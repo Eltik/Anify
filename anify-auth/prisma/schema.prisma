@@ -1,0 +1,84 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["orderByNulls", "clientExtensions", "postgresqlExtensions", "filteredRelationCount"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator json {
+  provider = "prisma-json-types-generator"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String  @unique
+  password  String
+  salt      String
+  simklId   String?
+  anilistId String?
+  malId     String?
+  lists     List[]
+  settings  UserSettings?
+}
+
+model List {
+  id        String   @id @default(uuid())
+  name      String
+  type      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  entries   Entry[]
+}
+
+model Entry {
+  id        String   @id @default(uuid())
+  listId    String
+  list      List     @relation(fields: [listId], references: [id])
+  status    String
+  score     Int
+  progress  Int
+  progressVolumes Int
+  repeat    Int
+  priority  Int
+  private   Boolean
+  mappings  String
+  notes     String?
+  hiddenFromStatusLists Boolean
+  advancedScores AdvancedScores?
+  startedAt DateTime?
+  completedAt DateTime?
+  updatedAt DateTime?
+  createdAt DateTime?
+}
+
+model AdvancedScores {
+  id        String   @id @default(uuid())
+  entryId   String   @unique
+  entry     Entry    @relation(fields: [entryId], references: [id])
+  story     Int
+  characters Int
+  visuals   Int
+  audio     Int
+  enjoyment Int
+  updatedAt DateTime?
+  createdAt DateTime?
+}
+
+model UserSettings {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  autoSkip Boolean @default(false)
+  autoFullscreen Boolean @default(false)
+  autoNext Boolean @default(false)
+  fontSize String @default("1rem 1.5rem")
+  fontWidth String @default("200")
+  titleLanguage String @default("english")
+  displayAdultContent Boolean @default(false)
+  airingNotifications Boolean @default(false)
+  updatedAt DateTime?
+  createdAt DateTime?
+}

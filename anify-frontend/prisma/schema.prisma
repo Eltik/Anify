@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id              Int        @id @unique
+  username        String     @default("")
+  avatar          String     @default("https://i.imgur.com/6VBx3io.png")
+  autoSkip        Boolean    @default(false)
+  autoFullscreen  Boolean    @default(false)
+  autoNext        Boolean    @default(false)
+  readingType     String     @default("Long Strip")
+  pageDirection   String     @default("Right to Left")
+  fontSize        String     @default("Large")
+  fontWeight      String     @default("Extra-light")
+  marginTop       String     @default("0")
+  marginBottom    String     @default("5")
+  fontColor       String     @default("#fff")
+  backgroundColor String     @default("rgba(0, 0, 0, 0.7)")
+}

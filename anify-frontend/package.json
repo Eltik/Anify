@@ -1,0 +1,63 @@
+{
+  "name": "anify-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "build:db": "npm run db:generate && npm run db:push && npm run db:validate",
+    "db:generate": "npx prisma generate",
+    "db:push": "npx prisma db push",
+    "db:validate": "npx prisma validate",
+    "lint": "next lint",
+    "prettier": "prettier --write .",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.11.0",
+    "@savvywombat/tailwindcss-grid-areas": "^3.0.1",
+    "@t3-oss/env-nextjs": "^0.2.1",
+    "@vercel/og": "^0.5.4",
+    "@vidstack/react": "^0.5.4",
+    "arrow-keys-react": "^1.0.6",
+    "axios": "^0.27.2",
+    "moment": "^2.29.4",
+    "next": "^13.2.4",
+    "next-pwa": "^5.6.0",
+    "nprogress": "^0.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.8.0",
+    "react-select": "^5.7.3",
+    "react-spring": "^9.7.1",
+    "sanitize-html": "^2.11.0",
+    "swiper": "^9.2.4",
+    "vidstack": "^0.5.4",
+    "zod": "^3.21.4",
+    "zustand": "^4.3.9"
+  },
+  "devDependencies": {
+    "@types/eslint": "^8.21.3",
+    "@types/next-pwa": "^5.6.2",
+    "@types/node": "^18.15.5",
+    "@types/nprogress": "^0.2.0",
+    "@types/prettier": "^2.7.2",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@types/sanitize-html": "^2.9.0",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
+    "autoprefixer": "^10.4.14",
+    "eslint": "^8.36.0",
+    "eslint-config-next": "^13.2.4",
+    "postcss": "^8.4.21",
+    "prettier": "^2.8.6",
+    "prettier-plugin-tailwindcss": "^0.2.6",
+    "prisma": "^4.11.0",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5.0.2"
+  },
+  "ct3aMetadata": {
+    "initVersion": "7.12.1"
+  }
+}

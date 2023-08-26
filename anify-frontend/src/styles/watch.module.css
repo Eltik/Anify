@@ -1,0 +1,116 @@
+.mediaBufferingContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.mediaBufferingIcon {
+    width: 84px;
+    height: 84px;
+    color: white;
+    opacity: 0;
+    transition: opacity 200ms ease;
+}
+
+.mediaPlayer:not([data-can-play]) .mediaBufferingIcon, .mediaPlayer[data-waiting] .mediaBufferingIcon {
+    opacity: 1;
+    animation: spin 1s linear infinite;
+}
+
+.mediaPlayer[data-ios-controls] .mediaControlsGroup, .mediaPlayer[data-user-idle] .ui, .mediaPlayer:not([data-can-play]) .ui {
+    opacity: 0;
+    visibility: hidden;
+    background: none;
+    cursor: none;
+}
+
+.mediaPlayer[data-ios-controls] .mediaControlsGroup, .mediaPlayer[data-user-idle] .mediaControlsContainer, .mediaPlayer:not([data-can-play]) .mediaControlsContainer {
+    background: none;
+    cursor: none;
+}
+
+.mediaPlayer[data-ios-controls] .mediaControlsGroup, .mediaPlayer[data-can-play] .subtitles, .mediaPlayer[data-user-idle] .subtitles, media-player:not([data-can-play]) .subtitles {
+    opacity: 1;
+    visibility: initial;
+    transform: translateY(-40px);
+}
+
+.mediaPlayer[data-paused], .mediaPlayer[data-paused] .mediaControlsGroup, .mediaPlayer[data-paused] .mediaControlsContainer, .mediaPlayer[data-paused] .ui {
+    cursor: initial;
+    opacity: 1;
+    visibility: initial;
+}
+
+/*
+.mediaPlayer[data-playing] .mediaControlsGroup, .mediaPlayer[data-hocus] .ui {
+    opacity: 1;
+    visibility: initial;
+    cursor: initial;
+}
+*/
+
+.mediaPlayer[data-ios-controls], .mediaPlayer[data-user-idle] {
+    cursor: none;
+    background: none;
+}
+
+.volumeSlider {
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.timeSlider [part~="track"] {
+    border-radius: 15px;
+    transition: all;
+    transition-duration: 200ms;
+}
+
+.timeSlider [part~="track"] {
+    height: 8px;
+    border: none;
+}
+
+.timeSlider [part~="track-fill"] {
+    background: rgb(76, 184, 117);
+}
+
+.thumb {
+    display: none;
+}
+
+.captions {
+    --cue-margin_top: 0vh;
+    --cue-margin_bottom: 5vh;
+    width: 100%;
+    height: auto;
+    margin-top: var(--cue-margin_top);
+    margin-bottom: var(--cue-margin_bottom);
+    position: absolute;
+    opacity: 1;
+    z-index: 999;
+    visibility: initial;
+    transition: 0.2s all;
+
+    --cue-color: white;
+    --cue-bg-color: rgba(0, 0, 0, 0.7);
+    --overlay-padding: 1%;
+    font-family: "Comfortaa", sans-serif;
+    --cue-font-size: calc(var(--overlay-height) / 100 * 3.5);
+    --cue-line-height: calc(var(--cue-font-size) * 1.12);
+    --cue-padding-x: calc(var(--cue-font-size) * 0.4);
+    --cue-padding-y: calc(var(--cue-font-size) * 0.2);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

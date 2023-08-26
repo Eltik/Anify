@@ -1,0 +1,33 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "esModuleInterop": true,
+        "module": "CommonJS",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "noImplicitAny": false,
+        "isolatedModules": false,
+        "allowSyntheticDefaultImports": true,
+        "jsx": "preserve",
+        "incremental": true,
+        "declaration": true,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./*"],
+            "database": ["./src/database"]
+        },
+        "outDir": "./dist"
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "dist"],
+    "ts-node": {
+        "compilerOptions": {
+            "module": "commonjs"
+        }
+    }
+}
