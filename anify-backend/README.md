@@ -1,5 +1,5 @@
 # anify-backend
-Robust JavaScript API server for scraping anime, manga, and light novel sites. **Note**: This documentation is slightly outdated and will be updated soon.
+Robust JavaScript API server for scraping anime, manga, and light novel sites.
 
 # Information
 
@@ -11,7 +11,7 @@ The API supports the following anime sites:
 - [x] [GogoAnime](https://www1.gogoanime.bid/)
 - [x] [AnimePahe](https://animepahe.com)
 - [x] [9anime](https://9anime.pl)
-- [x] [Kass](https://kickassanime.am)
+- [x] [AnimeFlix](https://animeflix.live)
 
 ## Manga
 The API supports the following manga sites:
@@ -31,6 +31,8 @@ The API supports the following novel sites:
 The API supports the following meta providers:
 - [x] [Kitsu](https://kitsu.io)
 - [x] [TMDB](https://www.themoviedb.org)
+- [x] [TVDB](https://thetvdb.com)
+- [x] [Simkl](https://simkl.com)
 
 ----
 
@@ -52,6 +54,11 @@ You can configure the web server via a `.env` file (not included). Default value
 PORT="3060"
 # PostgreSQL database URL
 DATABASE_URL="postgresql://postgres:password@localhost:5432/?connection_limit=100"
+# Whether to use Meilisearch
+USE_MEILISEARCH="true"
+# Meilisearch URL + Keys
+MEILISEARCH_URL="http://localhost:7700"
+MEILISEARCH_KEY="keylol"
 # 9anime resolver URL
 NINEANIME_RESOLVER="https://9anime.resolver.com"
 # 9anime resolver API key
@@ -76,6 +83,14 @@ CENSYS_SECRET="censys_secret"
 SIMKL_CLIENT_ID="simkl_client_id"
 # Simkl API client secret
 SIMKL_CLIENT_SECRET="simkl_client_secret"
+
+# Mixdrop related for uploads
+# Whether to use Mixdrop
+USE_MIXDROP="true"
+# Mixdrop Email
+MIXDROP_EMAIL="myemail@outlook.com"
+# Mixdrop API key
+MIXDROP_KEY="mixdrop_key"
 ```
 
 ## Using Redis
