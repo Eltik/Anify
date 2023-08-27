@@ -28,8 +28,8 @@ if (databaseType === "postgres") {
             console.error(error);
         }
     }
-    
+
     Database.initializeDatabase().then(() => {
         console.log(colors.green("Initialized database!"));
-    })
+    });
 }

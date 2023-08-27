@@ -639,7 +639,7 @@ export const recent = async (type: Type, formats: Format[], page: number, perPag
 
     const newResults: any[] = [];
     for (const result of results) {
-        if (((result as Anime | Manga).type === Type.ANIME ? (result as Anime).episodes.latest.latestEpisode === 0 : (result as Manga).chapters.latest.latestChapter === 0)) continue;
+        if ((result as Anime | Manga).type === Type.ANIME ? (result as Anime).episodes.latest.latestEpisode === 0 : (result as Manga).chapters.latest.latestChapter === 0) continue;
 
         const updatedAt = ((result as Anime | Manga).type === Type.ANIME ? (result as Anime).episodes : (result as Manga).chapters).latest.updatedAt;
 

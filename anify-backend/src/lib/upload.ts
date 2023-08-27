@@ -93,19 +93,19 @@ export const uploadPages = async (data: { id: string; providerId: string; chapte
                             // Cleanup
                             try {
                                 await unlink(pdfPath);
-                    
+
                                 const parentFolder = join(__dirname, `./manga/${data.id}/${data.providerId}/${data.chapter.title.replace(/[^\w .-]/gi, "")}`);
                                 if (existsSync(parentFolder)) {
                                     const files = readdirSync(parentFolder);
                                     if (files.length === 0) {
                                         await unlink(parentFolder);
-                    
+
                                         const providerFolder = join(__dirname, `./manga/${data.id}/${data.providerId}`);
                                         if (existsSync(providerFolder)) {
                                             const files = readdirSync(providerFolder);
                                             if (files.length === 0) {
                                                 await unlink(providerFolder);
-                    
+
                                                 const mangaFolder = join(__dirname, `./manga/${data.id}`);
                                                 if (existsSync(mangaFolder)) {
                                                     const files = readdirSync(mangaFolder);
@@ -145,13 +145,13 @@ export const uploadPages = async (data: { id: string; providerId: string; chapte
     }
 };
 
-const checkRemoteStatus = async(mixdrop: string): Promise<UploadStatus> => {
+const checkRemoteStatus = async (mixdrop: string): Promise<UploadStatus> => {
     const mixdropEmail = env.MIXDROP_EMAIL;
     const mixdropKey = env.MIXDROP_KEY;
 
     const res: UploadStatus = await (await fetch(`https://api.mixdrop.co/fileinfo2?email=${mixdropEmail}&key=${mixdropKey}&ref[]=${mixdrop}`)).json();
     return res;
-}
+};
 
 export const createPDF = async (id: string, providerId: string, chapter: Chapter, pages: Page[]): Promise<string> => {
     const parentFolder = join(__dirname, `./manga/${id}/${providerId}/${chapter.title.replace(/[^\w .-]/gi, "")}`);
@@ -305,4 +305,4 @@ type FileData = {
     thumb: null;
     url: string;
     yourfile: boolean;
-}
+};

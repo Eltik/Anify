@@ -57,7 +57,7 @@ export const enum StreamingServers {
     DuckStream = "duckstream",
     DuckStreamV2 = "duckstreamv2",
     BirdStream = "birdstream",
-    AnimeFlix = "animeflix"
+    AnimeFlix = "animeflix",
 }
 
 export type Episode = {

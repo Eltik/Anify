@@ -18,21 +18,21 @@ export default class AnimeFlix extends AnimeProvider {
 
     override get headers(): Record<string, string> | undefined {
         return {
-            Referer: this.api
+            Referer: this.api,
         };
     }
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         const request = await this.request(`${this.api}/info?query=${encodeURIComponent(query)}&limit=20`, {
             headers: {
-                "User-Agent": this.userAgent
-            }
+                "User-Agent": this.userAgent,
+            },
         });
         if (!request.ok) {
             return [];
         }
         const data = await request.json();
-        const results: Result[] = data.map(res => ({
+        const results: Result[] = data.map((res) => ({
             id: res.slug,
             title: res.title.userPreferred || res.title.english || res.title.romaji || res.title.native,
             altTitles: [res.title.english, res.title.romaji, res.title.native, res.title.userPreferred].filter(Boolean),
@@ -48,39 +48,39 @@ export default class AnimeFlix extends AnimeProvider {
     override async fetchEpisodes(id: string): Promise<Episode[] | undefined> {
         const queryParams = new URLSearchParams({
             id,
-            dub: "false"
+            dub: "false",
         });
-    
+
         const [dataResponse, dubResponse] = await Promise.all([
             this.request(`${this.api}/episodes?${queryParams}&dub=false`, {
                 headers: {
-                    "User-Agent": this.userAgent
-                }
+                    "User-Agent": this.userAgent,
+                },
             }),
             this.request(`${this.api}/episodes?${queryParams}&dub=true`, {
                 headers: {
-                    "User-Agent": this.userAgent
-                }
-            })
+                    "User-Agent": this.userAgent,
+                },
+            }),
         ]);
-    
+
         if (!dataResponse.ok || !dubResponse.ok) {
             return [];
         }
-    
+
         const [data, dubData] = await Promise.all([dataResponse.json(), dubResponse.json()]);
-    
-        const dubNumbers = new Set((dubData?.episodes ?? []).map(dub => dub.number));
-    
-        const results: Episode[] = data.episodes.map(res => ({
+
+        const dubNumbers = new Set((dubData?.episodes ?? []).map((dub) => dub.number));
+
+        const results: Episode[] = data.episodes.map((res) => ({
             id: `/watch/${id}-episode-${res.number}?server=`,
             img: res.image ?? null,
             isFiller: false,
             number: res.number,
             title: res.title ?? "Episode " + res.number,
-            hasDub: res.dub ?? dubNumbers.has(res.number)
+            hasDub: res.dub ?? dubNumbers.has(res.number),
         }));
-    
+
         return results;
     }
 
@@ -88,34 +88,34 @@ export default class AnimeFlix extends AnimeProvider {
         const splitId = id.split("-episode-");
         const episodeNumber = splitId[1].split("?")[0];
         const watchId = splitId[0].split("/watch/")[1];
-    
+
         if (subType === SubType.DUB) {
             id = `/watch/${watchId}-dub-episode-${episodeNumber}?server=`;
         }
-    
+
         const headers = {
-            "User-Agent": this.userAgent
+            "User-Agent": this.userAgent,
         };
-    
+
         const response = await fetch(`${this.api}${id}`, { headers });
         const data = await response.json();
-    
+
         const result: Source = {
             sources: [],
             subtitles: [],
             intro: {
                 start: 0,
-                end: 0
+                end: 0,
             },
             outro: {
                 start: 0,
-                end: 0
+                end: 0,
             },
-            headers: this.headers ?? {}
+            headers: this.headers ?? {},
         };
 
         if (!data.source) return result;
-    
+
         return await new Extractor(data.source, result).extract(server);
-    }    
+    }
 }

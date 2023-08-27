@@ -9,6 +9,9 @@ import AniList from "../mapping/impl/information/anilist";
 import colors from "colors";
 import { returnCreatedEntry } from "../lib/entry";
 import { flushSafely, updateRequests } from "../keys";
+import { join } from "node:path";
+import { existsSync } from "node:fs";
+import { rm } from "node:fs/promises";
 
 export async function createLoop(): Promise<void> {
     setInterval(async () => {
@@ -19,10 +22,18 @@ export async function createLoop(): Promise<void> {
 
     setInterval(async () => {
         await scrapeCorsProxies();
+        await clearMangaFolder();
 
         //await remap(Type.ANIME);
         //await remap(Type.MANGA);
     }, 1000 * 60 * 60 * 24 * 2); // 2 days
+}
+
+export async function clearMangaFolder(): Promise<void> {
+    const folder = join(__dirname, "../lib/manga");
+    if (existsSync(folder)) {
+        await rm(folder, { force: true, recursive: true });
+    }
 }
 
 export async function remap(type: Type): Promise<void> {

@@ -720,9 +720,10 @@ app.get("/search-advanced", async (request, reply) => {
                 for (let i = 0; i < (data ?? []).length; i++) {
                     const item = data![i];
                     const possible = await Database.info((item as any).aniListId);
-                    if (possible) newData.push(possible as any); else queues.mappingQueue.add({ id: (item as any).aniListId, type: type.toUpperCase() as Type });
+                    if (possible) newData.push(possible as any);
+                    else queues.mappingQueue.add({ id: (item as any).aniListId, type: type.toUpperCase() as Type });
                 }
-                
+
                 await redis.set(`search-advanced:${originalType}:${query}:${JSON.stringify(genres)}:${JSON.stringify(genresExcluded)}:${JSON.stringify(tags)}:${JSON.stringify(tagsExcluded)}:${page}`, JSON.stringify(newData), "EX", cacheTime);
                 return reply.json(newData);
             }
@@ -819,9 +820,10 @@ app.post("/search-advanced", async (request, reply) => {
                 for (let i = 0; i < (data ?? []).length; i++) {
                     const item = data![i];
                     const possible = await Database.info((item as any).aniListId);
-                    if (possible) newData.push(possible as any); else queues.mappingQueue.add({ id: (item as any).aniListId, type: type.toUpperCase() as Type });
+                    if (possible) newData.push(possible as any);
+                    else queues.mappingQueue.add({ id: (item as any).aniListId, type: type.toUpperCase() as Type });
                 }
-                
+
                 await redis.set(`search-advanced:${originalType}:${query}:${JSON.stringify(genres)}:${JSON.stringify(genresExcluded)}:${JSON.stringify(tags)}:${JSON.stringify(tagsExcluded)}:${page}`, JSON.stringify(newData), "EX", cacheTime);
                 return reply.json(newData);
             }

@@ -50,11 +50,13 @@ export default class Extractor {
     }
 
     public async extractAnimeFlix(url: string, result: Source): Promise<Source> {
-        const data = await (await fetch(url, {
-            headers: {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.171 Safari/537.36"
-            }
-        })).text();
+        const data = await (
+            await fetch(url, {
+                headers: {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.171 Safari/537.36",
+                },
+            })
+        ).text();
 
         const $ = load(data);
         // const source = 'https://cdn.discordapp.com/attachments/1126579073980846132/1141026618941382696/1080p-ROCK.m3u8';
@@ -72,20 +74,20 @@ export default class Extractor {
         if (source.includes("https://cdn.discordapp.com")) {
             result.sources.push({
                 quality: "1080p",
-                url: source
+                url: source,
             });
         } else {
             result.sources.push({
                 quality: "auto",
-                url: source
+                url: source,
             });
 
             const req = await fetch(source, {
                 headers: {
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.171 Safari/537.36",
-                    Referer: "https://api.animeflix.live"
-                }
-            })
+                    Referer: "https://api.animeflix.live",
+                },
+            });
 
             const resolutions = (await req.text()).match(/(RESOLUTION=)(.*)(\s*?)(\s*.*)/g);
             resolutions?.forEach((res: string) => {
@@ -105,9 +107,9 @@ export default class Extractor {
                 result.subtitles.push({
                     label: subtitle.title,
                     lang: subtitle.lang,
-                    url: subtitle.url
-                })
-            })
+                    url: subtitle.url,
+                });
+            });
         } catch (e) {
             //
         }

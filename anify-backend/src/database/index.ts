@@ -81,7 +81,7 @@ export default class Database {
 
         const relatedMediaPromises = relations.map(async (relation) => {
             const media = await this.info(relation.id);
-            Object.assign(media ?? {}, { relationType: relation.relationType })
+            Object.assign(media ?? {}, { relationType: relation.relationType });
             return media as Anime | Manga | null;
         });
 
