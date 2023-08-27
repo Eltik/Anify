@@ -128,6 +128,7 @@ export const uploadPages = async (data: { id: string; providerId: string; chapte
                             if (threshold >= maxThreshold) console.warn(colors.yellow("WARNING: ") + colors.blue(`Mixdrop upload for ${data.chapter.title} is taking too long.`));
                             if (threshold >= maxThreshold + 5) {
                                 console.error(colors.red("ERROR: ") + colors.blue(`Mixdrop upload for ${data.chapter.title} is taking too long.`));
+                                await unlink(pdfPath);
                                 clearInterval(interval);
                                 reject();
                                 return;
