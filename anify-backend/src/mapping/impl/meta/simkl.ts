@@ -8,8 +8,8 @@ export default class SimklMeta extends MetaProvider {
     override url = "https://simkl.com";
     override formats: Format[] = [Format.TV, Format.MOVIE, Format.ONA, Format.SPECIAL, Format.TV_SHORT, Format.OVA];
 
-    private simklKey = env.SIMKL_CLIENT_SECRET ?? "3f883e8e6cdd60d2d5e765aaf0612953f743dc77f44c422af98b38e083cf038b"; // From MALSync https://github.com/MALSync/MALSync/blob/master/src/simkl/simklClass.ts
-    private simklClient = env.SIMKL_CLIENT_ID ?? "39e8640b6f1a60aaf60f3f3313475e830517badab8048a4e52ff2d10deb2b9b0"; // From MALSync https://github.com/MALSync/MALSync/blob/master/src/provider/Simkl/helper.ts
+    private simklKey = env.SIMKL_CLIENT_SECRET ?? "";
+    private simklClient = env.SIMKL_CLIENT_ID ?? "";
     private simklApiUrl = "https://api.simkl.com";
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
