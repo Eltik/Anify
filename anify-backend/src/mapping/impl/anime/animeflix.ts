@@ -1,6 +1,7 @@
 import AnimeProvider, { Episode, Source, StreamingServers, SubType } from ".";
 import { Format, Result } from "../..";
 import Extractor from "@/src/helper/extractor";
+import * as crypto from "crypto";
 
 export default class AnimeFlix extends AnimeProvider {
     override rateLimit = 250;
@@ -8,7 +9,7 @@ export default class AnimeFlix extends AnimeProvider {
     override url = "https://animeflix.live";
 
     private api = "https://api.animeflix.live";
-    private userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.171 Safari/537.36";
+    private userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.111 Safari/537.36";
 
     override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
 
@@ -27,7 +28,7 @@ export default class AnimeFlix extends AnimeProvider {
             headers: {
                 "User-Agent": this.userAgent,
             },
-        });
+        }, true);
         if (!request.ok) {
             return [];
         }
@@ -46,22 +47,29 @@ export default class AnimeFlix extends AnimeProvider {
     }
 
     override async fetchEpisodes(id: string): Promise<Episode[] | undefined> {
-        const queryParams = new URLSearchParams({
-            id,
-            dub: "false",
+        // /getslug/fuufu-ijou-koibito-miman
+        // /idtoinfo?ids=[]
+        // /episodes?id=fuufu-ijou-koibito-miman&dub=false&a=j43o4d4d3o4d1j4142474d1j4347413k414c471j4541453j46
+
+        const hash = this.generateRandomStringWithSameLength("j43o4d4d3o4d1j4142474d1j4347413k414c471j4541453j46");
+
+        const test = await this.request(`${this.api}/episodes?id=${id}&dub=false&a=${hash}`, {
+            headers: {
+                "User-Agent": this.userAgent
+            },
         });
 
         const [dataResponse, dubResponse] = await Promise.all([
-            this.request(`${this.api}/episodes?${queryParams}&dub=false`, {
+            this.request(`${this.api}/episodes?id=${id}&dub=false&a=${hash}`, {
                 headers: {
-                    "User-Agent": this.userAgent,
+                    "User-Agent": this.userAgent
                 },
-            }),
-            this.request(`${this.api}/episodes?${queryParams}&dub=true`, {
+            }, true),
+            this.request(`${this.api}/episodes?id=${id}&dub=true&a=${hash}`, {
                 headers: {
-                    "User-Agent": this.userAgent,
+                    "User-Agent": this.userAgent
                 },
-            }),
+            }, true),
         ]);
 
         if (!dataResponse.ok || !dubResponse.ok) {
@@ -69,6 +77,8 @@ export default class AnimeFlix extends AnimeProvider {
         }
 
         const [data, dubData] = await Promise.all([dataResponse.json(), dubResponse.json()]);
+
+        console.log("yeah baby");
 
         const dubNumbers = new Set((dubData?.episodes ?? []).map((dub) => dub.number));
 
@@ -97,7 +107,7 @@ export default class AnimeFlix extends AnimeProvider {
             "User-Agent": this.userAgent,
         };
 
-        const response = await fetch(`${this.api}${id}`, { headers });
+        const response = await this.request(`${this.api}${id}`, { headers }, true);
         const data = await response.json();
 
         const result: Source = {
@@ -118,4 +128,17 @@ export default class AnimeFlix extends AnimeProvider {
 
         return await new Extractor(data.source, result).extract(server);
     }
+
+    private generateRandomStringWithSameLength(source: string): string {
+        const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
+        let result = "";
+      
+        for (let i = 0; i < source.length; i++) {
+          const randomIndex = Math.floor(Math.random() * characters.length);
+          result += characters[randomIndex];
+        }
+      
+        return result;
+      }
+      
 }
