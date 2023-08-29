@@ -15,8 +15,8 @@ export default class NineAnime extends AnimeProvider {
     override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
 
     private userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.42";
-    private resolver: string = env.NINEANIME_RESOLVER || `https://9anime.resolver.com`;
-    private resolverKey: string = env.NINEANIME_KEY || `9anime`;
+    private resolver: string | undefined = env.NINEANIME_RESOLVER;
+    private resolverKey: string | undefined = env.NINEANIME_KEY || `9anime`;
 
     override get subTypes(): SubType[] {
         return [SubType.SUB, SubType.DUB];
@@ -207,18 +207,38 @@ export default class NineAnime extends AnimeProvider {
     }
 
     private async getVRF(query: string): Promise<VRF> {
+        if (!this.resolver) return {
+            url: query,
+            vrfQuery: "vrf",
+        }
+
         return await (await this.request(`${this.resolver}/vrf?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {})).json();
     }
 
     public async getSearchVRF(query: string): Promise<VRF> {
+        if (!this.resolver) return {
+            url: query,
+            vrfQuery: "vrf",
+        }
+
         return await (await this.request(`${this.resolver}/9anime-search?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {})).json();
     }
 
     private async getRawVRF(query: string): Promise<VRF> {
+        if (!this.resolver) return {
+            url: query,
+            vrfQuery: "vrf",
+        }
+
         return await (await this.request(`${this.resolver}/rawVrf?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {})).json();
     }
 
     private async decodeURL(query: string): Promise<VRF> {
+        if (!this.resolver) return {
+            url: query,
+            vrfQuery: "vrf",
+        }
+
         return await (await this.request(`${this.resolver}/decrypt?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {})).json();
     }
 

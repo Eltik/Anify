@@ -27,102 +27,37 @@ export default async function handler(request: Request, response: ServerResponse
 
     const formats: string[] = request.body.formats ?? [];
 
-    let filter = formats.length > 0 ? `(format = ${formats.join(" OR format = ")})` : "";
-    filter += genres.length > 0 ? ` AND (genres = ${genres.join(" OR genres = ")})` : "";
-    filter += genresExcluded.length > 0 ? ` AND NOT (genres = ${genresExcluded.join(" OR genres = ")})` : "";
-    filter += tags.length > 0 ? ` AND (tags = ${tags.join(" OR tags = ")})` : "";
-    filter += tagsExcluded.length > 0 ? ` AND NOT (tags = ${tagsExcluded.join(" OR tags = ")})` : "";
-
-    if (env.USE_MEILISEARCH === "true") {
-        try {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const data: SearchResult = await (await fetch(`${env.MEILISEARCH_URL}/indexes/${request.body.type}/search`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${env.MEILISEARCH_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    q: request.body.query,
-                    limit: perPage,
-                    offset: page * perPage,
-                    filter
-                })
-            })).json();
-    
-            if (data.hits.length === 0) throw new Error("No results found.");
-    
-            response.writeHead(200, { "Content-Type": "application/json" });
-            response.write(JSON.stringify(data));
-            response.end();
-        } catch (e) {
-            const data = await (await fetch(`${env.BACKEND_URL}/search-advanced?apikey=${env.API_KEY}`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${env.MEILISEARCH_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    type: request.body.type === "manga" ? formats.includes("NOVEL") ? "novel" : "manga" : "anime",
-                    query: request.body.query,
-                    format: formats,
-                    page,
-                    perPage,
-                    genres,
-                    genresExcluded,
-                    tags,
-                    tagsExcluded,
-                    year: 0,
-                })
-            })).json() as Anime[] | Manga[];
-    
-            const newData = {
-                hits: data,
-                query: request.body.query,
-                processingTimeMs: 0,
-                limit: perPage,
-                offset: page * perPage,
-                estimatedTotalHits: data.length,
-            }
-    
-            response.writeHead(200, { "Content-Type": "application/json" });
-            response.write(JSON.stringify(newData));
-            response.end();
-        }
-    } else {
-        const data = await (await fetch(`${env.BACKEND_URL}/search-advanced?apikey=${env.API_KEY}`, {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${env.MEILISEARCH_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                type: request.body.type === "manga" ? formats.includes("NOVEL") ? "novel" : "manga" : "anime",
-                query: request.body.query,
-                format: formats,
-                page,
-                perPage,
-                genres,
-                genresExcluded,
-                tags,
-                tagsExcluded,
-                year: 0,
-            })
-        })).json() as Anime[] | Manga[];
-
-        const newData = {
-            hits: data,
+    const data = await (await fetch(`${env.BACKEND_URL}/search-advanced?apikey=${env.API_KEY}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            type: request.body.type === "manga" ? formats.includes("NOVEL") ? "novel" : "manga" : "anime",
             query: request.body.query,
-            processingTimeMs: 0,
-            limit: perPage,
-            offset: page * perPage,
-            estimatedTotalHits: data.length,
-        }
+            format: formats,
+            page,
+            perPage,
+            genres,
+            genresExcluded,
+            tags,
+            tagsExcluded,
+            year: 0,
+        })
+    })).json() as Anime[] | Manga[];
 
-        response.writeHead(200, { "Content-Type": "application/json" });
-        response.write(JSON.stringify(newData));
-        response.end();
+    const newData = {
+        hits: data,
+        query: request.body.query,
+        processingTimeMs: 0,
+        limit: perPage,
+        offset: page * perPage,
+        estimatedTotalHits: data.length,
     }
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.write(JSON.stringify(newData));
+    response.end();
 }
 
 interface Request {

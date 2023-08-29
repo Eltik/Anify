@@ -15,9 +15,6 @@ export const env = createEnv({
         ANILIST_REDIRECT_URL: z.string().url(),
         IMAGE_PROXY: z.string().url(),
         API_KEY: z.string(),
-        USE_MEILISEARCH: z.string(),
-        MEILISEARCH_URL: z.string().url(),
-        MEILISEARCH_KEY: z.string(),
         NODE_ENV: z.enum(["development", "test", "production"]),
     },
 
@@ -44,9 +41,6 @@ export const env = createEnv({
         ANILIST_REDIRECT_URL: process.env.ANILIST_REDIRECT_URL || "https://anilist.co/api/v2/oauth",
         IMAGE_PROXY: process.env.IMAGE_PROXY || "https://api.consumet.org/utils/image-proxy",
         API_KEY: process.env.API_KEY || "",
-        USE_MEILISEARCH: process.env.USE_MEILISEARCH?.toLowerCase() || "false",
-        MEILISEARCH_URL: process.env.MEILISEARCH_URL || "http://localhost:7700",
-        MEILISEARCH_KEY: process.env.MEILISEARCH_KEY || "",
         NODE_ENV: process.env.NODE_ENV,
         NEXT_PUBLIC_IMAGE_PROXY: process.env.IMAGE_PROXY || "https://api.consumet.org/utils/image-proxy"
     },

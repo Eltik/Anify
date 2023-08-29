@@ -4,14 +4,13 @@ Robust JavaScript API server for scraping anime, manga, and light novel sites.
 # Information
 
 ## Scraping
-Anify scrapes numerous Japanese media sites from Zoro, to GogoAnime, to AnimePahe, and more. The API is built on top of [AniSync](https://github.com/Eltik/AniSync) to map AniList information accurately, allowing for multiple providers in case one ever goes down. To avoid rate limits, the API stores information in a database to ensure fast and accurate results. This is meant to be a robust web server, so there are a ton of features from Redis caching, PostgreSQL support, configurable `.env` options, etc.
+Anify scrapes numerous Japanese media sites from Zoro, to MangaSee, to NovelUpdates, and more. The API is built on top of [AniSync](https://github.com/Eltik/AniSync) to map AniList information accurately, allowing for multiple providers in case one ever goes down. To avoid rate limits, the API stores information in a database to ensure fast and accurate results. This is meant to be a robust web server, so there are a ton of features from Redis caching, PostgreSQL support, configurable `.env` options, etc.
 ## Anime
 The API supports the following anime sites:
 - [x] [Zoro](https://aniwatch.to)
 - [x] [GogoAnime](https://www1.gogoanime.bid/)
 - [x] [AnimePahe](https://animepahe.com)
 - [x] [9anime](https://9anime.pl)
-- [x] [AnimeFlix](https://animeflix.live)
 
 ## Manga
 The API supports the following manga sites:
@@ -54,11 +53,6 @@ You can configure the web server via a `.env` file (not included). Default value
 PORT="3060"
 # PostgreSQL database URL
 DATABASE_URL="postgresql://postgres:password@localhost:5432/?connection_limit=100"
-# Whether to use Meilisearch
-USE_MEILISEARCH="true"
-# Meilisearch URL + Keys
-MEILISEARCH_URL="http://localhost:7700"
-MEILISEARCH_KEY="keylol"
 # 9anime resolver URL
 NINEANIME_RESOLVER="https://9anime.resolver.com"
 # 9anime resolver API key

@@ -1,13 +1,10 @@
 import { randomUUID } from "crypto";
 import { Anime, Format, Genres, Manga, Type } from "../mapping";
-import { prisma, search as searchPostgres, searchAdvanced as searchAdvancedPostgres, seasonal as seasonalPostgres, info as infoPostgres, media as mediaPostgres, recent } from "./postgresql";
-import { createMeiliEntry, initializeMeilisearch } from "./meilisearch";
-import { env } from "../env";
 import cluster from "cluster";
+import { info, media, prisma, recent, search, searchAdvanced, seasonal as seasonalPostgres, } from "./postgresql";
 
 export default class Database {
     private static type = "postgresql";
-    private static useMeilisearch = env.USE_MEILISEARCH;
 
     static async initializeDatabase() {
         if (this.type === "postgresql") {
@@ -20,15 +17,11 @@ export default class Database {
                 $$;`;
             }
         }
-
-        if (this.useMeilisearch && cluster.isPrimary) {
-            await initializeMeilisearch();
-        }
     }
 
     static async search(query: string, type: Type, formats: Format[], page: number, perPage: number): Promise<Anime[] | Manga[]> {
         if (this.type === "postgresql") {
-            return await searchPostgres(query, type, formats, page, perPage);
+            return await search(query, type, formats, page, perPage);
         } else {
             return [];
         }
@@ -36,7 +29,7 @@ export default class Database {
 
     static async searchAdvanced(query: string, type: Type, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = [], year = 0, tags: string[] = [], tagsExcluded: string[] = []): Promise<Anime[] | Manga[]> {
         if (this.type === "postgresql") {
-            return await searchAdvancedPostgres(query, type.toUpperCase() as Type, formats, page, 40, genres as Genres[], genresExcluded as Genres[], year, tags, tagsExcluded);
+            return await searchAdvanced(query, type.toUpperCase() as Type, formats, page, 40, genres as Genres[], genresExcluded as Genres[], year, tags, tagsExcluded);
         } else {
             return [];
         }
@@ -57,7 +50,7 @@ export default class Database {
 
     static async info(id: string): Promise<Anime | Manga | null> {
         if (this.type === "postgresql") {
-            return (await infoPostgres(id)) as Anime | Manga;
+            return (await info(id)) as Anime | Manga;
         } else {
             return null;
         }
@@ -65,7 +58,7 @@ export default class Database {
 
     static async media(providerId: string, id: string): Promise<Anime | Manga | null> {
         if (this.type === "postgresql") {
-            return (await mediaPostgres(providerId, id)) as Anime | Manga;
+            return (await media(providerId, id)) as Anime | Manga;
         } else {
             return null;
         }
@@ -125,17 +118,17 @@ export default class Database {
 
     static async delete(id: string): Promise<void> {
         if (this.type === "postgresql") {
-            const info = await infoPostgres(id);
-            if (info?.type === Type.ANIME) {
+            const data = await info(id);
+            if (data?.type === Type.ANIME) {
                 await prisma.anime.delete({
                     where: {
-                        id: info?.id,
+                        id: data?.id,
                     },
                 });
             } else {
                 await prisma.manga.delete({
                     where: {
-                        id: info?.id,
+                        id: data?.id,
                     },
                 });
             }
@@ -156,10 +149,6 @@ export default class Database {
                 });
             }
         }
-
-        if (this.useMeilisearch) {
-            await createMeiliEntry(media);
-        }
     }
 
     static async createEntrys(media: Anime[] | Manga[]): Promise<void> {
@@ -174,12 +163,6 @@ export default class Database {
                     data: media,
                     skipDuplicates: true,
                 });
-            }
-        }
-
-        if (this.useMeilisearch) {
-            for (const m of media) {
-                await createMeiliEntry(m);
             }
         }
     }

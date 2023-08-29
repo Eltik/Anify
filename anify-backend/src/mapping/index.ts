@@ -28,9 +28,8 @@ import SimklMeta from "./impl/meta/simkl";
 import Simkl from "./impl/information/simkl";
 import ColoredManga from "./impl/manga/coloredmanga";
 import AnimeFlix from "./impl/anime/animeflix";
-import Bilibili from "./impl/anime/bilibili";
 
-const ANIME_PROVIDERS: AnimeProvider[] = [new NineAnime(), new GogoAnime(), new Zoro(), new AnimePahe(), new Bilibili()];
+const ANIME_PROVIDERS: AnimeProvider[] = [new NineAnime(), new GogoAnime(), new Zoro(), new AnimePahe()];
 const animeProviders: Record<string, AnimeProvider> = ANIME_PROVIDERS.reduce((acc, provider) => {
     acc[provider.id] = provider;
     return acc;

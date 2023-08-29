@@ -6,10 +6,7 @@ export const env = {
     BACKEND_KEY: process.env.BACKEND_KEY ?? "",
     DATABASE_URL: process.env.DATABASE_URL,
     REDIS_URL: process.env.REDIS_URL,
-    REDIS_CACHE_TIME: Number(process.env.REDIS_CACHE_TIME) || 60 * 60 * 24 * 7,
-    USE_API_KEYS: process.env.USE_API_KEYS || "false",
-    MASTER_KEY: process.env.MASTER_KEY,
-    API_KEY_WHITELIST: process.env.API_KEY_WHITELIST?.split(",") || [],
+    REDIS_CACHE_TIME: Number(process.env.REDIS_CACHE_TIME) || 60 * 60 * 24 * 7
 };
 
 export const providerEnv = {
