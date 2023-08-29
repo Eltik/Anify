@@ -51,13 +51,7 @@ export default class AnimeFlix extends AnimeProvider {
         // /idtoinfo?ids=[]
         // /episodes?id=fuufu-ijou-koibito-miman&dub=false&a=j43o4d4d3o4d1j4142474d1j4347413k414c471j4541453j46
 
-        const hash = this.generateRandomStringWithSameLength("j43o4d4d3o4d1j4142474d1j4347413k414c471j4541453j46");
-
-        const test = await this.request(`${this.api}/episodes?id=${id}&dub=false&a=${hash}`, {
-            headers: {
-                "User-Agent": this.userAgent
-            },
-        });
+        const hash = this.generateHash(id);
 
         const [dataResponse, dubResponse] = await Promise.all([
             this.request(`${this.api}/episodes?id=${id}&dub=false&a=${hash}`, {
@@ -77,8 +71,6 @@ export default class AnimeFlix extends AnimeProvider {
         }
 
         const [data, dubData] = await Promise.all([dataResponse.json(), dubResponse.json()]);
-
-        console.log("yeah baby");
 
         const dubNumbers = new Set((dubData?.episodes ?? []).map((dub) => dub.number));
 
@@ -129,16 +121,18 @@ export default class AnimeFlix extends AnimeProvider {
         return await new Extractor(data.source, result).extract(server);
     }
 
-    private generateRandomStringWithSameLength(source: string): string {
-        const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
-        let result = "";
-      
-        for (let i = 0; i < source.length; i++) {
-          const randomIndex = Math.floor(Math.random() * characters.length);
-          result += characters[randomIndex];
+    private generateHash(source: string): string {
+        const currentDate = new Date();
+        const averageMonthAndDate = 9 + (currentDate.getUTCDate() + currentDate.getUTCMonth()) / 2;
+        let result = "j4";
+
+        const inputLength = source.length;
+        for (let i = 0; i < inputLength; i++) {
+            const charCode = source.charCodeAt(i);
+            const encodedValue = charCode.toString(Math.floor(averageMonthAndDate));
+            result += encodedValue;
         }
-      
+
         return result;
-      }
-      
+    }
 }

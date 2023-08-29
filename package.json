@@ -4,16 +4,11 @@
     "description": "The best Japanese media web application.",
     "private": true,
     "scripts": {
-        "test": "cd anify-backend && npm run test",
         "start": "cd anify-manager && npm run dev",
-        "install": "cd anify-manager && npm i && cd ../anify-frontend && npm i && cd ../anify-backend && npm i",
-        "lint": "cd anify-frontend && npx next lint && cd ../anify-backend && npm run lint",
+        "install": "cd anify-manager && npm i && cd ../anify-frontend && npm i && cd ../anify-backend && npm i && cd ../anify-auth && npm i",
+        "lint": "cd anify-frontend && npx next lint && cd ../anify-backend && npm run lint && cd ../anify-auth && npm run lint",
         "build": "npm run install && npm run build:ts && npm run build:db",
-        "build:ts": "cd anify-manager && npm run build:ts && cd ../anify-backend && npm run build:ts && cd ../anify-frontend && npm run build",
-        "build:db": "cd anify-frontend && npm run db:generate && npm run db:push && npm run db:validate && npm run build && cd ../anify-backend && npm run db:generate && npm run db:push && npm run db:validate",
-        "redis:flush": "redis-cli flushall",
-        "db:generate": "npx prisma generate",
-        "db:push": "npx prisma db push",
-        "db:validate": "npx prisma validate"
+        "build:ts": "cd anify-manager && npm run build:ts && cd ../anify-backend && npm run build:ts && cd ../anify-frontend && npm run build && cd ../anify-auth && npm run build",
+        "build:db": "cd anify-frontend && npm run build:db && cd ../anify-backend && npm run build:db && cd ../anify-auth && npm run build:db"
     }
 }
