@@ -8,7 +8,7 @@
         "install": "cd anify-manager && npm i && cd ../anify-frontend && npm i && cd ../anify-backend && npm i && cd ../anify-auth && npm i",
         "lint": "cd anify-frontend && npx next lint && cd ../anify-backend && npm run lint && cd ../anify-auth && npm run lint",
         "build": "npm run install && npm run build:ts && npm run build:db",
-        "build:ts": "cd anify-manager && npm run build:ts && cd ../anify-backend && npm run build:ts && cd ../anify-frontend && npm run build && cd ../anify-auth && npm run build",
+        "build:ts": "cd anify-manager && npm run build:ts && cd ../anify-backend && npm run build:ts && cd ../anify-frontend && npm run build && cd ../anify-auth && npm run build:ts",
         "build:db": "cd anify-frontend && npm run build:db && cd ../anify-backend && npm run build:db && cd ../anify-auth && npm run build:db"
     }
 }
