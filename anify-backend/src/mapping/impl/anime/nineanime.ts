@@ -207,37 +207,41 @@ export default class NineAnime extends AnimeProvider {
     }
 
     private async getVRF(query: string): Promise<VRF> {
-        if (!this.resolver) return {
-            url: query,
-            vrfQuery: "vrf",
-        }
+        if (!this.resolver)
+            return {
+                url: query,
+                vrfQuery: "vrf",
+            };
 
         return await (await this.request(`${this.resolver}/vrf?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {})).json();
     }
 
     public async getSearchVRF(query: string): Promise<VRF> {
-        if (!this.resolver) return {
-            url: query,
-            vrfQuery: "vrf",
-        }
+        if (!this.resolver)
+            return {
+                url: query,
+                vrfQuery: "vrf",
+            };
 
         return await (await this.request(`${this.resolver}/9anime-search?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {})).json();
     }
 
     private async getRawVRF(query: string): Promise<VRF> {
-        if (!this.resolver) return {
-            url: query,
-            vrfQuery: "vrf",
-        }
+        if (!this.resolver)
+            return {
+                url: query,
+                vrfQuery: "vrf",
+            };
 
         return await (await this.request(`${this.resolver}/rawVrf?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {})).json();
     }
 
     private async decodeURL(query: string): Promise<VRF> {
-        if (!this.resolver) return {
-            url: query,
-            vrfQuery: "vrf",
-        }
+        if (!this.resolver)
+            return {
+                url: query,
+                vrfQuery: "vrf",
+            };
 
         return await (await this.request(`${this.resolver}/decrypt?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {})).json();
     }

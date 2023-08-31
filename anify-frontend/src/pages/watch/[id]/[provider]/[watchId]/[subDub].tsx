@@ -861,6 +861,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     for (let i = 0; i < sources?.sources.length; i++) {
         if (sources.headers && Object.keys(sources.headers).length > 0) {
             Object.assign(sources.sources[i] ?? {}, { url: `${String(env.M3U8_PROXY)}/proxy/m3u8/${encodeURIComponent(String(sources.sources[i]?.url))}/${encodeURIComponent(JSON.stringify(sources.headers))}` })
+            //Object.assign(sources.sources[i] ?? {}, { url: `https://proxy.anistreme.live/proxy/m3u8/https%3A%2F%2Fvidstream.vidnethub.net%2Fmanifest%2F64a5b12944c6d04c129d45d5%2Fmaster.m3u8/%7B%22Origin%22%3A%22https%3A%2F%2Fvidnethub.net%22%7D` });
+
+            //console.log(`${String(env.M3U8_PROXY)}/proxy/m3u8/${encodeURIComponent(String(sources.sources[i]?.url))}/${encodeURIComponent(JSON.stringify(sources.headers))}`)
         }
     }
 

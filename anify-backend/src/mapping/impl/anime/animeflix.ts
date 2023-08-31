@@ -24,11 +24,15 @@ export default class AnimeFlix extends AnimeProvider {
     }
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
-        const request = await this.request(`${this.api}/info?query=${encodeURIComponent(query)}&limit=20`, {
-            headers: {
-                "User-Agent": this.userAgent,
+        const request = await this.request(
+            `${this.api}/info?query=${encodeURIComponent(query)}&limit=20`,
+            {
+                headers: {
+                    "User-Agent": this.userAgent,
+                },
             },
-        }, true);
+            true
+        );
         if (!request.ok) {
             return [];
         }
@@ -54,16 +58,24 @@ export default class AnimeFlix extends AnimeProvider {
         const hash = this.generateHash(id);
 
         const [dataResponse, dubResponse] = await Promise.all([
-            this.request(`${this.api}/episodes?id=${id}&dub=false&a=${hash}`, {
-                headers: {
-                    "User-Agent": this.userAgent
+            this.request(
+                `${this.api}/episodes?id=${id}&dub=false&a=${hash}`,
+                {
+                    headers: {
+                        "User-Agent": this.userAgent,
+                    },
                 },
-            }, true),
-            this.request(`${this.api}/episodes?id=${id}&dub=true&a=${hash}`, {
-                headers: {
-                    "User-Agent": this.userAgent
+                true
+            ),
+            this.request(
+                `${this.api}/episodes?id=${id}&dub=true&a=${hash}`,
+                {
+                    headers: {
+                        "User-Agent": this.userAgent,
+                    },
                 },
-            }, true),
+                true
+            ),
         ]);
 
         if (!dataResponse.ok || !dubResponse.ok) {

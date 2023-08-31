@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { Anime, Format, Genres, Manga, Type } from "../mapping";
 import cluster from "cluster";
-import { info, media, prisma, recent, search, searchAdvanced, seasonal as seasonalPostgres, } from "./postgresql";
+import { info, media, prisma, recent, search, searchAdvanced, seasonal as seasonalPostgres } from "./postgresql";
 
 export default class Database {
     private static type = "postgresql";

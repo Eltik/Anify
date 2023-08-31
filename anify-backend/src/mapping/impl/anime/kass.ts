@@ -14,21 +14,25 @@ export default class Kass extends AnimeProvider {
     }
 
     override get headers(): Record<string, string> | undefined {
-        return undefined;
+        return { Origin: "https://vidnethub.net" };
     }
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
-        const request = await this.request(`${this.url}/api/search`, {
-            method: "POST",
-            body: JSON.stringify({
-                query,
-            }),
-            headers: {
-                "Content-type": "application/json",
-                Referer: `${this.url}/`,
-                Origin: this.url,
+        const request = await this.request(
+            `${this.url}/api/search`,
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    query,
+                }),
+                headers: {
+                    "Content-type": "application/json",
+                    Referer: `${this.url}/`,
+                    Origin: this.url,
+                },
             },
-        });
+            true
+        );
 
         if (!request.ok) {
             return [];
@@ -56,7 +60,7 @@ export default class Kass extends AnimeProvider {
         const episodeJSONs: { sub?: Episodes; dub?: Episodes } = { dub: undefined, sub: undefined };
 
         try {
-            episodeJSONs.sub = await (await this.request(`${this.url}/api/show/${id}/episodes?lang=ja-JP`)).json();
+            episodeJSONs.sub = await (await this.request(`${this.url}/api/show/${id}/episodes?lang=ja-JP`, {}, true)).json();
 
             try {
                 const promises: Promise<Response>[] = [];
@@ -66,7 +70,7 @@ export default class Kass extends AnimeProvider {
                         continue;
                     }
 
-                    promises.push(this.request(`${this.url}/api/show/${id}/episodes?lang=ja-JP&page=${episodeJSONs["sub"]?.pages[i].number}`));
+                    promises.push(this.request(`${this.url}/api/show/${id}/episodes?lang=ja-JP&page=${episodeJSONs["sub"]?.pages[i].number}`, {}, true));
                 }
 
                 const results = await Promise.all(promises);
@@ -83,7 +87,7 @@ export default class Kass extends AnimeProvider {
                 console.warn(err);
             }
         } catch (err) {
-            episodeJSONs.dub = await (await this.request(`${this.url}/api/show/${id}/episodes?lang=en-US`)).json();
+            episodeJSONs.dub = await (await this.request(`${this.url}/api/show/${id}/episodes?lang=en-US`, {}, true)).json();
 
             try {
                 const promises: Promise<Response>[] = [];
@@ -93,7 +97,7 @@ export default class Kass extends AnimeProvider {
                         continue;
                     }
 
-                    promises.push(this.request(`${this.url}/api/show/${id}/episodes?lang=en-US&page=${episodeJSONs["dub"]?.pages[i].number}`));
+                    promises.push(this.request(`${this.url}/api/show/${id}/episodes?lang=en-US&page=${episodeJSONs["dub"]?.pages[i].number}`, {}, true));
                 }
 
                 const results = await Promise.all(promises);
@@ -112,7 +116,7 @@ export default class Kass extends AnimeProvider {
         }
 
         if (!episodeJSONs.dub) {
-            episodeJSONs.dub = await (await this.request(`${this.url}/api/show/${id}/episodes?lang=en-US`)).json();
+            episodeJSONs.dub = await (await this.request(`${this.url}/api/show/${id}/episodes?lang=en-US`, {}, true)).json();
 
             try {
                 const promises: Promise<Response>[] = [];
@@ -122,7 +126,7 @@ export default class Kass extends AnimeProvider {
                         continue;
                     }
 
-                    promises.push(this.request(`${this.url}/api/show/${id}/episodes?lang=en-US&page=${episodeJSONs["dub"]?.pages[i].number}`));
+                    promises.push(this.request(`${this.url}/api/show/${id}/episodes?lang=en-US&page=${episodeJSONs["dub"]?.pages[i].number}`, {}, true));
                 }
 
                 const results = await Promise.all(promises);
@@ -201,7 +205,7 @@ export default class Kass extends AnimeProvider {
         return episodes;
     }
 
-    override async fetchSources(id: string, subType: SubType | undefined, server: StreamingServers = StreamingServers.DuckStream): Promise<Source | undefined> {
+    override async fetchSources(id: string, subType: SubType | undefined, server: StreamingServers = StreamingServers.BirdStream): Promise<Source | undefined> {
         const source: Source = {
             sources: [],
             subtitles: [],
@@ -259,7 +263,7 @@ export default class Kass extends AnimeProvider {
 
         for (const type in links) {
             const slug = links[type];
-            const videoJSON = await (await this.request(`${this.url}/api/show/${id}/episode/${slug}`)).json();
+            const videoJSON = await (await this.request(`${this.url}/api/show/${id}/episode/${slug}`, {}, true)).json();
             const servers = videoJSON.servers;
 
             for (const s of servers) {
