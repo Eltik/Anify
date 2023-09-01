@@ -189,12 +189,12 @@ export default class Kass extends AnimeProvider {
             }
 
             episodes.push({
-                id: JSON.stringify({
+                id: encodeURIComponent(JSON.stringify({
                     id,
                     epNum,
                     sourceID: JSON.stringify(sourceID),
-                }),
-                title: `Episode ${epNum}${el?.title ? ` - ${el.title}` : ""}`,
+                })),
+                title: `${el?.title ? el.title : `Episode ${epNum}`}`,
                 number: epNum,
                 img: `${this.url}/image/thumbnail/${el?.thumbnail?.sm ?? el?.thumbnail?.sm}.${el?.thumbnail?.formats.includes("webp") ? "webp" : el?.thumbnail?.formats[0]}`,
                 hasDub: !!dubData[epNum],
@@ -254,7 +254,7 @@ export default class Kass extends AnimeProvider {
     }
 
     override async fetchServers(id: string): Promise<Server[] | undefined> {
-        const params = JSON.parse(id);
+        const params = JSON.parse(decodeURIComponent(id));
         id = params.id;
 
         const links = JSON.parse(params.sourceID);

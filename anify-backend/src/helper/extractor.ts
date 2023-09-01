@@ -853,7 +853,7 @@ export default class Extractor {
             }).toString(CryptoJS.enc.Utf8)
         );
 
-        let hlsURL = "";
+        let hlsURL = "", dashURL = "";
 
         if (finalResult.hls) {
             hlsURL = finalResult.hls.startsWith("//") ? `https:${finalResult.hls}` : finalResult.hls;
@@ -890,6 +890,13 @@ export default class Extractor {
         }
 
         if (finalResult.dash) {
+            dashURL = finalResult.dash.startsWith("//") ? `https:${finalResult.dash}` : finalResult.dash;
+
+            result.sources.push({
+                quality: "dash",
+                url: dashURL,
+            });
+
             result.intro.start = finalResult.cues?.intro?.start_ms ?? 0;
             result.intro.end = finalResult.cues?.intro?.end_ms ?? 0;
 
@@ -898,13 +905,25 @@ export default class Extractor {
         }
 
         if (finalResult.subtitles) {
-            finalResult.subtitles.map((sub) => {
-                result.subtitles.push({
-                    label: `${sub.name}`,
-                    url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, hlsURL).href,
-                    lang: sub.language,
+            if (hlsURL.length > 0) {
+                finalResult.subtitles.map((sub) => {
+                    result.subtitles.push({
+                        label: `${sub.name}`,
+                        url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, hlsURL).href,
+                        lang: sub.language,
+                    });
                 });
-            });
+            }
+
+            if (dashURL.length > 0) {
+                finalResult.subtitles.map((sub) => {
+                    result.subtitles.push({
+                        label: `${sub.name}`,
+                        url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, dashURL).href,
+                        lang: sub.language,
+                    });
+                });
+            }
         }
 
         return result;

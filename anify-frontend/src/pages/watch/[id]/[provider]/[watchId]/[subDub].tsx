@@ -852,9 +852,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         subType: subDub,
         episode: episodeNumber > 0 ? episodeNumber : -1
     }).catch((err) => {
-        console.log(err.response.data)
         return {
-            data: null
+            data: {
+                sources: [],
+                subtitles: [],
+                intro: {
+                    start: 0,
+                    end: 0
+                },
+                outro: {
+                    start: 0,
+                    end: 0
+                }
+            }
         }
     })).data as Source;
 
