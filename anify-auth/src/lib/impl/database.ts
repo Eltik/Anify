@@ -4,13 +4,15 @@ import { dehashPassword } from "@/src/helper";
 
 export const prisma = new PrismaClient();
 
-export const insertUser = async(ids: IDs, username: string, password: string, salt: string) => {
+export const insertUser = async (ids: IDs, username: string, password: string, salt: string) => {
     // Check if user already exists
-    if (await prisma.user.findUnique({
-        where: {
-            username
-        }
-    })) {
+    if (
+        await prisma.user.findUnique({
+            where: {
+                username,
+            },
+        })
+    ) {
         return null;
     }
 
@@ -33,30 +35,30 @@ export const insertUser = async(ids: IDs, username: string, password: string, sa
                     fontSize: "1rem 1.5rem",
                     fontWidth: "200",
                     updatedAt: new Date(Date.now()),
-                    createdAt: new Date(Date.now())
-                }
-            }
-        }
+                    createdAt: new Date(Date.now()),
+                },
+            },
+        },
     });
 };
 
-export const updateUser = async(id: string, ids: IDs) => {
+export const updateUser = async (id: string, ids: IDs) => {
     return await prisma.user.update({
         where: {
-            id
+            id,
         },
         data: {
             anilistId: ids.anilistId,
             malId: ids.malId,
-            simklId: ids.simklId
-        }
+            simklId: ids.simklId,
+        },
     });
 };
 
-export const fetchUser = async(id: string) => {
+export const fetchUser = async (id: string) => {
     return await prisma.user.findUnique({
         where: {
-            id
+            id,
         },
         select: {
             id: true,
@@ -67,16 +69,16 @@ export const fetchUser = async(id: string) => {
             username: true,
             simklId: true,
             password: false,
-            salt: false
-        }
+            salt: false,
+        },
     });
 };
 
-export const login = async(username: string, password: string) => {
+export const login = async (username: string, password: string) => {
     const user = await prisma.user.findUnique({
         where: {
-            username
-        }
+            username,
+        },
     });
 
     if (!user) return null;
@@ -87,7 +89,7 @@ export const login = async(username: string, password: string) => {
     // Remove password and salt from user object
     return await prisma.user.findUnique({
         where: {
-            username
+            username,
         },
         select: {
             id: true,
@@ -98,32 +100,35 @@ export const login = async(username: string, password: string) => {
             username: true,
             simklId: true,
             password: false,
-            salt: false
-        }
+            salt: false,
+        },
     });
 };
 
-export const fetchSettings = async(id: string) => {
+export const fetchSettings = async (id: string) => {
     return await prisma.userSettings.findUnique({
         where: {
-            userId: id
-        }
+            userId: id,
+        },
     });
 };
 
-export const updateSettings = async(id: string, settings: Settings = {
-    autoSkip: false,
-    autoNext: false,
-    autoFullscreen: false,
-    fontSize: "1rem 1.5rem",
-    fontWidth: "200",
-    titleLanguage: "english",
-    displayAdultContent: false,
-    airingNotifications: false
-}) => {
+export const updateSettings = async (
+    id: string,
+    settings: Settings = {
+        autoSkip: false,
+        autoNext: false,
+        autoFullscreen: false,
+        fontSize: "1rem 1.5rem",
+        fontWidth: "200",
+        titleLanguage: "english",
+        displayAdultContent: false,
+        airingNotifications: false,
+    }
+) => {
     return await prisma.userSettings.update({
         where: {
-            userId: id
+            userId: id,
         },
         data: {
             autoSkip: settings.autoSkip,
@@ -134,8 +139,8 @@ export const updateSettings = async(id: string, settings: Settings = {
             titleLanguage: settings.titleLanguage,
             displayAdultContent: settings.displayAdultContent,
             airingNotifications: settings.airingNotifications,
-            updatedAt: new Date(Date.now())
-        }
+            updatedAt: new Date(Date.now()),
+        },
     });
 };
 

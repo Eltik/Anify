@@ -56,25 +56,25 @@ if (!env.REDIS_URL) {
             );
         });
 
-        fastify.get("/user", async(request, reply) => {
+        fastify.get("/user", async (request, reply) => {
             const { id } = request.query as { id: string };
             if (!id) return reply.status(400).send({ error: "No user ID provided." });
 
             const data = await fetchUser(id);
             return reply.status(200).send(data);
-        })
+        });
 
-        fastify.post("/user", async(request, reply) => {
+        fastify.post("/user", async (request, reply) => {
             const { id } = request.body as { id: string };
             if (!id) return reply.status(400).send({ error: "No user ID provided." });
 
             const data = await fetchUser(id);
             return reply.status(200).send(data);
-        })
+        });
 
-        fastify.post("/create-user", async(request, reply) => {
-            const { username, password, anilistId, malId, simklId } = request.body as { username: string, password: string, anilistId?: string, malId?: string, simklId?: string };
-            
+        fastify.post("/create-user", async (request, reply) => {
+            const { username, password, anilistId, malId, simklId } = request.body as { username: string; password: string; anilistId?: string; malId?: string; simklId?: string };
+
             if (!username) return reply.status(400).send({ error: "No username provided." });
             if (!password) return reply.status(400).send({ error: "No password provided." });
 
@@ -84,29 +84,29 @@ if (!env.REDIS_URL) {
             if (!data) return reply.status(400).send({ error: "User already exists." });
 
             return reply.status(200).send(data);
-        })
+        });
 
-        fastify.post("/login", async(request, reply) => {
-            const { username, password } = request.body as { username: string, password: string };
-            
+        fastify.post("/login", async (request, reply) => {
+            const { username, password } = request.body as { username: string; password: string };
+
             if (!username) return reply.status(400).send({ error: "No username provided." });
             if (!password) return reply.status(400).send({ error: "No password provided." });
 
             const data = await login(username, password);
             if (!data) return reply.status(400).send({ error: "Invalid username or password." });
-            
-            return reply.status(200).send(data);
-        })
 
-        fastify.post("/update-user", async(request, reply) => {
-            const { id, anilistId, malId, simklId } = request.body as { id: string, anilistId?: string, malId?: string, simklId?: string };
+            return reply.status(200).send(data);
+        });
+
+        fastify.post("/update-user", async (request, reply) => {
+            const { id, anilistId, malId, simklId } = request.body as { id: string; anilistId?: string; malId?: string; simklId?: string };
             if (!id) return reply.status(400).send({ error: "No user ID provided." });
 
             const data = await updateUser(id, { anilistId, malId, simklId });
             return reply.status(200).send(data);
-        })
+        });
 
-        fastify.get("/settings", async(request, reply) => {
+        fastify.get("/settings", async (request, reply) => {
             const { id } = request.query as { id: string };
             if (!id) return reply.status(400).send({ error: "No user ID provided." });
 
@@ -116,9 +116,9 @@ if (!env.REDIS_URL) {
             const data = await fetchSettings(id);
             await redis.set(`settings:${id}`, JSON.stringify(data), "EX", 60 * 60 * 24 * 7);
             return reply.status(200).send(data);
-        })
+        });
 
-        fastify.post("/settings", async(request, reply) => {
+        fastify.post("/settings", async (request, reply) => {
             const { id } = request.body as { id: string };
             if (!id) return reply.status(400).send({ error: "No user ID provided." });
 
@@ -128,16 +128,16 @@ if (!env.REDIS_URL) {
             const data = await fetchSettings(id);
             await redis.set(`settings:${id}`, JSON.stringify(data), "EX", 60 * 60 * 24 * 7);
             return reply.status(200).send(data);
-        })
+        });
 
-        fastify.post("/update-settings", async(request, reply) => {
-            const { id, settings } = request.body as { id: string, settings: Settings };
+        fastify.post("/update-settings", async (request, reply) => {
+            const { id, settings } = request.body as { id: string; settings: Settings };
             if (!id) return reply.status(400).send({ error: "No user ID provided." });
             if (!settings) return reply.status(400).send({ error: "No settings provided." });
 
             const data = await updateSettings(id, settings);
             return reply.status(200).send(data);
-        })
+        });
 
         fastify.get("*", (_, reply) => {
             reply.status(404).send({ error: "Page not found." });

@@ -13,7 +13,7 @@ export function isValidDate(d) {
     return d instanceof Date && !isNaN(Number(d));
 }
 
-export async function hashPassword(password: string): Promise<{ password: string, salt: string }> {
+export async function hashPassword(password: string): Promise<{ password: string; salt: string }> {
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(password, salt);

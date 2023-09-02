@@ -266,4 +266,4 @@ export type Settings = {
     airingNotifications: boolean;
     updatedAt?: Date;
     createdAt?: Date;
-}
+};

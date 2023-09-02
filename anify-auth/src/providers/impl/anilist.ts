@@ -188,12 +188,11 @@ export default class AniList extends AuthProvider {
     }
 
     override async fetchEntry(userId: string, accessToken: string, id: string): Promise<Entry | undefined> {
-        const req = (
-            await (
-                await fetch(`https://graphql.anilist.co`, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        query: `
+        const req = await (
+            await fetch(`https://graphql.anilist.co`, {
+                method: "POST",
+                body: JSON.stringify({
+                    query: `
                         query($mediaId: Int) {
                             Media(id: $mediaId) {
                                 id title {
@@ -216,18 +215,17 @@ export default class AniList extends AuthProvider {
                             }
                         }
                         `,
-                        variables: {
-                            mediaId: id,
-                        },
-                    }),
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        Authorization: `Bearer ${accessToken}`,
+                    variables: {
+                        mediaId: id,
                     },
-                })
-            ).json()
-        );
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            })
+        ).json();
 
         const data: MediaListEntry = req?.data?.Media?.mediaListEntry;
 

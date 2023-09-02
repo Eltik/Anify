@@ -38,7 +38,7 @@ export async function parseEnv(process: Process) {
     }
 }
 
-async function promptEnv(process: Process, missing: string[]) {
+export async function promptEnv(process: Process, missing: string[]) {
     // Prompt the user for the missing environment variables
     const env = await loadEnv(process);
 

@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseEnv = exports.promptEnvVariables = void 0;
+exports.promptEnv = exports.parseEnv = exports.promptEnvVariables = void 0;
 const inquirer = __importStar(require("inquirer"));
 const colors_1 = __importDefault(require("colors"));
 const loadEnv_1 = require("../lib/loadEnv");
@@ -97,3 +97,4 @@ async function promptEnv(process, missing) {
     console.log(colors_1.default.green("Successfully wrote environment variables to ") + colors_1.default.yellow(`../${process}/.env`) + colors_1.default.green("."));
     console.log("\n");
 }
+exports.promptEnv = promptEnv;
