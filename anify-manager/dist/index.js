@@ -24,6 +24,30 @@ async function startManager() {
     console.log(colors_1.default.green("Started process manager."));
 }
 async function startBot() {
+    if (!process.env.TOKEN) {
+        console.log(colors_1.default.red("No Discord token provided. Discord bot will not be started up."));
+        return;
+    }
+    if (!process.env.CLIENT) {
+        console.log(colors_1.default.red("No Discord client ID provided. Discord bot will not be started up."));
+        return;
+    }
+    if (!process.env.GUILD) {
+        console.log(colors_1.default.red("No Discord guild ID provided. Discord bot will not be started up."));
+        return;
+    }
+    if (!process.env.FRONTEND) {
+        console.log(colors_1.default.yellow("WARNING: Frontend URL not provided. Discord bot will likely have issues. Please provide the URL in the .env file."));
+    }
+    if (!process.env.API) {
+        console.log(colors_1.default.yellow("WARNING: API URL not provided. Discord bot will likely have issues. Please provide the URL in the .env file."));
+    }
+    if (!process.env.AUTH) {
+        console.log(colors_1.default.yellow("WARNING: Auth URL not provided. Discord bot will likely have issues. Please provide the URL in the .env file."));
+    }
+    if (!process.env.MASTER_KEY) {
+        console.log(colors_1.default.yellow("WARNING: Master key not provided. Discord bot will likely have issues. Please provide the key in the .env file."));
+    }
     await Promise.all([(0, bot_1.registerCommands)(), (0, bot_1.loadCommands)(), (0, bot_1.loadEvents)(), (0, bot_1.login)()]).catch((err) => {
         console.error(colors_1.default.red("Error: "), err);
     });

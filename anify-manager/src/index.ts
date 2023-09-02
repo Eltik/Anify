@@ -21,6 +21,30 @@ async function startManager() {
 }
 
 async function startBot() {
+    if (!process.env.TOKEN) {
+        console.log(colors.red("No Discord token provided. Discord bot will not be started up."));
+        return;
+    }
+    if (!process.env.CLIENT) {
+        console.log(colors.red("No Discord client ID provided. Discord bot will not be started up."));
+        return;
+    }
+    if (!process.env.GUILD) {
+        console.log(colors.red("No Discord guild ID provided. Discord bot will not be started up."));
+        return;
+    }
+    if (!process.env.FRONTEND) {
+        console.log(colors.yellow("WARNING: Frontend URL not provided. Discord bot will likely have issues. Please provide the URL in the .env file."));
+    }
+    if (!process.env.API) {
+        console.log(colors.yellow("WARNING: API URL not provided. Discord bot will likely have issues. Please provide the URL in the .env file."));
+    }
+    if (!process.env.AUTH) {
+        console.log(colors.yellow("WARNING: Auth URL not provided. Discord bot will likely have issues. Please provide the URL in the .env file."));
+    }
+    if (!process.env.MASTER_KEY) {
+        console.log(colors.yellow("WARNING: Master key not provided. Discord bot will likely have issues. Please provide the key in the .env file."));
+    }
     await Promise.all([registerCommands(), loadCommands(), loadEvents(), login()]).catch((err) => {
         console.error(colors.red("Error: "), err);
     });
