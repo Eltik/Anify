@@ -133,7 +133,7 @@ export default class MangaDex extends MangaProvider {
                 if (canPush) {
                     chapters.push({
                         id,
-                        title,
+                        title: title?.trim(),
                         number: curChapter.attributes.chapter,
                         updatedAt: new Date(curChapter.attributes.updatedAt ?? 0).getTime(),
                     });
@@ -174,23 +174,5 @@ export default class MangaDex extends MangaProvider {
             });
         }
         return pages;
-    }
-
-    private padNum(number, places): string {
-        // Credit to https://stackoverflow.com/a/10073788
-        /*
-         * '17'
-         * '17.5'
-         * '17-17.5'
-         * '17 - 17.5'
-         * '17-123456789'
-         */
-        let range = number.split("-");
-        range = range.map((chapter) => {
-            chapter = chapter.trim();
-            const digits = chapter.split(".")[0].length;
-            return "0".repeat(Math.max(0, places - digits)) + chapter;
-        });
-        return range.join("-");
     }
 }

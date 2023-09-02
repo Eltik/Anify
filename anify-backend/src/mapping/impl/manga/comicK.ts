@@ -53,26 +53,31 @@ export default class ComicK extends MangaProvider {
 
         data.chapters.map((chapter) => {
             let title = "";
-            if (chapter.group_name && chapter.group_name.length > 0) {
-                title += `[${chapter.group_name[0]}] `;
-            }
+
             if (chapter.vol) {
-                title += `Vol. ${chapter.vol} `;
+                title += "Vol. " + this.padNum(chapter.vol, 2) + " ";
             }
-            title += `Ch. ${chapter.chap}`;
-            if (chapter.title) {
-                title += ` - ${chapter.title}`;
+            if (chapter.chap) {
+                title += "Ch. " + this.padNum(chapter.chap, 2) + " ";
             }
 
-            const updatedAt = new Date(chapter.updated_at ?? 0).getTime();
+            let canPush = true;
+            for (let i = 0; i < chapters.length; i++) {
+                if (chapters[i].title === title) {
+                    canPush = false;
+                }
+            }
 
-            if (chapter.lang === "en") {
-                chapters.push({
-                    id: chapter.hid,
-                    title: title,
-                    number: chapter.chap,
-                    updatedAt,
-                });
+            if (canPush) {
+                const updatedAt = new Date(chapter.updated_at ?? 0).getTime();
+                if (chapter.lang === "en") {
+                    chapters.push({
+                        id: chapter.hid,
+                        title: title?.trim(),
+                        number: chapter.chap,
+                        updatedAt,
+                    });
+                }
             }
         });
 
