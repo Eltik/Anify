@@ -189,11 +189,13 @@ export default class Kass extends AnimeProvider {
             }
 
             episodes.push({
-                id: encodeURIComponent(JSON.stringify({
-                    id,
-                    epNum,
-                    sourceID: JSON.stringify(sourceID),
-                })),
+                id: encodeURIComponent(
+                    JSON.stringify({
+                        id,
+                        epNum,
+                        sourceID: JSON.stringify(sourceID),
+                    })
+                ),
                 title: `${el?.title ? el.title : `Episode ${epNum}`}`,
                 number: epNum,
                 img: `${this.url}/image/thumbnail/${el?.thumbnail?.sm ?? el?.thumbnail?.sm}.${el?.thumbnail?.formats.includes("webp") ? "webp" : el?.thumbnail?.formats[0]}`,

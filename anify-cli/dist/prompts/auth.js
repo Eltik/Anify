@@ -12,6 +12,11 @@ async function promptAuth() {
     const auth = await (0, env_1.parseEnv)("anify-auth" /* Process.AUTH */);
     await (0, env_1.promptEnv)("anify-auth" /* Process.AUTH */, auth);
     // Test out installing and building
-    await (0, build_1.build)("anify-auth" /* Process.AUTH */);
+    const buildData = await (0, build_1.build)("anify-auth" /* Process.AUTH */);
+    if (!buildData) {
+        console.log(colors_1.default.red("Build failed. Please check the above for errors.\n"));
+        return;
+    }
+    console.log(colors_1.default.green("Build succeeded. Authentication server is all setup."));
 }
 exports.promptAuth = promptAuth;

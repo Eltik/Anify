@@ -21,12 +21,10 @@ import JNovels from "./impl/manga/jnovels";
 import ReadLightNovels from "./impl/manga/readlightnovels";
 import { EpisodeData } from "../content/impl/episodes";
 import { ChapterData } from "../content/impl/chapters";
-import MangaBuddy from "./impl/manga/mangabuddy";
 import TheTVDB from "./impl/meta/tvdb";
 import TVDB from "./impl/information/tvdb";
 import SimklMeta from "./impl/meta/simkl";
 import Simkl from "./impl/information/simkl";
-import ColoredManga from "./impl/manga/coloredmanga";
 import Kass from "./impl/anime/kass";
 import ComicKInfo from "./impl/information/comicK";
 
@@ -36,7 +34,7 @@ const animeProviders: Record<string, AnimeProvider> = ANIME_PROVIDERS.reduce((ac
     return acc;
 }, {});
 
-const MANGA_PROVIDERS: MangaProvider[] = [new ComicK(), new MangaDex(), new MangaSee(), new NovelBuddy(), new NovelUpdates(), new JNovels(), new ReadLightNovels(), new MangaBuddy(), new ColoredManga()];
+const MANGA_PROVIDERS: MangaProvider[] = [new ComicK(), new MangaDex(), new MangaSee(), new NovelBuddy(), new NovelUpdates(), new JNovels(), new ReadLightNovels()];
 const mangaProviders: Record<string, MangaProvider> = MANGA_PROVIDERS.reduce((acc, provider) => {
     acc[provider.id] = provider;
     return acc;

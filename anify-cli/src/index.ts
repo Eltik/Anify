@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import { program } from "commander";
 import * as inquirer from "inquirer";
 import { promptEnvVariables } from "./prompts/env";

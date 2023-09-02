@@ -19,7 +19,7 @@ async function getStats() {
     (await axios(`${auth}/`)).data;
     const end1 = new Date(Date.now());
     const authTime = end1.getTime() - start1.getTime();
-    
+
     const start2 = new Date(Date.now());
     (await axios(`${frontend}/`)).data;
     const end2 = new Date(Date.now());

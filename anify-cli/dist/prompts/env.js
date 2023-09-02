@@ -93,7 +93,7 @@ async function promptEnv(process, missing) {
         env[key] = parsedValue;
     }
     // Write the environment variables to the .env file
-    await (0, promises_1.writeFile)(`../${process}/.env`, Object.entries(env).map(([key, value]) => `${key}=${typeof value === "string" ? `"${value}"` : value}`).join("\n"));
+    await (0, promises_1.writeFile)(`../${process}/.env`, Object.entries(env).map(([key, value]) => `${key}=${`"${value}"`}`).join("\n"));
     console.log(colors_1.default.green("Successfully wrote environment variables to ") + colors_1.default.yellow(`../${process}/.env`) + colors_1.default.green("."));
     console.log("\n");
 }

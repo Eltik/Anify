@@ -56,14 +56,19 @@ export const loadEnv = async (process: Process) => {
             return;
         }
 
-        const [key, value] = line.split("=");
-        if (!key || !value) {
+        const equalIndex = line.indexOf("=");
+        if (equalIndex === -1) {
+            // Skip lines without '='
             return;
         }
 
+        const key = line.slice(0, equalIndex).trim();
+        const value = line.slice(equalIndex + 1).trim();
+
         // Try to parse values into appropriate types
         let parsedValue: string | boolean | number = value.trim();
-        parsedValue = parsedValue.startsWith('"') && parsedValue.endsWith('"') ? parsedValue.slice(1, -1) : parsedValue;
+        parsedValue = parsedValue.startsWith('"') ? parsedValue.slice(1) : parsedValue;
+        parsedValue = parsedValue.endsWith('"') ? parsedValue.slice(0, -1) : parsedValue;
 
         if (parsedValue?.toLowerCase() === "true") {
             parsedValue = true;

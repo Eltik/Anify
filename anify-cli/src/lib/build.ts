@@ -26,13 +26,29 @@ const simulateLoadingDots = () => {
 
 export const build = async (process: Process) => {
     const child = childProcess.spawn("npm", ["run", "build"], {
-        cwd: `../${process}`
+        cwd: `../${process}`,
+        stdio: "pipe"
     });
 
     const loadingInterval = simulateLoadingDots();
 
-    await new Promise((resolve, reject) => {
-        child.on("error", reject);
+    return new Promise((resolve, reject) => {
+        let buildOutput = ""; // Variable to capture build output
+
+        child.stdout?.on("data", (data) => {
+            buildOutput += data.toString();
+        });
+
+        child.stderr?.on("data", (data) => {
+            buildOutput += data.toString();
+        });
+
+        child.on("error", (error) => {
+            clearInterval(loadingInterval);
+            console.error(colors.red(`Error starting build process: ${error.message}\n`));
+            resolve(false);
+        });
+
         child.on("exit", (code) => {
             clearInterval(loadingInterval);
 
@@ -40,7 +56,9 @@ export const build = async (process: Process) => {
                 console.log(colors.green("Build completed successfully\n"));
                 resolve(true);
             } else {
-                console.log(colors.red("Build failed. Please check the console for errors.\n"));
+                console.error(buildOutput); // Log the error output
+                console.log(colors.red("Build failed. Please check the above for errors.\n"));
+                resolve(false);
             }
         });
     });

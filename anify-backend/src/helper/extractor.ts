@@ -853,7 +853,8 @@ export default class Extractor {
             }).toString(CryptoJS.enc.Utf8)
         );
 
-        let hlsURL = "", dashURL = "";
+        let hlsURL = "",
+            dashURL = "";
 
         if (finalResult.hls) {
             hlsURL = finalResult.hls.startsWith("//") ? `https:${finalResult.hls}` : finalResult.hls;

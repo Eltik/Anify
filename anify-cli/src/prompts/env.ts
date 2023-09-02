@@ -77,7 +77,7 @@ export async function promptEnv(process: Process, missing: string[]) {
     }
 
     // Write the environment variables to the .env file
-    await writeFile(`../${process}/.env`, Object.entries(env).map(([key, value]) => `${key}=${typeof value === "string" ? `"${value}"` : value}`).join("\n"));
+    await writeFile(`../${process}/.env`, Object.entries(env).map(([key, value]) => `${key}=${`"${value}"`}`).join("\n"));
     console.log(colors.green("Successfully wrote environment variables to ") + colors.yellow(`../${process}/.env`) + colors.green("."));
     
     console.log("\n");

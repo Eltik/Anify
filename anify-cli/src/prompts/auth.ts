@@ -10,5 +10,12 @@ export async function promptAuth() {
     await promptEnv(Process.AUTH, auth);
 
     // Test out installing and building
-    await build(Process.AUTH);
+    const buildData = await build(Process.AUTH);
+
+    if (!buildData) {
+        console.log(colors.red("Build failed. Please check the above for errors.\n"));
+        return;
+    }
+
+    console.log(colors.green("Build succeeded. Authentication server is all setup."));
 }

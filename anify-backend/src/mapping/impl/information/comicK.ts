@@ -44,18 +44,22 @@ export default class ComicKInfo extends InformationProvider<Anime | Manga, Anime
             characters: [],
             color: null,
             countryOfOrigin: data.country,
-            coverImage: covers.md_covers.map((cover) => {
-                if (cover.is_primary) {
-                    return `https://meo.comick.pictures/${cover.b2key}`;
-                }
-            })[0] ?? data.md_covers.map((cover) => `https://meo.comick.pictures/${cover.b2key}`)[0] ?? null,
+            coverImage:
+                covers.md_covers.map((cover) => {
+                    if (cover.is_primary) {
+                        return `https://meo.comick.pictures/${cover.b2key}`;
+                    }
+                })[0] ??
+                data.md_covers.map((cover) => `https://meo.comick.pictures/${cover.b2key}`)[0] ??
+                null,
             currentEpisode: null,
             description: data.desc,
             duration: null,
             format: Format.UNKNOWN,
-            genres: (data.md_comic_md_genres.map((genre) => {
-                return genre.md_genres.name
-            }) as Genres[]) ?? [],
+            genres:
+                (data.md_comic_md_genres.map((genre) => {
+                    return genre.md_genres.name;
+                }) as Genres[]) ?? [],
             popularity: Number(data.user_follow_count),
             rating: Number(data.bayesian_rating),
             relations: [],
@@ -63,7 +67,7 @@ export default class ComicKInfo extends InformationProvider<Anime | Manga, Anime
             status: data.status === 1 ? MediaStatus.FINISHED : MediaStatus.RELEASING,
             synonyms: data.md_titles.map((title) => title.title),
             tags: data.mu_comics.mu_comic_categories.map((genre) => {
-                return genre.mu_categories.title
+                return genre.mu_categories.title;
             }),
             title: {
                 english: data.md_titles.find((title) => title.lang === "en")?.title ?? data.title,
@@ -73,8 +77,8 @@ export default class ComicKInfo extends InformationProvider<Anime | Manga, Anime
             totalChapters: data.chapter_count,
             totalVolumes: null,
             trailer: null,
-            year: data.year
-        }
+            year: data.year,
+        };
     }
 }
 
@@ -104,7 +108,7 @@ interface Comic {
     translation_completed: boolean;
     relate_from: Array<any>;
     mies: any;
-    md_titles: { title: string, lang?: string }[];
+    md_titles: { title: string; lang?: string }[];
     md_comic_md_genres: { md_genres: { name: string; type: string | null; slug: string; group: string } }[];
     mu_comics: {
         licensed_in_english: any;
@@ -146,4 +150,3 @@ interface Covers {
         locale: string | boolean;
     }[];
 }
-  
