@@ -18,6 +18,7 @@
     "source": "src/index.ts",
     "scripts": {
         "dev": "ts-node -r tsconfig-paths/register src/index.ts",
+        "cli": "npm start",
         "start": "node dist/index.js",
         "build": "npm run build:ts && npm run lint",
         "build:ts": "tsc --project tsconfig.json && tscpaths -p tsconfig.json -s ./src -o ./dist",
@@ -40,6 +41,7 @@
         "colors": "^1.4.0",
         "commander": "^11.0.0",
         "crypto-js": "^4.1.1",
-        "dotenv": "^16.0.3"
+        "dotenv": "^16.0.3",
+        "inquirer": "^8.2.6"
     }
 }
