@@ -68,11 +68,13 @@ const Watch: NextPage<Props> = ({ episodeNumber, episodeSelector, episodes, medi
         }));
 
         playerRef.current?.subscribe(({ currentTime }) => {
+            // Remove duplicates
             for (let i = 0; i < (watchTime ?? []).length; i++) {
                 if (watchTime?.[i]?.episodeNumber != episodeNumber && watchTime?.[i]?.mediaId === media.id) {
                     watchTime?.splice(i, 1);
                 }
             }
+
             for (let i = 0; i < (watchTime ?? []).length; i++) {
                 if (watchTime?.[i]?.episodeNumber === episodeNumber && watchTime?.[i]?.mediaId === media.id) {
                     currentWatchTime = i;
@@ -105,6 +107,13 @@ const Watch: NextPage<Props> = ({ episodeNumber, episodeSelector, episodes, medi
 
                     Object.assign(watchTime?.[currentWatchTime] ?? {}, { currentTime });
                     Object.assign(watchTime?.[currentWatchTime] ?? {}, { duration: playerRef.current?.style.getPropertyValue("--media-duration") ?? 0 });
+                } else {
+                    // Move to the front
+                    const temp = watchTime[currentWatchTime];
+                    watchTime?.splice(currentWatchTime, 1);
+                    temp ? watchTime?.unshift(temp) : null;
+
+                    Object.assign(watchTime?.[currentWatchTime] ?? {}, { currentTime });
                 }
             }
             

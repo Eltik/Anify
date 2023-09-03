@@ -74,7 +74,7 @@ const Read: NextPage<Props> = ({ chapterNumber, chapterSelector, chapters, downl
                 readHistory?.splice(i, 1);
             }
         }
-
+        
         for (let i = 0; i < (readHistory ?? []).length; i++) {
             if (readHistory?.[i]?.chapterNumber === chapterNumber && readHistory?.[i]?.mediaId === media.id) {
                 currentReadHistory = i;
