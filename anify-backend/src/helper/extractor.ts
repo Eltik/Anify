@@ -628,7 +628,8 @@ export default class Extractor {
             }).toString(CryptoJS.enc.Utf8)
         );
 
-        let hlsURL = "";
+        let hlsURL = "",
+            dashURL = "";
 
         if (finalResult.hls) {
             hlsURL = finalResult.hls.startsWith("//") ? `https:${finalResult.hls}` : finalResult.hls;
@@ -641,6 +642,7 @@ export default class Extractor {
             try {
                 const data = await (await fetch(hlsURL)).text();
 
+                // Extract qualities
                 const resolutions = data.match(/(RESOLUTION=)(.*)(\s*?)(\s*.*)/g);
 
                 resolutions?.forEach((res: string) => {
@@ -653,6 +655,29 @@ export default class Extractor {
                         quality: quality + "p",
                     });
                 });
+
+                // Extract audio
+                const audioRegex = /#EXT-X-MEDIA:TYPE=AUDIO,.*URI="(.*)"/g;
+                const audioMatches = [...data.matchAll(audioRegex)];
+
+                audioMatches?.forEach((value: RegExpMatchArray, i: number, array: RegExpMatchArray[]) => {
+                    const audioUrl = value[1];
+                    const index = hlsURL.lastIndexOf("/");
+                    const nameMatch = value[0].match(/NAME="([^"]*)"/);
+                    const languageMatch = value[0].match(/LANGUAGE="([^"]*)"/);
+
+                    if (nameMatch && languageMatch) {
+                        const name = nameMatch[1];
+                        const language = languageMatch[1];
+                        const url = hlsURL.slice(0, index);
+
+                        result.audio.push({
+                            name: name,
+                            language: language,
+                            url: url + "/" + audioUrl,
+                        });
+                    }
+                });
             } catch (e) {
                 //
             }
@@ -662,18 +687,37 @@ export default class Extractor {
         }
 
         if (finalResult.dash) {
+            dashURL = finalResult.dash.startsWith("//") ? `https:${finalResult.dash}` : finalResult.dash;
+
+            result.sources.push({
+                quality: "dash",
+                url: dashURL,
+            });
+
             result.intro.start = finalResult.skip?.intro?.start ?? 0;
             result.intro.end = finalResult.skip?.intro?.end ?? 0;
         }
 
         if (finalResult.subtitles) {
-            finalResult.subtitles.map((sub) => {
-                result.subtitles.push({
-                    label: `${sub.name}`,
-                    url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, hlsURL).href,
-                    lang: sub.lang,
+            if (hlsURL.length > 0) {
+                finalResult.subtitles.map((sub) => {
+                    result.subtitles.push({
+                        label: `${sub.name}`,
+                        url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, hlsURL).href,
+                        lang: sub.language,
+                    });
                 });
-            });
+            }
+
+            if (dashURL.length > 0 && finalResult.subtitles.length === 0) {
+                finalResult.subtitles.map((sub) => {
+                    result.subtitles.push({
+                        label: `${sub.name}`,
+                        url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, dashURL).href,
+                        lang: sub.language,
+                    });
+                });
+            }
         }
 
         return result;
@@ -736,7 +780,8 @@ export default class Extractor {
             }).toString(CryptoJS.enc.Utf8)
         );
 
-        let hlsURL = "";
+        let hlsURL = "",
+            dashURL = "";
 
         if (finalResult.hls) {
             hlsURL = finalResult.hls.startsWith("//") ? `https:${finalResult.hls}` : finalResult.hls;
@@ -749,6 +794,7 @@ export default class Extractor {
             try {
                 const data = await (await fetch(hlsURL)).text();
 
+                // Extract qualities
                 const resolutions = data.match(/(RESOLUTION=)(.*)(\s*?)(\s*.*)/g);
 
                 resolutions?.forEach((res: string) => {
@@ -761,6 +807,29 @@ export default class Extractor {
                         quality: quality + "p",
                     });
                 });
+
+                // Extract audio
+                const audioRegex = /#EXT-X-MEDIA:TYPE=AUDIO,.*URI="(.*)"/g;
+                const audioMatches = [...data.matchAll(audioRegex)];
+
+                audioMatches?.forEach((value: RegExpMatchArray, i: number, array: RegExpMatchArray[]) => {
+                    const audioUrl = value[1];
+                    const index = hlsURL.lastIndexOf("/");
+                    const nameMatch = value[0].match(/NAME="([^"]*)"/);
+                    const languageMatch = value[0].match(/LANGUAGE="([^"]*)"/);
+
+                    if (nameMatch && languageMatch) {
+                        const name = nameMatch[1];
+                        const language = languageMatch[1];
+                        const url = hlsURL.slice(0, index);
+
+                        result.audio.push({
+                            name: name,
+                            language: language,
+                            url: url + "/" + audioUrl,
+                        });
+                    }
+                });
             } catch (e) {
                 //
             }
@@ -770,27 +839,37 @@ export default class Extractor {
         }
 
         if (finalResult.dash) {
-            /*
             dashURL = finalResult.dash.startsWith("//") ? `https:${finalResult.dash}` : finalResult.dash;
 
             result.sources.push({
                 quality: "dash",
                 url: dashURL,
             });
-            */
 
             result.intro.start = finalResult.skip?.intro?.start ?? 0;
             result.intro.end = finalResult.skip?.intro?.end ?? 0;
         }
 
         if (finalResult.subtitles) {
-            finalResult.subtitles.map((sub) => {
-                result.subtitles.push({
-                    label: `${sub.name}`,
-                    url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, hlsURL).href,
-                    lang: sub.language,
+            if (hlsURL.length > 0) {
+                finalResult.subtitles.map((sub) => {
+                    result.subtitles.push({
+                        label: `${sub.name}`,
+                        url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, hlsURL).href,
+                        lang: sub.language,
+                    });
                 });
-            });
+            }
+
+            if (dashURL.length > 0 && finalResult.subtitles.length === 0) {
+                finalResult.subtitles.map((sub) => {
+                    result.subtitles.push({
+                        label: `${sub.name}`,
+                        url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, dashURL).href,
+                        lang: sub.language,
+                    });
+                });
+            }
         }
 
         return result;
@@ -867,6 +946,7 @@ export default class Extractor {
             try {
                 const data = await (await fetch(hlsURL)).text();
 
+                // Extract qualities
                 const resolutions = data.match(/(RESOLUTION=)(.*)(\s*?)(\s*.*)/g);
 
                 resolutions?.forEach((res: string) => {
@@ -878,6 +958,29 @@ export default class Extractor {
                         url: url + "/" + res.split("\n")[1],
                         quality: quality + "p",
                     });
+                });
+
+                // Extract audio
+                const audioRegex = /#EXT-X-MEDIA:TYPE=AUDIO,.*URI="(.*)"/g;
+                const audioMatches = [...data.matchAll(audioRegex)];
+
+                audioMatches?.forEach((value: RegExpMatchArray, i: number, array: RegExpMatchArray[]) => {
+                    const audioUrl = value[1];
+                    const index = hlsURL.lastIndexOf("/");
+                    const nameMatch = value[0].match(/NAME="([^"]*)"/);
+                    const languageMatch = value[0].match(/LANGUAGE="([^"]*)"/);
+
+                    if (nameMatch && languageMatch) {
+                        const name = nameMatch[1];
+                        const language = languageMatch[1];
+                        const url = hlsURL.slice(0, index);
+
+                        result.audio.push({
+                            name: name,
+                            language: language,
+                            url: url + "/" + audioUrl,
+                        });
+                    }
                 });
             } catch (e) {
                 //
@@ -916,7 +1019,7 @@ export default class Extractor {
                 });
             }
 
-            if (dashURL.length > 0) {
+            if (dashURL.length > 0 && finalResult.subtitles.length === 0) {
                 finalResult.subtitles.map((sub) => {
                     result.subtitles.push({
                         label: `${sub.name}`,

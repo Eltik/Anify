@@ -117,6 +117,7 @@ export default class AnimeFlix extends AnimeProvider {
         const result: Source = {
             sources: [],
             subtitles: [],
+            audio: [],
             intro: {
                 start: 0,
                 end: 0,

@@ -24,7 +24,7 @@ const type: Type = Type.ANIME;
 
     const aniList = new AniList();
     //const ids: string[] = await getPopularIds();
-    const ids: string[] = await getAnimeIDs();
+    const ids: string[] = type === Type.ANIME ? await getAnimeIDs() : await getMangaIDs();
     //const ids: string[] = ["108465"];
 
     const idsToRemove: string[] = [];

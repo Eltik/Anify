@@ -211,6 +211,7 @@ export default class Kass extends AnimeProvider {
         const source: Source = {
             sources: [],
             subtitles: [],
+            audio: [],
             intro: {
                 start: 0,
                 end: 0,

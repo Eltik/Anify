@@ -12,7 +12,7 @@ export default class MangaFox extends MangaProvider {
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         const results: Result[] = [];
-        
+
         const data = await (await this.request(`${this.url}/search?title=${query}${year && year != 0 ? `&released=${year}` : ""}`)).text();
         const $ = load(data);
 
@@ -27,9 +27,9 @@ export default class MangaFox extends MangaProvider {
                 img: img ?? "",
                 providerId: this.id,
                 title: title ?? "",
-                year: 0
-            })
-        })
+                year: 0,
+            });
+        });
 
         return results;
     }
@@ -48,7 +48,7 @@ export default class MangaFox extends MangaProvider {
 
             let volume = -1.0;
             let chapter = -1.0;
-            
+
             if (title?.includes("Vol.") && title.includes("Ch.")) {
                 volume = Number(title.split("Vol.")[1].split("Ch.")[0].trim());
                 chapter = Number(title.split("Vol.")[1].split("Ch.")[1].trim());
@@ -62,9 +62,9 @@ export default class MangaFox extends MangaProvider {
                 id: $(el).find("a").attr("href")?.replace("/manga/", "")?.replace("/1.html", "") ?? "",
                 number: chapter != -1.0 ? chapter : i,
                 title: title ?? "",
-                updatedAt: new Date($(el).find("a p.title2").text()).getTime()
-            })
-        })
+                updatedAt: new Date($(el).find("a p.title2").text()).getTime(),
+            });
+        });
 
         return results;
     }
@@ -72,11 +72,13 @@ export default class MangaFox extends MangaProvider {
     override async fetchPages(id: string): Promise<string | Page[] | undefined> {
         const pages: Page[] = [];
 
-        const data = await (await this.request(`https://m.fanfox.net/roll_manga/${id}/1.html`, {
-            headers: {
-                Cookie: "readway=2"
-            }
-        })).text();
+        const data = await (
+            await this.request(`https://m.fanfox.net/roll_manga/${id}/1.html`, {
+                headers: {
+                    Cookie: "readway=2",
+                },
+            })
+        ).text();
 
         const $ = load(data);
 
@@ -85,9 +87,9 @@ export default class MangaFox extends MangaProvider {
                 url: $(el).attr("data-original")?.startsWith("//") ? `https:${$(el).attr("data-original")}` : $(el).attr("data-original") ?? "",
                 index: i,
                 headers: {
-                    Referer: "https://m.fanfox.net"
-                }
-            })
+                    Referer: "https://m.fanfox.net",
+                },
+            });
         });
 
         return pages;
