@@ -70,6 +70,12 @@ const Read: NextPage<Props> = ({ chapterNumber, chapterSelector, chapters, downl
         let currentReadHistory: number | undefined = undefined;
 
         for (let i = 0; i < (readHistory ?? []).length; i++) {
+            if (readHistory?.[i]?.chapterNumber != chapterNumber && readHistory?.[i]?.mediaId === media.id) {
+                readHistory?.splice(i, 1);
+            }
+        }
+
+        for (let i = 0; i < (readHistory ?? []).length; i++) {
             if (readHistory?.[i]?.chapterNumber === chapterNumber && readHistory?.[i]?.mediaId === media.id) {
                 currentReadHistory = i;
             }
@@ -88,7 +94,22 @@ const Read: NextPage<Props> = ({ chapterNumber, chapterSelector, chapters, downl
 
             currentReadHistory = readHistory?.length;
 
-            readHistory?.push(newReadHistory);
+            readHistory?.unshift(newReadHistory);
+        } else {
+            const temp = readHistory?.[currentReadHistory];
+            readHistory?.splice(currentReadHistory, 1);
+
+            Object.assign(temp ?? {}, {
+                chapterNumber,
+                mediaId: media.id,
+                coverImage: media.coverImage ?? "",
+                title: media.title,
+                readId,
+                providerId: provider,
+                format: media.format
+            });
+            
+            temp ? readHistory?.unshift(temp) : null;
         }
         
         useReadHistory.setState({ readHistory });

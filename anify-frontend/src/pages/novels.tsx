@@ -65,7 +65,7 @@ const Novel: NextPage<Props> = ({ seasonal, recent }) => {
                         <div className="mx-auto mt-5">
                             <h1 className="text-white text-2xl lg:text-3xl font-semibold mb-2 ml-2">Continue Reading</h1>
                             <Swiper slidesPerView={"auto"} className="relative h-fit" freeMode={true}>
-                                {readHistory?.reverse().map((media, index: number) => {
+                                {readHistory.map((media, index: number) => {
                                     return (
                                         <SwiperSlide key={index} className="!w-fit px-2">
                                             <div className="flex group flex-col gap-2 w-[calc(34vh/1.5)] h-full min-w-[120px] text-white">

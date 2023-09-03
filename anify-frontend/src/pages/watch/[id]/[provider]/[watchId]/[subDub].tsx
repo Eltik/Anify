@@ -69,6 +69,11 @@ const Watch: NextPage<Props> = ({ episodeNumber, episodeSelector, episodes, medi
 
         playerRef.current?.subscribe(({ currentTime }) => {
             for (let i = 0; i < (watchTime ?? []).length; i++) {
+                if (watchTime?.[i]?.episodeNumber != episodeNumber && watchTime?.[i]?.mediaId === media.id) {
+                    watchTime?.splice(i, 1);
+                }
+            }
+            for (let i = 0; i < (watchTime ?? []).length; i++) {
                 if (watchTime?.[i]?.episodeNumber === episodeNumber && watchTime?.[i]?.mediaId === media.id) {
                     currentWatchTime = i;
                 }
@@ -81,7 +86,7 @@ const Watch: NextPage<Props> = ({ episodeNumber, episodeSelector, episodes, medi
                     mediaId: media.id,
                     coverImage: media.coverImage ?? "",
                     title: media.title,
-                    duration: Number(playerRef.current?.style.getPropertyValue("--media-duration")) ?? 0,
+                    duration: playerRef.current?.style.getPropertyValue("--media-duration") ?? 0,
                     watchId,
                     providerId: provider,
                     subDub
@@ -89,9 +94,15 @@ const Watch: NextPage<Props> = ({ episodeNumber, episodeSelector, episodes, medi
 
                 currentWatchTime = watchTime?.length;
 
-                watchTime?.push(newWatchTime);
+                // Move it to the front
+                watchTime?.unshift(newWatchTime);
             } else {
                 if (currentTime != 0) {
+                    // Move to the front
+                    const temp = watchTime[currentWatchTime];
+                    watchTime?.splice(currentWatchTime, 1);
+                    temp ? watchTime?.unshift(temp) : null;
+
                     Object.assign(watchTime?.[currentWatchTime] ?? {}, { currentTime });
                     Object.assign(watchTime?.[currentWatchTime] ?? {}, { duration: playerRef.current?.style.getPropertyValue("--media-duration") ?? 0 });
                 }

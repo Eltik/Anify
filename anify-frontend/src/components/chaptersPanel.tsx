@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 export function ChaptersPanel({ contentSelector, showChapters }: { contentSelector: { title: string, number: number, length: string, url: string, selected: boolean }[], showChapters: boolean }) {
@@ -48,16 +49,15 @@ export function ChaptersPanel({ contentSelector, showChapters }: { contentSelect
             {contentSelector.map((el, i: number) => {
                 if (i < minChapters || i >= maxChapters) return null;
                 return (
-                    <div key={i} className={`chapterItem ${selectedChapter == i ? "active" : ""} cursor-pointer`} onClick={() => {
+                    <Link key={i} href={`${el.url ?? ""}`} className={`chapterItem ${selectedChapter === i ? "active" : ""} cursor-pointer`} onClick={() => {
                         setSelectedChapter(i)
-                        window.location.href = (el.url ?? "");
                     }}>
                         <h4 className="w-[42px] h-[52px] flex justify-center pt-[8px] font-normal text-zinc-500 text-sm pr-2">{el.number}</h4>
                         <div className="flex flex-col">
                             <h4 className="font-medium text-white text-base line-clamp-1">{el.title}</h4>
                             <h4 className="text-[#8a8a8a] font-normal text-sm">{el.length}</h4>
                         </div>
-                    </div>
+                    </Link>
                 )
             })}
 
