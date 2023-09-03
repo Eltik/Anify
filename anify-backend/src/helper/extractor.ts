@@ -651,7 +651,7 @@ export default class Extractor {
                     const url = hlsURL.slice(0, index);
 
                     result.sources.push({
-                        url: url + "/" + res.split("\n")[1],
+                        url: url + (res.split("\n")[1]?.startsWith("/") ? "" : "/") + res.split("\n")[1],
                         quality: quality + "p",
                     });
                 });
@@ -803,7 +803,7 @@ export default class Extractor {
                     const url = hlsURL.slice(0, index);
 
                     result.sources.push({
-                        url: url + "/" + res.split("\n")[1],
+                        url: url + (res.split("\n")[1]?.startsWith("/") ? "" : "/") + res.split("\n")[1],
                         quality: quality + "p",
                     });
                 });
@@ -955,7 +955,7 @@ export default class Extractor {
                     const url = hlsURL.slice(0, index);
 
                     result.sources.push({
-                        url: url + "/" + res.split("\n")[1],
+                        url: url + (res.split("\n")[1]?.startsWith("/") ? "" : "/") + res.split("\n")[1],
                         quality: quality + "p",
                     });
                 });
