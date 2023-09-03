@@ -648,7 +648,7 @@ export default class Extractor {
                 resolutions?.forEach((res: string) => {
                     const index = hlsURL.lastIndexOf("/");
                     const quality = res.split("\n")[0].split("x")[1].split(",")[0];
-                    const url = hlsURL.slice(0, index);
+                    const url = new URL(hlsURL.slice(0, index)).origin;
 
                     result.sources.push({
                         url: url + (res.split("\n")[1]?.startsWith("/") ? "" : "/") + res.split("\n")[1],
@@ -800,7 +800,7 @@ export default class Extractor {
                 resolutions?.forEach((res: string) => {
                     const index = hlsURL.lastIndexOf("/");
                     const quality = res.split("\n")[0].split("x")[1].split(",")[0];
-                    const url = hlsURL.slice(0, index);
+                    const url = new URL(hlsURL.slice(0, index)).origin;
 
                     result.sources.push({
                         url: url + (res.split("\n")[1]?.startsWith("/") ? "" : "/") + res.split("\n")[1],
@@ -952,7 +952,7 @@ export default class Extractor {
                 resolutions?.forEach((res: string) => {
                     const index = hlsURL.lastIndexOf("/");
                     const quality = res.split("\n")[0].split("x")[1].split(",")[0];
-                    const url = hlsURL.slice(0, index);
+                    const url = new URL(hlsURL.slice(0, index)).origin;
 
                     result.sources.push({
                         url: url + (res.split("\n")[1]?.startsWith("/") ? "" : "/") + res.split("\n")[1],

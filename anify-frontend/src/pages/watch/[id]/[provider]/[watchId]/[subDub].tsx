@@ -890,8 +890,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     for (let i = 0; i < sources?.sources.length; i++) {
         if (sources.headers && Object.keys(sources.headers).length > 0) {
+            //console.log(`${String(env.M3U8_PROXY)}/proxy/m3u8/${encodeURIComponent(String(sources.sources[i]?.url))}/${encodeURIComponent(JSON.stringify(sources.headers))}`);
             Object.assign(sources.sources[i] ?? {}, { url: `${String(env.M3U8_PROXY)}/proxy/m3u8/${encodeURIComponent(String(sources.sources[i]?.url))}/${encodeURIComponent(JSON.stringify(sources.headers))}` })
-            //console.log(`${String(env.M3U8_PROXY)}/proxy/m3u8/${encodeURIComponent(String(sources.sources[i]?.url))}/${encodeURIComponent(JSON.stringify(sources.headers))}`)
         }
     }
 
