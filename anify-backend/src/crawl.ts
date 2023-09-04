@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -14,7 +15,7 @@ import { generateQueryBuilder } from "./helper/generator";
 import { Anime, Manga, Type } from "./mapping";
 import AniList from "./mapping/impl/information/anilist";
 
-const type: Type = Type.ANIME;
+const type: Type = Type.MANGA;
 
 (async () => {
     await fetchCorsProxies();
@@ -24,8 +25,9 @@ const type: Type = Type.ANIME;
 
     const aniList = new AniList();
     //const ids: string[] = await getPopularIds();
+    // @ts-ignore
     const ids: string[] = type === Type.ANIME ? await getAnimeIDs() : await getMangaIDs();
-    //const ids: string[] = ["108465"];
+    //const ids: string[] = ["85470"];
 
     const idsToRemove: string[] = [];
     const media = await Database.fetchAll(type);

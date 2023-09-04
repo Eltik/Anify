@@ -28,6 +28,7 @@ import Simkl from "./impl/information/simkl";
 import Kass from "./impl/anime/kass";
 import ComicKInfo from "./impl/information/comicK";
 import MangaFox from "./impl/manga/mangafox";
+import VyNovel from "./impl/manga/vynovel";
 
 const ANIME_PROVIDERS: AnimeProvider[] = [new NineAnime(), new GogoAnime(), new Zoro(), new AnimePahe(), new Kass()];
 const animeProviders: Record<string, AnimeProvider> = ANIME_PROVIDERS.reduce((acc, provider) => {
@@ -35,7 +36,7 @@ const animeProviders: Record<string, AnimeProvider> = ANIME_PROVIDERS.reduce((ac
     return acc;
 }, {});
 
-const MANGA_PROVIDERS: MangaProvider[] = [new ComicK(), new MangaDex(), new MangaSee(), new MangaFox(), new NovelBuddy(), new NovelUpdates(), new JNovels(), new ReadLightNovels()];
+const MANGA_PROVIDERS: MangaProvider[] = [new ComicK(), new MangaDex(), new MangaSee(), new MangaFox(), new NovelBuddy(), new NovelUpdates(), new JNovels(), new ReadLightNovels(), new VyNovel()];
 const mangaProviders: Record<string, MangaProvider> = MANGA_PROVIDERS.reduce((acc, provider) => {
     acc[provider.id] = provider;
     return acc;

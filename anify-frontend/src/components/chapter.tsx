@@ -49,7 +49,7 @@ const Chapter = ({ chapter, media, provider, index, subDub }: { chapter: Episode
                         <div>
                             {/*<div className="text-gray-500 text-sm font-medium">{chapter.number ?? index}</div>*/}
                             <button type="button" className="text-sm font-medium text-gray-500 transition-all duration-200 hover:text-white">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" strokeLinecap="round" strokeLinejoin="round" className="">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="">
                                     <path d="M12 17V3"/>
                                     <path d="m6 11 6 6 6-6"/>
                                     <path d="M19 21H5"/>
