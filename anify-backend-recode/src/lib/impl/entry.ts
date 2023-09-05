@@ -2,7 +2,7 @@ import { create } from "../../database/impl/create";
 import { get } from "../../database/impl/get";
 import { Type } from "../../types/enums";
 import { Anime, Manga } from "../../types/types";
-import emitter, { Events } from "../event";
+import emitter, { Events } from "../";
 
 export const createEntry = async (data: { toInsert: Anime | Manga; type: Type }) => {
     const existing = await get(String(data.toInsert.id));

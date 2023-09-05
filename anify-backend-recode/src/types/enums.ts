@@ -24,6 +24,8 @@ export const enum Format {
     UNKNOWN = "UNKNOWN",
 }
 
+export const Formats = [Format.TV, Format.TV_SHORT, Format.MOVIE, Format.SPECIAL, Format.OVA, Format.ONA, Format.MUSIC, Format.MANGA, Format.NOVEL, Format.ONE_SHOT, Format.UNKNOWN];
+
 export const enum Season {
     WINTER = "WINTER",
     SPRING = "SPRING",

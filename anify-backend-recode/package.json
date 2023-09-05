@@ -10,6 +10,7 @@
     "lint": "bun run prettier && bun run eslint"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.1.2",
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",
     "bun-types": "latest",
@@ -22,6 +23,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
     "colors": "^1.4.0",
+    "crypto-js": "^4.1.1",
     "dotenv": "^16.3.1",
     "eventemitter2": "latest"
   }
