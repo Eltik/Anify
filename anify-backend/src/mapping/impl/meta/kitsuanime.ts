@@ -13,12 +13,16 @@ export default class KitsuAnime extends MetaProvider {
         const results: Result[] = [];
 
         const searchUrl = `/anime?filter[text]=${encodeURIComponent(query)}`;
-        const req = await this.request(this.kitsuApiUrl + searchUrl, {
-            headers: {
-                Accept: "application/vnd.api+json",
-                "Content-Type": "application/vnd.api+json",
+        const req = await this.request(
+            this.kitsuApiUrl + searchUrl,
+            {
+                headers: {
+                    Accept: "application/vnd.api+json",
+                    "Content-Type": "application/vnd.api+json",
+                },
             },
-        }).catch((err) => {
+            true
+        ).catch((err) => {
             return null;
         });
         if (!req) {

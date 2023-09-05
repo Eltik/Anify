@@ -13,7 +13,8 @@ export default class MangaFox extends MangaProvider {
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         const results: Result[] = [];
 
-        const data = await (await this.request(`${this.url}/search?title=${query}${year && year != 0 ? `&released=${year}` : ""}`)).text();
+        // &genres=&nogenres=&sort=&stype=1&name=&type=0&author_method=cw&author=&artist_method=cw&artist=&rating_method=eq&rating=&released_method=eq&released=&st=0
+        const data = await (await this.request(`${this.url}/search?title=${encodeURIComponent(query)}&genres=${format === Format.ONE_SHOT ? "26" : ""}&nogenres=&sort=&stype=1&name=&type=0&author_method=cw&author=&artist_method=cw&artist=&rating_method=eq&rating=&released_method=eq&released=${year && year != 0 ? year : ""}&st=0`)).text();
         const $ = load(data);
 
         $("ul.manga-list-4-list li").map((i, el) => {

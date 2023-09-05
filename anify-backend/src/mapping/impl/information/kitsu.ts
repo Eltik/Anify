@@ -21,13 +21,13 @@ export default class Kitsu extends InformationProvider<Anime | Manga, AnimeInfo 
 
         if (!kitsuId) return undefined;
 
-        const kitsuResponse: KitsuResponse = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}`)).json();
+        const kitsuResponse: KitsuResponse = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}`, {}, true)).json();
 
         const attributes = kitsuResponse?.data?.attributes;
 
         if (!attributes) return undefined;
 
-        const kitsuGenre = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}/genres`)).json();
+        const kitsuGenre = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}/genres`, {}, true)).json();
         const genres = kitsuGenre?.data;
 
         const artwork: Artwork[] = [];
@@ -93,7 +93,7 @@ export default class Kitsu extends InformationProvider<Anime | Manga, AnimeInfo 
 
             let req;
             try {
-                req = await this.request(url, { headers });
+                req = await this.request(url, { headers }, true);
             } catch (err) {
                 console.error(`Error fetching ${url}`, err);
                 retries++;
