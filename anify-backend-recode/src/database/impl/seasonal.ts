@@ -10,29 +10,45 @@ export const seasonal = async (trending: Anime[] | Manga[], popular: Anime[] | M
         seasonal: seasonal.map((a) => String(a.id)),
     };
 
-    const trend = await db.query(`
+    const trend = (await db
+        .query(
+            `
         SELECT * FROM ${trending[0].type === Type.ANIME ? "anime" : "manga"}
         WHERE id IN (${ids.trending.map((id) => `'${id}'`).join(", ")})
         ORDER BY title->>'english' ASC
-    `).all() as Anime[] | Manga[];
+    `,
+        )
+        .all()) as Anime[] | Manga[];
 
-    const pop = await db.query(`
+    const pop = (await db
+        .query(
+            `
         SELECT * FROM ${trending[0].type === Type.ANIME ? "anime" : "manga"}
         WHERE id IN (${ids.popular.map((id) => `'${id}'`).join(", ")})
         ORDER BY title->>'english' ASC
-    `).all() as Anime[] | Manga[];
+    `,
+        )
+        .all()) as Anime[] | Manga[];
 
-    const t = await db.query(`
+    const t = (await db
+        .query(
+            `
         SELECT * FROM ${trending[0].type === Type.ANIME ? "anime" : "manga"}
         WHERE id IN (${ids.top.map((id) => `'${id}'`).join(", ")})
         ORDER BY title->>'english' ASC
-    `).all() as Anime[] | Manga[];
+    `,
+        )
+        .all()) as Anime[] | Manga[];
 
-    const season = await db.query(`
+    const season = (await db
+        .query(
+            `
         SELECT * FROM ${trending[0].type === Type.ANIME ? "anime" : "manga"}
         WHERE id IN (${ids.seasonal.map((id) => `'${id}'`).join(", ")})
         ORDER BY title->>'english' ASC
-    `).all() as Anime[] | Manga[];
+    `,
+        )
+        .all()) as Anime[] | Manga[];
 
     trend.map((media) => {
         media.characters = [];

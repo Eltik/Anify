@@ -12,7 +12,7 @@ export const searchAdvanced = async (query: string, type: Type, formats: Format[
             OR title->>'native' LIKE '%${query}%'
             OR synonyms LIKE '%${query}%'
         )
-        ${formats?.length > 0 ? `AND "format" IN (${formats.map(f => `'${f}'`).join(', ')})` : ''}
+        ${formats?.length > 0 ? `AND "format" IN (${formats.map((f) => `'${f}'`).join(", ")})` : ""}
     `;
 
     if (genres && genres.length > 0) {

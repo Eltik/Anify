@@ -1,0 +1,6 @@
+const ANIME_PROVIDERS: any[] = [];
+const MANGA_PROVIDERS: any[] = [];
+const META_PROVIDERS: any[] = [];
+const INFORMATION_PROVIDERS: any[] = [];
+
+export { ANIME_PROVIDERS, MANGA_PROVIDERS, INFORMATION_PROVIDERS, META_PROVIDERS };

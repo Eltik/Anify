@@ -1,111 +1,25 @@
 import colors from "colors";
-import { existsSync, writeFileSync } from "fs";
-import { readFile, writeFile } from "fs/promises";
-import { join } from "path";
+import { isString } from "../../helper";
 import ChunkedExecutor from "../executor";
-import cluster from "node:cluster";
-import { isString } from "..";
-import { ANIME_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS } from "../../mapping";
-import { env } from "../../env";
+import { CORS_PROXIES } from "..";
+import { ANIME_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS } from "../../mappings";
 
-// List of CORS proxies
-export const CORS_PROXIES: string[] = [];
 const toCheck: string[] = [];
-
-export async function fetchCorsProxies(): Promise<string[]> {
-    if (existsSync(join(__dirname, "./goodProxies.json"))) {
-        const BATCH_SIZE = 100;
-
-        const fileContents = await readFile(join(__dirname, "./goodProxies.json"), "utf-8");
-        const proxyData = JSON.parse(fileContents);
-        const totalProxies = proxyData.length;
-        let currentIndex = 0;
-
-        while (currentIndex < totalProxies) {
-            const proxiesToAdd: string[] = [];
-
-            for (let i = 0; i < BATCH_SIZE && currentIndex < totalProxies; i++, currentIndex++) {
-                const proxy = proxyData[currentIndex];
-
-                if (!proxy.startsWith("http")) {
-                    proxiesToAdd.push(`http://${proxy}`);
-                } else {
-                    proxiesToAdd.push(proxy);
-                }
-            }
-
-            if (cluster.isPrimary) console.log(colors.yellow(`Adding ${proxiesToAdd.length} proxies to the list.`));
-
-            CORS_PROXIES.push(...proxiesToAdd);
-        }
-
-        if (cluster.isPrimary) console.log(colors.green("Finished importing proxies."));
-    } else {
-        return [];
-    }
-    return CORS_PROXIES;
-}
-
-export async function scrapeCorsProxies(): Promise<void> {
-    const hits: { ip: string; port: number }[] = [];
-    let cursor: any = null; // Initialize cursor as null
-    const maxRequests = 50;
-    let currentRequest = 0;
-
-    console.log(colors.yellow("Searching for proxies on Censys..."));
-
-    try {
-        do {
-            const data = await search("c7d96235df80ea051e9d57f3ab6d3e4da289fd3b", cursor);
-            if (!data) {
-                break;
-            }
-
-            data.result.hits.filter((hit) => {
-                hit.services.some((service) => {
-                    if (service.extended_service_name === "HTTP" || service.extended_service_name === "HTTPS") {
-                        hits.push({ ip: hit.ip, port: service.port });
-                    }
-                });
-            });
-
-            console.log(colors.gray("Fetched ") + colors.blue(hits.length + "") + colors.gray(" hits so far."));
-
-            cursor = data.result.links.next;
-            currentRequest++;
-
-            // Break the loop if cursor is null or empty string, or maxRequests limit is reached
-            if (cursor === null || cursor === "" || currentRequest >= maxRequests) {
-                console.log(colors.gray("Finished fetching proxies from Censys."));
-
-                await writeFile(join(__dirname, "./proxies.json"), JSON.stringify(hits, null, 4));
-                toCheck.push(...hits.map((hit) => `http://${hit.ip}:${hit.port}`));
-
-                await checkCorsProxies();
-                break;
-            }
-        } while (cursor !== null && cursor !== "" && currentRequest < maxRequests);
-    } catch (error) {
-        // Handle the error if necessary
-        console.error(error);
-    }
-}
 
 export async function checkCorsProxies(): Promise<string[]> {
     const goodIps: string[] = [];
     console.log(colors.yellow("Importing proxies... Please note that reading the proxies file may take a while."));
     if (toCheck.length === 0) {
-        if (existsSync(join(__dirname, "./proxies.json"))) {
+        const file = Bun.file("./proxies.json");
+        if (file) {
             // Check proxies.json
-            const proxies = await readFile(join(__dirname, "./proxies.json"), "utf-8");
-            if (proxies) {
-                for (let i = 0; i < JSON.parse(proxies).length; i++) {
-                    const ip = JSON.parse(proxies)[i].ip;
-                    const port = JSON.parse(proxies)[i].port;
+            const proxies = await file.json();
+            for (let i = 0; i < proxies.length; i++) {
+                const ip = proxies[i].ip;
+                const port = proxies[i].port;
 
-                    const url = `http://${ip}:${port}`;
-                    toCheck.push(url);
-                }
+                const url = `http://${ip}:${port}`;
+                toCheck.push(url);
             }
             console.log(colors.green("Finished importing current proxies."));
         }
@@ -131,7 +45,8 @@ export async function checkCorsProxies(): Promise<string[]> {
         const ips = result.filter(isString);
         goodIps.push(...ips);
         console.log(colors.green(`${ips.length} proxies are good!`));
-        writeFileSync(join(__dirname, "./goodProxies.json"), JSON.stringify(goodIps, null, 4));
+
+        Bun.write("./goodProxies.json", JSON.stringify(goodIps, null, 4));
     };
 
     const executor = new ChunkedExecutor<IP, string | undefined>(ips, chunkSize, makeRequest, perChunkCallback, perResultsCallback);
@@ -143,30 +58,6 @@ export async function checkCorsProxies(): Promise<string[]> {
     toCheck.length = 0;
     CORS_PROXIES.push(...goodIps);
     return goodIps;
-}
-
-async function search(q: string, cursor: string | null = null): Promise<Root | undefined> {
-    const appendCursor = cursor ? `&cursor=${cursor}` : "";
-
-    const url = "/hosts/search?q=" + q + `&per_page=100&virtual_hosts=EXCLUDE` + appendCursor;
-
-    if (!env.CENSYS_ID || !env.CENSYS_SECRET) {
-        console.log(colors.yellow("CENSYS_ID or CENSYS_SECRET not found in .env file. Please add them to scrape CORS proxies."));
-        return undefined;
-    }
-
-    const apiID = env.CENSYS_ID ?? "d973cf60-4ce4-4746-962b-815ddfdebf80",
-        apiSecret = env.CENSYS_SECRET ?? "s6EUuA4Sfaajd8jDBJ17b4DaoPofjDe6";
-
-    const auth = "Basic " + Buffer.from(apiID + ":" + apiSecret).toString("base64");
-    const headers = { Authorization: auth };
-
-    const data = await (
-        await fetch(`https://search.censys.io/api/v2${url}`, {
-            headers: headers,
-        })
-    ).json();
-    return data;
 }
 
 async function makeRequest(ip: IP): Promise<string | undefined> {
@@ -227,7 +118,7 @@ async function makeRequest(ip: IP): Promise<string | undefined> {
 
                     provider.customProxy = `http://${ip.ip}:${ip.port}`;
 
-                    const providerResponse = await provider.search("Mushoku Tensei").catch((err) => {
+                    const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
                         return undefined;
                     });
 
@@ -253,7 +144,7 @@ async function makeRequest(ip: IP): Promise<string | undefined> {
 
                     provider.customProxy = `http://${ip.ip}:${ip.port}`;
 
-                    const providerResponse = await provider.search("Mushoku Tensei").catch((err) => {
+                    const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
                         return undefined;
                     });
 
@@ -278,7 +169,7 @@ async function makeRequest(ip: IP): Promise<string | undefined> {
 
                     provider.customProxy = `http://${ip.ip}:${ip.port}`;
 
-                    const providerResponse = await provider.search("Mushoku Tensei").catch((err) => {
+                    const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
                         return undefined;
                     });
 
@@ -307,74 +198,6 @@ async function makeRequest(ip: IP): Promise<string | undefined> {
     } catch (error) {
         return undefined;
     }
-}
-
-interface Root {
-    code: number;
-    status: string;
-    result: Result;
-}
-
-interface Result {
-    query: string;
-    total: number;
-    duration: number;
-    hits: Hit[];
-    links: Links;
-}
-
-interface Hit {
-    ip: string;
-    services: Service[];
-    location: Location;
-    autonomous_system: AutonomousSystem;
-    last_updated_at: string;
-    dns?: Dns;
-}
-
-interface Service {
-    port: number;
-    service_name: string;
-    extended_service_name: string;
-    transport_protocol: string;
-    certificate?: string;
-}
-
-interface Location {
-    continent: string;
-    country: string;
-    country_code: string;
-    city: string;
-    postal_code?: string;
-    timezone: string;
-    coordinates: Coordinates;
-    province?: string;
-}
-
-interface Coordinates {
-    latitude: number;
-    longitude: number;
-}
-
-interface AutonomousSystem {
-    asn: number;
-    description: string;
-    bgp_prefix: string;
-    name: string;
-    country_code: string;
-}
-
-interface Dns {
-    reverse_dns: ReverseDns;
-}
-
-interface ReverseDns {
-    names: string[];
-}
-
-interface Links {
-    next: string;
-    prev: string;
 }
 
 interface IP {

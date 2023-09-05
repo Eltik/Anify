@@ -2,7 +2,7 @@ import { Database } from "bun:sqlite";
 
 export const db = new Database("db.sqlite");
 
-export const init = async() => {
+export const init = async () => {
     const anime = `
     CREATE TABLE IF NOT EXISTS anime (
         id TEXT PRIMARY KEY,

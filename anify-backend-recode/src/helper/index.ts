@@ -1,3 +1,7 @@
+export function isString(object: unknown): object is string {
+    return typeof object === "string";
+}
+
 export function setIntervalImmediately(func: () => Promise<void>, interval: number) {
     func();
     return setInterval(async () => {
