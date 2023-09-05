@@ -1,4 +1,4 @@
-import QueueExecutor from "@/src/helper/queue";
+import QueueExecutor from "../helper/queue";
 import colors from "colors";
 import { Source } from "../mapping/impl/anime";
 import { loadSkipTimes } from "../lib/skipTimes";

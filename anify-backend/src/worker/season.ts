@@ -1,4 +1,4 @@
-import QueueExecutor from "@/src/helper/queue";
+import QueueExecutor from "../helper/queue";
 import { Format, Type } from "../mapping";
 import { loadSeasonal } from "../lib/season";
 import colors from "colors";

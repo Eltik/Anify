@@ -1,6 +1,6 @@
 import MangaProvider, { Chapter, Page } from ".";
 import { Format, Result } from "../..";
-import { stringSearch } from "@/src/helper";
+import { stringSearch } from "../../../helper";
 import { load } from "cheerio";
 
 export default class MangaSee extends MangaProvider {
@@ -37,7 +37,7 @@ export default class MangaSee extends MangaProvider {
         const $ = load(await data.text());
 
         const mangaId = id.split("/manga/")[1];
-        const contentScript = $("body > script:nth-child(16)").get()[0].children[0];
+        const contentScript = $("body > script:nth-child(16)").get()[0].children[0] as any;
 
         const chaptersData = this.processScriptTagVariable(contentScript["data"], "vm.Chapters = ");
         chaptersData?.map((i: { [x: string]: any }) => {
@@ -59,7 +59,7 @@ export default class MangaSee extends MangaProvider {
 
         const $ = load(await data.text());
 
-        const chapterScript = $("body > script:nth-child(19)").get()[0].children[0];
+        const chapterScript = $("body > script:nth-child(19)").get()[0].children[0] as any;
         const curChapter = this.processScriptTagVariable(chapterScript["data"], "vm.CurChapter = ");
         const imageHost = this.processScriptTagVariable(chapterScript["data"], "vm.CurPathName = ");
         const curChapterLength = Number(curChapter["Page"]);

@@ -1,7 +1,7 @@
-import AniList from "@/src/mapping/impl/information/anilist";
+import AniList from "../../../mapping/impl/information/anilist";
 import { Manga, Type, mangaProviders } from "../../../mapping";
-import Database from "@/src/database";
-import { Chapter } from "@/src/mapping/impl/manga";
+import Database from "../../../database";
+import { Chapter } from "../../../mapping/impl/manga";
 
 export const fetchChapters = async (id: string): Promise<ChapterData[]> => {
     const media = await Database.info(id);

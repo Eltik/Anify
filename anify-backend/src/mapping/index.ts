@@ -34,25 +34,25 @@ const ANIME_PROVIDERS: AnimeProvider[] = [new NineAnime(), new GogoAnime(), new 
 const animeProviders: Record<string, AnimeProvider> = ANIME_PROVIDERS.reduce((acc, provider) => {
     acc[provider.id] = provider;
     return acc;
-}, {});
+}, {} as Record<string, AnimeProvider>);
 
 const MANGA_PROVIDERS: MangaProvider[] = [new ComicK(), new MangaDex(), new MangaSee(), new MangaFox(), new NovelBuddy(), new NovelUpdates(), new JNovels(), new ReadLightNovels(), new VyNovel()];
 const mangaProviders: Record<string, MangaProvider> = MANGA_PROVIDERS.reduce((acc, provider) => {
     acc[provider.id] = provider;
     return acc;
-}, {});
+}, {} as Record<string, MangaProvider>);
 
 const INFORMATION_PROVIDERS: InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>[] = [new AniList(), new MAL(), new Kitsu(), new TVDB(), new Simkl(), new ComicKInfo()];
 const infoProviders: Record<string, InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>> = INFORMATION_PROVIDERS.reduce((acc, provider) => {
     acc[provider.id] = provider;
     return acc;
-}, {});
+}, {} as Record<string, InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>>);
 
 const META_PROVIDERS: MetaProvider[] = [new KitsuAnime(), new KitsuManga(), new TMDB(), new TheTVDB(), new SimklMeta()];
 const metaProviders: Record<string, MetaProvider> = META_PROVIDERS.reduce((acc, provider) => {
     acc[provider.id] = provider;
     return acc;
-}, {});
+}, {} as Record<string, MetaProvider>);
 
 export { ANIME_PROVIDERS, MANGA_PROVIDERS, INFORMATION_PROVIDERS, META_PROVIDERS, animeProviders, mangaProviders, infoProviders, metaProviders };
 

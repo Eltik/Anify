@@ -1,7 +1,6 @@
 import MangaProvider, { Chapter, Page } from ".";
 import { Format, Result } from "../..";
 import { load } from "cheerio";
-import { compareTwoStrings } from "@/src/helper/stringSimilarity";
 
 export default class VyNovel extends MangaProvider {
     override rateLimit = 250;

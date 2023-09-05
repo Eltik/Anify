@@ -56,7 +56,7 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
 
             const averageRunTime = info.averageRuntime;
 
-            const characters: Character[] = (info.characters ?? []).map((character) => {
+            const characters: Character[] = (info.characters ?? []).map((character: any) => {
                 return {
                     name: character.name,
                     image: character.image,
@@ -123,15 +123,15 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
                 status: null,
                 format: Format.UNKNOWN,
                 season: Season.UNKNOWN,
-                synonyms: aliases?.map((alias) => alias.name) ?? [],
+                synonyms: aliases?.map((alias: { name: string }) => alias.name) ?? [],
                 description: null,
                 year: Number(info.year ?? firstAired.getFullYear()) ?? null,
                 totalEpisodes: 0,
-                genres: genres ? genres.map((genre) => genre.name) : [],
+                genres: genres ? genres.map((genre: { name: string }) => genre.name) : [],
                 rating: null,
                 popularity: null,
                 countryOfOrigin: null,
-                tags: info.tags?.map((tag) => tag.name) ?? [],
+                tags: info.tags?.map((tag: { name: string }) => tag.name) ?? [],
                 relations: [],
                 artwork: artworkData as any,
                 characters: characters.slice(0, 10),

@@ -1,4 +1,4 @@
-import QueueExecutor from "@/src/helper/queue";
+import QueueExecutor from "../helper/queue";
 import colors from "colors";
 import { Chapter, Page } from "../mapping/impl/manga";
 import { uploadPages } from "../lib/upload";

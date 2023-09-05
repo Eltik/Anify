@@ -1,4 +1,4 @@
-import { CORS_PROXIES } from "@/src/helper/proxies";
+import { CORS_PROXIES } from "../../helper/proxies";
 import colors from "colors";
 
 export default class Http {

@@ -1,4 +1,4 @@
-import { setIntervalImmediately } from "@/src/helper/index";
+import { setIntervalImmediately } from "./";
 
 export default class QueueExecutor<T> {
     id: string;

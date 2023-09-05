@@ -1,12 +1,9 @@
-import Http from "../request";
-import { load } from "cheerio";
-import vm from "node:vm";
 import AnimeProvider, { Episode, Server, Source, StreamingServers, SubType } from ".";
+import { load } from "cheerio";
 
-import Extractor from "@/src/helper/extractor";
+import Extractor from "../../../helper/extractor";
 import { Format, Formats, type Result } from "../..";
-import { isString } from "node:util";
-import { env } from "@/src/env";
+import { env } from "../../../env";
 
 export default class NineAnime extends AnimeProvider {
     override rateLimit = 250;

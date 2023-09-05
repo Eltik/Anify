@@ -1,4 +1,4 @@
-import { env } from "@/src/env";
+import { env } from "../../../env";
 import InformationProvider, { AnimeInfo, MangaInfo, MediaInfoKeys } from ".";
 import { Anime, Artwork, Format, Manga, Season, Type } from "../..";
 

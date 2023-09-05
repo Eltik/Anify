@@ -66,7 +66,7 @@ export const flushSafely = async () => {
     await importKeys();
 };
 
-export async function checkAPIKey(req, res, next) {
+export async function checkAPIKey(req: any, res: Response, next: () => void) {
     if (shouldUseKeys === "true") {
         try {
             if (req.query.apikey) {
@@ -79,13 +79,14 @@ export async function checkAPIKey(req, res, next) {
                     // Continue processing the request
                     next();
                 } else {
-                    res.json({ error: "Invalid API key." });
+                    return new Response(JSON.stringify({ error: "Invalid API key." }), { status: 401, headers: { "Content-Type": "application/json" } });
                 }
             } else {
-                res.json({ error: "No API key provided." });
+                return new Response(JSON.stringify({ error: "No API key provided." }), { status: 401, headers: { "Content-Type": "application/json" } });
             }
         } catch (err) {
-            res.json({ error: "An unexpected error occurred." });
+            console.error(err);
+            return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500, headers: { "Content-Type": "application/json" } });
         }
     } else {
         next();

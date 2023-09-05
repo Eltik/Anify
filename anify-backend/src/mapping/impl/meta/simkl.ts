@@ -1,6 +1,6 @@
-import { Format, Formats, Result } from "../..";
+import { Format, Result } from "../..";
 import MetaProvider from ".";
-import { env } from "@/src/env";
+import { env } from "../../../env";
 
 export default class SimklMeta extends MetaProvider {
     override rateLimit = 250;

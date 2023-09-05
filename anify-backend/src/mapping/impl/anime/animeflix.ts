@@ -1,7 +1,6 @@
 import AnimeProvider, { Episode, Source, StreamingServers, SubType } from ".";
 import { Format, Result } from "../..";
-import Extractor from "@/src/helper/extractor";
-import * as crypto from "crypto";
+import Extractor from "../../../helper/extractor";
 
 export default class AnimeFlix extends AnimeProvider {
     override rateLimit = 250;
@@ -37,7 +36,7 @@ export default class AnimeFlix extends AnimeProvider {
             return [];
         }
         const data = await request.json();
-        const results: Result[] = data.map((res) => ({
+        const results: Result[] = data.map((res: any) => ({
             id: res.slug,
             title: res.title.userPreferred || res.title.english || res.title.romaji || res.title.native,
             altTitles: [res.title.english, res.title.romaji, res.title.native, res.title.userPreferred].filter(Boolean),
@@ -84,9 +83,9 @@ export default class AnimeFlix extends AnimeProvider {
 
         const [data, dubData] = await Promise.all([dataResponse.json(), dubResponse.json()]);
 
-        const dubNumbers = new Set((dubData?.episodes ?? []).map((dub) => dub.number));
+        const dubNumbers = new Set((dubData?.episodes ?? []).map((dub: any) => dub.number));
 
-        const results: Episode[] = data.episodes.map((res) => ({
+        const results: Episode[] = data.episodes.map((res: any) => ({
             id: `/watch/${id}-episode-${res.number}?server=`,
             img: res.image ?? null,
             isFiller: false,

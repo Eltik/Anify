@@ -1,6 +1,5 @@
-import { wait } from "@/src/helper";
 import MangaProvider, { Chapter, Page } from ".";
-import { Format, Formats, Result } from "../..";
+import { Format, Result } from "../..";
 import { load } from "cheerio";
 
 export default class MangaFox extends MangaProvider {

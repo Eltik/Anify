@@ -1,4 +1,4 @@
-import { wait } from "@/src/helper";
+import { wait } from "../../../helper";
 import MangaProvider, { Chapter, Page } from ".";
 import { Format, Formats, Result } from "../..";
 
@@ -44,7 +44,7 @@ export default class MangaDex extends MangaProvider {
 
             const altTitles: string[] = [];
 
-            attributes.altTitles.map((element, index) => {
+            attributes.altTitles.map((element: { [key: string]: string }, index: number) => {
                 const temp = element;
                 if (temp["ja-ro"] != undefined) {
                     altTitles.push(temp["ja-ro"]);
@@ -62,7 +62,7 @@ export default class MangaDex extends MangaProvider {
 
             const id = manga.id;
             let img = "";
-            relationships.map((element) => {
+            relationships.map((element: { id: string; type: string; related: string; attributes: { [key: string]: string } }) => {
                 if (element.type === "cover_art") {
                     img = `${this.url}/covers/${id}/${element.id}.jpg.512.jpg`;
                 }

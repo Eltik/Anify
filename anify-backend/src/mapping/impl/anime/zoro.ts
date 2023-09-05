@@ -1,7 +1,7 @@
 import AnimeProvider, { Episode, Source, StreamingServers, SubType } from ".";
 import { Format, Formats, Result } from "../..";
 import { load } from "cheerio";
-import Extractor from "@/src/helper/extractor";
+import Extractor from "../../../helper/extractor";
 
 export default class Zoro extends AnimeProvider {
     override rateLimit = 250;

@@ -64,7 +64,7 @@ export default class Kitsu extends InformationProvider<Anime | Manga, AnimeInfo 
             description: attributes.synopsis ?? null,
             year: null,
             totalEpisodes: attributes.episodeCount ?? 0,
-            genres: genres ? genres.map((genre) => genre.attributes.name) : [],
+            genres: genres ? genres.map((genre: any) => genre.attributes.name) : [],
             rating: attributes.averageRating ? Number.parseFloat((Number.parseFloat(attributes.averageRating) / 10).toFixed(2)) : null,
             popularity: null,
             countryOfOrigin: null,

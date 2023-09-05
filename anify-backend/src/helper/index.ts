@@ -27,7 +27,7 @@ export function substringAfter(str: string, toFind: string) {
     return index == -1 ? "" : str.substring(index + toFind.length);
 }
 
-export function sanitizeTitle(title): string {
+export function sanitizeTitle(title: string): string {
     let resTitle = title.replace(/ *(\(dub\)|\(sub\)|\(uncensored\)|\(uncut\)|\(subbed\)|\(dubbed\))/i, "");
     resTitle = resTitle.replace(/ *\([^)]+audio\)/i, "");
     resTitle = resTitle.replace(/ BD( |$)/i, "");
@@ -37,7 +37,7 @@ export function sanitizeTitle(title): string {
     return resTitle;
 }
 
-export function similarity(externalTitle, title, titleArray: string[] = []): { same: boolean; value: number } {
+export function similarity(externalTitle: string, title: string, titleArray: string[] = []): { same: boolean; value: number } {
     if (!title) {
         title = "";
     }
@@ -75,7 +75,7 @@ export function stringSearch(string: string, pattern: string): number {
     return count;
 }
 
-export function setIntervalImmediately(func: () => Promise<void>, interval) {
+export function setIntervalImmediately(func: () => Promise<void>, interval: number) {
     func();
     return setInterval(async () => {
         try {
@@ -87,7 +87,7 @@ export function setIntervalImmediately(func: () => Promise<void>, interval) {
 }
 
 export const slugify = (...args: (string | number)[]): string => {
-    const replaceLoweringCase = (string, [regExp, replacement]) => string.replace(RegExp(regExp, "giu"), replacement);
+    const replaceLoweringCase = (string: string, [regExp, replacement]: any) => string.replace(RegExp(regExp, "giu"), replacement);
 
     let value = args.join(" ");
 

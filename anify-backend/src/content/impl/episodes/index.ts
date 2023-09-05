@@ -1,7 +1,7 @@
-import AniList from "@/src/mapping/impl/information/anilist";
+import AniList from "../../../mapping/impl/information/anilist";
 import { animeProviders, Anime, Type } from "../../../mapping";
 import { Episode } from "../../../mapping/impl/anime";
-import Database from "@/src/database";
+import Database from "../../../database";
 
 export const fetchEpisodes = async (id: string): Promise<EpisodeData[]> => {
     const media = await Database.info(id);

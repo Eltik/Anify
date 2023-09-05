@@ -306,3 +306,7 @@ type FileData = {
     url: string;
     yourfile: boolean;
 };
+
+declare module "stream" {
+    function fromWeb(input: any): Readable;
+}

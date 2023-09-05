@@ -1,6 +1,5 @@
 import { randomUUID } from "crypto";
 import { Anime, Format, Genres, Manga, Type } from "../mapping";
-import cluster from "cluster";
 import { info, media, prisma, recent, search, searchAdvanced, seasonal as seasonalPostgres } from "./postgresql";
 
 export default class Database {
@@ -9,13 +8,11 @@ export default class Database {
     static async initializeDatabase() {
         if (this.type === "postgresql") {
             await prisma.$connect();
-            if (cluster.isPrimary) {
-                await prisma.$executeRaw`CREATE EXTENSION IF NOT EXISTS pg_trgm;`;
-                await prisma.$executeRaw`create or replace function most_similar(text, text[]) returns double precision
-                language sql as $$
-                    select max(similarity($1,x)) from unnest($2) f(x)
-                $$;`;
-            }
+            await prisma.$executeRaw`CREATE EXTENSION IF NOT EXISTS pg_trgm;`;
+            await prisma.$executeRaw`create or replace function most_similar(text, text[]) returns double precision
+            language sql as $$
+                select max(similarity($1,x)) from unnest($2) f(x)
+            $$;`;
         }
     }
 

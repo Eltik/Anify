@@ -18,14 +18,14 @@ if (env.DATABASE_TYPE) {
 if (databaseType === "postgres") {
     const requiredVariables = ["DATABASE_URL"];
     for (const variable of requiredVariables) {
-        if (!env[variable]) {
+        if (!env[variable as keyof typeof env]) {
             throw new Error(colors.red(`Missing environment variable ${variable}`));
         }
     }
 }
 
 for (const variable of recommendedVariables) {
-    if (!env[variable]) {
+    if (!env[variable as keyof typeof env]) {
         console.log(colors.yellow(`WARNING: Enviornment variable ${variable} not found.`));
     }
 }

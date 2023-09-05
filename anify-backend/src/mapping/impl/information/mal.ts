@@ -5,12 +5,6 @@ export default class MAL extends InformationProvider<Anime | Manga, AnimeInfo | 
     override id = "mal";
     override url = "https://myanimelist.net";
 
-    private statusMap = {
-        "not yet aired": MediaStatus.NOT_YET_RELEASED,
-        "currently airing": MediaStatus.RELEASING,
-        "finished airing": MediaStatus.FINISHED,
-    };
-
     override get priorityArea(): MediaInfoKeys[] {
         return [];
     }
@@ -60,7 +54,7 @@ export default class MAL extends InformationProvider<Anime | Manga, AnimeInfo | 
             bannerImage: null,
             color: null,
             totalEpisodes: data.episodes ?? 0,
-            status: data.status ? this.statusMap[(data.status as string).toLowerCase()] : null,
+            status: data.status ? ((data.status as string).toLowerCase() === "not yet aired" ? MediaStatus.NOT_YET_RELEASED : (data.status as string).toLowerCase() === "currently airing" ? MediaStatus.RELEASING : (data.status as string).toLowerCase() === "finished airing" ? MediaStatus.FINISHED : null) : null,
             popularity: data.popularity,
             synonyms: data.title_synonyms?.filter((s) => s?.length) ?? [],
             season: data.season ? ([(data.season as string).toUpperCase()] as unknown as Season) : Season.UNKNOWN,
