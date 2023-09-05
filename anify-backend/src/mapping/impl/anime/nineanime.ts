@@ -11,7 +11,6 @@ export default class NineAnime extends AnimeProvider {
     override url = "https://aniwave.to";
     override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
 
-    private userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.42";
     private resolver: string | undefined = env.NINEANIME_RESOLVER;
     private resolverKey: string | undefined = env.NINEANIME_KEY || `9anime`;
 

@@ -12,7 +12,7 @@
     "rimraf": "^5.0.1",
     "ts-node": "^10.9.1",
     "tslib": "^2.5.3",
-    "typescript": "^4.9.5"
+    "typescript": "^5.2.2"
   },
   "name": "anify-backend",
   "description": "Anify backend",
@@ -22,7 +22,7 @@
   "scripts": {
     "dev": "bun run src/index.ts",
     "crawl": "bun run src/crawl.ts",
-    "start": "bun run dist/index.js",
+    "start": "bun run dist/index.js/index.js",
     "copy-files": "copyfiles -u 1 src/**/*.json dist/",
     "build": "npm run check:env && npm run build:db && npm run lint && npm run build:bun",
     "rebuild": "npm run clean && npm run build:ts",

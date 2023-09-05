@@ -6,6 +6,7 @@
         // enable latest features
         "lib": ["esnext"],
         "module": "esnext",
+        "allowImportingTsExtensions": true,
         "target": "esnext",
 
         // if TS 5.x+

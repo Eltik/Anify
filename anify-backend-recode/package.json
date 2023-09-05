@@ -1,0 +1,27 @@
+{
+  "name": "test",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run dist/index.js",
+    "build": "bun build ./src/index.ts --outdir ./dist --target node",
+    "prettier": "prettier --write .",
+    "eslint": "eslint --ext .ts src/** --fix",
+    "lint": "bunx run prettier && bunx run eslint"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
+    "bun-types": "latest",
+    "eslint": "^8.48.0",
+    "prettier": "^3.0.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.3.1",
+    "eventemitter2": "latest"
+  }
+}
