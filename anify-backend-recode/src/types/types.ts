@@ -99,6 +99,22 @@ export type Manga = {
     characters: Character[];
 };
 
+export type AnimeInfo = Pick<Anime, "title" | "artwork" | "synonyms" | "totalEpisodes" | "currentEpisode" | "bannerImage" | "coverImage" | "color" | "season" | "year" | "status" | "genres" | "description" | "format" | "duration" | "trailer" | "countryOfOrigin" | "tags" | "relations" | "characters"> & {
+    rating: number | null;
+    popularity: number | null;
+};
+
+export type MangaInfo = Pick<Manga, "title" | "artwork" | "synonyms" | "totalChapters" | "bannerImage" | "coverImage" | "color" | "year" | "status" | "genres" | "description" | "format" | "totalVolumes" | "countryOfOrigin" | "tags" | "relations" | "characters"> & {
+    rating: number | null;
+    popularity: number | null;
+};
+
+type SharedKeys<T, U> = {
+    [K in keyof T]: K extends keyof U ? K : never;
+}[keyof T];
+
+export type MediaInfoKeys = SharedKeys<AnimeInfo, MangaInfo>;
+
 export interface Character {
     name: string;
     image: string;

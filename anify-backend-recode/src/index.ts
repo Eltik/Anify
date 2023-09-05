@@ -2,10 +2,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { fetchCorsProxies } from "./proxies/impl/fetchProxies";
-import NineAnime from "./mappings/impl/anime/nineanime";
+import { animeProviders } from "./mappings";
 
 fetchCorsProxies().then(async (_) => {
-    const nineAnime = new NineAnime();
-    const data = await nineAnime.search("Mushoku Tensei");
+    const data = await animeProviders["9anime"].search("Mushoku Tensei");
     console.log(data);
 });
