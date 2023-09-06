@@ -113,12 +113,6 @@ export const create = async (data: Anime | Manga) => {
         });
     }
 
-    const insert = db.prepare(query);
-
-    return new Promise((resolve, reject) => {
-        db.transaction(() => {
-            insert.run(params);
-            resolve(true);
-        });
-    });
+    const insert = await db.prepare(query).run(params);
+    return insert;
 };

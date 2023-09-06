@@ -6,14 +6,28 @@ import { Format, MediaStatus, ProviderType, Season, Type } from "../../types/enu
 import { ANIME_PROVIDERS, INFORMATION_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS, animeProviders, baseProviders, infoProviders, mangaProviders, metaProviders } from "../../mappings";
 import { clean, slugify } from "../../helper/title";
 import { findBestMatch2DArray, similarity } from "../../helper/stringSimilarity";
-import { isString } from "../../helper";
+import { averageMetric, isString } from "../../helper";
 import InformationProvider from "../../mappings/impl/information";
+import { deleteEntry } from "../../database/impl/delete";
 
 export const loadMapping = async (data: { id: string; type: Type }, aniData?: AnimeInfo | MangaInfo | null, retries = 0, media?: Anime | Manga): Promise<Anime[] | Manga[]> => {
     const MIN_MAPPINGS = 3;
     const MAX_RETRIES = 2;
 
-    if (retries > 0) console.log(colors.yellow("Remapping ") + colors.blue(data.id) + colors.yellow(" with retry ") + colors.blue(retries + "") + colors.yellow("..."));
+    if (retries > 0) {
+        console.log(colors.yellow("Remapping ") + colors.blue(data.id) + colors.yellow(" with retry ") + colors.blue(retries + "") + colors.yellow("..."));
+        // Delete entry if exists
+        try {
+            const existing = await get(data.id);
+
+            if (existing) {
+                await deleteEntry(data.id);
+            }
+        } catch (e) {
+            console.error(e);
+            console.log(colors.red("Error while deleting from database."));
+        }
+    }
 
     if (!aniData) {
         try {
@@ -35,6 +49,7 @@ export const loadMapping = async (data: { id: string; type: Type }, aniData?: An
 
     // Map only one media
     if (!aniData) {
+        // TODO: If manga, use base provider for manga. Otherwise, use one for anime.
         aniData = await baseProviders.anilist.getMedia(data.id);
     }
 
@@ -414,6 +429,16 @@ function fillMediaInfo<T extends Anime | Manga, U extends AnimeInfo | MangaInfo>
                     }
                 }
             }
+        }
+
+        // Set averagePopularity and averageRating
+        if (media.rating) {
+            const averageRating = averageMetric(media.rating);
+            media.averageRating = averageRating;
+        }
+        if (media.popularity) {
+            const averagePopularity = averageMetric(media.popularity);
+            media.averagePopularity = averagePopularity;
         }
 
         return media;
