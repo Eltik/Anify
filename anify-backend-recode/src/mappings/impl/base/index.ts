@@ -9,6 +9,10 @@ export default abstract class BaseProvider {
     public providerType: ProviderType = ProviderType.BASE;
     public customProxy: string | undefined;
 
+    async search(query: string, type: Type, formats: Format[], page: number, perPage: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
+        return undefined;
+    }
+
     async searchAdvanced(query: string, type: Type, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = [], year = 0, tags: string[] = [], tagsExcluded: string[] = []): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         return undefined;
     }

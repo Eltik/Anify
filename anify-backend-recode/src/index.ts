@@ -2,20 +2,15 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { fetchCorsProxies } from "./proxies/impl/fetchProxies";
-import { loadMapping } from "./lib/impl/mappings";
-import { Type } from "./types/enums";
+import { MediaStatus } from "./types/enums";
 import { init } from "./database";
 import emitter, { Events } from "./lib";
 import { get } from "./database/impl/get";
 import queues from "./worker";
-import { deleteEntry } from "./database/impl/delete";
-import { mangaProviders } from "./mappings";
+import { start } from "./server";
 
 before().then(async (_) => {
-    if (await get("132182")) await deleteEntry("132182");
-    await loadMapping({ id: "132182", type: Type.MANGA }).then(console.log);
-
-    //mangaProviders.mangasee.fetchPages("/read-online/Mushoku-Tensei-Isekai-Ittara-Honki-Dasu-chapter-1").then(console.log);
+    await start();
 });
 
 async function before() {
@@ -31,6 +26,16 @@ async function before() {
         }
     });
 
+    emitter.on(Events.COMPLETED_SEARCH_LOAD, (data) => {
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].status === MediaStatus.NOT_YET_RELEASED) {
+                continue;
+            }
+            queues.mappingQueue.add({ id: data[i].id, type: data[i].type });
+        }
+    });
+
     queues.mappingQueue.start();
     queues.createEntry.start();
+    queues.searchQueue.start();
 }

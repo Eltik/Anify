@@ -8,6 +8,223 @@ export default class AniListBase extends BaseProvider {
 
     private api = "https://graphql.anilist.co";
 
+    override async search(query: string, type: Type, formats: Format[], page: number, perPage: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
+        const aniListArgs: { query: string; variables: { [key: string]: any } } = {
+            query: `
+            query ($page: Int, $perPage: Int, $search: String, $type: MediaType, $format: [MediaFormat]) {
+                Page(page: $page, perPage: $perPage) {
+                    pageInfo {
+                        total
+                        currentPage
+                        lastPage
+                        hasNextPage
+                        perPage
+                    }
+                    media(type: $type, format_in: $format, search: $search) {
+                        ${this.query}
+                    }
+                }
+            }
+            `,
+            variables: {
+                search: query,
+                type: type,
+                format: formats,
+                page: page,
+                perPage: perPage,
+            },
+        };
+
+        const req = await this.request(
+            this.api,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    origin: "graphql.anilist.co",
+                },
+                body: JSON.stringify(aniListArgs),
+            },
+            true,
+        );
+        const json = await req?.json();
+        const media = json.data.Page.media;
+
+        if (type === Type.ANIME) {
+            return media.map((data: Media) => {
+                const artwork: Artwork[] = [];
+
+                if (data.coverImage.large)
+                    artwork.push({
+                        type: "poster",
+                        img: data.coverImage.large,
+                        providerId: this.id,
+                    });
+                if (data.coverImage.extraLarge)
+                    artwork.push({
+                        type: "poster",
+                        img: data.coverImage.extraLarge,
+                        providerId: this.id,
+                    });
+                if (data.bannerImage)
+                    artwork.push({
+                        type: "banner",
+                        img: data.bannerImage,
+                        providerId: this.id,
+                    });
+
+                const characters: Character[] = [];
+                const relations: Relations[] = [];
+
+                for (const character of data.characters.edges) {
+                    if (characters.length > 10) break;
+                    const aliases: string[] = [];
+
+                    for (const alias of character.node.name.alternative) {
+                        aliases.push(alias);
+                    }
+                    aliases.push(character.node.name.full);
+
+                    characters.push({
+                        voiceActor: {
+                            name: character.voiceActors[0]?.name?.full ?? null,
+                            image: character.voiceActors[0]?.image?.large ?? null,
+                        },
+                        image: character.node.image.large,
+                        name: character.node.name.full,
+                    });
+                }
+
+                for (const relation of data.relations.edges) {
+                    relations.push({
+                        id: String(relation.node.id),
+                        format: relation.node.format,
+                        relationType: relation.relationType,
+                        title: relation.node.title,
+                        type: relation.node.type,
+                    });
+                }
+
+                return {
+                    id: String(data.id),
+                    title: {
+                        english: data.title.english ?? null,
+                        romaji: data.title.romaji ?? null,
+                        native: data.title.native ?? null,
+                    },
+                    trailer: null,
+                    currentEpisode: data.status === MediaStatus.FINISHED || data.status === MediaStatus.CANCELLED ? data.episodes ?? 0 : 0,
+                    duration: data.duration ?? null,
+                    coverImage: data.coverImage.extraLarge ?? null,
+                    bannerImage: data.bannerImage ?? null,
+                    popularity: Number(data.popularity),
+                    synonyms: data.synonyms ?? [],
+                    totalEpisodes: data.episodes ?? 0,
+                    color: null,
+                    status: data.status,
+                    season: data.season as Season,
+                    genres: (data.genres as Genres[]) ?? [],
+                    rating: data.meanScore ? data.meanScore / 10 : null,
+                    description: data.description ?? null,
+                    format: data.format,
+                    year: data.seasonYear ?? data.startDate?.year ?? null,
+                    type: data.type,
+                    countryOfOrigin: data.countryOfOrigin ?? null,
+                    tags: data.tags.map((tag) => {
+                        return tag.name;
+                    }),
+                    artwork: artwork,
+                    relations: relations,
+                    characters: characters,
+                } as AnimeInfo;
+            });
+        } else {
+            return media.map((data: Media) => {
+                const artwork: Artwork[] = [];
+
+                if (data.coverImage.large)
+                    artwork.push({
+                        type: "poster",
+                        img: data.coverImage.large,
+                        providerId: this.id,
+                    });
+                if (data.coverImage.extraLarge)
+                    artwork.push({
+                        type: "poster",
+                        img: data.coverImage.extraLarge,
+                        providerId: this.id,
+                    });
+                if (data.bannerImage)
+                    artwork.push({
+                        type: "banner",
+                        img: data.bannerImage,
+                        providerId: this.id,
+                    });
+
+                const characters: Character[] = [];
+                const relations: Relations[] = [];
+
+                for (const character of data.characters.edges) {
+                    if (characters.length > 10) break;
+                    const aliases: string[] = [];
+
+                    for (const alias of character.node.name.alternative) {
+                        aliases.push(alias);
+                    }
+                    aliases.push(character.node.name.full);
+
+                    characters.push({
+                        voiceActor: {
+                            name: character.voiceActors[0]?.name?.full ?? null,
+                            image: character.voiceActors[0]?.image?.large ?? null,
+                        },
+                        image: character.node.image.large,
+                        name: character.node.name.full,
+                    });
+                }
+
+                for (const relation of data.relations.edges) {
+                    relations.push({
+                        id: String(relation.node.id),
+                        format: relation.node.format,
+                        relationType: relation.relationType,
+                        title: relation.node.title,
+                        type: relation.node.type,
+                    });
+                }
+
+                return {
+                    id: String(data.id),
+                    title: {
+                        english: data.title.english ?? null,
+                        romaji: data.title.romaji ?? null,
+                        native: data.title.native ?? null,
+                    },
+                    coverImage: data.coverImage.extraLarge ?? null,
+                    bannerImage: data.bannerImage ?? null,
+                    popularity: Number(data.popularity),
+                    synonyms: data.synonyms ?? [],
+                    totalChapters: data.chapters ?? 0,
+                    totalVolumes: data.volumes ?? 0,
+                    color: null,
+                    status: data.status,
+                    genres: (data.genres as Genres[]) ?? [],
+                    rating: data.meanScore ? data.meanScore / 10 : null,
+                    description: data.description ?? null,
+                    format: data.format,
+                    year: data.seasonYear ?? data.startDate?.year ?? null,
+                    type: data.type,
+                    countryOfOrigin: data.countryOfOrigin ?? null,
+                    tags: data.tags.map((tag) => tag.name),
+                    artwork: artwork,
+                    characters: characters,
+                    relations: relations,
+                } as MangaInfo;
+            });
+        }
+    }
+
     override async searchAdvanced(query: string, type: Type, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = [], year = 0, tags: string[] = [], tagsExcluded: string[] = []): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         const aniListArgs: { query: string; variables: { [key: string]: any } } = {
             query: `
