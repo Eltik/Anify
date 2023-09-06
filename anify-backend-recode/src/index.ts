@@ -9,11 +9,13 @@ import emitter, { Events } from "./lib";
 import { get } from "./database/impl/get";
 import queues from "./worker";
 import { deleteEntry } from "./database/impl/delete";
+import { mangaProviders } from "./mappings";
 
 before().then(async (_) => {
-    if (await get("147103")) await deleteEntry("147103");
+    if (await get("132182")) await deleteEntry("132182");
+    await loadMapping({ id: "132182", type: Type.MANGA }).then(console.log);
 
-    await loadMapping({ id: "147103", type: Type.ANIME }).then(console.log);
+    //mangaProviders.mangasee.fetchPages("/read-online/Mushoku-Tensei-Isekai-Ittara-Honki-Dasu-chapter-1").then(console.log);
 });
 
 async function before() {

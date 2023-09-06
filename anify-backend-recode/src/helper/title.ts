@@ -103,3 +103,19 @@ export const slugify = (...args: (string | number)[]): string => {
         .replace(/[^a-z0-9 ]/g, "-")
         .replace(/\s+/g, "-");
 };
+
+export function stringSearch(string: string, pattern: string): number {
+    let count = 0;
+    string = string.toLowerCase();
+    pattern = pattern.toLowerCase();
+    string = string.replace(/[^a-zA-Z0-9 -]/g, "");
+    pattern = pattern.replace(/[^a-zA-Z0-9 -]/g, "");
+
+    for (let i = 0; i < string.length; i++) {
+        for (let j = 0; j < pattern.length; j++) {
+            if (pattern[j] !== string[i + j]) break;
+            if (j === pattern.length - 1) count++;
+        }
+    }
+    return count;
+}

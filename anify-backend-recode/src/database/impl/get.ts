@@ -30,6 +30,7 @@ export const get = async (id: string): Promise<Anime | Manga | undefined> => {
         try {
             Object.assign(anime, {
                 title: JSON.parse((anime as any).title),
+                season: (anime as any).season.replace(/"/g, ""),
                 mappings: JSON.parse((anime as any).mappings),
                 synonyms: JSON.parse((anime as any).synonyms),
                 rating: JSON.parse((anime as any).rating),

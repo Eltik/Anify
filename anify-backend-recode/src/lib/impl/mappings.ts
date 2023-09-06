@@ -170,7 +170,7 @@ export const map = async (type: Type, formats: Format[], aniData: AnimeInfo | Ma
 
         const providerTitles = providerData.map((m: Result) => {
             const titles = [m.title, ...(m.altTitles ?? [])];
-            return titles;
+            return titles.filter(isString);
         });
 
         // If there are no results, skip
