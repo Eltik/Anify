@@ -51,15 +51,135 @@ export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: Ani
         .all()) as Anime[] | Manga[];
 
     trend.map((media) => {
+        if (media.type === Type.ANIME) {
+            Object.assign(media, {
+                title: JSON.parse((media as any).title),
+                mappings: JSON.parse((media as any).mappings),
+                synonyms: JSON.parse((media as any).synonyms),
+                rating: JSON.parse((media as any).rating),
+                popularity: JSON.parse((media as any).popularity),
+                relations: JSON.parse((media as any).relations),
+                genres: JSON.parse((media as any).genres),
+                tags: JSON.parse((media as any).tags),
+                episodes: JSON.parse((media as any).episodes),
+                artwork: JSON.parse((media as any).artwork),
+                characters: JSON.parse((media as any).characters),
+            });
+        } else {
+            Object.assign(media, {
+                title: JSON.parse((media as any).title),
+                mappings: JSON.parse((media as any).mappings),
+                synonyms: JSON.parse((media as any).synonyms),
+                rating: JSON.parse((media as any).rating),
+                popularity: JSON.parse((media as any).popularity),
+                relations: JSON.parse((media as any).relations),
+                genres: JSON.parse((media as any).genres),
+                tags: JSON.parse((media as any).tags),
+                chapters: JSON.parse((media as any).chapters),
+                artwork: JSON.parse((media as any).artwork),
+                characters: JSON.parse((media as any).characters),
+            });
+        }
+
         media.characters = [];
     });
     pop.map((media) => {
+        if (media.type === Type.ANIME) {
+            Object.assign(media, {
+                title: JSON.parse((media as any).title),
+                mappings: JSON.parse((media as any).mappings),
+                synonyms: JSON.parse((media as any).synonyms),
+                rating: JSON.parse((media as any).rating),
+                popularity: JSON.parse((media as any).popularity),
+                relations: JSON.parse((media as any).relations),
+                genres: JSON.parse((media as any).genres),
+                tags: JSON.parse((media as any).tags),
+                episodes: JSON.parse((media as any).episodes),
+                artwork: JSON.parse((media as any).artwork),
+                characters: JSON.parse((media as any).characters),
+            });
+        } else {
+            Object.assign(media, {
+                title: JSON.parse((media as any).title),
+                mappings: JSON.parse((media as any).mappings),
+                synonyms: JSON.parse((media as any).synonyms),
+                rating: JSON.parse((media as any).rating),
+                popularity: JSON.parse((media as any).popularity),
+                relations: JSON.parse((media as any).relations),
+                genres: JSON.parse((media as any).genres),
+                tags: JSON.parse((media as any).tags),
+                chapters: JSON.parse((media as any).chapters),
+                artwork: JSON.parse((media as any).artwork),
+                characters: JSON.parse((media as any).characters),
+            });
+        }
+
         media.characters = [];
     });
     t.map((media) => {
+        if (media.type === Type.ANIME) {
+            Object.assign(media, {
+                title: JSON.parse((media as any).title),
+                mappings: JSON.parse((media as any).mappings),
+                synonyms: JSON.parse((media as any).synonyms),
+                rating: JSON.parse((media as any).rating),
+                popularity: JSON.parse((media as any).popularity),
+                relations: JSON.parse((media as any).relations),
+                genres: JSON.parse((media as any).genres),
+                tags: JSON.parse((media as any).tags),
+                episodes: JSON.parse((media as any).episodes),
+                artwork: JSON.parse((media as any).artwork),
+                characters: JSON.parse((media as any).characters),
+            });
+        } else {
+            Object.assign(media, {
+                title: JSON.parse((media as any).title),
+                mappings: JSON.parse((media as any).mappings),
+                synonyms: JSON.parse((media as any).synonyms),
+                rating: JSON.parse((media as any).rating),
+                popularity: JSON.parse((media as any).popularity),
+                relations: JSON.parse((media as any).relations),
+                genres: JSON.parse((media as any).genres),
+                tags: JSON.parse((media as any).tags),
+                chapters: JSON.parse((media as any).chapters),
+                artwork: JSON.parse((media as any).artwork),
+                characters: JSON.parse((media as any).characters),
+            });
+        }
+
         media.characters = [];
     });
     season.map((media) => {
+        if (media.type === Type.ANIME) {
+            Object.assign(media, {
+                title: JSON.parse((media as any).title),
+                mappings: JSON.parse((media as any).mappings),
+                synonyms: JSON.parse((media as any).synonyms),
+                rating: JSON.parse((media as any).rating),
+                popularity: JSON.parse((media as any).popularity),
+                relations: JSON.parse((media as any).relations),
+                genres: JSON.parse((media as any).genres),
+                tags: JSON.parse((media as any).tags),
+                episodes: JSON.parse((media as any).episodes),
+                artwork: JSON.parse((media as any).artwork),
+                characters: JSON.parse((media as any).characters),
+            });
+        } else {
+            Object.assign(media, {
+                title: JSON.parse((media as any).title),
+                mappings: JSON.parse((media as any).mappings),
+                synonyms: JSON.parse((media as any).synonyms),
+                rating: JSON.parse((media as any).rating),
+                popularity: JSON.parse((media as any).popularity),
+                relations: JSON.parse((media as any).relations),
+                genres: JSON.parse((media as any).genres),
+                tags: JSON.parse((media as any).tags),
+                chapters: JSON.parse((media as any).chapters),
+                artwork: JSON.parse((media as any).artwork),
+                characters: JSON.parse((media as any).characters),
+            });
+        }
+
         media.characters = [];
     });
 

@@ -14,7 +14,7 @@ export const createEntry = async (data: { toInsert: Anime | Manga; type: Type })
 
     if (data.type === Type.ANIME) {
         if (Array.isArray((data.toInsert as any).season)) {
-            (data.toInsert as any).season = (data.toInsert as any).season[0];
+            (data.toInsert as any).season = String((data.toInsert as any).season[0]?.trim());
         }
     }
 

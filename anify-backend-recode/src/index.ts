@@ -3,14 +3,15 @@ dotenv.config();
 
 import { fetchCorsProxies } from "./proxies/impl/fetchProxies";
 import { loadMapping } from "./lib/impl/mappings";
-import { Type } from "./types/enums";
+import { Format, Type } from "./types/enums";
 import { init } from "./database";
 import emitter, { Events } from "./lib";
 import { get } from "./database/impl/get";
 import queues from "./worker";
+import { search } from "./database/impl/search";
 
 before().then(async (_) => {
-    await loadMapping({ id: "142598", type: Type.ANIME }).then(console.log);
+    await search("Seven", Type.ANIME, [Format.TV], 1, 10).then(console.log);
 });
 
 async function before() {
