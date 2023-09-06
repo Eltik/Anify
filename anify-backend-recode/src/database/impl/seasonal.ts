@@ -54,6 +54,7 @@ export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: Ani
         if (media.type === Type.ANIME) {
             Object.assign(media, {
                 title: JSON.parse((media as any).title),
+                season: (media as any).season.replace(/"/g, ""),
                 mappings: JSON.parse((media as any).mappings),
                 synonyms: JSON.parse((media as any).synonyms),
                 rating: JSON.parse((media as any).rating),

@@ -32,6 +32,8 @@ export function setIntervalImmediately(func: () => Promise<void>, interval: numb
 export const averageMetric = (object: any) => {
     let average = 0,
         validCount = 0;
+    if (!object) return 0;
+
     for (const [_, v] of Object.entries(object)) {
         if (v && typeof v === "number") {
             average += v;

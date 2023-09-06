@@ -33,9 +33,9 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const formats = type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL];
 
-        const data = await search(query, type.toUpperCase() as Type, formats, 0, 20);
+        const data = await search(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats, 0, 20);
         if (data.length === 0) {
-            queues.searchQueue.add({ type: type.toUpperCase() as Type, query: query, formats: formats });
+            queues.searchQueue.add({ type: (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, query: query, formats: formats });
 
             return new Response(JSON.stringify([]), {
                 status: 200,

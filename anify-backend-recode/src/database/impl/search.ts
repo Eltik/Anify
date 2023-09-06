@@ -22,6 +22,7 @@ export const search = async (query: string, type: Type, formats: Format[], page:
             if (data.type === Type.ANIME) {
                 Object.assign(data, {
                     title: JSON.parse((data as any).title),
+                    season: (data as any).season.replace(/"/g, ""),
                     mappings: JSON.parse((data as any).mappings),
                     synonyms: JSON.parse((data as any).synonyms),
                     rating: JSON.parse((data as any).rating),
