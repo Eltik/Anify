@@ -2,8 +2,11 @@ import { db } from "..";
 import { averageMetric } from "../../helper";
 import { Type } from "../../types/enums";
 import { Anime, Manga } from "../../types/types";
+import { get } from "./get";
 
 export const create = async (data: Anime | Manga) => {
+    if (await get(data.id)) return console.log("Yeah no it exists lol");
+
     const query = `
     INSERT INTO ${data.type === "ANIME" ? "anime" : "manga"} (
         id,

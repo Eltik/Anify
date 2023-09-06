@@ -1,8 +1,8 @@
 import { db } from "..";
 import { Type } from "../../types/enums";
-import { Anime, Manga } from "../../types/types";
+import { Anime, AnimeInfo, Manga, MangaInfo } from "../../types/types";
 
-export const seasonal = async (trending: Anime[] | Manga[], popular: Anime[] | Manga[], top: Anime[] | Manga[], seasonal: Anime[] | Manga[]) => {
+export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: AnimeInfo[] | MangaInfo[], top: AnimeInfo[] | MangaInfo[], seasonal: AnimeInfo[] | MangaInfo[]) => {
     const ids = {
         trending: trending.map((a) => String(a.id)),
         popular: popular.map((a) => String(a.id)),

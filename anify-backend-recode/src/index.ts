@@ -3,12 +3,11 @@ dotenv.config();
 
 import { fetchCorsProxies } from "./proxies/impl/fetchProxies";
 import { loadMapping } from "./lib/impl/mappings";
-import { MediaStatus, Type } from "./types/enums";
+import { Type } from "./types/enums";
 import { init } from "./database";
 import emitter, { Events } from "./lib";
 import { get } from "./database/impl/get";
 import queues from "./worker";
-import { deleteEntry } from "./database/impl/delete";
 
 before().then(async (_) => {
     await loadMapping({ id: "142598", type: Type.ANIME }).then(console.log);

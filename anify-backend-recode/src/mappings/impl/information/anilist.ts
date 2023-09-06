@@ -120,7 +120,7 @@ export default class AniList extends InformationProvider<Anime | Manga, AnimeInf
                         romaji: data.title.romaji ?? null,
                         native: data.title.native ?? null,
                     },
-                    trailer: null,
+                    trailer: data.trailer?.id ? `https://www.youtube.com/watch?v=${data.trailer.id}` : null,
                     currentEpisode: data.status === MediaStatus.FINISHED || data.status === MediaStatus.CANCELLED ? data.episodes ?? 0 : 0,
                     duration: data.duration ?? null,
                     coverImage: data.coverImage.extraLarge ?? null,
@@ -233,7 +233,11 @@ export default class AniList extends InformationProvider<Anime | Manga, AnimeInf
     }
 
     override async info(media: Anime | Manga): Promise<AnimeInfo | MangaInfo | undefined> {
-        const anilistId = media.id;
+        const anilistId = media.mappings.find((data) => {
+            return data.providerId === "anilist";
+        })?.id;
+
+        if (!anilistId) return undefined;
 
         const query = `query ($id: Int) {
             Media (id: $id) {
