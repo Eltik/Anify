@@ -8,6 +8,7 @@ export const enum ProviderType {
     MANGA = "MANGA",
     META = "META",
     INFORMATION = "INFORMATION",
+    BASE = "BASE",
 }
 
 export const enum Format {

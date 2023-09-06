@@ -21,16 +21,8 @@ export type Anime = {
     duration: number | null;
     color: string | null;
     year: number | null;
-    rating: {
-        anilist: number;
-        mal: number;
-        kitsu: number;
-    };
-    popularity: {
-        anilist: number;
-        mal: number;
-        kitsu: number;
-    };
+    rating: { [key: string]: number } | null;
+    popularity: { [key: string]: number } | null;
     averageRating?: number;
     averagePopularity?: number;
     type: Type;
@@ -69,16 +61,8 @@ export type Manga = {
     totalVolumes: number | null;
     color: string | null;
     year: number | null;
-    rating: {
-        anilist: number;
-        mal: number;
-        kitsu: number;
-    };
-    popularity: {
-        anilist: number;
-        mal: number;
-        kitsu: number;
-    };
+    rating: { [key: string]: number } | null;
+    popularity: { [key: string]: number } | null;
     averageRating?: number;
     averagePopularity?: number;
     genres: Genres[];
@@ -99,12 +83,12 @@ export type Manga = {
     characters: Character[];
 };
 
-export type AnimeInfo = Pick<Anime, "title" | "artwork" | "synonyms" | "totalEpisodes" | "currentEpisode" | "bannerImage" | "coverImage" | "color" | "season" | "year" | "status" | "genres" | "description" | "format" | "duration" | "trailer" | "countryOfOrigin" | "tags" | "relations" | "characters"> & {
+export type AnimeInfo = Pick<Anime, "id" | "title" | "artwork" | "synonyms" | "totalEpisodes" | "currentEpisode" | "bannerImage" | "coverImage" | "color" | "season" | "year" | "status" | "genres" | "description" | "format" | "duration" | "trailer" | "countryOfOrigin" | "tags" | "relations" | "characters" | "type"> & {
     rating: number | null;
     popularity: number | null;
 };
 
-export type MangaInfo = Pick<Manga, "title" | "artwork" | "synonyms" | "totalChapters" | "bannerImage" | "coverImage" | "color" | "year" | "status" | "genres" | "description" | "format" | "totalVolumes" | "countryOfOrigin" | "tags" | "relations" | "characters"> & {
+export type MangaInfo = Pick<Manga, "id" | "title" | "artwork" | "synonyms" | "totalChapters" | "bannerImage" | "coverImage" | "color" | "year" | "status" | "genres" | "description" | "format" | "totalVolumes" | "countryOfOrigin" | "tags" | "relations" | "characters" | "type"> & {
     rating: number | null;
     popularity: number | null;
 };

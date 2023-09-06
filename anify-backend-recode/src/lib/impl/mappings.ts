@@ -3,7 +3,7 @@ import { get } from "../../database/impl/get";
 import emitter, { Events } from "..";
 import { Anime, AnimeInfo, Manga, MangaInfo, Result } from "../../types/types";
 import { Format, MediaStatus, ProviderType, Season, Type } from "../../types/enums";
-import { ANIME_PROVIDERS, INFORMATION_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS, animeProviders, infoProviders, mangaProviders, metaProviders } from "../../mappings";
+import { ANIME_PROVIDERS, INFORMATION_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS, animeProviders, baseProviders, infoProviders, mangaProviders, metaProviders } from "../../mappings";
 import { clean, slugify } from "../../helper/title";
 import { findBestMatch2DArray, similarity } from "../../helper/stringSimilarity";
 import { isString } from "../../helper";
@@ -35,7 +35,7 @@ export const loadMapping = async (data: { id: string; type: Type }, aniData?: An
 
     // Map only one media
     if (!aniData) {
-        aniData = await (infoProviders.anilist as any).getMedia(data.id);
+        aniData = await baseProviders.anilist.getMedia(data.id);
     }
 
     if (!aniData) {
@@ -176,10 +176,12 @@ export const map = async (type: Type, formats: Format[], aniData: AnimeInfo | Ma
         const best: Result = providerData[bestMatchIndex.bestMatchIndex];
 
         // Add checks
-        if (best.format != Format.UNKNOWN && (aniData as any)?.format && (aniData as any)?.format != Format.UNKNOWN && best.format != aniData?.format) continue;
-        if (best.year != 0 && (aniData as any)?.year && (aniData as any)?.year != 0 && best.year != (aniData as any)?.year) continue;
+        if (best.format != Format.UNKNOWN && aniData?.format && aniData?.format != Format.UNKNOWN && best.format != aniData?.format) continue;
+        if (best.year != 0 && aniData?.year && aniData?.year != 0 && best.year != aniData?.year) continue;
 
-        const altTitles: any[] = Object.values((aniData as any)?.title).concat(aniData?.synonyms);
+        const altTitles: string[] = Object.values(aniData?.title ?? {})
+            .concat(aniData?.synonyms ?? [])
+            .filter(isString);
 
         const sim = similarity(title, best.title, altTitles);
 
@@ -187,7 +189,7 @@ export const map = async (type: Type, formats: Format[], aniData: AnimeInfo | Ma
         if (mappings.filter((m) => m.data.id === best.id).length > 0) continue;
 
         mappings.push({
-            id: (aniData as any).id,
+            id: aniData?.id ?? "",
             slug: slugify(aniData?.title.english ?? aniData?.title.romaji ?? aniData?.title.native ?? ""),
             data: best,
             similarity: sim.value,
@@ -254,16 +256,8 @@ export async function createMedia(mappings: MappedResult[], type: Type): Promise
                     duration: null,
                     color: null,
                     year: null,
-                    rating: {
-                        anilist: 0,
-                        mal: 0,
-                        kitsu: 0,
-                    },
-                    popularity: {
-                        anilist: 0,
-                        mal: 0,
-                        kitsu: 0,
-                    },
+                    rating: null,
+                    popularity: null,
                     genres: [],
                     format: Format.UNKNOWN,
                     relations: [],
@@ -308,16 +302,8 @@ export async function createMedia(mappings: MappedResult[], type: Type): Promise
                     description: null,
                     color: null,
                     year: null,
-                    rating: {
-                        anilist: 0,
-                        mal: 0,
-                        kitsu: 0,
-                    },
-                    popularity: {
-                        anilist: 0,
-                        mal: 0,
-                        kitsu: 0,
-                    },
+                    rating: null,
+                    popularity: null,
                     genres: [],
                     format: Format.UNKNOWN,
                     relations: [],
@@ -415,6 +401,13 @@ function fillMediaInfo<T extends Anime | Manga, U extends AnimeInfo | MangaInfo>
 
         for (const crossLoad of crossLoadFields) {
             if (info[crossLoad as keyof (AnimeInfo | MangaInfo)]) {
+                if (media[crossLoad as keyof (Anime | Manga)] === null || media[crossLoad as keyof (Anime | Manga)] === undefined) {
+                    (media[crossLoad as keyof (Anime | Manga)] as any) = {};
+
+                    Object.assign(media[crossLoad as keyof (Anime | Manga)] ?? {}, {
+                        [provider.id]: info[crossLoad as keyof (AnimeInfo | MangaInfo)],
+                    });
+                }
                 if (media[crossLoad as keyof (Anime | Manga)] !== null && media[crossLoad as keyof (Anime | Manga)] !== undefined) {
                     if (media[crossLoad as keyof (Anime | Manga)]) {
                         (media[crossLoad as keyof (Anime | Manga)] as any)[provider.id] = info[crossLoad as keyof (AnimeInfo | MangaInfo)] as any;
