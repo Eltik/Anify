@@ -307,14 +307,17 @@ export default class AniList extends InformationProvider<Anime | Manga, AnimeInf
             }
             aliases.push(character.node.name.full);
 
-            characters.push({
-                voiceActor: {
-                    name: character.voiceActors[0]?.name?.full ?? null,
-                    image: character.voiceActors[0]?.image?.large ?? null,
-                },
-                image: character.node.image.large,
-                name: character.node.name.full,
-            });
+            const existingCharacter = media.characters.find((char) => char.name === character.name);
+            if (!existingCharacter) {
+                characters.push({
+                    voiceActor: {
+                        name: character.voiceActors[0]?.name?.full ?? null,
+                        image: character.voiceActors[0]?.image?.large ?? null,
+                    },
+                    image: character.node.image.large,
+                    name: character.node.name.full,
+                });
+            }
         }
 
         for (const relation of data.relations.edges) {

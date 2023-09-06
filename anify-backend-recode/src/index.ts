@@ -3,15 +3,17 @@ dotenv.config();
 
 import { fetchCorsProxies } from "./proxies/impl/fetchProxies";
 import { loadMapping } from "./lib/impl/mappings";
-import { Format, Type } from "./types/enums";
+import { Type } from "./types/enums";
 import { init } from "./database";
 import emitter, { Events } from "./lib";
 import { get } from "./database/impl/get";
 import queues from "./worker";
-import { search } from "./database/impl/search";
+import { deleteEntry } from "./database/impl/delete";
 
 before().then(async (_) => {
-    await search("Seven", Type.ANIME, [Format.TV], 1, 10).then(console.log);
+    if (await get("147103")) await deleteEntry("147103");
+
+    await loadMapping({ id: "147103", type: Type.ANIME }).then(console.log);
 });
 
 async function before() {

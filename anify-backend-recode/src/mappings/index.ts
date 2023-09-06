@@ -9,9 +9,14 @@ import AniListBase from "./impl/base/anilist";
 import InformationProvider from "./impl/information";
 import AniList from "./impl/information/anilist";
 import Kitsu from "./impl/information/kitsu";
+import MAL from "./impl/information/mal";
+import TVDB from "./impl/information/tvdb";
 import MangaProvider from "./impl/manga";
 import MetaProvider from "./impl/meta";
 import AniListMeta from "./impl/meta/anilist";
+import KitsuMeta from "./impl/meta/kitsu";
+import MALMeta from "./impl/meta/mal";
+import TMDB from "./impl/meta/tmdb";
 import TheTVDB from "./impl/meta/tvdb";
 
 const ANIME_PROVIDERS: AnimeProvider[] = [new NineAnime(), new AnimePahe(), new GogoAnime(), new Zoro()];
@@ -32,7 +37,7 @@ const mangaProviders: Record<string, MangaProvider> = MANGA_PROVIDERS.reduce(
     {} as Record<string, MangaProvider>,
 );
 
-const INFORMATION_PROVIDERS: InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>[] = [new AniList(), new Kitsu()];
+const INFORMATION_PROVIDERS: InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>[] = [new AniList(), new Kitsu(), new MAL(), new TVDB()];
 const infoProviders: Record<string, InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>> = INFORMATION_PROVIDERS.reduce(
     (acc, provider) => {
         acc[provider.id] = provider;
@@ -41,7 +46,7 @@ const infoProviders: Record<string, InformationProvider<Anime | Manga, AnimeInfo
     {} as Record<string, InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>>,
 );
 
-const META_PROVIDERS: MetaProvider[] = [new TheTVDB(), new AniListMeta()];
+const META_PROVIDERS: MetaProvider[] = [new TheTVDB(), new AniListMeta(), new MALMeta(), new KitsuMeta(), new TMDB()];
 const metaProviders: Record<string, MetaProvider> = META_PROVIDERS.reduce(
     (acc, provider) => {
         acc[provider.id] = provider;

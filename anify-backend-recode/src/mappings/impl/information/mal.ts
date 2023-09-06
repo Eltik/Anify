@@ -6,6 +6,8 @@ export default class MAL extends InformationProvider<Anime | Manga, AnimeInfo | 
     override id = "mal";
     override url = "https://myanimelist.net";
 
+    private api = "https://api.jikan.moe/v4";
+
     override get priorityArea(): MediaInfoKeys[] {
         return [];
     }
@@ -21,11 +23,15 @@ export default class MAL extends InformationProvider<Anime | Manga, AnimeInfo | 
 
         if (!malId) return undefined;
 
-        const req = await this.request(`https://api.jikan.moe/v4/${media.type.toLowerCase()}/${malId}/full`, {
-            headers: {
-                origin: "https://jikan.moe",
+        const req = await this.request(
+            `${this.api}/${media.type.toLowerCase()}/${malId}/full`,
+            {
+                headers: {
+                    origin: "https://jikan.moe",
+                },
             },
-        });
+            true,
+        );
 
         if (!req.ok) return undefined;
         const jikanResponse = await req.json();
