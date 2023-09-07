@@ -325,7 +325,7 @@ export async function createMedia(mappings: MappedResult[], type: Type): Promise
     return results;
 }
 
-function fillMediaInfo<T extends Anime | Manga, U extends AnimeInfo | MangaInfo>(media: T, info: U, provider: InformationProvider<T, U>): T {
+export function fillMediaInfo<T extends Anime | Manga, U extends AnimeInfo | MangaInfo>(media: T, info: U, provider: InformationProvider<T, U>): T {
     try {
         // Fields that need to be cross loaded. For example, rating which contains Kitsu, AniList, and MAL fields.
         const crossLoadFields: (keyof AnimeInfo | MangaInfo)[] = ["popularity", "rating"];

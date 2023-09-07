@@ -79,7 +79,8 @@ export default class GogoAnime extends AnimeProvider {
                 hasDub: id.includes("-dub"),
             });
         });
-        return episodes;
+
+        return episodes.reverse();
     }
 
     override async fetchSources(id: string, subType = SubType.SUB, server: StreamingServers = StreamingServers.GogoCDN): Promise<Source | undefined> {
