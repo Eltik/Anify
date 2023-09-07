@@ -6,6 +6,9 @@ export default class AniListBase extends BaseProvider {
     override id = "anilist";
     override url = "https://anilist.co";
 
+    override type: Type = Type.ANIME;
+    override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
+
     private api = "https://graphql.anilist.co";
 
     override async search(query: string, type: Type, formats: Format[], page: number, perPage: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {

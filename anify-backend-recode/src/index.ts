@@ -31,7 +31,7 @@ async function before() {
             if (data[i].status === MediaStatus.NOT_YET_RELEASED) {
                 continue;
             }
-            queues.mappingQueue.add({ id: data[i].id, type: data[i].type });
+            queues.mappingQueue.add({ id: data[i].id, type: data[i].type, formats: [data[i].format] });
         }
     });
 

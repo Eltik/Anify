@@ -1,9 +1,9 @@
 import QueueExecutor from "../../lib/executor";
 import { loadMapping } from "../../lib/impl/mappings";
 import colors from "colors";
-import { Type } from "../../types/enums";
+import { Format, Type } from "../../types/enums";
 
-const executor = new QueueExecutor<{ id: string; type: Type }>("mapping-executor")
+const executor = new QueueExecutor<{ id: string; type: Type; formats: Format[] }>("mapping-executor")
     .executor(async (data) => {
         const media = await loadMapping(data);
         return media;

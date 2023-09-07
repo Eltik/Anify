@@ -1,10 +1,13 @@
 import Http from "../../../helper/request";
 import { Format, Genres, ProviderType, Season, Type } from "../../../types/enums";
-import { Anime, AnimeInfo, Manga, MangaInfo } from "../../../types/types";
+import { Anime, AnimeInfo, MangaInfo } from "../../../types/types";
 
 export default abstract class BaseProvider {
     abstract id: string;
     abstract url: string;
+
+    abstract type: Type;
+    abstract formats: Format[];
 
     public providerType: ProviderType = ProviderType.BASE;
     public customProxy: string | undefined;

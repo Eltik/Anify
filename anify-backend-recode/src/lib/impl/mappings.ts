@@ -3,71 +3,48 @@ import { get } from "../../database/impl/get";
 import emitter, { Events } from "..";
 import { Anime, AnimeInfo, Manga, MangaInfo, Result } from "../../types/types";
 import { Format, MediaStatus, ProviderType, Season, Type } from "../../types/enums";
-import { ANIME_PROVIDERS, INFORMATION_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS, animeProviders, baseProviders, infoProviders, mangaProviders, metaProviders } from "../../mappings";
+import { ANIME_PROVIDERS, BASE_PROVIDERS, INFORMATION_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS, animeProviders, baseProviders, infoProviders, mangaProviders, metaProviders } from "../../mappings";
 import { clean, slugify } from "../../helper/title";
 import { findBestMatch2DArray, similarity } from "../../helper/stringSimilarity";
 import { averageMetric, isString } from "../../helper";
 import InformationProvider from "../../mappings/impl/information";
-import { deleteEntry } from "../../database/impl/delete";
 
-export const loadMapping = async (data: { id: string; type: Type }, aniData?: AnimeInfo | MangaInfo | null, retries = 0, media?: Anime | Manga): Promise<Anime[] | Manga[]> => {
-    const MIN_MAPPINGS = 3;
-    const MAX_RETRIES = 2;
+export const loadMapping = async (data: { id: string; type: Type; formats: Format[] }): Promise<Anime[] | Manga[]> => {
+    try {
+        // First check if exists in database
+        const existing = await get(data.id);
 
-    if (retries > 0) {
-        console.log(colors.yellow("Remapping ") + colors.blue(data.id) + colors.yellow(" with retry ") + colors.blue(retries + "") + colors.yellow("..."));
-        // Delete entry if exists
-        try {
-            const existing = await get(data.id);
-
-            if (existing) {
-                await deleteEntry(data.id);
-            }
-        } catch (e) {
-            console.error(e);
-            console.log(colors.red("Error while deleting from database."));
+        if (existing) {
+            // If it does, emit the event and return
+            await emitter.emitAsync(Events.COMPLETED_MAPPING_LOAD, [existing]);
+            return [existing] as Anime[] | Manga[];
         }
-    }
-
-    if (!aniData) {
-        try {
-            // First check if exists in database
-            const existing = await get(data.id);
-
-            if (existing) {
-                // If it does, emit the event and return
-                await emitter.emitAsync(Events.COMPLETED_MAPPING_LOAD, [existing]);
-                return [existing] as Anime[] | Manga[];
-            }
-        } catch (e) {
-            console.error(e);
-            console.log(colors.red("Error while fetching from database."));
-        }
+    } catch (e) {
+        console.error(e);
+        console.log(colors.red("Error while fetching from database."));
     }
 
     console.log(colors.gray("Loading mapping for ") + colors.blue(data.id) + colors.gray("..."));
 
     // Map only one media
-    if (!aniData) {
-        // TODO: If manga, use base provider for manga. Otherwise, use one for anime.
-        aniData = await baseProviders.anilist.getMedia(data.id);
-    }
+    //const baseData = await baseProviders.anilist.getMedia(data.id);
+    const baseData = await BASE_PROVIDERS.map((provider) => {
+        if (provider.type === data.type && provider.formats?.includes(data.formats[0])) {
+            return provider.getMedia(data.id);
+        }
+    })[0];
 
-    if (!aniData) {
+    if (!baseData) {
         await emitter.emitAsync(Events.COMPLETED_MAPPING_LOAD, []);
         return [];
     }
 
-    if ((aniData as any).isAdult) {
-        console.log(colors.red("Media is adult. Skipping..."));
-        return [];
-    }
-    if (aniData.status === MediaStatus.NOT_YET_RELEASED) {
+    if (baseData.status === MediaStatus.NOT_YET_RELEASED) {
         console.log(colors.red("Media is not yet released. Skipping..."));
         return [];
     }
 
-    const result = await map((aniData as any)?.type, [aniData?.format!], aniData, media);
+    const result = await map(baseData.type, [baseData.format], baseData);
 
     // Only return if the ID matches the one we're looking for
     // If it isn't, we don't want to return.
@@ -75,11 +52,6 @@ export const loadMapping = async (data: { id: string; type: Type }, aniData?: An
         if (String(result[i].id) === String(data.id)) {
             console.log(colors.gray("Found mapping for ") + colors.blue(data.id) + colors.gray(".") + colors.gray(" Saving..."));
             await emitter.emitAsync(Events.COMPLETED_MAPPING_LOAD, [result[i]]);
-
-            // Only return if anime or manga mappings are greater than MIN_MAPPINGS.
-            const mappings = result[i].mappings.filter((item) => item.providerType === ProviderType.ANIME || item.providerType === ProviderType.MANGA);
-
-            if (mappings.length < MIN_MAPPINGS && retries < MAX_RETRIES) return loadMapping(data, aniData, retries + 1, result[i]);
 
             return [result[i]] as Anime[] | Manga[];
         }
@@ -90,10 +62,10 @@ export const loadMapping = async (data: { id: string; type: Type }, aniData?: An
 };
 
 // Map and insert a mapping into the database
-export const insertMapping = async (data: { id: string; type: Type }, aniData: AnimeInfo | MangaInfo | undefined) => {
-    if ((aniData as any).isAdult) return [];
+export const insertMapping = async (data: { id: string; type: Type }, baseData: AnimeInfo | MangaInfo | undefined) => {
+    if (!baseData || (baseData as any).isAdult) return [];
 
-    const result = await map((aniData as any)?.type, [aniData?.format!], aniData);
+    const result = await map(baseData.type, [baseData.format], baseData);
 
     // Only return if the ID matches the one we're looking for
     // If it isn't, we don't want to return.
@@ -110,37 +82,22 @@ export const insertMapping = async (data: { id: string; type: Type }, aniData: A
 };
 
 // Map a media to AniList
-export const map = async (type: Type, formats: Format[], aniData: AnimeInfo | MangaInfo | undefined, media?: Anime | Manga): Promise<Anime[] | Manga[]> => {
+export const map = async (type: Type, formats: Format[], aniData: AnimeInfo | MangaInfo | undefined): Promise<Anime[] | Manga[]> => {
     const providers = type === Type.ANIME ? ANIME_PROVIDERS : MANGA_PROVIDERS;
     providers.push(...(META_PROVIDERS as any));
 
-    if (media) {
-        aniData?.synonyms?.push(...media.synonyms);
-        aniData?.synonyms?.push(...(media.title.english ? [media.title.english] : []));
-        aniData?.synonyms?.push(...(media.title.native ? [media.title.native] : []));
-        aniData?.synonyms?.push(...(media.title.romaji ? [media.title.romaji] : []));
-
-        if (aniData) {
-            aniData.title.english = media.title.english;
-            aniData.title.native = media.title.native;
-            aniData.title.romaji = media.title.romaji;
-
-            aniData.format = media.format;
-        }
-    }
-
     // Filter out providers that don't contain the format
-    const suitableProviders = providers
-        .filter((provider) => {
+    const suitableProviders = (providers as any[])
+        .filter((provider: any) => {
             if (formats && provider.formats) {
                 return formats.some((format) => provider.formats.includes(format));
             }
             return true;
         })
-        .reduce((acc: any[], currentProvider) => {
+        .reduce((acc: any[], currentProvider: any) => {
             const existingProvider = acc.find((provider: any) => provider.id === currentProvider.id);
             if (!existingProvider) {
-                acc.push(currentProvider);
+                acc.push(currentProvider as any);
             }
             return acc;
         }, []);

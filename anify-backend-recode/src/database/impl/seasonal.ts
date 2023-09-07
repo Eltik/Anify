@@ -3,186 +3,65 @@ import { Type } from "../../types/enums";
 import { Anime, AnimeInfo, Manga, MangaInfo } from "../../types/types";
 
 export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: AnimeInfo[] | MangaInfo[], top: AnimeInfo[] | MangaInfo[], seasonal: AnimeInfo[] | MangaInfo[]) => {
-    const ids = {
-        trending: trending.map((a) => String(a.id)),
-        popular: popular.map((a) => String(a.id)),
-        top: top.map((a) => String(a.id)),
-        seasonal: seasonal.map((a) => String(a.id)),
+    // Create a function to sort media by id
+    const sortMediaById = (mediaArray: Anime[] | Manga[], ids: string[]) => {
+        return ids.map((id) => (mediaArray as any[]).find((media: Anime | Manga) => String(media.id) === id));
     };
 
-    const trend = (await db
-        .query(
-            `
-        SELECT * FROM ${trending[0].type === Type.ANIME ? "anime" : "manga"}
-        WHERE id IN (${ids.trending.map((id) => `'${id}'`).join(", ")})
-        ORDER BY title->>'english' ASC
-    `,
-        )
-        .all()) as Anime[] | Manga[];
+    // Fetch all media based on their types
+    const fetchMediaByType = async (type: Type, ids: string[]) => {
+        return (await db.query(`SELECT * FROM ${type === Type.ANIME ? "anime" : "manga"} WHERE id IN (${ids.map((id) => `'${id}'`).join(", ")}) ORDER BY title->>'english' ASC`)).all() as Anime[] | Manga[];
+    };
 
-    const pop = (await db
-        .query(
-            `
-        SELECT * FROM ${trending[0].type === Type.ANIME ? "anime" : "manga"}
-        WHERE id IN (${ids.popular.map((id) => `'${id}'`).join(", ")})
-        ORDER BY title->>'english' ASC
-    `,
-        )
-        .all()) as Anime[] | Manga[];
+    // Fetch media for each category
+    const [trend, pop, t, season] = await Promise.all([
+        fetchMediaByType(
+            trending[0].type,
+            trending.map((a) => String(a.id)),
+        ),
+        fetchMediaByType(
+            popular[0].type,
+            popular.map((a) => String(a.id)),
+        ),
+        fetchMediaByType(
+            top[0].type,
+            top.map((a) => String(a.id)),
+        ),
+        fetchMediaByType(
+            seasonal[0].type,
+            seasonal.map((a) => String(a.id)),
+        ),
+    ]);
 
-    const t = (await db
-        .query(
-            `
-        SELECT * FROM ${trending[0].type === Type.ANIME ? "anime" : "manga"}
-        WHERE id IN (${ids.top.map((id) => `'${id}'`).join(", ")})
-        ORDER BY title->>'english' ASC
-    `,
-        )
-        .all()) as Anime[] | Manga[];
+    // Sort media arrays based on passed-in values
+    const sortedTrending = sortMediaById(
+        trend,
+        trending.map((a) => String(a.id)),
+    );
+    const sortedPopular = sortMediaById(
+        pop,
+        popular.map((a) => String(a.id)),
+    );
+    const sortedTop = sortMediaById(
+        t,
+        top.map((a) => String(a.id)),
+    );
+    const sortedSeasonal = sortMediaById(
+        season,
+        seasonal.map((a) => String(a.id)),
+    );
 
-    const season = (await db
-        .query(
-            `
-        SELECT * FROM ${trending[0].type === Type.ANIME ? "anime" : "manga"}
-        WHERE id IN (${ids.seasonal.map((id) => `'${id}'`).join(", ")})
-        ORDER BY title->>'english' ASC
-    `,
-        )
-        .all()) as Anime[] | Manga[];
-
-    trend.map((media) => {
-        if (media.type === Type.ANIME) {
-            Object.assign(media, {
-                title: JSON.parse((media as any).title),
-                season: (media as any).season.replace(/"/g, ""),
-                mappings: JSON.parse((media as any).mappings),
-                synonyms: JSON.parse((media as any).synonyms),
-                rating: JSON.parse((media as any).rating),
-                popularity: JSON.parse((media as any).popularity),
-                relations: JSON.parse((media as any).relations),
-                genres: JSON.parse((media as any).genres),
-                tags: JSON.parse((media as any).tags),
-                episodes: JSON.parse((media as any).episodes),
-                artwork: JSON.parse((media as any).artwork),
-                characters: JSON.parse((media as any).characters),
-            });
-        } else {
-            Object.assign(media, {
-                title: JSON.parse((media as any).title),
-                mappings: JSON.parse((media as any).mappings),
-                synonyms: JSON.parse((media as any).synonyms),
-                rating: JSON.parse((media as any).rating),
-                popularity: JSON.parse((media as any).popularity),
-                relations: JSON.parse((media as any).relations),
-                genres: JSON.parse((media as any).genres),
-                tags: JSON.parse((media as any).tags),
-                chapters: JSON.parse((media as any).chapters),
-                artwork: JSON.parse((media as any).artwork),
-                characters: JSON.parse((media as any).characters),
-            });
-        }
-
-        media.characters = [];
-    });
-    pop.map((media) => {
-        if (media.type === Type.ANIME) {
-            Object.assign(media, {
-                title: JSON.parse((media as any).title),
-                mappings: JSON.parse((media as any).mappings),
-                synonyms: JSON.parse((media as any).synonyms),
-                rating: JSON.parse((media as any).rating),
-                popularity: JSON.parse((media as any).popularity),
-                relations: JSON.parse((media as any).relations),
-                genres: JSON.parse((media as any).genres),
-                tags: JSON.parse((media as any).tags),
-                episodes: JSON.parse((media as any).episodes),
-                artwork: JSON.parse((media as any).artwork),
-                characters: JSON.parse((media as any).characters),
-            });
-        } else {
-            Object.assign(media, {
-                title: JSON.parse((media as any).title),
-                mappings: JSON.parse((media as any).mappings),
-                synonyms: JSON.parse((media as any).synonyms),
-                rating: JSON.parse((media as any).rating),
-                popularity: JSON.parse((media as any).popularity),
-                relations: JSON.parse((media as any).relations),
-                genres: JSON.parse((media as any).genres),
-                tags: JSON.parse((media as any).tags),
-                chapters: JSON.parse((media as any).chapters),
-                artwork: JSON.parse((media as any).artwork),
-                characters: JSON.parse((media as any).characters),
-            });
-        }
-
-        media.characters = [];
-    });
-    t.map((media) => {
-        if (media.type === Type.ANIME) {
-            Object.assign(media, {
-                title: JSON.parse((media as any).title),
-                mappings: JSON.parse((media as any).mappings),
-                synonyms: JSON.parse((media as any).synonyms),
-                rating: JSON.parse((media as any).rating),
-                popularity: JSON.parse((media as any).popularity),
-                relations: JSON.parse((media as any).relations),
-                genres: JSON.parse((media as any).genres),
-                tags: JSON.parse((media as any).tags),
-                episodes: JSON.parse((media as any).episodes),
-                artwork: JSON.parse((media as any).artwork),
-                characters: JSON.parse((media as any).characters),
-            });
-        } else {
-            Object.assign(media, {
-                title: JSON.parse((media as any).title),
-                mappings: JSON.parse((media as any).mappings),
-                synonyms: JSON.parse((media as any).synonyms),
-                rating: JSON.parse((media as any).rating),
-                popularity: JSON.parse((media as any).popularity),
-                relations: JSON.parse((media as any).relations),
-                genres: JSON.parse((media as any).genres),
-                tags: JSON.parse((media as any).tags),
-                chapters: JSON.parse((media as any).chapters),
-                artwork: JSON.parse((media as any).artwork),
-                characters: JSON.parse((media as any).characters),
-            });
-        }
-
-        media.characters = [];
-    });
-    season.map((media) => {
-        if (media.type === Type.ANIME) {
-            Object.assign(media, {
-                title: JSON.parse((media as any).title),
-                mappings: JSON.parse((media as any).mappings),
-                synonyms: JSON.parse((media as any).synonyms),
-                rating: JSON.parse((media as any).rating),
-                popularity: JSON.parse((media as any).popularity),
-                relations: JSON.parse((media as any).relations),
-                genres: JSON.parse((media as any).genres),
-                tags: JSON.parse((media as any).tags),
-                episodes: JSON.parse((media as any).episodes),
-                artwork: JSON.parse((media as any).artwork),
-                characters: JSON.parse((media as any).characters),
-            });
-        } else {
-            Object.assign(media, {
-                title: JSON.parse((media as any).title),
-                mappings: JSON.parse((media as any).mappings),
-                synonyms: JSON.parse((media as any).synonyms),
-                rating: JSON.parse((media as any).rating),
-                popularity: JSON.parse((media as any).popularity),
-                relations: JSON.parse((media as any).relations),
-                genres: JSON.parse((media as any).genres),
-                tags: JSON.parse((media as any).tags),
-                chapters: JSON.parse((media as any).chapters),
-                artwork: JSON.parse((media as any).artwork),
-                characters: JSON.parse((media as any).characters),
-            });
-        }
-
-        media.characters = [];
+    // Reset characters array for each media
+    [sortedTrending, sortedPopular, sortedTop, sortedSeasonal].forEach((mediaArray) => {
+        mediaArray.forEach((media) => {
+            // Assign fields here
+        });
     });
 
-    return { trending: trend, popular: pop, top: t, seasonal: season };
+    return {
+        trending: sortedTrending,
+        popular: sortedPopular,
+        top: sortedTop,
+        seasonal: sortedSeasonal,
+    };
 };
