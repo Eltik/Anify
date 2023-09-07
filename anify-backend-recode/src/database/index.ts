@@ -57,6 +57,7 @@ export const init = async () => {
         type TEXT,
         format TEXT DEFAULT 'UNKNOWN',
         relations JSON DEFAULT '[]',
+        currentChapter INTEGER,
         totalChapters REAL,
         totalVolumes REAL,
         genres JSON DEFAULT '[]',

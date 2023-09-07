@@ -58,6 +58,7 @@ export type Manga = {
     synonyms: string[];
     countryOfOrigin: string | null;
     description: string | null;
+    currentChapter: number | null;
     totalVolumes: number | null;
     color: string | null;
     year: number | null;

@@ -281,6 +281,7 @@ export async function createMedia(mappings: MappedResult[], type: Type): Promise
                     genres: [],
                     format: Format.UNKNOWN,
                     relations: [],
+                    currentChapter: null,
                     totalChapters: 0,
                     totalVolumes: 0,
                     chapters: {

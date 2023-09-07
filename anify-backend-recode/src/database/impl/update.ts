@@ -30,6 +30,8 @@ export const update = async (data: Anime | Manga) => {
         format = $format,
         relations = $relations,
         ${data.type === Type.ANIME ? "totalEpisodes = $totalEpisodes," : ""}
+        ${data.type === Type.MANGA ? "currentChapter = $currentChapter," : ""}
+        ${data.type === Type.MANGA ? "totalChapters = $totalChapters," : ""}
         ${data.type === Type.MANGA ? "totalVolumes = $totalVolumes," : ""}
         genres = $genres,
         tags = $tags,
