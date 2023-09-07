@@ -68,9 +68,10 @@ export default class ComicKInfo extends InformationProvider<Anime | Manga, Anime
             season: Season.UNKNOWN,
             status: data.status === 1 ? MediaStatus.FINISHED : MediaStatus.RELEASING,
             synonyms: data.md_titles.map((title) => title.title),
-            tags: data.mu_comics.mu_comic_categories.map((genre) => {
-                return genre.mu_categories.title;
-            }),
+            tags:
+                data.mu_comics?.mu_comic_categories?.map((genre) => {
+                    return genre.mu_categories.title;
+                }) ?? [],
             title: {
                 english: data.md_titles.find((title) => title.lang === "en")?.title ?? data.title,
                 native: data.md_titles.find((title) => title.lang === "ja")?.title ?? null,

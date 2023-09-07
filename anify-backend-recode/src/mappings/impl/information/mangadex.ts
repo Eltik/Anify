@@ -23,50 +23,54 @@ export default class MangaDexInfo extends InformationProvider<Anime | Manga, Ani
 
         if (!mangadexId) return undefined;
 
-        const data = (await (await this.request(`${this.api}/manga/${mangadexId}`, {}, true)).json()).data;
-        const covers = await (await this.request(`${this.api}/cover?limit=100&manga[]=${mangadexId}`, {}, true)).json();
+        try {
+            const data = (await (await this.request(`${this.api}/manga/${mangadexId}`, {}, true)).json()).data;
+            const covers = await (await this.request(`${this.api}/cover?limit=100&manga[]=${mangadexId}`, {}, true)).json();
 
-        return {
-            id: mangadexId,
-            type: media.type,
-            title: {
-                romaji: data.attributes.title.jp_ro ?? null,
-                english: data.attributes.title.en ?? null,
-                native: data.attributes.title.jp ?? null,
-            },
-            synonyms: data.attributes.altTitles.map((title: { [key: string]: string }) => {
-                return Object.values(title)[0];
-            }),
-            description: data.attributes.description.en ?? data.attributes.description.jp ?? data.attributes.description.jp_ro ?? data.attributes.description.ko ?? Object.values(data.attributes.description)[0],
-            countryOfOrigin: data.attributes.publicationDemographic ?? data.attributes.originalLanguage?.toUpperCase() ?? null,
-            characters: [],
-            genres: data.attributes.tags.filter((tag: any) => tag.attributes.group === "genre").map((tag: any) => tag.attributes.name.en),
-            year: data.attributes.year,
-            artwork: covers.data.map((cover: any) => {
-                const img = `${this.url}/covers/${mangadexId}/${cover.attributes.fileName}`;
-                const providerId = this.id;
-                const type = "poster";
-                return {
-                    img,
-                    providerId,
-                    type,
-                };
-            }),
-            totalChapters: data.attributes.lastChapter ?? null,
-            totalVolumes: data.attributes.lastVolume ?? null,
-            status: data.attributes.status === "ongoing" ? MediaStatus.RELEASING : data.attributes.status === "completed" ? MediaStatus.FINISHED : null,
-            color: null,
-            currentEpisode: null,
-            duration: null,
-            popularity: null,
-            relations: [],
-            tags: data.attributes.tags.filter((tag: any) => tag.attributes.group === "theme").map((tag: any) => tag.attributes.name.en),
-            rating: null,
-            season: Season.UNKNOWN,
-            trailer: null,
-            format: Format.UNKNOWN,
-            coverImage: `${this.url}/covers/${mangadexId}/${data.relationships.find((element: any) => element.type === "cover_art").id}.jpg`,
-            bannerImage: null,
-        };
+            return {
+                id: mangadexId,
+                type: media.type,
+                title: {
+                    romaji: data.attributes.title.jp_ro ?? null,
+                    english: data.attributes.title.en ?? null,
+                    native: data.attributes.title.jp ?? null,
+                },
+                synonyms: data.attributes.altTitles.map((title: { [key: string]: string }) => {
+                    return Object.values(title)[0];
+                }),
+                description: data.attributes.description.en ?? data.attributes.description.jp ?? data.attributes.description.jp_ro ?? data.attributes.description.ko ?? Object.values(data.attributes.description)[0],
+                countryOfOrigin: data.attributes.publicationDemographic ?? data.attributes.originalLanguage?.toUpperCase() ?? null,
+                characters: [],
+                genres: data.attributes.tags.filter((tag: any) => tag.attributes.group === "genre").map((tag: any) => tag.attributes.name.en),
+                year: data.attributes.year,
+                artwork: covers.data.map((cover: any) => {
+                    const img = `${this.url}/covers/${mangadexId}/${cover.attributes.fileName}`;
+                    const providerId = this.id;
+                    const type = "poster";
+                    return {
+                        img,
+                        providerId,
+                        type,
+                    };
+                }),
+                totalChapters: data.attributes.lastChapter ?? null,
+                totalVolumes: data.attributes.lastVolume ?? null,
+                status: data.attributes.status === "ongoing" ? MediaStatus.RELEASING : data.attributes.status === "completed" ? MediaStatus.FINISHED : null,
+                color: null,
+                currentEpisode: null,
+                duration: null,
+                popularity: null,
+                relations: [],
+                tags: data.attributes.tags.filter((tag: any) => tag.attributes.group === "theme").map((tag: any) => tag.attributes.name.en),
+                rating: null,
+                season: Season.UNKNOWN,
+                trailer: null,
+                format: Format.UNKNOWN,
+                coverImage: `${this.url}/covers/${mangadexId}/${data.relationships.find((element: any) => element.type === "cover_art").id}.jpg`,
+                bannerImage: null,
+            };
+        } catch (e) {
+            return undefined;
+        }
     }
 }

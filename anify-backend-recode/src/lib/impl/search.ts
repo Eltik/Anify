@@ -1,6 +1,6 @@
 import emitter, { Events } from "..";
 import { search } from "../../database/impl/search";
-import { baseProviders } from "../../mappings";
+import { BASE_PROVIDERS, baseProviders } from "../../mappings";
 import { Format, Type } from "../../types/enums";
 
 export const loadSearch = async (data: { query: string; type: Type; formats: Format[] }) => {
@@ -11,7 +11,13 @@ export const loadSearch = async (data: { query: string; type: Type; formats: For
         return existing;
     }
 
-    const result = await baseProviders.anilist.search(data.query, data.type, data.formats, 0, 10);
+    const result = await BASE_PROVIDERS.map((provider) => {
+        if (provider.type === data.type && provider.formats?.includes(data.formats[0])) {
+            return provider.search(data.query, data.type, data.formats, 0, 10);
+        } else {
+            return null;
+        }
+    }).filter((x) => x !== null)[0];
 
     await emitter.emitAsync(Events.COMPLETED_SEARCH_LOAD, result);
     return result;

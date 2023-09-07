@@ -31,8 +31,10 @@ export const loadMapping = async (data: { id: string; type: Type; formats: Forma
     const baseData = await BASE_PROVIDERS.map((provider) => {
         if (provider.type === data.type && provider.formats?.includes(data.formats[0])) {
             return provider.getMedia(data.id);
+        } else {
+            return null;
         }
-    })[0];
+    }).filter((x) => x !== null)[0];
 
     if (!baseData) {
         await emitter.emitAsync(Events.COMPLETED_MAPPING_LOAD, []);
@@ -82,7 +84,7 @@ export const insertMapping = async (data: { id: string; type: Type }, baseData: 
 };
 
 // Map a media to AniList
-export const map = async (type: Type, formats: Format[], aniData: AnimeInfo | MangaInfo | undefined): Promise<Anime[] | Manga[]> => {
+export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | MangaInfo | undefined): Promise<Anime[] | Manga[]> => {
     const providers = type === Type.ANIME ? ANIME_PROVIDERS : MANGA_PROVIDERS;
     providers.push(...(META_PROVIDERS as any));
 
@@ -104,7 +106,7 @@ export const map = async (type: Type, formats: Format[], aniData: AnimeInfo | Ma
 
     // Search for the media on each provider
     const promises = suitableProviders.map((provider: any) => {
-        const search = [provider.search(aniData?.title.english ?? aniData?.title.romaji ?? aniData?.title.native, aniData?.format, (aniData as any)?.year)];
+        const search = [provider.search(baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native, baseData?.format, baseData?.year)];
         return Promise.all(search)
             .then((results) => {
                 return results.find((r) => r?.length !== 0) || [];
@@ -123,7 +125,7 @@ export const map = async (type: Type, formats: Format[], aniData: AnimeInfo | Ma
     // Loop through each provider and find the best match
     for (let i = 0; i < resultsArray.length; i++) {
         const providerData = resultsArray[i];
-        const title: string = (aniData?.title.english ?? aniData?.title.romaji ?? aniData?.title.native)!;
+        const title: string = (baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native)!;
 
         const providerTitles = providerData.map((m: Result) => {
             const titles = [m.title, ...(m.altTitles ?? [])];
@@ -136,7 +138,7 @@ export const map = async (type: Type, formats: Format[], aniData: AnimeInfo | Ma
             continue;
         }
 
-        const titles = [aniData?.title.english, aniData?.title.romaji, aniData?.title.native].filter(isString);
+        const titles = [baseData?.title.english, baseData?.title.romaji, baseData?.title.native].filter(isString);
         const cleanedTitles = titles.map((x) => clean(x?.toLowerCase().trim() ?? ""));
 
         const bestMatchIndex = findBestMatch2DArray(cleanedTitles, providerTitles);
@@ -148,11 +150,11 @@ export const map = async (type: Type, formats: Format[], aniData: AnimeInfo | Ma
         const best: Result = providerData[bestMatchIndex.bestMatchIndex];
 
         // Add checks
-        if (best.format != Format.UNKNOWN && aniData?.format && aniData?.format != Format.UNKNOWN && best.format != aniData?.format) continue;
-        if (best.year != 0 && aniData?.year && aniData?.year != 0 && best.year != aniData?.year) continue;
+        if (best.format != Format.UNKNOWN && baseData?.format && baseData?.format != Format.UNKNOWN && best.format != baseData?.format) continue;
+        if (best.year != 0 && baseData?.year && baseData?.year != 0 && best.year != baseData?.year) continue;
 
-        const altTitles: string[] = Object.values(aniData?.title ?? {})
-            .concat(aniData?.synonyms ?? [])
+        const altTitles: string[] = Object.values(baseData?.title ?? {})
+            .concat(baseData?.synonyms ?? [])
             .filter(isString);
 
         const sim = similarity(title, best.title, altTitles);
@@ -161,8 +163,8 @@ export const map = async (type: Type, formats: Format[], aniData: AnimeInfo | Ma
         if (mappings.filter((m) => m.data.id === best.id).length > 0) continue;
 
         mappings.push({
-            id: aniData?.id ?? "",
-            slug: slugify(aniData?.title.english ?? aniData?.title.romaji ?? aniData?.title.native ?? ""),
+            id: baseData?.id ?? "",
+            slug: slugify(baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native ?? ""),
             data: best,
             similarity: sim.value,
         });
@@ -171,7 +173,7 @@ export const map = async (type: Type, formats: Format[], aniData: AnimeInfo | Ma
     // Create the media object
     const result = await createMedia(mappings, type);
 
-    console.log(colors.yellow("Finished fetching from providers.") + colors.blue(" - ") + colors.yellow(aniData?.title.english ?? aniData?.title.romaji ?? aniData?.title.native!));
+    console.log(colors.yellow("Finished fetching from providers.") + colors.blue(" - ") + colors.yellow(baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native!));
     return result;
 };
 
