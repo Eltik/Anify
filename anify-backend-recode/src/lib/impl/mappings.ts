@@ -29,7 +29,7 @@ export const loadMapping = async (data: { id: string; type: Type; formats: Forma
     // Map only one media
     //const baseData = await baseProviders.anilist.getMedia(data.id);
     const baseData = await BASE_PROVIDERS.map((provider) => {
-        if (provider.type === data.type && provider.formats?.includes(data.formats[0])) {
+        if (provider.formats?.includes(data.formats[0])) {
             return provider.getMedia(data.id);
         } else {
             return null;

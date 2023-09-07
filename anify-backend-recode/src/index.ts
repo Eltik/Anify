@@ -3,14 +3,13 @@ dotenv.config();
 
 import { fetchCorsProxies } from "./proxies/impl/fetchProxies";
 import { MediaStatus } from "./types/enums";
-import { db, init } from "./database";
+import { init } from "./database";
 import emitter, { Events } from "./lib";
 import { get } from "./database/impl/get";
 import queues from "./worker";
 import { start } from "./server";
 
 before().then(async (_) => {
-    //await db.run("DELETE from manga;");
     await start();
 });
 

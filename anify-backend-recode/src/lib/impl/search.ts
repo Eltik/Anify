@@ -12,8 +12,8 @@ export const loadSearch = async (data: { query: string; type: Type; formats: For
     }
 
     const result = await BASE_PROVIDERS.map((provider) => {
-        if (provider.type === data.type && provider.formats?.includes(data.formats[0])) {
-            return provider.search(data.query, data.type, data.formats, 0, 1);
+        if (provider.formats?.includes(data.formats[0])) {
+            return provider.search(data.query, data.type, data.formats, 0, 10);
         } else {
             return null;
         }

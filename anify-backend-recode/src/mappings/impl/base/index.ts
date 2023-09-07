@@ -6,7 +6,6 @@ export default abstract class BaseProvider {
     abstract id: string;
     abstract url: string;
 
-    abstract type: Type;
     abstract formats: Format[];
 
     public providerType: ProviderType = ProviderType.BASE;

@@ -7,7 +7,6 @@ export default class ManagDexBase extends BaseProvider {
     override id = "mangadex";
     override url = "https://mangadex.org";
 
-    override type: Type = Type.MANGA;
     override formats: Format[] = [Format.MANGA, Format.ONE_SHOT];
 
     private api = "https://api.mangadex.org";
