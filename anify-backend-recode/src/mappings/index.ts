@@ -6,7 +6,7 @@ import NineAnime from "./impl/anime/nineanime";
 import Zoro from "./impl/anime/zoro";
 import BaseProvider from "./impl/base";
 import AniListBase from "./impl/base/anilist";
-import ComicKBase from "./impl/base/comick";
+import ManagDexBase from "./impl/base/mangadex";
 import InformationProvider from "./impl/information";
 import AniList from "./impl/information/anilist";
 import ComicKInfo from "./impl/information/comick";
@@ -63,7 +63,7 @@ const metaProviders: Record<string, MetaProvider> = META_PROVIDERS.reduce(
     {} as Record<string, MetaProvider>,
 );
 
-const BASE_PROVIDERS: BaseProvider[] = [new AniListBase(), new ComicKBase()];
+const BASE_PROVIDERS: BaseProvider[] = [new AniListBase(), new ManagDexBase()];
 const baseProviders: Record<string, BaseProvider> = BASE_PROVIDERS.reduce(
     (acc, provider) => {
         acc[provider.id] = provider;

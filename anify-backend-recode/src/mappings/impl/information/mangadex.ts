@@ -31,9 +31,9 @@ export default class MangaDexInfo extends InformationProvider<Anime | Manga, Ani
                 id: mangadexId,
                 type: media.type,
                 title: {
-                    romaji: data.attributes.title.jp_ro ?? null,
+                    romaji: data.attributes.title["ja-ro"] ?? data.attributes.title["jp_ro"] ?? null,
                     english: data.attributes.title.en ?? null,
-                    native: data.attributes.title.jp ?? null,
+                    native: data.attributes.title.jp ?? data.attributes.title.ja ?? null,
                 },
                 synonyms: data.attributes.altTitles.map((title: { [key: string]: string }) => {
                     return Object.values(title)[0];
