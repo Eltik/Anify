@@ -25,8 +25,6 @@ export default class ManagDexBase extends BaseProvider {
             uri.searchParams.set("order[relevance]", "desc");
             uri.searchParams.append("contentRating[]", "safe");
             uri.searchParams.append("contentRating[]", "suggestive");
-            uri.searchParams.append("contentRating[]", "erotica");
-            uri.searchParams.append("contentRating[]", "pornographic");
             uri.searchParams.append("includes[]", "cover_art");
 
             const data = await (await this.request(uri.href)).json();
@@ -41,9 +39,11 @@ export default class ManagDexBase extends BaseProvider {
             const attributes = manga.attributes;
             const relationships = manga.relationships;
 
-            const altTitles: string[] = attributes.altTitles.map((title: { [key: string]: string }) => {
-                return Object.values(title)[0];
-            }).concat(Object.values(attributes.title));
+            const altTitles: string[] = attributes.altTitles
+                .map((title: { [key: string]: string }) => {
+                    return Object.values(title)[0];
+                })
+                .concat(Object.values(attributes.title));
 
             const id = manga.id;
             let img = null;
@@ -59,9 +59,9 @@ export default class ManagDexBase extends BaseProvider {
             results.push({
                 id,
                 title: {
-                    english: attributes.title["en"] ?? null,
-                    romaji: attributes.title["ja-ro"] ?? attributes.title["jp-ro"] ?? null,
-                    native: attributes.title["jp"] ?? attributes.title["ja"] ?? attributes.title["ko"] ?? null,
+                    english: attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "en")?.en ?? null,
+                    romaji: attributes.title["ja-ro"] ?? attributes.title["jp-ro"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja-ro")?.["ja-ro"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp-ro")?.["jp-ro"] ?? null,
+                    native: attributes.title["jp"] ?? attributes.title["ja"] ?? attributes.title["ko"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp")?.jp ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja")?.ja ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ko")?.ko ?? null,
                 },
                 synonyms: altTitles,
                 coverImage: img,
@@ -85,7 +85,7 @@ export default class ManagDexBase extends BaseProvider {
                 rating: null,
                 season: Season.UNKNOWN,
                 trailer: null,
-                type: Type.MANGA
+                type: Type.MANGA,
             });
         }
 
@@ -97,10 +97,10 @@ export default class ManagDexBase extends BaseProvider {
 
         let mangaList: any[] = [];
 
-        const genreList: { name: string, uid: string }[] = [];
-        const tagList: { name: string, uid: string }[] = [];
+        const genreList: { name: string; uid: string }[] = [];
+        const tagList: { name: string; uid: string }[] = [];
 
-        if (Array.isArray(tags) && tags.length > 0 || Array.isArray(tagsExcluded) && tagsExcluded.length > 0) {
+        if ((Array.isArray(tags) && tags.length > 0) || (Array.isArray(tagsExcluded) && tagsExcluded.length > 0)) {
             const data = await (await this.request(`${this.api}/manga/tag`, {}, true)).json();
 
             for (const item of data) {
@@ -108,12 +108,12 @@ export default class ManagDexBase extends BaseProvider {
                     genreList.push({
                         name: item.attributes?.name?.en,
                         uid: item.id,
-                    })
+                    });
                 } else if (item.attributes?.group === "tag") {
                     tagList.push({
                         name: item.attributes?.name?.en,
                         uid: item.id,
-                    })
+                    });
                 }
             }
         }
@@ -126,25 +126,47 @@ export default class ManagDexBase extends BaseProvider {
             uri.searchParams.set("order[relevance]", "desc");
             uri.searchParams.append("contentRating[]", "safe");
             uri.searchParams.append("contentRating[]", "suggestive");
-            uri.searchParams.append("contentRating[]", "erotica");
-            uri.searchParams.append("contentRating[]", "pornographic");
             uri.searchParams.append("includes[]", "cover_art");
-            
+
             if (year) uri.searchParams.set("year", String(year));
             if (genres && genres.length > 0) {
-                uri.searchParams.append("includedTags[]", genres.map((genre) => genreList.find((item) => item.name === genre)?.uid).filter((x) => x !== undefined).join(","));
+                uri.searchParams.append(
+                    "includedTags[]",
+                    genres
+                        .map((genre) => genreList.find((item) => item.name === genre)?.uid)
+                        .filter((x) => x !== undefined)
+                        .join(","),
+                );
                 uri.searchParams.set("includedTagsMode", "AND");
             }
             if (genresExcluded && genresExcluded.length > 0) {
-                uri.searchParams.append("excludedTags[]", genresExcluded.map((genre) => genreList.find((item) => item.name === genre)?.uid).filter((x) => x !== undefined).join(","));
+                uri.searchParams.append(
+                    "excludedTags[]",
+                    genresExcluded
+                        .map((genre) => genreList.find((item) => item.name === genre)?.uid)
+                        .filter((x) => x !== undefined)
+                        .join(","),
+                );
                 if (!uri.searchParams.get("includedTagsMode")) uri.searchParams.set("includedTagsMode", "AND");
             }
             if (tags && tags.length > 0) {
-                uri.searchParams.append("includedTags[]", tags.map((tag) => tagList.find((item) => item.name === tag)?.uid).filter((x) => x !== undefined).join(","));
+                uri.searchParams.append(
+                    "includedTags[]",
+                    tags
+                        .map((tag) => tagList.find((item) => item.name === tag)?.uid)
+                        .filter((x) => x !== undefined)
+                        .join(","),
+                );
                 if (!uri.searchParams.get("includedTagsMode")) uri.searchParams.set("includedTagsMode", "AND");
             }
             if (tagsExcluded && tagsExcluded.length > 0) {
-                uri.searchParams.append("excludedTags[]", tagsExcluded.map((tag) => tagList.find((item) => item.name === tag)?.uid).filter((x) => x !== undefined).join(","));
+                uri.searchParams.append(
+                    "excludedTags[]",
+                    tagsExcluded
+                        .map((tag) => tagList.find((item) => item.name === tag)?.uid)
+                        .filter((x) => x !== undefined)
+                        .join(","),
+                );
                 if (!uri.searchParams.get("includedTagsMode")) uri.searchParams.set("includedTagsMode", "AND");
             }
 
@@ -160,9 +182,11 @@ export default class ManagDexBase extends BaseProvider {
             const attributes = manga.attributes;
             const relationships = manga.relationships;
 
-            const altTitles: string[] = attributes.altTitles.map((title: { [key: string]: string }) => {
-                return Object.values(title)[0];
-            }).concat(Object.values(attributes.title));
+            const altTitles: string[] = attributes.altTitles
+                .map((title: { [key: string]: string }) => {
+                    return Object.values(title)[0];
+                })
+                .concat(Object.values(attributes.title));
 
             const id = manga.id;
             let img = null;
@@ -178,9 +202,9 @@ export default class ManagDexBase extends BaseProvider {
             results.push({
                 id,
                 title: {
-                    english: attributes.title["en"] ?? null,
-                    romaji: attributes.title["ja-ro"] ?? attributes.title["jp-ro"] ?? null,
-                    native: attributes.title["jp"] ?? attributes.title["ja"] ?? attributes.title["ko"] ?? null,
+                    english: attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "en")?.en ?? null,
+                    romaji: attributes.title["ja-ro"] ?? attributes.title["jp-ro"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja-ro")?.["ja-ro"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp-ro")?.["jp-ro"] ?? null,
+                    native: attributes.title["jp"] ?? attributes.title["ja"] ?? attributes.title["ko"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp")?.jp ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja")?.ja ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ko")?.ko ?? null,
                 },
                 synonyms: altTitles,
                 coverImage: img,
@@ -204,7 +228,7 @@ export default class ManagDexBase extends BaseProvider {
                 rating: null,
                 season: Season.UNKNOWN,
                 trailer: null,
-                type: Type.MANGA
+                type: Type.MANGA,
             });
         }
         return results;
@@ -222,9 +246,9 @@ export default class ManagDexBase extends BaseProvider {
                 id: id,
                 type: Type.MANGA,
                 title: {
-                    romaji: data.attributes.title["ja-ro"] ?? data.attributes.title["jp_ro"] ?? null,
-                    english: data.attributes.title.en ?? null,
-                    native: data.attributes.title.jp ?? data.attributes.title.ja ?? null,
+                    english: data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "en")?.en ?? null,
+                    romaji: data.attributes.title["ja-ro"] ?? data.attributes.title["jp-ro"] ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja-ro")?.["ja-ro"] ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp-ro")?.["jp-ro"] ?? null,
+                    native: data.attributes.title["jp"] ?? data.attributes.title["ja"] ?? data.attributes.title["ko"] ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp")?.jp ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja")?.ja ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ko")?.ko ?? null,
                 },
                 synonyms: data.attributes.altTitles.map((title: { [key: string]: string }) => {
                     return Object.values(title)[0];

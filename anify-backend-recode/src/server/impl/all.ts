@@ -8,13 +8,16 @@ export const handler = async (req: Request): Promise<Response> => {
         const anime = await db.query("SELECT * FROM anime;").all();
         const manga = await db.query("SELECT * FROM manga;").all();
 
-        return new Response(JSON.stringify({
-            anime: anime,
-            manga: manga,
-        }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-        });
+        return new Response(
+            JSON.stringify({
+                anime: anime,
+                manga: manga,
+            }),
+            {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            },
+        );
     } catch (e) {
         console.error(e);
         return new Response(JSON.stringify({ error: "An error occurred." }), {
