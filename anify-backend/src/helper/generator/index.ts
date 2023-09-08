@@ -1,4 +1,4 @@
-import { Genres } from "../../mapping";
+import { Genres } from "@/src/mapping";
 
 export function anilistMediaGenerator(data: any) {
     return {
@@ -24,7 +24,7 @@ export function anilistMediaGenerator(data: any) {
         countryOfOrigin: data.countryOfOrigin ?? null,
         year: data.seasonYear ?? data.startDate?.year ?? null,
         type: data.type,
-        tags: data.tags.map((tag: { name: string }) => tag.name),
+        tags: data.tags.map((tag) => tag.name),
     };
 }
 

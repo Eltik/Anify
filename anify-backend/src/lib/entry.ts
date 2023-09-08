@@ -1,4 +1,4 @@
-import emitter, { Events } from "../helper/event";
+import emitter, { Events } from "@/src/helper/event";
 import { Anime, Format, Manga, Season, Type } from "../mapping";
 import colors from "colors";
 import Database from "../database";

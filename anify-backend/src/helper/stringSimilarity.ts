@@ -1,7 +1,7 @@
 import { clean } from "./title";
 
 // From npm package string-similarity
-export function compareTwoStrings(first: string, second: string): number {
+export function compareTwoStrings(first, second): number {
     first = first.replace(/\s+/g, "");
     second = second.replace(/\s+/g, "");
 

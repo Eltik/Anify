@@ -21,7 +21,7 @@ export default class TMDB extends MetaProvider {
         if (!data) return undefined;
 
         if (data.results.length > 0) {
-            data.results.forEach((result: TMDBResult) => {
+            data.results.forEach((result) => {
                 if (result.media_type === "tv") {
                     results.push({
                         id: `/tv/${result.id}`,
@@ -58,7 +58,7 @@ export default class TMDB extends MetaProvider {
         if (!episodes) {
             return [];
         }
-        episodes.forEach((episode: Episode) => {
+        episodes.forEach((episode) => {
             if (episode.still_path != null) {
                 episodeCovers.push({
                     episode: episode.episode_number,
@@ -69,65 +69,3 @@ export default class TMDB extends MetaProvider {
         return episodeCovers;
     }
 }
-
-type TMDBResult = {
-    adult: boolean;
-    backdrop_path: string | null;
-    id: number;
-    title?: string;
-    name: string;
-    original_language: string;
-    original_title?: string;
-    original_name: string;
-    overview: string;
-    poster_path: string | null;
-    media_type: string;
-    genre_ids: number[];
-    popularity: number;
-    first_air_date: string;
-    vote_average: number;
-    vote_count: number;
-    origin_country: string[];
-};
-
-type Episode = {
-    air_date: string;
-    episode_number: number;
-    episode_type: string;
-    id: number;
-    name: string;
-    overview: string;
-    production_code: string;
-    runtime: number;
-    season_number: number;
-    show_id: number;
-    still_path: string;
-    vote_average: number;
-    vote_count: number;
-    crew: {
-        job: string;
-        department: string;
-        credit_id: string;
-        adult: boolean;
-        gender: number;
-        id: number;
-        known_for_department: string;
-        name: string;
-        original_name: string;
-        popularity: number;
-        profile_path: string | null;
-    }[];
-    guest_stars: {
-        character: string;
-        credit_id: string;
-        order: number;
-        adult: boolean;
-        gender: number;
-        id: number;
-        known_for_department: string;
-        name: string;
-        original_name: string;
-        popularity: number;
-        profile_path: string | null;
-    }[];
-};

@@ -1,6 +1,6 @@
 import AnimeProvider, { Episode, Server, Source, StreamingServers, SubType } from ".";
 import { Format, Formats, Result } from "../..";
-import Extractor from "../../../helper/extractor";
+import Extractor from "@/src/helper/extractor";
 
 export default class Kass extends AnimeProvider {
     override rateLimit = 250;
@@ -153,7 +153,7 @@ export default class Kass extends AnimeProvider {
         }
 
         const episodeJSON = episodeJSONs.sub ?? episodeJSONs.dub;
-        const dubData: { [episodeNumber: number]: { episode_string: string; slug: string } } = {};
+        const dubData = {};
 
         if (episodeJSONs.sub && episodeJSONs.dub) {
             for (let i = 0; i < episodeJSONs.dub?.result?.length; i++) {
@@ -180,7 +180,7 @@ export default class Kass extends AnimeProvider {
                 epNum = 0.1;
             }
 
-            const sourceID: any = {};
+            const sourceID = {};
 
             sourceID[isSub ? "sub" : "dub"] = `ep-${el?.episode_string}-${el?.slug}`;
 

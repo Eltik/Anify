@@ -2,8 +2,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import queues from "./worker";
-import emitter, { Events } from "./helper/event";
-import { start } from "./server";
+import emitter, { Events } from "@/src/helper/event";
+import { start } from "./server/server";
 import Database from "./database";
 import { MediaStatus } from "./mapping";
 import { fetchCorsProxies } from "./helper/proxies";

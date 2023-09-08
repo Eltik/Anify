@@ -5,7 +5,7 @@ import { join } from "path";
 import ChunkedExecutor from "../executor";
 import cluster from "node:cluster";
 import { isString } from "..";
-import { ANIME_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS } from "../../mapping";
+import { ANIME_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS } from "@/src/mapping";
 import { env } from "process";
 
 // List of CORS proxies

@@ -1,27 +1,33 @@
 {
     "compilerOptions": {
-        // add Bun type definitions
-        "types": ["bun-types"],
-
-        // enable latest features
-        "lib": ["esnext"],
-        "module": "esnext",
         "target": "esnext",
-
-        // if TS 5.x+
-        "moduleResolution": "Bundler",
-        "noEmit": true,
-        "moduleDetection": "force",
-
-        "jsx": "react-jsx", // support JSX
-        "allowJs": false, // allow importing `.js` from `.ts`
-        "esModuleInterop": true, // allow default imports for CommonJS modules
-
-        // best practices
-        "strict": false,
-        "forceConsistentCasingInFileNames": true,
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "allowJs": true,
         "skipLibCheck": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "esModuleInterop": true,
+        "module": "CommonJS",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "noImplicitAny": false,
+        "isolatedModules": false,
+        "allowSyntheticDefaultImports": true,
+        "jsx": "preserve",
+        "incremental": true,
+        "declaration": true,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./*"],
+            "database": ["./src/database"]
+        },
         "outDir": "./dist"
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "dist"],
+    "ts-node": {
+        "compilerOptions": {
+            "module": "commonjs"
+        }
     }
 }
-  

@@ -1,4 +1,4 @@
-import QueueExecutor from "../helper/queue";
+import QueueExecutor from "@/src/helper/queue";
 import { Anime, Manga, Type } from "../mapping";
 import { createEntry } from "../lib/entry";
 import colors from "colors";

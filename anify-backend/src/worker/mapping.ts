@@ -1,4 +1,4 @@
-import QueueExecutor from "../helper/queue";
+import QueueExecutor from "@/src/helper/queue";
 import { loadMapping } from "../lib/mappings";
 import { Type } from "../mapping";
 import colors from "colors";

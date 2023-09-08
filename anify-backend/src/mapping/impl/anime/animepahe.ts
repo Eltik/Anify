@@ -1,7 +1,7 @@
 import AnimeProvider, { Episode, Source, StreamingServers, SubType } from ".";
 import { Format, Formats, Result } from "../..";
 import { load } from "cheerio";
-import Extractor from "../../../helper/extractor";
+import Extractor from "@/src/helper/extractor";
 
 export default class AnimePahe extends AnimeProvider {
     override rateLimit = 250;
@@ -30,7 +30,7 @@ export default class AnimePahe extends AnimeProvider {
             return [];
         }
 
-        data.data.map((item: { id: number; title: string; year: number; poster: string; type: string; session: string }) => {
+        data.data.map((item) => {
             const formatString: string = item.type.toUpperCase();
             const f: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
 
@@ -58,7 +58,7 @@ export default class AnimePahe extends AnimeProvider {
         const tempId = $("head > meta[property='og:url']").attr("content")!.split("/").pop()!;
         const { last_page, data } = await (await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=1`)).json();
 
-        data.map((item: { id: number; episode: number; title: string; snapshot: string; filler: number; created_at?: string }) => {
+        data.map((item) => {
             const updatedAt = new Date(item.created_at ?? Date.now()).getTime();
 
             episodes.push({

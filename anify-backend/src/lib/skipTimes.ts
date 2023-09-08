@@ -1,5 +1,5 @@
-import emitter, { Events } from "../helper/event";
-import { Episode, Source } from "../mapping/impl/anime";
+import emitter, { Events } from "@/src/helper/event";
+import { Source } from "../mapping/impl/anime";
 import AniList from "../mapping/impl/information/anilist";
 import colors from "colors";
 import Database from "../database";
@@ -43,7 +43,7 @@ export const loadSkipTimes = async (data: { id: string; episode: number; toInser
     // temp
     console.log(colors.green(`Inserted skip times for ${data.id} episode ${data.episode}`));
 
-    const skipTimes = toInsert.episodes.find((e: Episode) => e.number === data.episode);
+    const skipTimes = toInsert.episodes.find((e) => e.number === data.episode);
     if (!skipTimes) {
         await emitter.emitAsync(Events.COMPLETED_SKIPTIMES_LOAD, null);
         return null;

@@ -1,11 +1,11 @@
 import { ANIME_PROVIDERS, Anime, Format, INFORMATION_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS, Manga, MediaStatus, Result, Season, Type, animeProviders, ProviderType, mangaProviders, metaProviders, infoProviders } from "../mapping";
 import colors from "colors";
 import AniList from "../mapping/impl/information/anilist";
-import { isString, similarity, slugify } from "../helper";
+import { isString, similarity, slugify } from "@/src/helper";
 import InformationProvider, { AnimeInfo, MangaInfo } from "../mapping/impl/information";
-import emitter, { Events } from "../helper/event";
-import Database from "../database";
-import { findBestMatch2DArray } from "../helper/stringSimilarity";
+import emitter, { Events } from "@/src/helper/event";
+import Database from "database";
+import { findBestMatch2DArray, findBestMatchArray } from "../helper/stringSimilarity";
 import { clean } from "../helper/title";
 // Return a mapped result using the ID given
 const aniList = new AniList();
@@ -166,7 +166,7 @@ export const map = async (type: Type, formats: Format[], aniData: AnimeInfo | Ma
         }
 
         const titles = [aniData?.title.english, aniData?.title.romaji, aniData?.title.native].filter(isString);
-        const cleanedTitles = titles.map((x) => clean(x?.toLowerCase().trim() ?? ""));
+        const cleanedTitles = titles.map((x) => clean(x.toLowerCase().trim()));
 
         const bestMatchIndex = findBestMatch2DArray(cleanedTitles, providerTitles);
 
@@ -382,20 +382,20 @@ function fillMediaInfo<T extends Anime | Manga, U extends AnimeInfo | MangaInfo>
         for (const ak of Object.keys(info)) {
             if (crossLoadFields.includes(ak as any) || provider.sharedArea.includes(ak as any) || specialLoadFields.includes(ak as any)) continue;
 
-            const v = media[ak as keyof (Anime | Manga)];
+            const v = media[ak];
 
             let write = false;
-            if ((!v || v === "UNKNOWN") && !!info[ak as keyof (AnimeInfo | MangaInfo)] && info[ak as keyof (AnimeInfo | MangaInfo)] !== "UNKNOWN") {
+            if ((!v || v === "UNKNOWN") && !!info[ak] && info[ak] !== "UNKNOWN") {
                 write = true;
             } else {
-                if (provider.priorityArea.includes(ak as any) && !!info[ak as keyof (AnimeInfo | MangaInfo)]) write = true;
+                if (provider.priorityArea.includes(ak as any) && !!info[ak]) write = true;
             }
 
-            if (write) media[ak as any] = info[ak as keyof (AnimeInfo | MangaInfo)];
+            if (write) media[ak] = info[ak];
         }
 
         for (const special of specialLoadFields) {
-            const v = info[special as keyof (AnimeInfo | MangaInfo)];
+            const v = info[special as any];
 
             if (v) {
                 for (const [ak, av] of Object.entries(v)) {
@@ -411,12 +411,12 @@ function fillMediaInfo<T extends Anime | Manga, U extends AnimeInfo | MangaInfo>
                 media[shared as any] = [];
             }
 
-            media[shared as any] = [...new Set(media[shared as any].concat(info[shared as keyof (AnimeInfo | MangaInfo)] ?? []))];
+            media[shared as any] = [...new Set(media[shared as any].concat(info[shared as any]))];
         }
 
         for (const crossLoad of crossLoadFields) {
-            if (info[crossLoad as keyof (AnimeInfo | MangaInfo)]) {
-                media[crossLoad as any][provider.id] = info[crossLoad as keyof (AnimeInfo | MangaInfo)];
+            if (info[crossLoad as any]) {
+                media[crossLoad as any][provider.id] = info[crossLoad as any];
             }
         }
 

@@ -1,6 +1,6 @@
 import { Anime, Artwork, Character, Format, Genres, Manga, MediaStatus, Relations, Season, Type } from "../..";
 import InformationProvider, { AnimeInfo, MangaInfo, MediaInfoKeys } from ".";
-import { anilistMediaGenerator } from "../../../helper/generator";
+import { anilistMediaGenerator } from "@/src/helper/generator";
 
 export default class AniList extends InformationProvider<Anime | Manga, AnimeInfo | MangaInfo> {
     override id = "anilist";
@@ -575,7 +575,7 @@ export default class AniList extends InformationProvider<Anime | Manga, AnimeInf
             format: data.format,
             year: data.seasonYear ?? data.startDate?.year ?? null,
             countryOfOrigin: data.countryOfOrigin ?? null,
-            tags: data.tags.map((tag: { name: string }) => tag.name),
+            tags: data.tags.map((tag) => tag.name),
             relations: relations,
             artwork,
             characters,

@@ -1,7 +1,7 @@
 import AnimeProvider, { Episode, Source, StreamingServers, SubType } from ".";
 import { Format, Result } from "../..";
 import { load } from "cheerio";
-import Extractor from "../../../helper/extractor";
+import Extractor from "@/src/helper/extractor";
 
 export default class GogoAnime extends AnimeProvider {
     override rateLimit = 250;

@@ -36,7 +36,7 @@ export const exportDatabase = async () => {
     }
 };
 
-const writeDataInBatches = async (data: any, batchSize: number) => {
+const writeDataInBatches = async (data, batchSize) => {
     /*
     const keys = Object.keys(data);
 
