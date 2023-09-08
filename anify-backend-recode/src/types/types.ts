@@ -191,3 +191,20 @@ export type Result = {
     img: string | null;
     providerId: string;
 };
+
+export type SkipTime = {
+    id: string;
+    episodes: {
+        intro: {
+            start: number;
+            end: number;
+        };
+        outro: {
+            start: number;
+            end: number;
+        };
+        number: number;
+    }[];
+};
+
+export type Time = Pick<SkipTime, "episodes">["episodes"][number];

@@ -38,4 +38,5 @@ async function before() {
     queues.mappingQueue.start();
     queues.createEntry.start();
     queues.searchQueue.start();
+    queues.skipTimes.start();
 }
