@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.2",
+    "@types/pdfkit": "^0.12.10",
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",
     "bun-types": "latest",
@@ -28,6 +29,8 @@
     "crypto-js": "^4.1.1",
     "dotenv": "^16.3.1",
     "eventemitter2": "latest",
-    "ioredis": "^5.3.2"
+    "image-size": "^1.0.2",
+    "ioredis": "^5.3.2",
+    "pdfkit": "^0.13.0"
   }
 }

@@ -1,7 +1,10 @@
-import { db } from "..";
-import { Type } from "../../types/enums";
-import { Anime, AnimeInfo, Manga, MangaInfo } from "../../types/types";
+import { db } from "../..";
+import { Type } from "../../../types/enums";
+import { Anime, AnimeInfo, Manga, MangaInfo } from "../../../types/types";
 
+// TODO: Add fields to query specific to anime/manga.
+// For example, if people only want bannerImage/coverImage
+// it should be possible to only query those fields
 export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: AnimeInfo[] | MangaInfo[], top: AnimeInfo[] | MangaInfo[], seasonal: AnimeInfo[] | MangaInfo[]) => {
     // Create a function to sort media by id
     const sortMediaById = (mediaArray: Anime[] | Manga[], ids: string[]) => {

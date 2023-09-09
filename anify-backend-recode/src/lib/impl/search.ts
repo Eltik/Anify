@@ -1,5 +1,5 @@
 import emitter, { Events } from "..";
-import { search } from "../../database/impl/search";
+import { search } from "../../database/impl/search/search";
 import { BASE_PROVIDERS, baseProviders } from "../../mappings";
 import { Format, Type } from "../../types/enums";
 

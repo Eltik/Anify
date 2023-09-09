@@ -5,7 +5,7 @@ import { fetchCorsProxies } from "./proxies/impl/fetchProxies";
 import { MediaStatus } from "./types/enums";
 import { init } from "./database";
 import emitter, { Events } from "./lib";
-import { get } from "./database/impl/get";
+import { get } from "./database/impl/modify/get";
 import queues from "./worker";
 import { start } from "./server";
 

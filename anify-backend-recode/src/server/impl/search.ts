@@ -1,5 +1,5 @@
 import queues from "../../worker";
-import { search } from "../../database/impl/search";
+import { search } from "../../database/impl/search/search";
 import { Format, Type } from "../../types/enums";
 
 export const handler = async (req: Request): Promise<Response> => {

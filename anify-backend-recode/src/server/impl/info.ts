@@ -1,4 +1,4 @@
-import { get } from "../../database/impl/get";
+import { get } from "../../database/impl/modify/get";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {

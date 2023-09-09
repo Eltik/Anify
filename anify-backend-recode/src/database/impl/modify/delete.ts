@@ -1,5 +1,5 @@
-import { db } from "..";
-import { Anime, Manga } from "../../types/types";
+import { db } from "../..";
+import { Manga } from "../../../types/types";
 
 export const deleteEntry = async (id: string): Promise<void> => {
     const anime = await db.query(`SELECT * FROM anime WHERE id = $id`).get({ $id: id });

@@ -1,7 +1,7 @@
-import { db } from "..";
-import { averageMetric } from "../../helper";
-import { Type } from "../../types/enums";
-import { Anime, Manga } from "../../types/types";
+import { db } from "../..";
+import { averageMetric } from "../../../helper";
+import { Type } from "../../../types/enums";
+import { Anime, Manga } from "../../../types/types";
 import { get } from "./get";
 
 export const update = async (data: Anime | Manga) => {
