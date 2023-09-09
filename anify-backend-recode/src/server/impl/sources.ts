@@ -1,5 +1,6 @@
 import content from "../../content";
 import { StreamingServers, SubType } from "../../types/enums";
+import queues from "../../worker";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -7,7 +8,30 @@ export const handler = async (req: Request): Promise<Response> => {
         const paths = url.pathname.split("/");
         paths.shift();
 
-        const providerId = paths[1] ?? url.searchParams.get("providerId") ?? null;
+        const body =
+            req.method === "POST"
+                ? await req.json().catch(() => {
+                      return null;
+                  })
+                : null;
+
+        const id = body.id ?? paths[1] ?? url.searchParams.get("id") ?? null;
+        if (!id) {
+            return new Response(JSON.stringify({ error: "No ID provided." }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
+        const episodeNumber = Number(body.episodeNumber ?? paths[2] ?? url.searchParams.get("episodeNumber") ?? null);
+        if (!episodeNumber) {
+            return new Response(JSON.stringify({ error: "No episode number provided." }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
+        const providerId = body.providerId ?? paths[3] ?? url.searchParams.get("providerId") ?? null;
         if (!providerId) {
             return new Response(JSON.stringify({ error: "No provider ID provided." }), {
                 status: 400,
@@ -15,7 +39,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const watchId = decodeURIComponent(paths[2] ?? url.searchParams.get("watchId") ?? "");
+        const watchId = decodeURIComponent(body.watchId ?? paths[4] ?? url.searchParams.get("watchId") ?? "");
         if (!watchId || watchId.length === 0) {
             return new Response(JSON.stringify({ error: "No watch ID provided." }), {
                 status: 400,
@@ -23,7 +47,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const subType = decodeURIComponent(paths[3] ?? url.searchParams.get("subType") ?? "");
+        const subType = decodeURIComponent(body.subType ?? paths[5] ?? url.searchParams.get("subType") ?? "");
         if (!subType || subType.length === 0) {
             return new Response(JSON.stringify({ error: "No sub type provided." }), {
                 status: 400,
@@ -36,9 +60,11 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const server = decodeURIComponent(paths[3] ?? url.searchParams.get("server") ?? "") as StreamingServers;
+        const server = decodeURIComponent(body.server ?? paths[6] ?? url.searchParams.get("server") ?? "") as StreamingServers;
 
         const data = await content.fetchSources(providerId, watchId, subType.toUpperCase() as SubType, server);
+
+        if (data) queues.skipTimes.add({ id, episode: episodeNumber, toInsert: data });
 
         return new Response(JSON.stringify(data), {
             status: 200,

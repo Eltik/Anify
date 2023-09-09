@@ -1,3 +1,4 @@
+import { stats } from "../../database/impl/misc/stats";
 import { get } from "../../database/impl/modify/get";
 
 export const handler = async (req: Request): Promise<Response> => {
@@ -6,22 +7,7 @@ export const handler = async (req: Request): Promise<Response> => {
         const paths = url.pathname.split("/");
         paths.shift();
 
-        const body =
-            req.method === "POST"
-                ? await req.json().catch(() => {
-                      return null;
-                  })
-                : null;
-
-        const id = body?.id ?? paths[1] ?? url.searchParams.get("id") ?? null;
-        if (!id) {
-            return new Response(JSON.stringify({ error: "No ID provided." }), {
-                status: 400,
-                headers: { "Content-Type": "application/json" },
-            });
-        }
-
-        const data = await get(String(id));
+        const data = await stats();
         if (!data) {
             return new Response(JSON.stringify({ error: "No data found." }), {
                 status: 404,
@@ -43,7 +29,7 @@ export const handler = async (req: Request): Promise<Response> => {
 };
 
 const route = {
-    path: "/info",
+    path: "/stats",
     handler,
 };
 

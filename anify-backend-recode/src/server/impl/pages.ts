@@ -6,7 +6,14 @@ export const handler = async (req: Request): Promise<Response> => {
         const paths = url.pathname.split("/");
         paths.shift();
 
-        const providerId = paths[1] ?? url.searchParams.get("providerId") ?? null;
+        const body =
+            req.method === "POST"
+                ? await req.json().catch(() => {
+                      return null;
+                  })
+                : null;
+
+        const providerId = body?.providerId ?? paths[1] ?? url.searchParams.get("providerId") ?? null;
         if (!providerId) {
             return new Response(JSON.stringify({ error: "No provider ID provided." }), {
                 status: 400,
@@ -14,7 +21,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const readId = decodeURIComponent(paths[2] ?? url.searchParams.get("readId") ?? "");
+        const readId = decodeURIComponent(body?.readId ?? paths[2] ?? url.searchParams.get("readId") ?? "");
         if (!readId || readId.length === 0) {
             return new Response(JSON.stringify({ error: "No read ID provided." }), {
                 status: 400,
@@ -38,7 +45,6 @@ export const handler = async (req: Request): Promise<Response> => {
 };
 
 const route = {
-    method: "GET",
     path: "/pages",
     handler,
 };

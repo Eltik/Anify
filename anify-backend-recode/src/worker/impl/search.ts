@@ -1,9 +1,9 @@
 import colors from "colors";
 import QueueExecutor from "../../lib/executor";
-import { Format, Type } from "../../types/enums";
+import { Format, Genres, Type } from "../../types/enums";
 import { loadSearch } from "../../lib/impl/search";
 
-const executor = new QueueExecutor<{ query: string; type: Type; formats: Format[] }>("search-executor")
+const executor = new QueueExecutor<{ query: string; type: Type; formats: Format[]; genres?: Genres[]; genresExcluded?: Genres[]; year?: number; tags?: string[]; tagsExcluded?: string[] }>("search-executor")
     .executor(async (data) => {
         const media = await loadSearch(data);
         return media;

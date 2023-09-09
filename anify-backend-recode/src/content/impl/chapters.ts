@@ -1,5 +1,5 @@
 import { get } from "../../database/impl/modify/get";
-import { update } from "../../database/impl/update";
+import { update } from "../../database/impl/modify/update";
 import { fillMediaInfo } from "../../lib/impl/mappings";
 import { INFORMATION_PROVIDERS, mangaProviders } from "../../mappings";
 import { ChapterData, Manga } from "../../types/types";

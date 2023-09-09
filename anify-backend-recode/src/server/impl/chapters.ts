@@ -6,7 +6,14 @@ export const handler = async (req: Request): Promise<Response> => {
         const paths = url.pathname.split("/");
         paths.shift();
 
-        const id = paths[1] ?? url.searchParams.get("id") ?? null;
+        const body =
+            req.method === "POST"
+                ? await req.json().catch(() => {
+                      return null;
+                  })
+                : null;
+
+        const id = body?.id ?? paths[1] ?? url.searchParams.get("id") ?? null;
         if (!id) {
             return new Response(JSON.stringify({ error: "No ID provided." }), {
                 status: 400,
@@ -30,7 +37,6 @@ export const handler = async (req: Request): Promise<Response> => {
 };
 
 const route = {
-    method: "GET",
     path: "/chapters",
     handler,
 };

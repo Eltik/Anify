@@ -1,5 +1,5 @@
 import { get } from "../../database/impl/modify/get";
-import { update } from "../../database/impl/update";
+import { update } from "../../database/impl/modify/update";
 import { fillMediaInfo } from "../../lib/impl/mappings";
 import { INFORMATION_PROVIDERS, animeProviders } from "../../mappings";
 import { Anime, EpisodeData } from "../../types/types";

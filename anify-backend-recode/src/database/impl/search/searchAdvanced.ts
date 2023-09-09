@@ -1,6 +1,6 @@
-import { db } from "..";
-import { Format, Genres, Type } from "../../types/enums";
-import { Anime, Manga } from "../../types/types";
+import { db } from "../..";
+import { Format, Genres, Type } from "../../../types/enums";
+import { Anime, Manga } from "../../../types/types";
 
 export const searchAdvanced = async (query: string, type: Type, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = [], year = 0, tags: string[] = [], tagsExcluded: string[] = []) => {
     const skip = page > 0 ? perPage * (page - 1) : 0;

@@ -1,14 +1,12 @@
 import queues from "../../worker";
-import { search } from "../../database/impl/search/search";
-import { Format, Type } from "../../types/enums";
+import { Format, Genres, Type } from "../../types/enums";
+import { searchAdvanced } from "../../database/impl/search/searchAdvanced";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
         const url = new URL(req.url);
         const paths = url.pathname.split("/");
         paths.shift();
-
-        const validTypes = ["anime", "manga", "novel"];
 
         const body =
             req.method === "POST"
@@ -17,7 +15,9 @@ export const handler = async (req: Request): Promise<Response> => {
                   })
                 : null;
 
-        const type = body?.type ?? paths[1] ?? url.searchParams.get("type") ?? null;
+        const validTypes = ["anime", "manga", "novel"];
+
+        const type = body?.type ?? url.searchParams.get("type") ?? null;
         if (!type) {
             return new Response(JSON.stringify({ error: "No type provided." }), {
                 status: 400,
@@ -30,19 +30,20 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const query = decodeURIComponent(body?.query ?? paths[2] ?? url.searchParams.get("query") ?? "");
-        if (!query || query.length === 0) {
-            return new Response(JSON.stringify({ error: "No query provided." }), {
-                status: 400,
-                headers: { "Content-Type": "application/json" },
-            });
-        }
+        const query = decodeURIComponent(body?.query ?? url.searchParams.get("query") ?? "");
+        const genres = body?.genres ?? url.searchParams.get("genres")?.split(",") ?? [];
+        const genresExcluded = body?.genresExcluded ?? url.searchParams.get("genresExcluded")?.split(",") ?? [];
+        const tags = body?.tags ?? url.searchParams.get("tags")?.split(",") ?? [];
+        const tagsExcluded = body?.tagsExcluded ?? url.searchParams.get("tagsExcluded")?.split(",") ?? [];
+        const year = Number(body?.year ?? url.searchParams.get("year") ?? "0");
+        const page = Number(body?.page ?? url.searchParams.get("page") ?? "1");
+        const perPage = Number(body?.perPage ?? url.searchParams.get("perPage") ?? "20");
 
         const formats = type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL];
 
-        const data = await search(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats, 0, 20);
+        const data = await searchAdvanced(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats, page, perPage, genres as Genres[], genresExcluded as Genres[], year, tags, tagsExcluded);
         if (data.length === 0) {
-            queues.searchQueue.add({ type: (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, query: query, formats: formats });
+            queues.searchQueue.add({ type: (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, query: query, formats: formats, genres: genres as Genres[], genresExcluded: genresExcluded as Genres[], year: year, tags: tags, tagsExcluded: tagsExcluded });
 
             return new Response(JSON.stringify([]), {
                 status: 200,
@@ -64,7 +65,7 @@ export const handler = async (req: Request): Promise<Response> => {
 };
 
 const route = {
-    path: "/search",
+    path: "/search-advanced",
     handler,
 };
 

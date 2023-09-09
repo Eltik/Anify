@@ -8,8 +8,12 @@ import colors from "colors";
 import { pipeline } from "node:stream";
 import { promisify } from "node:util";
 import imageSize from "image-size";
+import { env } from "../../env";
 
-export const createPDF = async (providerId: string, chapter: Chapter, pages: string | Page[]): Promise<string> => {
+export const loadPDF = async (providerId: string, chapter: Chapter, pages: string | Page[]): Promise<string | undefined> => {
+    const useMixdrop = env.USE_MIXDROP;
+    if (!useMixdrop) return;
+
     if (typeof pages === "string") {
         return await createNovelPDF(providerId, chapter, pages);
     }

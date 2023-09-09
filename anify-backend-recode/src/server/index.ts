@@ -26,16 +26,16 @@ export const start = async () => {
                 const route = routeModule.default;
 
                 if (route) {
-                    const { method, path, handler } = route;
+                    const { path, handler } = route;
                     const pathName = url.pathname.split("/").slice(1)[0];
 
-                    if (method === req.method && path === `/${pathName}`) {
+                    if (path === `/${pathName}`) {
                         return handler(req);
                     }
                 }
             }
 
-            return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: { "Content-Type": "application/json" } });
+            return new Response(JSON.stringify({ error: "Route not found" }), { status: 404, headers: { "Content-Type": "application/json" } });
         },
     });
 
