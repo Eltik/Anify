@@ -23,62 +23,66 @@ export default class Kitsu extends InformationProvider<Anime | Manga, AnimeInfo 
 
         if (!kitsuId) return undefined;
 
-        const kitsuResponse: KitsuResponse = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}`, {}, true)).json();
+        try {
+            const kitsuResponse: KitsuResponse = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}`, {}, true)).json();
 
-        const attributes = kitsuResponse?.data?.attributes;
+            const attributes = kitsuResponse?.data?.attributes;
 
-        if (!attributes) return undefined;
+            if (!attributes) return undefined;
 
-        const kitsuGenre = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}/genres`, {}, true)).json();
-        const genres = kitsuGenre?.data;
+            const kitsuGenre = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}/genres`, {}, true)).json();
+            const genres = kitsuGenre?.data;
 
-        const artwork: Artwork[] = [];
+            const artwork: Artwork[] = [];
 
-        if (attributes.coverImage?.original)
-            artwork.push({
-                type: "banner",
-                img: attributes.coverImage.original,
-                providerId: this.id,
-            });
-        if (attributes.posterImage?.original)
-            artwork.push({
-                type: "poster",
-                img: attributes.posterImage.original,
-                providerId: this.id,
-            });
+            if (attributes.coverImage?.original)
+                artwork.push({
+                    type: "banner",
+                    img: attributes.coverImage.original,
+                    providerId: this.id,
+                });
+            if (attributes.posterImage?.original)
+                artwork.push({
+                    type: "poster",
+                    img: attributes.posterImage.original,
+                    providerId: this.id,
+                });
 
-        return {
-            id: kitsuId,
-            title: {
-                english: attributes.titles.en ?? null,
-                romaji: attributes.titles.en_jp ?? null,
-                native: attributes.titles.ja_jp ?? null,
-            },
-            currentEpisode: null,
-            trailer: null,
-            duration: attributes.episodeLength ?? null,
-            color: null,
-            bannerImage: attributes.coverImage?.original ?? null,
-            coverImage: attributes.posterImage?.original ?? null,
-            status: null,
-            format: Format.UNKNOWN,
-            season: Season.UNKNOWN,
-            synonyms: [],
-            description: attributes.synopsis ?? null,
-            year: null,
-            totalEpisodes: attributes.episodeCount ?? 0,
-            genres: genres ? genres.map((genre: any) => genre.attributes.name) : [],
-            rating: attributes.averageRating ? Number.parseFloat((Number.parseFloat(attributes.averageRating) / 10).toFixed(2)) : null,
-            popularity: null,
-            countryOfOrigin: null,
-            tags: [],
-            relations: [],
-            artwork,
-            characters: [],
-            totalChapters: null,
-            totalVolumes: null,
-            type: media.type,
-        };
+            return {
+                id: kitsuId,
+                title: {
+                    english: attributes.titles.en ?? null,
+                    romaji: attributes.titles.en_jp ?? null,
+                    native: attributes.titles.ja_jp ?? null,
+                },
+                currentEpisode: null,
+                trailer: null,
+                duration: attributes.episodeLength ?? null,
+                color: null,
+                bannerImage: attributes.coverImage?.original ?? null,
+                coverImage: attributes.posterImage?.original ?? null,
+                status: null,
+                format: Format.UNKNOWN,
+                season: Season.UNKNOWN,
+                synonyms: [],
+                description: attributes.synopsis ?? null,
+                year: null,
+                totalEpisodes: attributes.episodeCount ?? 0,
+                genres: genres ? genres.map((genre: any) => genre.attributes.name) : [],
+                rating: attributes.averageRating ? Number.parseFloat((Number.parseFloat(attributes.averageRating) / 10).toFixed(2)) : null,
+                popularity: null,
+                countryOfOrigin: null,
+                tags: [],
+                relations: [],
+                artwork,
+                characters: [],
+                totalChapters: null,
+                totalVolumes: null,
+                type: media.type,
+            };
+        } catch (e) {
+            return undefined;
+        }
     }
 }
 
