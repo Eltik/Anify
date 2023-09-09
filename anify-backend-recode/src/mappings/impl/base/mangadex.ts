@@ -287,4 +287,90 @@ export default class ManagDexBase extends BaseProvider {
             return undefined;
         }
     }
+
+    override async fetchSeasonal(type: Type, formats: Format[]): Promise<{ trending: AnimeInfo[] | MangaInfo[]; seasonal: AnimeInfo[] | MangaInfo[]; popular: AnimeInfo[] | MangaInfo[]; top: AnimeInfo[] | MangaInfo[] } | undefined> {
+        const currentDate = new Date();
+
+        // Format the date as YYYY-MM-DD
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+        const day = String(currentDate.getDate()).padStart(2, "0");
+        const createdAtParam = `${year}-${month}-${day}T00:00:00`;
+
+        const trending = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true&createdAtSince=${createdAtParam}`, {}, true)).json();
+        const popular = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`, {}, true)).json();
+        const top = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[rating]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`, {}, true)).json();
+        const seasonalReq = await (await this.request(`${this.api}/list/1b9f88f8-9880-464d-9ed9-59b7e36392e2?includes[]=user`, {}, true)).json();
+
+        const seasonalIDs: string[] = [];
+        for (const item of seasonalReq.data.relationships) {
+            if (item.type === "manga") {
+                seasonalIDs.push(item.id);
+            }
+        }
+        const seasonal = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&ids[]=${seasonalIDs.join("&ids[]=")}`, {}, true)).json();
+
+        const trendingList: MangaInfo[] = [];
+        const popularList: MangaInfo[] = [];
+        const topList: MangaInfo[] = [];
+        const seasonalList: MangaInfo[] = [];
+
+        for (const manga of trending.data) {
+            trendingList.push(this.returnFilledManga(manga));
+        }
+
+        for (const manga of popular.data) {
+            popularList.push(this.returnFilledManga(manga));
+        }
+
+        for (const manga of top.data) {
+            topList.push(this.returnFilledManga(manga));
+        }
+
+        for (const manga of seasonal.data) {
+            seasonalList.push(this.returnFilledManga(manga));
+        }
+
+        return {
+            trending: trendingList,
+            seasonal: seasonalList,
+            popular: popularList,
+            top: topList,
+        };
+    }
+
+    private returnFilledManga(manga: any) {
+        const formatString: string = manga.type.toUpperCase();
+        const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
+
+        return {
+            id: manga.id,
+            type: Type.MANGA,
+            title: {
+                english: manga.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "en")?.en ?? null,
+                romaji: manga.attributes.title["ja-ro"] ?? manga.attributes.title["jp-ro"] ?? manga.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja-ro")?.["ja-ro"] ?? manga.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp-ro")?.["jp-ro"] ?? null,
+                native: manga.attributes.title["jp"] ?? manga.attributes.title["ja"] ?? manga.attributes.title["ko"] ?? manga.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp")?.jp ?? manga.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja")?.ja ?? manga.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ko")?.ko ?? null,
+            },
+            synonyms: manga.attributes.altTitles.map((title: { [key: string]: string }) => {
+                return Object.values(title)[0];
+            }),
+            description: manga.attributes.description.en ?? manga.attributes.description.jp ?? manga.attributes.description.jp_ro ?? manga.attributes.description.ko ?? Object.values(manga.attributes.description)[0],
+            countryOfOrigin: manga.attributes.publicationDemographic ?? manga.attributes.originalLanguage?.toUpperCase() ?? null,
+            characters: [],
+            genres: manga.attributes.tags.filter((tag: any) => tag.attributes.group === "genre").map((tag: any) => tag.attributes.name.en),
+            year: manga.attributes.year,
+            artwork: [],
+            totalChapters: manga.attributes.lastChapter ?? null,
+            totalVolumes: manga.attributes.lastVolume ?? null,
+            status: manga.attributes.status === "ongoing" ? MediaStatus.RELEASING : manga.attributes.status === "completed" ? MediaStatus.FINISHED : null,
+            color: null,
+            popularity: null,
+            relations: [],
+            tags: manga.attributes.tags.filter((tag: any) => tag.attributes.group === "theme").map((tag: any) => tag.attributes.name.en),
+            rating: null,
+            format,
+            coverImage: `${this.url}/covers/${manga.id}/${manga.relationships.find((element: any) => element.type === "cover_art").id}.jpg`,
+            bannerImage: null,
+        };
+    }
 }

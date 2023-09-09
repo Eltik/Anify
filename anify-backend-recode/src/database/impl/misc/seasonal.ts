@@ -60,19 +60,19 @@ export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: Ani
     // Fetch media for each category
     const [trend, pop, t, season] = await Promise.all([
         fetchMediaByType(
-            trending[0].type,
+            trending[0]?.type,
             trending.map((a) => String(a.id)),
         ),
         fetchMediaByType(
-            popular[0].type,
+            popular[0]?.type,
             popular.map((a) => String(a.id)),
         ),
         fetchMediaByType(
-            top[0].type,
+            top[0]?.type,
             top.map((a) => String(a.id)),
         ),
         fetchMediaByType(
-            seasonal[0].type,
+            seasonal[0]?.type,
             seasonal.map((a) => String(a.id)),
         ),
     ]);

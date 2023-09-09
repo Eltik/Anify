@@ -142,7 +142,7 @@ const Novel: NextPage<Props> = ({ seasonal, recent }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async () => {
-    const seasonal = (await axios.get(String(env.BACKEND_URL) + "/seasonal/novel?apikey=" + String(env.API_KEY))).data as Seasonal;
+    const seasonal = (await axios.get(String(env.BACKEND_URL) + "/seasonal?type=novel&fields=[id,description,bannerImage,coverImage,title,genres,format,averageRating,episodes,chapters,year]&apikey=" + String(env.API_KEY))).data as Seasonal;
     const recent = (await axios.get(String(env.BACKEND_URL) + "/recent?type=novel&apikey=" + String(env.API_KEY))).data as Manga[];
 
     return {

@@ -365,25 +365,25 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                             boxShadow: "0 1px 12px #000a"
                                         }}>
                                             <div className="flex flex-row gap-5">
-                                                {media.rating.anilist && media.rating.anilist != 0 ? (
+                                                {media.rating?.anilist && media.rating.anilist != 0 ? (
                                                     <div className="flex flex-col gap-1">
                                                         <span className="text-white text-base">AniList</span>
                                                         <span className="text-gray-300 text-sm">{media.rating.anilist}</span>
                                                     </div>
                                                 ) : null}
-                                                {media.rating.mal && media.rating.mal != 0 ? (
+                                                {media.rating?.mal && media.rating.mal != 0 ? (
                                                     <div className="flex flex-col gap-1">
                                                         <span className="text-white text-base">MAL</span>
                                                         <span className="text-gray-300 text-sm">{media.rating.mal}</span>
                                                     </div>
                                                 ) : null}
-                                                {media.rating.kitsu && media.rating.kitsu != 0 ? (
+                                                {media.rating?.kitsu && media.rating.kitsu != 0 ? (
                                                     <div className="flex flex-col gap-1">
                                                         <span className="text-white text-base">Kitsu</span>
                                                         <span className="text-gray-300 text-sm">{media.rating.kitsu}</span>
                                                     </div>
                                                 ) : null}
-                                                {media.rating.simkl && media.rating.simkl != 0 ? (
+                                                {media.rating?.simkl && media.rating.simkl != 0 ? (
                                                     <div className="flex flex-col gap-1">
                                                         <span className="text-white text-base">Simkl</span>
                                                         <span className="text-gray-300 text-sm">{media.rating.simkl}</span>
