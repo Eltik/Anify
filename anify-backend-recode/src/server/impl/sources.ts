@@ -60,9 +60,15 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const server = decodeURIComponent(body.server ?? paths[6] ?? url.searchParams.get("server") ?? "") as StreamingServers;
+        const server = body.server ?? paths[6] ?? url.searchParams.get("server") ?? undefined ? (decodeURIComponent(body.server ?? paths[6] ?? url.searchParams.get("server") ?? undefined) as StreamingServers) : undefined;
 
-        const data = await content.fetchSources(providerId, watchId, subType.toUpperCase() as SubType, server);
+        const data = await content.fetchSources(providerId, watchId, subType as SubType, server as StreamingServers);
+
+        if (!data)
+            return new Response(JSON.stringify({ error: "Sources not found." }), {
+                status: 404,
+                headers: { "Content-Type": "application/json" },
+            });
 
         if (data) queues.skipTimes.add({ id, episode: episodeNumber, toInsert: data });
 

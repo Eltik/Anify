@@ -103,7 +103,7 @@ export default class GogoAnime extends AnimeProvider {
             const serverURL = id;
             const download = `https://gogohd.net/download${new URL(serverURL).search}`;
 
-            return await new Extractor(serverURL, result).extract(server);
+            return await new Extractor(serverURL, result).extract(server ?? StreamingServers.GogoCDN);
         }
 
         const data = await (await this.request(`${this.url}${id}`)).text();
@@ -127,6 +127,6 @@ export default class GogoAnime extends AnimeProvider {
                 break;
         }
 
-        return await this.fetchSources(serverURL, subType, server);
+        return await this.fetchSources(serverURL, subType, server ?? StreamingServers.GogoCDN);
     }
 }

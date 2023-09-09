@@ -162,7 +162,7 @@ export default class AnimePahe extends AnimeProvider {
                 headers: this.headers ?? {},
             };
 
-            return await new Extractor(matches[0], result).extract(server);
+            return await new Extractor(matches[0], result).extract(server ?? StreamingServers.Kwik);
         } catch (e) {
             console.error(e);
             return undefined;

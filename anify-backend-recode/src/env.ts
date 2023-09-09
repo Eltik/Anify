@@ -10,6 +10,7 @@ export const env = {
     API_KEY_WHITELIST: process.env.API_KEY_WHITELIST?.split(",") || [],
     CENSYS_ID: process.env.CENSYS_ID,
     CENSYS_SECRET: process.env.CENSYS_SECRET,
+    SIMKL_CLIENT_ID: process.env.SIMKL_CLIENT_ID,
     USE_MIXDROP: process.env.USE_MIXDROP === "true" || false,
     MIXDROP_EMAIL: process.env.MIXDROP_EMAIL,
     MIXDROP_KEY: process.env.MIXDROP_KEY,

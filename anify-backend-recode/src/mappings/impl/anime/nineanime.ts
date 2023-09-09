@@ -138,7 +138,7 @@ export default class NineAnime extends AnimeProvider {
 
             const source = (await (await this.request(`${this.resolver}/decrypt?query=${encodeURIComponent(serverSource.result?.url)}&apikey=${this.resolverKey}`)).json()).url.split("/").pop();
 
-            return await new Extractor(source, result).extract(server);
+            return await new Extractor(source, result).extract(server ?? StreamingServers.MyCloud);
         }
 
         if (subType === SubType.SUB) {
@@ -170,10 +170,12 @@ export default class NineAnime extends AnimeProvider {
                 if (!s) throw new Error("Filemoon server found");
                 break;
             default:
-                throw new Error("Server not found");
+                s = servers.find((s) => s.name === "vidstream")!;
+                if (!s) throw new Error("Vidstream server found");
+                break;
         }
 
-        return await this.fetchSources(s.url, subType, server);
+        return await this.fetchSources(s.url, subType, server ?? StreamingServers.MyCloud);
     }
 
     override async fetchServers(id: string): Promise<Server[] | undefined> {

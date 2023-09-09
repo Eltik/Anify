@@ -112,7 +112,7 @@ export default class Zoro extends AnimeProvider {
         if (id.startsWith("http")) {
             const serverURL = id;
 
-            return await new Extractor(serverURL, result).extract(server);
+            return await new Extractor(serverURL, result).extract(server ?? StreamingServers.VidCloud);
         }
 
         const data = await (await this.request(`${this.url}/ajax/v2/episode/servers?episodeId=${id.split("?ep=")[1]}`)).json();
@@ -147,11 +147,14 @@ export default class Zoro extends AnimeProvider {
                 if (!serverId) throw new Error("StreamTape not found");
                 break;
             default:
-                throw new Error("Server not found");
+                serverId = this.retrieveServerId($, 4, subType);
+
+                if (!serverId) throw new Error("RapidCloud not found");
+                break;
         }
 
         const req = await (await this.request(`${this.url}/ajax/v2/episode/sources?id=${serverId}`)).json();
-        return await this.fetchSources(req.link, subType, server);
+        return await this.fetchSources(req.link, subType, server ?? StreamingServers.VidCloud);
     }
 
     private retrieveServerId($: any, index: number, subOrDub: SubType) {

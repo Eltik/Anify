@@ -32,7 +32,7 @@ export const loadSkipTimes = async (data: { id: string; episode: number; toInser
     }
 
     if (data.toInsert.intro.end > 0 || data.toInsert.outro.end > 0) {
-        toInsert.episodes.push({
+        toInsert?.episodes.push({
             intro: data.toInsert.intro,
             outro: data.toInsert.outro,
             number: data.episode,
