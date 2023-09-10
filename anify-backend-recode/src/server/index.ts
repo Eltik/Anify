@@ -20,9 +20,9 @@ export const start = async () => {
             if (url.pathname === "/") return new Response("Welcome to Anify API! 🎉 Documentation can be viewed at https://docs.anify.tv. Join our Discord https://anify.tv/discord for more information.", { headers: { "Content-Type": "application/json" } });
 
             // Dynamically add routes
-            const routeFiles = readdirSync(join(__dirname, "./impl"));
+            const routeFiles = readdirSync(join(import.meta.dir, "./impl"));
             for (const file of routeFiles) {
-                const routeModule = await import(join(__dirname, "./impl", file));
+                const routeModule = await import(join(import.meta.dir, "./impl", file));
                 const route = routeModule.default;
 
                 if (route) {
