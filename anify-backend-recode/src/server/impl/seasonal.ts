@@ -1,6 +1,7 @@
 import { Format, Type } from "../../types/enums";
 import { loadSeasonal } from "../../lib/impl/seasonal";
 import { seasonal } from "../../database/impl/misc/seasonal";
+import { cacheTime, redis } from "..";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -41,10 +42,20 @@ export const handler = async (req: Request): Promise<Response> => {
             fields = fieldsArray.filter(Boolean);
         }
 
+        const cached = await redis.get(`seasonal:${type}:${fields.join(",")}`);
+        if (cached) {
+            return new Response(cached, {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
         const formats = type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL];
 
         const seasonData = await loadSeasonal({ type: (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats });
         const data = await seasonal(seasonData?.trending ?? [], seasonData?.popular ?? [], seasonData?.top ?? [], seasonData?.seasonal ?? [], fields);
+
+        await redis.set(`seasonal:${type}:${fields.join(",")}`, JSON.stringify(data), "EX", cacheTime);
 
         return new Response(JSON.stringify(data), {
             status: 200,

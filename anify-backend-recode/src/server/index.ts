@@ -7,11 +7,18 @@ import colors from "colors";
 
 import { env } from "../env";
 
-export const start = async () => {
-    const redis = new Redis((env.REDIS_URL as string) || "redis://localhost:6379");
-    const cacheTime = env.REDIS_CACHE_TIME;
-    const whitelist = env.API_KEY_WHITELIST;
+export const redis: Redis = env.REDIS_URL ? new Redis((env.REDIS_URL as string) || "redis://localhost:6379") : {
+    get: async () => null,
+    set: (): Promise<"OK"> => Promise.resolve("OK"),
+    on: () => Redis.prototype,
+    keys: async () => [],
+    connect: async () => void 0,
+    call: async () => void 0,
+} as any;
 
+export const cacheTime = env.REDIS_CACHE_TIME || 60 * 60 * 24 * 7 * 2;
+
+export const start = async () => {
     const routes: { [key: string]: { path: string; handler: (req: Request) => Promise<Response> } } = {};
     const routeFiles = readdirSync(join(import.meta.dir, "./impl"));
     for (const file of routeFiles) {

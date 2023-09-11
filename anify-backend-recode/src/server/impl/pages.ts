@@ -1,3 +1,4 @@
+import { cacheTime, redis } from "..";
 import content from "../../content";
 import { Chapter, Page } from "../../types/types";
 import queues from "../../worker";
@@ -47,7 +48,17 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
+        const cached = await redis.get(`pages:${chapterTitle}:${chapterNumber}:${providerId}:${readId}`);
+        if (cached) {
+            return new Response(cached, {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
         const data = await content.fetchPages(providerId, readId);
+
+        await redis.set(`pages:${chapterTitle}:${chapterNumber}:${providerId}:${readId}`, JSON.stringify(data), "EX", cacheTime);
 
         const chapter: Chapter | null = {
             id: readId,

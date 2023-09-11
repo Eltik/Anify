@@ -1,3 +1,4 @@
+import { cacheTime, redis } from "..";
 import { get } from "../../database/impl/modify/get";
 import { Anime, Manga } from "../../types/types";
 
@@ -22,6 +23,14 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
+        const cached = await redis.get(`relations:${id}`);
+        if (cached) {
+            return new Response(cached, {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
         const data = await get(String(id));
         if (!data) {
             return new Response(JSON.stringify({ error: "No data found." }), {
@@ -38,6 +47,8 @@ export const handler = async (req: Request): Promise<Response> => {
                 relations.push(possible as any);
             }
         }
+
+        await redis.set(`relations:${id}`, JSON.stringify(relations), "EX", cacheTime);
 
         return new Response(JSON.stringify(relations), {
             status: 200,

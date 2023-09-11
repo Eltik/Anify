@@ -1,6 +1,7 @@
 import queues from "../../worker";
 import { search } from "../../database/impl/search/search";
 import { Format, Type } from "../../types/enums";
+import { cacheTime, redis } from "..";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -38,17 +39,22 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
+        const cached = await redis.get(`search:${type}:${query}`);
+        if (cached) {
+            return new Response(cached, {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
         const formats = type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL];
 
         const data = await search(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats, 0, 20);
         if (data.length === 0) {
             queues.searchQueue.add({ type: (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, query: query, formats: formats });
-
-            return new Response(JSON.stringify([]), {
-                status: 200,
-                headers: { "Content-Type": "application/json" },
-            });
         }
+
+        await redis.set(`search:${type}:${query}`, JSON.stringify(data), "EX", cacheTime);
 
         return new Response(JSON.stringify(data), {
             status: 200,

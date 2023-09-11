@@ -1,3 +1,4 @@
+import { cacheTime, redis } from "..";
 import { get } from "../../database/impl/modify/get";
 
 export const handler = async (req: Request): Promise<Response> => {
@@ -21,6 +22,14 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
+        const cached = await redis.get(`info:${id}`);
+        if (cached) {
+            return new Response(cached, {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
         const data = await get(String(id));
         if (!data) {
             return new Response(JSON.stringify({ error: "No data found." }), {
@@ -28,6 +37,8 @@ export const handler = async (req: Request): Promise<Response> => {
                 headers: { "Content-Type": "application/json" },
             });
         }
+
+        await redis.set(`info:${id}`, JSON.stringify(data), "EX", cacheTime);
 
         return new Response(JSON.stringify(data), {
             status: 200,

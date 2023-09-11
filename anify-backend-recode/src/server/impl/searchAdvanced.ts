@@ -1,6 +1,7 @@
 import queues from "../../worker";
 import { Format, Genres, Type } from "../../types/enums";
 import { searchAdvanced } from "../../database/impl/search/searchAdvanced";
+import { cacheTime, redis } from "..";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -39,17 +40,22 @@ export const handler = async (req: Request): Promise<Response> => {
         const page = Number(body?.page ?? url.searchParams.get("page") ?? "1");
         const perPage = Number(body?.perPage ?? url.searchParams.get("perPage") ?? "20");
 
+        const cached = await redis.get(`search-advanced:${type}:${query}:${genres}:${genresExcluded}:${tags}:${tagsExcluded}:${year}:${page}:${perPage}`);
+        if (cached) {
+            return new Response(cached, {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
         const formats = type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL];
 
         const data = await searchAdvanced(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats, page, perPage, genres as Genres[], genresExcluded as Genres[], year, tags, tagsExcluded);
         if (data.length === 0) {
             queues.searchQueue.add({ type: (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, query: query, formats: formats, genres: genres as Genres[], genresExcluded: genresExcluded as Genres[], year: year, tags: tags, tagsExcluded: tagsExcluded });
-
-            return new Response(JSON.stringify([]), {
-                status: 200,
-                headers: { "Content-Type": "application/json" },
-            });
         }
+
+        await redis.set(`search-advanced:${type}:${query}:${genres}:${genresExcluded}:${tags}:${tagsExcluded}:${year}:${page}:${perPage}`, JSON.stringify(data), "EX", cacheTime);
 
         return new Response(JSON.stringify(data), {
             status: 200,

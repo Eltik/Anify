@@ -1,3 +1,4 @@
+import { cacheTime, redis } from "..";
 import content from "../../content";
 
 export const handler = async (req: Request): Promise<Response> => {
@@ -21,7 +22,17 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
+        const cached = await redis.get(`chapters:${id}`);
+        if (cached) {
+            return new Response(cached, {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
         const data = await content.fetchChapters(String(id));
+        
+        await redis.set(`chapters:${id}`, JSON.stringify(data), "EX", cacheTime);
 
         return new Response(JSON.stringify(data), {
             status: 200,

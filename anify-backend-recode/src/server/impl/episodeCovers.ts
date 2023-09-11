@@ -1,3 +1,4 @@
+import { cacheTime, redis } from "..";
 import { get } from "../../database/impl/modify/get";
 import { env } from "../../env";
 
@@ -53,6 +54,16 @@ export const handler = async (req: Request): Promise<Response> => {
                 img: `https://simkl.in/episodes/${episode.img}_c.jpg`,
             });
         }
+
+        const cached = await redis.get(`episode-covers:${id}`);
+        if (cached) {
+            return new Response(cached, {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
+        await redis.set(`episode-covers:${id}`, JSON.stringify(episodeCovers), "EX", cacheTime);
 
         return new Response(JSON.stringify(episodeCovers), {
             status: 200,

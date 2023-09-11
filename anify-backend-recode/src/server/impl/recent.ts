@@ -2,6 +2,7 @@ import queues from "../../worker";
 import { search } from "../../database/impl/search/search";
 import { Format, Type } from "../../types/enums";
 import { recent } from "../../database/impl/misc/recent";
+import { cacheTime, redis } from "..";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -31,9 +32,19 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
+        const cached = await redis.get(`recent:${type}`);
+        if (cached) {
+            return new Response(cached, {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
         const formats = type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL];
 
         const data = await recent((type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats, 0, 20);
+        
+        await redis.set(`recent:${type}`, JSON.stringify(data), "EX", cacheTime);
 
         return new Response(JSON.stringify(data), {
             status: 200,

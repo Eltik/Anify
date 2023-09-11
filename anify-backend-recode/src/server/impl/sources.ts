@@ -1,3 +1,4 @@
+import { cacheTime, redis } from "..";
 import content from "../../content";
 import { StreamingServers, SubType } from "../../types/enums";
 import queues from "../../worker";
@@ -62,6 +63,14 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const server = body.server ?? paths[6] ?? url.searchParams.get("server") ?? undefined ? (decodeURIComponent(body.server ?? paths[6] ?? url.searchParams.get("server") ?? undefined) as StreamingServers) : undefined;
 
+        const cached = await redis.get(`sources:${id}:${episodeNumber}:${providerId}:${watchId}:${subType}:${server}`);
+        if (cached) {
+            return new Response(cached, {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
         const data = await content.fetchSources(providerId, watchId, subType as SubType, server as StreamingServers);
 
         if (!data)
@@ -71,6 +80,8 @@ export const handler = async (req: Request): Promise<Response> => {
             });
 
         if (data) queues.skipTimes.add({ id, episode: episodeNumber, toInsert: data });
+
+        await redis.set(`sources:${id}:${episodeNumber}:${providerId}:${watchId}:${subType}:${server}`, JSON.stringify(data), "EX", cacheTime);
 
         return new Response(JSON.stringify(data), {
             status: 200,
