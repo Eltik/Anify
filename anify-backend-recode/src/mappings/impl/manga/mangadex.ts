@@ -25,8 +25,6 @@ export default class MangaDex extends MangaProvider {
             uri.searchParams.set("order[relevance]", "desc");
             uri.searchParams.append("contentRating[]", "safe");
             uri.searchParams.append("contentRating[]", "suggestive");
-            uri.searchParams.append("contentRating[]", "erotica");
-            uri.searchParams.append("contentRating[]", "pornographic");
             uri.searchParams.append("includes[]", "cover_art");
 
             const data = await (await this.request(uri.href)).json();

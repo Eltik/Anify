@@ -9,18 +9,20 @@ import { pipeline } from "node:stream";
 import { promisify } from "node:util";
 import imageSize from "image-size";
 import { env } from "../../env";
+import emitter, { Events } from "..";
 
-export const loadPDF = async (providerId: string, chapter: Chapter, pages: string | Page[]): Promise<string | undefined> => {
+export const loadPDF = async (data: { providerId: string; chapter: Chapter; pages: string | Page[] }): Promise<string | undefined> => {
     const useMixdrop = env.USE_MIXDROP;
     if (!useMixdrop) return;
 
-    if (typeof pages === "string") {
-        return await createNovelPDF(providerId, chapter, pages);
+    if (typeof data.pages === "string") {
+        return await createNovelPDF(data.providerId, data.chapter, data.pages);
     }
-    return await createMangaPDF(providerId, chapter, pages);
+    return await createMangaPDF(data.providerId, data.chapter, data.pages);
 };
 
 export const createNovelPDF = async (providerId: string, chapter: Chapter, pages: string): Promise<string> => {
+    await emitter.emitAsync(Events.COMPLETED_PAGES_UPLOAD, "");
     return "";
 };
 
@@ -123,6 +125,7 @@ export const createMangaPDF = async (providerId: string, chapter: Chapter, pages
         }
     }
 
+    await emitter.emitAsync(Events.COMPLETED_PAGES_UPLOAD, `${parentFolder}/${chapter.title.replace(/[^\w .-]/gi, "")}.pdf`);
     return `${parentFolder}/${chapter.title.replace(/[^\w .-]/gi, "")}.pdf`;
 };
 

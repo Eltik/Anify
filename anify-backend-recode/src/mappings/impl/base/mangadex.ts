@@ -297,10 +297,26 @@ export default class ManagDexBase extends BaseProvider {
         const day = String(currentDate.getDate()).padStart(2, "0");
         const createdAtParam = `${year}-${month}-${day}T00:00:00`;
 
-        const trending = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true&createdAtSince=${createdAtParam}`, {}, true)).json();
-        const popular = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`, {}, true)).json();
-        const top = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[rating]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`, {}, true)).json();
-        const seasonalReq = await (await this.request(`${this.api}/list/1b9f88f8-9880-464d-9ed9-59b7e36392e2?includes[]=user`, {}, true)).json();
+        const trending = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true&createdAtSince=${createdAtParam}`, {}, true)).json().catch(() => {
+            return {
+                data: [],
+            };
+        });
+        const popular = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`, {}, true)).json().catch(() => {
+            return {
+                data: [],
+            };
+        });
+        const top = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[rating]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`, {}, true)).json().catch(() => {
+            return {
+                data: [],
+            };
+        });
+        const seasonalReq = await (await this.request(`${this.api}/list/1b9f88f8-9880-464d-9ed9-59b7e36392e2?includes[]=user`, {}, true)).json().catch(() => {
+            return {
+                data: [],
+            };
+        });
 
         const seasonalIDs: string[] = [];
         for (const item of seasonalReq.data.relationships) {
@@ -308,7 +324,11 @@ export default class ManagDexBase extends BaseProvider {
                 seasonalIDs.push(item.id);
             }
         }
-        const seasonal = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&ids[]=${seasonalIDs.join("&ids[]=")}`, {}, true)).json();
+        const seasonal = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&ids[]=${seasonalIDs.join("&ids[]=")}`, {}, true)).json().catch(() => {
+            return {
+                data: [],
+            };
+        });
 
         const trendingList: MangaInfo[] = [];
         const popularList: MangaInfo[] = [];

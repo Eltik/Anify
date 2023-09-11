@@ -532,11 +532,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     const media = (await axios.get(String(env.BACKEND_URL) + "/info/" + String(id) + "?apikey=" + String(env.API_KEY))).data as Manga;
     const content = (await axios.get(String(env.BACKEND_URL) + "/chapters/" + String(id) + "?apikey=" + String(env.API_KEY))).data as ChapterData[];
-    const pages = await (await axios.post(String(env.BACKEND_URL) + "/pages?apikey=" + String(env.API_KEY), {
-        id,
-        providerId: provider,
-        readId
-    })).data as Page[];
 
     let mixdrop = "";
     for (const prov of content) {
@@ -555,19 +550,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         })).data as MixdropResponse;
     }
 
-    if (media.format !== "NOVEL") {
-        for (let i = 0; i < pages.length; i++) {
-            if (pages[i]?.headers && Object.keys(pages[i]?.headers ?? {}).length > 0) {
-                Object.assign(pages[i] ?? {}, { url: `${String(env.IMAGE_PROXY)}?url=${encodeURIComponent(String(pages[i]?.url))}&headers=${encodeURIComponent(JSON.stringify(pages[i]?.headers))}` })
-            }
-        }
-    }
-
     content.reverse();
 
     let nextChapter = "";
     let previousChapter = "";
     let chapterNumber = -1;
+    let chapterTitle = "";
 
     const chapterSelector = [];
 
@@ -577,6 +565,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             const chapter = providerChap?.chapters[j];
 
             if (chapter?.id === readId) {
+                chapterTitle = chapter?.title ?? "";
                 chapterNumber = chapter.number ?? i;
             }
             if (providerChap?.providerId.toLowerCase() === (provider as string).toLowerCase()) {
@@ -608,6 +597,21 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                         )}`;
                     }
                 }
+            }
+        }
+    }
+
+    const pages = await (await axios.post(String(env.BACKEND_URL) + "/pages?apikey=" + String(env.API_KEY), {
+        chapterNumber,
+        chapterTitle,
+        providerId: provider,
+        readId
+    })).data as Page[];
+
+    if (media.format !== "NOVEL") {
+        for (let i = 0; i < pages.length; i++) {
+            if (pages[i]?.headers && Object.keys(pages[i]?.headers ?? {}).length > 0) {
+                Object.assign(pages[i] ?? {}, { url: `${String(env.IMAGE_PROXY)}?url=${encodeURIComponent(String(pages[i]?.url))}&headers=${encodeURIComponent(JSON.stringify(pages[i]?.headers))}` })
             }
         }
     }

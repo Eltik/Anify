@@ -76,4 +76,5 @@ async function before() {
     queues.searchQueue.start();
     queues.seasonalQueue.start();
     queues.skipTimes.start();
+    queues.uploadPages.start();
 }
