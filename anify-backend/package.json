@@ -1,5 +1,6 @@
 {
-  "name": "test",
+  "name": "anify-backend",
+  "description": "Anify Backend",
   "module": "index.ts",
   "type": "module",
   "scripts": {

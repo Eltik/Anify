@@ -31,7 +31,7 @@ export default abstract class BaseProvider {
         return undefined;
     }
 
-    async fetchSchedule(): Promise<Anime[] | undefined> {
+    async fetchIds(): Promise<string[] | undefined> {
         return undefined;
     }
 
