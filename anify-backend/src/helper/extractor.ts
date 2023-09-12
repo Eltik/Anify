@@ -1,9 +1,9 @@
 import CryptoJS from "crypto-js";
 import { load } from "cheerio";
-import { isJson, substringAfter, substringBefore } from ".";
-import { type Source, StreamingServers } from "../mapping/impl/anime";
-import { animeProviders } from "../mapping";
+import { substringAfter, substringBefore } from ".";
 import { env } from "process";
+import { Source } from "../types/types";
+import { StreamingServers } from "../types/enums";
 
 export default class Extractor {
     private url: string;
@@ -36,12 +36,6 @@ export default class Extractor {
                 return await this.extractKwik(this.url, this.result);
             case StreamingServers.AllAnime:
                 return await this.extractAllAnime(this.url, this.result);
-            case StreamingServers.DuckStream:
-                return await this.extractDuckStream(this.url, this.result);
-            case StreamingServers.DuckStreamV2:
-                return await this.extractDuckStreamV2(this.url, this.result);
-            case StreamingServers.BirdStream:
-                return await this.extractBirdStream(this.url, this.result);
             case StreamingServers.AnimeFlix:
                 return await this.extractAnimeFlix(this.url, this.result);
             default:
@@ -103,7 +97,7 @@ export default class Extractor {
 
         try {
             const subtitles = JSON.parse($.html().split("instance.setTrackByUrl(JSON.parse(`")[1].split("`).find")[0]);
-            subtitles.map((subtitle) => {
+            subtitles.map((subtitle: { title: string; lang: string; url: string }) => {
                 result.subtitles.push({
                     label: subtitle.title,
                     lang: subtitle.lang,
@@ -139,7 +133,7 @@ export default class Extractor {
 
         const mainReq = await (
             await fetch(m3u8File, {
-                headers: animeProviders["9anime"].headers,
+                headers: { Referer: "https://vidstream.pro/", "X-Requested-With": "XMLHttpRequest" },
             })
         ).json();
 
@@ -154,7 +148,7 @@ export default class Extractor {
         const file = mainReq.result?.sources[0]?.file;
 
         const req = await fetch(file, {
-            headers: animeProviders["9anime"].headers,
+            headers: { Referer: "https://vidstream.pro/", "X-Requested-With": "XMLHttpRequest" },
         });
 
         const resolutions = (await req.text()).match(/(RESOLUTION=)(.*)(\s*?)(\s*.*)/g);
@@ -242,7 +236,7 @@ export default class Extractor {
 
         const mainReq = await (
             await fetch(m3u8File, {
-                headers: animeProviders["9anime"].headers,
+                headers: { Referer: "https://vidstream.pro/", "X-Requested-With": "XMLHttpRequest" },
             })
         ).json();
 
@@ -257,7 +251,7 @@ export default class Extractor {
         const file = mainReq.result?.sources[0]?.file;
 
         const req = await fetch(file, {
-            headers: animeProviders["9anime"].headers,
+            headers: { Referer: "https://vidstream.pro/", "X-Requested-With": "XMLHttpRequest" },
         });
 
         const resolutions = (await req.text()).match(/(RESOLUTION=)(.*)(\s*?)(\s*.*)/g);
@@ -360,7 +354,7 @@ export default class Extractor {
             const decryptedData = CryptoJS.enc.Utf8.stringify(
                 CryptoJS.AES.decrypt(encryptedData, keys.secondKey, {
                     iv: keys.iv,
-                })
+                }),
             );
 
             return JSON.parse(decryptedData);
@@ -412,7 +406,7 @@ export default class Extractor {
             }
         }
 
-        sources = encryptedURLTemp.filter((x) => x !== null).join("");
+        sources = encryptedURLTemp.filter((x: any) => x !== null).join("");
 
         try {
             sources = JSON.parse(CryptoJS.AES.decrypt(sources, key).toString(CryptoJS.enc.Utf8));
@@ -567,468 +561,6 @@ export default class Extractor {
             url: link,
             quality: "auto",
         });
-
-        return result;
-    }
-
-    public async extractDuckStream(url: string, result: Source): Promise<Source> {
-        const order = await (await fetch("https://raw.githubusercontent.com/enimax-anime/gogo/main/KAA.json")).json();
-
-        const data = await (await fetch(url)).text();
-        const cid = data.split("cid:")[1].split("'")[1].trim();
-
-        const metaData = CryptoJS.enc.Hex.parse(cid).toString(CryptoJS.enc.Utf8);
-        const sigArray: any[] = [];
-
-        let key = "";
-
-        try {
-            const res = await fetch("https://raw.githubusercontent.com/enimax-anime/kaas/duck/key.txt");
-            if (res.status === 404) {
-                throw new Error("Not found");
-            } else {
-                key = await res.text();
-            }
-        } catch {
-            key = await (await fetch("https://raw.githubusercontent.com/enimax-anime/kaas/duck/key.txt")).json();
-        }
-
-        const signatureItems = {
-            SIG: data.split("signature:")[1].split("'")[1].trim(),
-            USERAGENT: "Mozilla/5.0 (Linux; Android 10; SM-A415F Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/96.0.4664.104 Mobile Safari/537.36 [FB_IAB/Orca-Android;FBAV/341.0.0.6.237;]",
-            IP: metaData.split("|")[0],
-            ROUTE: metaData.split("|")[1].replace("player.php", "source.php"),
-            KEY: key,
-            TIMESTAMP: Math.floor(Date.now() / 1000),
-            MID: new URL(url).searchParams.get("mid"),
-        };
-
-        for (const item of order.duck) {
-            sigArray.push(signatureItems[item]);
-        }
-
-        const sig = CryptoJS.SHA1(sigArray.join("")).toString(CryptoJS.enc.Hex);
-
-        const res = (
-            await (
-                await fetch(`${new URL(url).origin}${signatureItems.ROUTE}?${"mid"}=${signatureItems.MID}${"&e=" + signatureItems.TIMESTAMP}&s=${sig}`, {
-                    headers: {
-                        Referer: `${new URL(url).origin}${signatureItems.ROUTE.replace("source.php", "player.php")}?${"mid"}=${signatureItems.MID}`,
-                        "User-Agent": signatureItems.USERAGENT,
-                    },
-                })
-            ).json()
-        ).data;
-
-        const finalResult = JSON.parse(
-            CryptoJS.AES.decrypt(res.split(":")[0], CryptoJS.enc.Utf8.parse(signatureItems.KEY), {
-                mode: CryptoJS.mode.CBC,
-                iv: CryptoJS.enc.Hex.parse(res.split(":")[1]),
-                keySize: 256,
-            }).toString(CryptoJS.enc.Utf8)
-        );
-
-        let hlsURL = "",
-            dashURL = "";
-
-        if (finalResult.hls) {
-            hlsURL = finalResult.hls.startsWith("//") ? `https:${finalResult.hls}` : finalResult.hls;
-
-            result.sources.push({
-                quality: "auto",
-                url: hlsURL,
-            });
-
-            try {
-                const data = await (await fetch(hlsURL)).text();
-
-                // Extract qualities
-                const resolutions = data.match(/(RESOLUTION=)(.*)(\s*?)(\s*.*)/g);
-
-                resolutions?.forEach((res: string) => {
-                    const index = hlsURL.lastIndexOf("/");
-                    const quality = res.split("\n")[0].split("x")[1].split(",")[0];
-                    const url = new URL(hlsURL.slice(0, index)).origin;
-
-                    result.sources.push({
-                        url: url + (res.split("\n")[1]?.startsWith("/") ? "" : "/") + res.split("\n")[1],
-                        quality: quality + "p",
-                    });
-                });
-
-                // Extract audio
-                const audioRegex = /#EXT-X-MEDIA:TYPE=AUDIO,.*URI="(.*)"/g;
-                const audioMatches = [...data.matchAll(audioRegex)];
-
-                audioMatches?.forEach((value: RegExpMatchArray, i: number, array: RegExpMatchArray[]) => {
-                    const audioUrl = value[1];
-                    const index = hlsURL.lastIndexOf("/");
-                    const nameMatch = value[0].match(/NAME="([^"]*)"/);
-                    const languageMatch = value[0].match(/LANGUAGE="([^"]*)"/);
-
-                    if (nameMatch && languageMatch) {
-                        const name = nameMatch[1];
-                        const language = languageMatch[1];
-                        const url = hlsURL.slice(0, index);
-
-                        result.audio.push({
-                            name: name,
-                            language: language,
-                            url: url + "/" + audioUrl,
-                        });
-                    }
-                });
-            } catch (e) {
-                //
-            }
-
-            result.intro.start = finalResult.skip?.intro?.start ?? 0;
-            result.intro.end = finalResult.skip?.intro?.end ?? 0;
-        }
-
-        if (finalResult.dash) {
-            dashURL = finalResult.dash.startsWith("//") ? `https:${finalResult.dash}` : finalResult.dash;
-
-            result.sources.push({
-                quality: "dash",
-                url: dashURL,
-            });
-
-            result.intro.start = finalResult.skip?.intro?.start ?? 0;
-            result.intro.end = finalResult.skip?.intro?.end ?? 0;
-        }
-
-        if (finalResult.subtitles) {
-            if (hlsURL.length > 0) {
-                finalResult.subtitles.map((sub) => {
-                    result.subtitles.push({
-                        label: `${sub.name}`,
-                        url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, hlsURL).href,
-                        lang: sub.language,
-                    });
-                });
-            }
-
-            if (dashURL.length > 0 && finalResult.subtitles.length === 0) {
-                finalResult.subtitles.map((sub) => {
-                    result.subtitles.push({
-                        label: `${sub.name}`,
-                        url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, dashURL).href,
-                        lang: sub.language,
-                    });
-                });
-            }
-        }
-
-        return result;
-    }
-
-    public async extractDuckStreamV2(url: string, result: Source): Promise<Source> {
-        const order = await (await fetch("https://raw.githubusercontent.com/enimax-anime/gogo/main/KAA.json")).json();
-
-        const data = await (await fetch(url)).text();
-        const cid = data.split("cid:")[1].split("'")[1].trim();
-
-        const metaData = CryptoJS.enc.Hex.parse(cid).toString(CryptoJS.enc.Utf8);
-        const sigArray: any[] = [];
-
-        let key = "";
-
-        try {
-            const res = await fetch("https://raw.githubusercontent.com/enimax-anime/kaas/duck/key.txt");
-            if (res.status === 404) {
-                throw new Error("Not found");
-            } else {
-                key = await res.text();
-            }
-        } catch {
-            key = await (await fetch("https://raw.githubusercontent.com/enimax-anime/kaas/duck/key.txt")).json();
-        }
-
-        const signatureItems = {
-            SIG: data.split("signature:")[1].split("'")[1].trim(),
-            USERAGENT: "Mozilla/5.0 (Linux; Android 10; SM-A415F Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/96.0.4664.104 Mobile Safari/537.36 [FB_IAB/Orca-Android;FBAV/341.0.0.6.237;]",
-            IP: metaData.split("|")[0],
-            ROUTE: metaData.split("|")[1].replace("player.php", "source.php"),
-            KEY: key,
-            TIMESTAMP: Math.floor(Date.now() / 1000),
-            MID: new URL(url).searchParams.get("id"),
-        };
-
-        for (const item of order.duck) {
-            sigArray.push(signatureItems[item]);
-        }
-
-        const sig = CryptoJS.SHA1(sigArray.join("")).toString(CryptoJS.enc.Hex);
-
-        const res = (
-            await (
-                await fetch(`${new URL(url).origin}${signatureItems.ROUTE}?${"id"}=${signatureItems.MID}${"&e=" + signatureItems.TIMESTAMP}&s=${sig}`, {
-                    headers: {
-                        Referer: `${new URL(url).origin}${signatureItems.ROUTE.replace("source.php", "player.php")}?${"mid"}=${signatureItems.MID}`,
-                        "User-Agent": signatureItems.USERAGENT,
-                    },
-                })
-            ).json()
-        ).data;
-
-        const finalResult = JSON.parse(
-            CryptoJS.AES.decrypt(res.split(":")[0], CryptoJS.enc.Utf8.parse(signatureItems.KEY), {
-                mode: CryptoJS.mode.CBC,
-                iv: CryptoJS.enc.Hex.parse(res.split(":")[1]),
-                keySize: 256,
-            }).toString(CryptoJS.enc.Utf8)
-        );
-
-        let hlsURL = "",
-            dashURL = "";
-
-        if (finalResult.hls) {
-            hlsURL = finalResult.hls.startsWith("//") ? `https:${finalResult.hls}` : finalResult.hls;
-
-            result.sources.push({
-                quality: "auto",
-                url: hlsURL,
-            });
-
-            try {
-                const data = await (await fetch(hlsURL)).text();
-
-                // Extract qualities
-                const resolutions = data.match(/(RESOLUTION=)(.*)(\s*?)(\s*.*)/g);
-
-                resolutions?.forEach((res: string) => {
-                    const index = hlsURL.lastIndexOf("/");
-                    const quality = res.split("\n")[0].split("x")[1].split(",")[0];
-                    const url = new URL(hlsURL.slice(0, index)).origin;
-
-                    result.sources.push({
-                        url: url + (res.split("\n")[1]?.startsWith("/") ? "" : "/") + res.split("\n")[1],
-                        quality: quality + "p",
-                    });
-                });
-
-                // Extract audio
-                const audioRegex = /#EXT-X-MEDIA:TYPE=AUDIO,.*URI="(.*)"/g;
-                const audioMatches = [...data.matchAll(audioRegex)];
-
-                audioMatches?.forEach((value: RegExpMatchArray, i: number, array: RegExpMatchArray[]) => {
-                    const audioUrl = value[1];
-                    const index = hlsURL.lastIndexOf("/");
-                    const nameMatch = value[0].match(/NAME="([^"]*)"/);
-                    const languageMatch = value[0].match(/LANGUAGE="([^"]*)"/);
-
-                    if (nameMatch && languageMatch) {
-                        const name = nameMatch[1];
-                        const language = languageMatch[1];
-                        const url = hlsURL.slice(0, index);
-
-                        result.audio.push({
-                            name: name,
-                            language: language,
-                            url: url + "/" + audioUrl,
-                        });
-                    }
-                });
-            } catch (e) {
-                //
-            }
-
-            result.intro.start = finalResult.skip?.intro?.start ?? 0;
-            result.intro.end = finalResult.skip?.intro?.end ?? 0;
-        }
-
-        if (finalResult.dash) {
-            dashURL = finalResult.dash.startsWith("//") ? `https:${finalResult.dash}` : finalResult.dash;
-
-            result.sources.push({
-                quality: "dash",
-                url: dashURL,
-            });
-
-            result.intro.start = finalResult.skip?.intro?.start ?? 0;
-            result.intro.end = finalResult.skip?.intro?.end ?? 0;
-        }
-
-        if (finalResult.subtitles) {
-            if (hlsURL.length > 0) {
-                finalResult.subtitles.map((sub) => {
-                    result.subtitles.push({
-                        label: `${sub.name}`,
-                        url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, hlsURL).href,
-                        lang: sub.language,
-                    });
-                });
-            }
-
-            if (dashURL.length > 0 && finalResult.subtitles.length === 0) {
-                finalResult.subtitles.map((sub) => {
-                    result.subtitles.push({
-                        label: `${sub.name}`,
-                        url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, dashURL).href,
-                        lang: sub.language,
-                    });
-                });
-            }
-        }
-
-        return result;
-    }
-
-    public async extractBirdStream(url: string, result: Source): Promise<Source> {
-        const order = await (await fetch("https://raw.githubusercontent.com/enimax-anime/gogo/main/KAA.json")).json();
-
-        const data = await (await fetch(url)).text();
-        const cid = data.split("cid:")[1].split("'")[1].trim();
-
-        const metaData = CryptoJS.enc.Hex.parse(cid).toString(CryptoJS.enc.Utf8);
-        const sigArray: any[] = [];
-
-        let key = "";
-
-        try {
-            const res = await fetch("https://raw.githubusercontent.com/enimax-anime/kaas/bird/key.txt");
-            if (res.status === 404) {
-                throw new Error("Not found");
-            } else {
-                key = await res.text();
-            }
-        } catch {
-            key = await (await fetch("https://raw.githubusercontent.com/enimax-anime/kaas/bird/key.txt")).json();
-        }
-
-        const signatureItems = {
-            SIG: data.split("signature:")[1].split("'")[1].trim(),
-            USERAGENT: "Mozilla/5.0 (Linux; Android 10; SM-A415F Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/96.0.4664.104 Mobile Safari/537.36 [FB_IAB/Orca-Android;FBAV/341.0.0.6.237;]",
-            IP: metaData.split("|")[0],
-            ROUTE: metaData.split("|")[1].replace("player.php", "source.php"),
-            KEY: key,
-            TIMESTAMP: Math.floor(Date.now() / 1000),
-            MID: new URL(url).searchParams.get("id"),
-        };
-
-        for (const item of order.bird) {
-            sigArray.push(signatureItems[item]);
-        }
-
-        const sig = CryptoJS.SHA1(sigArray.join("")).toString(CryptoJS.enc.Hex);
-
-        const res = (
-            await (
-                await fetch(`${new URL(url).origin}${signatureItems.ROUTE}?${"id"}=${signatureItems.MID}&s=${sig}`, {
-                    headers: {
-                        Referer: `${new URL(url).origin}${signatureItems.ROUTE.replace("source.php", "player.php")}?${"id"}=${signatureItems.MID}`,
-                        "User-Agent": signatureItems.USERAGENT,
-                    },
-                })
-            ).json()
-        ).data;
-
-        const finalResult = JSON.parse(
-            CryptoJS.AES.decrypt(res.split(":")[0], CryptoJS.enc.Utf8.parse(signatureItems.KEY), {
-                mode: CryptoJS.mode.CBC,
-                iv: CryptoJS.enc.Hex.parse(res.split(":")[1]),
-                keySize: 256,
-            }).toString(CryptoJS.enc.Utf8)
-        );
-
-        let hlsURL = "",
-            dashURL = "";
-
-        if (finalResult.hls) {
-            hlsURL = finalResult.hls.startsWith("//") ? `https:${finalResult.hls}` : finalResult.hls;
-
-            result.sources.push({
-                quality: "auto",
-                url: hlsURL,
-            });
-
-            try {
-                const data = await (await fetch(hlsURL)).text();
-
-                // Extract qualities
-                const resolutions = data.match(/(RESOLUTION=)(.*)(\s*?)(\s*.*)/g);
-
-                resolutions?.forEach((res: string) => {
-                    const index = hlsURL.lastIndexOf("/");
-                    const quality = res.split("\n")[0].split("x")[1].split(",")[0];
-                    const url = new URL(hlsURL.slice(0, index)).origin;
-
-                    result.sources.push({
-                        url: url + (res.split("\n")[1]?.startsWith("/") ? "" : "/") + res.split("\n")[1],
-                        quality: quality + "p",
-                    });
-                });
-
-                // Extract audio
-                const audioRegex = /#EXT-X-MEDIA:TYPE=AUDIO,.*URI="(.*)"/g;
-                const audioMatches = [...data.matchAll(audioRegex)];
-
-                audioMatches?.forEach((value: RegExpMatchArray, i: number, array: RegExpMatchArray[]) => {
-                    const audioUrl = value[1];
-                    const index = hlsURL.lastIndexOf("/");
-                    const nameMatch = value[0].match(/NAME="([^"]*)"/);
-                    const languageMatch = value[0].match(/LANGUAGE="([^"]*)"/);
-
-                    if (nameMatch && languageMatch) {
-                        const name = nameMatch[1];
-                        const language = languageMatch[1];
-                        const url = hlsURL.slice(0, index);
-
-                        result.audio.push({
-                            name: name,
-                            language: language,
-                            url: url + "/" + audioUrl,
-                        });
-                    }
-                });
-            } catch (e) {
-                //
-            }
-
-            result.intro.start = finalResult.cues?.intro?.start_ms ?? 0;
-            result.intro.end = finalResult.cues?.intro?.end_ms ?? 0;
-
-            result.outro.start = finalResult.cues?.ending?.start_ms ?? 0;
-            result.outro.end = finalResult.cues?.ending?.end_ms ?? 0;
-        }
-
-        if (finalResult.dash) {
-            dashURL = finalResult.dash.startsWith("//") ? `https:${finalResult.dash}` : finalResult.dash;
-
-            result.sources.push({
-                quality: "dash",
-                url: dashURL,
-            });
-
-            result.intro.start = finalResult.cues?.intro?.start_ms ?? 0;
-            result.intro.end = finalResult.cues?.intro?.end_ms ?? 0;
-
-            result.outro.start = finalResult.cues?.ending?.start_ms ?? 0;
-            result.outro.end = finalResult.cues?.ending?.end_ms ?? 0;
-        }
-
-        if (finalResult.subtitles) {
-            if (hlsURL.length > 0) {
-                finalResult.subtitles.map((sub) => {
-                    result.subtitles.push({
-                        label: `${sub.name}`,
-                        url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, hlsURL).href,
-                        lang: sub.language,
-                    });
-                });
-            }
-
-            if (dashURL.length > 0 && finalResult.subtitles.length === 0) {
-                finalResult.subtitles.map((sub) => {
-                    result.subtitles.push({
-                        label: `${sub.name}`,
-                        url: sub.src.startsWith("//") ? `https:${sub.src}` : new URL(sub.src, dashURL).href,
-                        lang: sub.language,
-                    });
-                });
-            }
-        }
 
         return result;
     }

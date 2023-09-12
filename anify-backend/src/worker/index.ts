@@ -1,15 +1,15 @@
-import mappingQueue from "./mapping";
-import seasonQueue from "./season";
-import createEntry from "./entry";
-import searchQueue from "./search";
-import skipTimes from "./skipTimes";
-import uploadPages from "./upload";
+import mappingQueue from "./impl/mappings";
+import createEntry from "./impl/entry";
+import searchQueue from "./impl/search";
+import seasonalQueue from "./impl/seasonal";
+import skipTimes from "./impl/skipTimes";
+import uploadPages from "./impl/pdf";
 
 export default {
     mappingQueue,
-    seasonQueue,
     createEntry,
     searchQueue,
+    seasonalQueue,
     skipTimes,
     uploadPages,
 };

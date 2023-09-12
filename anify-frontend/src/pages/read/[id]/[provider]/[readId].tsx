@@ -603,9 +603,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     const pages = await (await axios.post(String(env.BACKEND_URL) + "/pages?apikey=" + String(env.API_KEY), {
         chapterNumber,
-        chapterTitle,
         providerId: provider,
-        readId
+        readId,
+        id
     })).data as Page[];
 
     if (media.format !== "NOVEL") {
