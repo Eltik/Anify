@@ -1,4 +1,4 @@
-import { Chapter, Page } from "../../types/types";
+import { Chapter, Manga, Page, UploadStatus } from "../../types/types";
 import { wait } from "../../helper";
 
 import PDFDocument from "pdfkit";
@@ -10,23 +10,125 @@ import { promisify } from "node:util";
 import imageSize from "image-size";
 import { env } from "../../env";
 import emitter, { Events } from "..";
+import { get } from "../../database/impl/modify/get";
+import { update } from "../../database/impl/modify/update";
 
-export const loadPDF = async (data: { providerId: string; chapter: Chapter; pages: string | Page[] }): Promise<string | undefined> => {
+export const loadPDF = async (data: { id: string; providerId: string; chapter: Chapter; pages: string | Page[] }) => {
     const useMixdrop = env.USE_MIXDROP;
     if (!useMixdrop) return;
 
-    if (typeof data.pages === "string") {
-        return await createNovelPDF(data.providerId, data.chapter, data.pages);
+    const mixdropEmail = env.MIXDROP_EMAIL;
+    const mixdropKey = env.MIXDROP_KEY;
+
+    if (!mixdropEmail || !mixdropKey) return;
+
+    const manga = await get(data.id);
+    if (!manga) return await emitter.emitAsync(Events.COMPLETED_PAGES_UPLOAD, "");
+
+    const chapters = (manga as Manga).chapters;
+    const mixdrop = chapters.data.find((x) => x.providerId === data.providerId)?.chapters.find((x) => x.id === data.chapter.id)?.mixdrop;
+
+    // Check if the file is removed
+    const isRemoved = await checkIsDeleted(mixdropEmail ?? "", mixdropKey ?? "", mixdrop ?? "");
+    if (!isRemoved && mixdrop != undefined) return mixdrop;
+
+    const pdfPath = typeof data.pages === "string" ? await createNovelPDF(data.providerId, data.chapter, data.pages) : await createMangaPDF(data.providerId, data.chapter, data.pages);
+    const file = Bun.file(pdfPath);
+    if (!file.exists()) return await emitter.emitAsync(Events.COMPLETED_PAGES_UPLOAD, "");
+
+    const form = new FormData();
+    form.append("email", mixdropEmail);
+    form.append("key", mixdropKey);
+    form.append("file", file, `${data.chapter.title.replace(/[^\w .-]/gi, "")}.pdf`);
+
+    const result = await (
+        await fetch("https://ul.mixdrop.co/api", {
+            method: "POST",
+            body: form,
+        })
+    ).json();
+
+    if (result.success) {
+        for (const chap of chapters.data) {
+            if (chap.providerId === data.providerId) {
+                const chaps = chap.chapters;
+                for (const ch of chaps) {
+                    if (ch.id === data.chapter.id) {
+                        ch.mixdrop = result[0];
+                    }
+                }
+            }
+        }
+
+        Object.assign(manga, { chapters });
+        await update(manga);
+
+        const maxThreshold = 100;
+        let threshold = 0;
+
+        const interval = setInterval(async () => {
+            const isComplete = await checkRemoteStatus(result.result?.fileref);
+            const key = Object.keys(isComplete.result)[0];
+
+            if (isComplete.result[key].status === "OK") {
+                console.log(colors.green("Completed uploading ") + colors.blue(data.chapter.title) + colors.green(" to Mixdrop"));
+                try {
+                    unlinkSync(pdfPath);
+                    // Try to delete parent folders
+                    const parentFolder = pdfPath.split("/").slice(0, -1).join("/");
+                    if (readdirSync(parentFolder).length === 0) {
+                        unlinkSync(parentFolder);
+                        const parentParentFolder = parentFolder.split("/").slice(0, -1).join("/");
+                        if (readdirSync(parentParentFolder).length === 0) {
+                            unlinkSync(parentParentFolder);
+                        }
+                    }
+                } catch (e) {
+                    //
+                }
+
+                clearInterval(interval);
+                return;
+            } else {
+                if (threshold >= maxThreshold + 5) {
+                    console.error(colors.red("ERROR: ") + colors.blue(`Mixdrop upload for ${data.chapter.title} is taking too long.`));
+                    try {
+                        unlinkSync(pdfPath);
+                        // Try to delete parent folders
+                        const parentFolder = pdfPath.split("/").slice(0, -1).join("/");
+                        if (readdirSync(parentFolder).length === 0) {
+                            unlinkSync(parentFolder);
+                            const parentParentFolder = parentFolder.split("/").slice(0, -1).join("/");
+                            if (readdirSync(parentParentFolder).length === 0) {
+                                unlinkSync(parentParentFolder);
+                            }
+                        }
+                    } catch (e) {
+                        //
+                    }
+
+                    clearInterval(interval);
+                    return;
+                }
+                threshold++;
+            }
+        }, 1000);
+
+        await emitter.emitAsync(Events.COMPLETED_PAGES_UPLOAD, result.result?.fileref);
+        return pdfPath;
+    } else {
+        console.error(colors.red("Failed to upload PDF to Mixdrop."));
+        return await emitter.emitAsync(Events.COMPLETED_PAGES_UPLOAD, "");
     }
-    return await createMangaPDF(data.providerId, data.chapter, data.pages);
 };
 
 export const createNovelPDF = async (providerId: string, chapter: Chapter, pages: string): Promise<string> => {
-    await emitter.emitAsync(Events.COMPLETED_PAGES_UPLOAD, "");
     return "";
 };
 
 export const createMangaPDF = async (providerId: string, chapter: Chapter, pages: Page[]): Promise<string> => {
+    if (chapter.title.length === 0) Object.assign(chapter, { title: `Chapter ${chapter.number}` });
+
     const parentFolder = `./manga/${providerId}/${chapter.title.replace(/[^\w .-]/gi, "")}`;
     const chapterTitle = chapter.title.replace(/[^\w .-]/gi, "");
 
@@ -125,7 +227,6 @@ export const createMangaPDF = async (providerId: string, chapter: Chapter, pages
         }
     }
 
-    await emitter.emitAsync(Events.COMPLETED_PAGES_UPLOAD, `${parentFolder}/${chapter.title.replace(/[^\w .-]/gi, "")}.pdf`);
     return `${parentFolder}/${chapter.title.replace(/[^\w .-]/gi, "")}.pdf`;
 };
 
@@ -136,7 +237,6 @@ export const createMangaPDF = async (providerId: string, chapter: Chapter, pages
  * @param headers (Optional) Headers to be included in the HTTP request.
  * @returns A Promise that resolves when the download is complete.
  */
-
 async function downloadFile(url: string, outputPath: string, headers?: Record<string, string>): Promise<void> {
     try {
         const response = await fetch(url, { headers });
@@ -184,3 +284,32 @@ async function getImageSize(path: string): Promise<{ width: number; height: numb
         return null;
     }
 }
+
+const checkRemoteStatus = async (mixdrop: string): Promise<UploadStatus> => {
+    const mixdropEmail = env.MIXDROP_EMAIL;
+    const mixdropKey = env.MIXDROP_KEY;
+
+    const res: UploadStatus = await (await fetch(`https://api.mixdrop.co/fileinfo2?email=${mixdropEmail}&key=${mixdropKey}&ref[]=${mixdrop}`)).json();
+    return res;
+};
+
+const checkIsDeleted = async (email: string, key: string, fileRef: string): Promise<boolean> => {
+    let pages = 1;
+    const initial = await (await fetch(`https://api.mixdrop.co/removed?email=${email}&key=${key}&page=1`)).json();
+    if (!Array.isArray(initial.result)) return false;
+
+    for (const file of initial.result) {
+        if (file.fileref === fileRef) return true;
+    }
+
+    pages = initial.pages;
+
+    for (let i = 2; i <= pages; i++) {
+        const initial = await (await fetch(`https://api.mixdrop.co/removed?email=${email}&key=${key}&page=${i}`)).json();
+        for (const file of initial.result) {
+            if (file.fileref === fileRef) return true;
+        }
+    }
+
+    return false;
+};

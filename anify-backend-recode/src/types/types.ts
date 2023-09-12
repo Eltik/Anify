@@ -208,3 +208,31 @@ export type SkipTime = {
 };
 
 export type Time = Pick<SkipTime, "episodes">["episodes"][number];
+
+/**
+ * @description MixDrop upload status
+ */
+export type UploadStatus = {
+    success: true;
+    result: ResultData;
+};
+
+type ResultData = {
+    [key: string]: FileData;
+};
+
+type FileData = {
+    fileref: string;
+    title: string;
+    size: string;
+    duration: null;
+    subtitle: boolean;
+    isvideo: boolean;
+    isaudio: boolean;
+    added: string;
+    status: string;
+    deleted: boolean;
+    thumb: null;
+    url: string;
+    yourfile: boolean;
+};

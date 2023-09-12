@@ -31,7 +31,7 @@ export const handler = async (req: Request): Promise<Response> => {
         }
 
         const data = await content.fetchChapters(String(id));
-        
+
         await redis.set(`chapters:${id}`, JSON.stringify(data), "EX", cacheTime);
 
         return new Response(JSON.stringify(data), {

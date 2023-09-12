@@ -16,9 +16,9 @@ export const handler = async (req: Request): Promise<Response> => {
                   })
                 : null;
 
-        const chapterTitle = body.chapterTitle ?? paths[1] ?? url.searchParams.get("chapterTitle") ?? null;
-        if (!chapterTitle) {
-            return new Response(JSON.stringify({ error: "No chapter title provided." }), {
+        const id = body.id ?? paths[1] ?? url.searchParams.get("id") ?? null;
+        if (!id) {
+            return new Response(JSON.stringify({ error: "No media ID provided." }), {
                 status: 400,
                 headers: { "Content-Type": "application/json" },
             });
@@ -48,7 +48,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const cached = await redis.get(`pages:${chapterTitle}:${chapterNumber}:${providerId}:${readId}`);
+        const cached = await redis.get(`pages:${id}:${chapterNumber}:${providerId}:${readId}`);
         if (cached) {
             return new Response(cached, {
                 status: 200,
@@ -58,15 +58,15 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const data = await content.fetchPages(providerId, readId);
 
-        await redis.set(`pages:${chapterTitle}:${chapterNumber}:${providerId}:${readId}`, JSON.stringify(data), "EX", cacheTime);
+        await redis.set(`pages:${id}:${chapterNumber}:${providerId}:${readId}`, JSON.stringify(data), "EX", cacheTime);
 
         const chapter: Chapter | null = {
             id: readId,
             number: chapterNumber,
-            title: chapterTitle,
+            title: "",
         };
 
-        if (chapter) await queues.uploadPages.add({ providerId, chapter, pages: (data as Page[] | string) ?? [] });
+        if (chapter) await queues.uploadPages.add({ id, providerId, chapter, pages: (data as Page[] | string) ?? [] });
 
         return new Response(JSON.stringify(data), {
             status: 200,

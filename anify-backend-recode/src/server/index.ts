@@ -7,14 +7,16 @@ import colors from "colors";
 
 import { env } from "../env";
 
-export const redis: Redis = env.REDIS_URL ? new Redis((env.REDIS_URL as string) || "redis://localhost:6379") : {
-    get: async () => null,
-    set: (): Promise<"OK"> => Promise.resolve("OK"),
-    on: () => Redis.prototype,
-    keys: async () => [],
-    connect: async () => void 0,
-    call: async () => void 0,
-} as any;
+export const redis: Redis = env.REDIS_URL
+    ? new Redis((env.REDIS_URL as string) || "redis://localhost:6379")
+    : ({
+          get: async () => null,
+          set: (): Promise<"OK"> => Promise.resolve("OK"),
+          on: () => Redis.prototype,
+          keys: async () => [],
+          connect: async () => void 0,
+          call: async () => void 0,
+      } as any);
 
 export const cacheTime = env.REDIS_CACHE_TIME || 60 * 60 * 24 * 7 * 2;
 
