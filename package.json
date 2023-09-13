@@ -5,7 +5,6 @@
     "private": true,
     "scripts": {
         "start": "cd anify-manager && npm run dev",
-        "cli": "cd anify-cli && npm run cli",
         "install": "cd anify-manager && npm i && cd ../anify-frontend && npm i && cd ../anify-backend && npm i && cd ../anify-auth && npm i",
         "lint": "cd anify-frontend && npx next lint && cd ../anify-backend && npm run lint && cd ../anify-auth && npm run lint",
         "build": "npm run build:ts && npm run build:db",

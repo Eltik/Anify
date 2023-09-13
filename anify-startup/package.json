@@ -1,0 +1,19 @@
+{
+  "name": "anify-startup",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run dist/index.js",
+    "dev": "bun run index.ts",
+    "build": "bun build index.ts --outdir ./dist --target node"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "colors": "^1.4.0"
+  }
+}

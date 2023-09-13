@@ -14,7 +14,7 @@ import { loadMapping } from "./lib/impl/mappings";
 import { fetchChapters } from "./content/impl/chapters";
 
 before().then(async (_) => {
-    //await start();
+    await start();
     const chapter = {
         id: "/read-online/Mushoku-Tensei-Isekai-Ittara-Honki-Dasu-Shitsui-no-Majutsushihen-chapter-1",
         title: "Chapter 1",
@@ -22,9 +22,9 @@ before().then(async (_) => {
         updatedAt: 1660688888000,
     };
 
-    const pages = await mangaProviders.mangasee.fetchPages("/read-online/Mushoku-Tensei-Isekai-Ittara-Honki-Dasu-Shitsui-no-Majutsushihen-chapter-1");
+    //const pages = await mangaProviders.mangasee.fetchPages("/read-online/Mushoku-Tensei-Isekai-Ittara-Honki-Dasu-Shitsui-no-Majutsushihen-chapter-1");
 
-    await loadPDF({ id: "dc481ed5-4925-4f3c-bac1-e73f1e7ed338", providerId: "mangasee", chapter, pages: pages ?? [] }).then(console.log);
+    //await loadPDF({ id: "dc481ed5-4925-4f3c-bac1-e73f1e7ed338", providerId: "mangasee", chapter, pages: pages ?? [] }).then(console.log);
 });
 
 async function before() {
