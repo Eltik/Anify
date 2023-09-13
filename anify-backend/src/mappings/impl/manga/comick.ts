@@ -51,7 +51,7 @@ export default class ComicK extends MangaProvider {
 
         const chapters: Chapter[] = [];
 
-        data.chapters.map((chapter) => {
+        data.chapters.map((chapter: ComickChapter) => {
             let title = "";
 
             if (chapter.vol) {
@@ -74,7 +74,7 @@ export default class ComicK extends MangaProvider {
                     chapters.push({
                         id: chapter.hid,
                         title: title?.trim(),
-                        number: chapter.chap,
+                        number: Number(chapter.chap),
                         updatedAt,
                     });
                 }
@@ -91,7 +91,7 @@ export default class ComicK extends MangaProvider {
 
         const pages: Page[] = [];
 
-        data.chapter.md_images.map((image, index) => {
+        data.chapter.md_images.map((image: { vol: any; w: number; h: number; b2key: string }, index: number) => {
             pages.push({
                 url: `https://meo.comick.pictures/${image.b2key}?width=${image.w}`,
                 index: index,
@@ -166,4 +166,20 @@ interface Comic {
     iso639_1: string;
     lang_name: string;
     lang_native: string;
+}
+
+interface ComickChapter {
+    id: number;
+    chap: string;
+    title: string;
+    vol: string | null;
+    lang: string;
+    created_at: string;
+    updated_at: string;
+    up_count: number;
+    down_count: number;
+    group_name: any;
+    hid: string;
+    identities: any;
+    md_chapter_groups: { md_groups: { title: string; slug: string } }[];
 }

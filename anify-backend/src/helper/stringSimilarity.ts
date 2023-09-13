@@ -23,7 +23,7 @@ export function similarity(externalTitle: string, title: string, titleArray: str
 }
 
 // From npm package string-similarity
-export function compareTwoStrings(first, second): number {
+export function compareTwoStrings(first: string, second: string): number {
     first = first.replace(/\s+/g, "");
     second = second.replace(/\s+/g, "");
 

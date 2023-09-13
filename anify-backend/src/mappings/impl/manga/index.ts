@@ -27,7 +27,7 @@ export default abstract class MangaProvider {
         return Http.request(url, config, proxyRequest, 0, this.customProxy);
     }
 
-    padNum(number, places): string {
+    padNum(number: string, places: number): string {
         // Credit to https://stackoverflow.com/a/10073788
         /*
          * '17'
