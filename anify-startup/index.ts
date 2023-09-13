@@ -39,6 +39,9 @@ async function stopProcesses() {
         runningProcesses.get(directory)?.kill();
     }
 
+    runningProcesses.clear();
+
+    /*
     // Run killall node
     await new Promise((resolve, reject) => {
         spawn("killall", ["node"]).on("exit", () => {
@@ -47,6 +50,7 @@ async function stopProcesses() {
             reject(err);
         });
     });
+    */
 }
 
 startProcesses().then(() => {

@@ -18,7 +18,7 @@ export const runCommands: {
 
 export const repositories = [
     {
-        url: "https://github.com/Eltik/Anify/tree/bun",
+        url: "https://github.com/concumin/Anify",
         name: "anify",
     },
 ];
