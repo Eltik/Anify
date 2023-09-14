@@ -26,7 +26,7 @@ const customPromisify = (
 };
 
 export default async function update({ label = "auto", name = Object.keys(buildCommands) }: { label?: string; name?: string[] }) {
-    let data: { error?: any[]; data: any[] } = {
+    const data: { error?: any[]; data: any[] } = {
         error: undefined,
         data: [],
     };
@@ -133,8 +133,7 @@ export default async function update({ label = "auto", name = Object.keys(buildC
         // we assume a victroy so now run fs.utimesSync( path, atime, mtime ) on the buildFolder
         const newTime = new Date();
         fs.utimesSync(buildPath, newTime, newTime);
-    } catch (error) {
-        // @ts-ignore
+    } catch (error: any) {
         const errorMessage = error.message || error;
         console.error(`buildRepo error: ${errorMessage}`);
         data.error = [{ message: errorMessage }];

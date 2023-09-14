@@ -1,2 +1,15 @@
-# anify-auth
-This documentation will be updated soon.
+# anify-auth-recode
+
+To install dependencies:
+
+```bash
+bun install
+```
+
+To run:
+
+```bash
+bun run src/index.ts
+```
+
+This project was created using `bun init` in bun v1.0.1. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.

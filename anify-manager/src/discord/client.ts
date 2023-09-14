@@ -46,7 +46,7 @@ client.on("ready", async () => {
     readdirSync(join(import.meta.dir, "./commands")).forEach((file) => {
         // check if file is a folder (if it is make it a subcommand)
         if (lstatSync(join(import.meta.dir, `./commands/${file}`)).isDirectory()) {
-            let subcommands: ApplicationCommand[] = [];
+            const subcommands: ApplicationCommand[] = [];
             readdirSync(join(import.meta.dir, `./commands/${file}`)).forEach((subfile) => {
                 const command = require(`./commands/${file}/${subfile}`).default;
                 if (command.setup) {
@@ -77,7 +77,7 @@ client.on("interactionCreate", async (interaction) => {
         if (!interaction.member?.roles.includes(env.ADMIN_ROLE_ID ?? "")) return;
 
         const message = await client.getMessage(interaction.message.channel.id, interaction.message.id);
-        let posibleName: string[] = [];
+        const posibleName: string[] = [];
         message.referencedMessage?.components?.forEach((x) => {
             x.components.map((y) => {
                 if ("custom_id" in y) {
@@ -86,7 +86,7 @@ client.on("interactionCreate", async (interaction) => {
             });
         });
 
-        let name = posibleName[0] || interaction?.message?.interaction?.name.split(" ").join("-").toLowerCase() || interaction.data.custom_id.split(" ").join("-").toLowerCase();
+        const name = posibleName[0] || interaction?.message?.interaction?.name.split(" ").join("-").toLowerCase() || interaction.data.custom_id.split(" ").join("-").toLowerCase();
 
         if (client.commands.has(name)) return client.commands.get(name).onInteraction(client, interaction);
     }

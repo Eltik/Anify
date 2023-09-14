@@ -1,7 +1,5 @@
-import { env, providerEnv } from "@/src/env";
 import AuthProvider, { Entry, ListData } from ".";
-import { FastifyReply, FastifyRequest } from "fastify";
-import crypto from "crypto";
+import { env, providerEnv } from "../../env";
 
 export default class MAL extends AuthProvider {
     override rateLimit = 250;
@@ -134,7 +132,7 @@ export default class MAL extends AuthProvider {
             ).json();
         }
 
-        function parseMediaType(mediaType) {
+        function parseMediaType(mediaType: string) {
             if (mediaType === "tv" || mediaType === "movie" || mediaType === "special" || mediaType === "ova" || mediaType === "ona" || mediaType === "music") {
                 return "ANIME";
             } else {
@@ -210,8 +208,12 @@ export default class MAL extends AuthProvider {
         }
     }
 
-    override async handleAuth(req: FastifyRequest, res: FastifyReply): Promise<void | undefined> {
-        const { code } = req.query as { code: string };
+    override async handleAuth(req: Request, res: Response): Promise<Response | undefined> {
+        const url = new URL(req.url);
+        const paths = url.pathname.split("/");
+        paths.shift();
+
+        const code = url.searchParams.get("code");
 
         try {
             const data: MALResponse = await (
@@ -224,23 +226,10 @@ export default class MAL extends AuthProvider {
                 })
             ).json();
 
-            return res.redirect(`${env.FRONTEND_URL}/login?token=${encodeURIComponent(data.access_token)}&expires=${Date.now() + data.expires_in * 1000}&provider=${this.id}`);
+            return Response.redirect(`${env.FRONTEND_URL}/login?token=${encodeURIComponent(data.access_token)}&expires=${Date.now() + data.expires_in * 1000}&provider=${this.id}`);
         } catch (e) {
-            return res.send({ error: e });
+            return new Response(JSON.stringify({ error: "Invalid code" }), { status: 400, headers: { "Content-Type": "application/json" } });
         }
-    }
-
-    private generateChallenge(verifier: string): string {
-        const bytes = Buffer.from(verifier, "ascii");
-        const md = crypto.createHash("sha256");
-        md.update(bytes);
-        const digest = md.digest();
-
-        // Convert the digest bytes to a URL-safe base64 string
-        const base64 = Buffer.from(digest).toString("base64");
-        const urlSafeBase64 = base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-
-        return urlSafeBase64;
     }
 
     get oauthURL(): string {

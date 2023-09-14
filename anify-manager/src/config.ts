@@ -5,7 +5,7 @@ export const buildCommands: {
     };
 } = {
     anify: {
-        command: "npm run build",
+        command: "npm run install && npm run lint && npm run build",
         ".env": `.env`,
     },
 };

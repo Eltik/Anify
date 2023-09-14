@@ -18,7 +18,7 @@ export default {
         ],
     },
     on: async (client: Client, interaction: CommandInteraction<TextableChannel>) => {
-        let value = (interaction?.data?.options?.[0] as any)?.options?.[0]?.value as string;
+        const value = (interaction?.data?.options?.[0] as any)?.options?.[0]?.value as string;
 
         if (!interaction.acknowledged) await interaction.acknowledge(1);
 

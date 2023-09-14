@@ -1,7 +1,6 @@
-import { FastifyReply, FastifyRequest } from "fastify";
 import AuthProvider, { AdvancedScores, Entry, ListData } from ".";
-import { env, providerEnv } from "@/src/env";
-import { generateUUID } from "@/src/helper";
+import { env, providerEnv } from "../../env";
+import { generateUUID } from "../../helper";
 
 export default class AniList extends AuthProvider {
     override rateLimit = 250;
@@ -333,8 +332,12 @@ export default class AniList extends AuthProvider {
         return data;
     }
 
-    override async handleAuth(req: FastifyRequest, res: FastifyReply): Promise<void | undefined> {
-        const { code } = req.query as { code: string };
+    override async handleAuth(req: Request, res: Response): Promise<Response> {
+        const url = new URL(req.url);
+        const paths = url.pathname.split("/");
+        paths.shift();
+
+        const code = url.searchParams.get("code");
 
         try {
             const data: AniListResult = await (
@@ -354,9 +357,10 @@ export default class AniList extends AuthProvider {
                 })
             ).json();
 
-            return res.redirect(`${env.FRONTEND_URL}/login?token=${encodeURIComponent(data.access_token)}&expires=${Date.now() + data.expires_in * 1000}&provider=${this.id}`);
+            // Redirect user
+            return Response.redirect(`${env.FRONTEND_URL}/login?token=${encodeURIComponent(data.access_token)}&expires=${Date.now() + data.expires_in * 1000}&provider=${this.id}`);
         } catch (e) {
-            return res.send({ error: e });
+            return new Response(JSON.stringify({ error: (e as any).message }), { status: 500 });
         }
     }
 

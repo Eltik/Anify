@@ -1,4 +1,5 @@
-import { runningProcesses } from ".";
+import pm2 from "pm2";
+import init from "./init";
 
 interface IResponse {
     error?: string;
@@ -6,6 +7,8 @@ interface IResponse {
 }
 
 const kill = async (names: string | number | (string | number)[]): Promise<IResponse[]> => {
+    await init();
+
     if (!Array.isArray(names)) {
         names = [names];
     }
@@ -13,8 +16,13 @@ const kill = async (names: string | number | (string | number)[]): Promise<IResp
     return Promise.all(
         names.map((name) => {
             return new Promise<IResponse>((resolve, reject) => {
-                runningProcesses.get(String(name))?.kill();
-                resolve({ data: `killed ${name}` });
+                pm2.delete(name, (err, results) => {
+                    if (err) {
+                        resolve({ error: err.message as string, data: name as string });
+                    } else {
+                        resolve({ data: "success" });
+                    }
+                });
             });
         })
     );

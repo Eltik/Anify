@@ -57,8 +57,7 @@ export default {
         ]);
     },
     on: async (client: Client, interaction: CommandInteraction<TextableChannel>) => {
-        // @ts-ignore
-        let value = interaction?.data?.options?.[0]?.options?.[0]?.value as string;
+        const value = (interaction?.data?.options?.[0] as any)?.options?.[0]?.value as string;
 
         const embed = await logic(value);
         interaction.createMessage(embed);

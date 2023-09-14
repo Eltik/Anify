@@ -1,4 +1,5 @@
-import { runningProcesses } from ".";
+import pm2 from "pm2";
+import init from "./init";
 
 export interface IResponse extends Object {
     error?: string;
@@ -9,15 +10,17 @@ export interface IResponse extends Object {
 }
 
 const list = async (): Promise<IResponse> => {
+    await init();
+
     return new Promise((resolve, reject) => {
-        const data = Array.from(runningProcesses.keys()).map((x) => {
-            if (!x) return;
-            return { name: x, pid: runningProcesses.get(x)?.pid }
-        }).filter((x) => x) as any;
+        pm2.list((err, list) => {
+            if (err) {
+                console.error(err);
+                return resolve({ error: err.message, data: [] });
+            }
 
-        // Also get all processes that use node
-
-        resolve({ data });
+            resolve({ data: list.map((x) => ({ name: x.name, pid: x.pid })) });
+        });
     });
 };
 

@@ -6,7 +6,7 @@ import { copyFileSync, createWriteStream, existsSync, mkdirSync } from "fs";
 const execPromise = promisify(exec);
 
 export default async function build(label: string, name: string[], count: number) {
-    let data: { error?: any[]; data: any[] } = {
+    const data: { error?: any[]; data: any[] } = {
         error: undefined,
         data: [],
     };

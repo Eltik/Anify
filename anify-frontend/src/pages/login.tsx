@@ -98,7 +98,7 @@ const Login: NextPage<Props> = ({ login, user, token, provider, providers, redir
                             <h1 className="text-3xl font-bold text-white">Providers</h1>
                             <br />
                             <div className="flex flex-row flex-wrap gap-5 items-center justify-center">
-                                {providers.map((p, index) => (
+                                {providers?.map((p, index) => (
                                     <div key={index} className="flex flex-col justify-center items-center">
                                         <div className="w-32 h-32 bg-background rounded-sm flex flex-col items-center justify-center mb-2">
                                             <img src={p.icon} alt={p.name} className="w-[70%] h-auto rounded-md" />

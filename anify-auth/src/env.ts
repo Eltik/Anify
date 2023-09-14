@@ -1,16 +1,13 @@
-// All environment variables.
 export const env = {
-    PORT: Number(process.env.PORT) || 3000,
-    BACKEND_URL: process.env.BACKEND_URL,
-    FRONTEND_URL: process.env.FRONTEND_URL,
-    BACKEND_KEY: process.env.BACKEND_KEY ?? "",
-    DATABASE_URL: process.env.DATABASE_URL,
+    PORT: Number(process.env.PORT) || 3606,
+    DATABASE_URL: process.env.DATABASE_URL ?? "./db.sqlite",
+    FRONTEND_URL: process.env.FRONTEND_URL ?? "http://localhost:3000",
     REDIS_URL: process.env.REDIS_URL,
     REDIS_CACHE_TIME: Number(process.env.REDIS_CACHE_TIME) || 60 * 60 * 24 * 7,
 };
 
 export const providerEnv = {
-    PUBLIC_URL: process.env.PUBLIC_URL || `http://localhost:${process.env.PORT || 3000}`,
+    PUBLIC_URL: process.env.PUBLIC_URL || `http://localhost:${process.env.PORT || 3606}`,
     ANILIST_CLIENT_ID: process.env.ANILIST_CLIENT_ID ?? "",
     ANILIST_CLIENT_SECRET: process.env.ANILIST_CLIENT_SECRET ?? "",
     MAL_CLIENT_ID: process.env.MAL_CLIENT_ID ?? "",
