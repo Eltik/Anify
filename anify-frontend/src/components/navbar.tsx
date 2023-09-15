@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { useEffect, useRef, useState } from "react";
+import { type SearchResult } from "~/pages/api/search";
+import SearchItem from "./searchItem";
 import { Format, type UserData } from "~/types";
 import Link from "next/link";
 import { useUserData } from "~/store/store";
@@ -10,6 +12,7 @@ function Navbar({ active }: { active: "home" | "anime" | "manga" | "novel" }) {
     const [modelOpen, setModelOpen] = useState(false);
     const [showFilter, setShowFilter] = useState(false);
     const [requesting, setRequesting] = useState(false);
+    const [searchData, setSearch] = useState<SearchResult | null>(null);
 
     const [searchType, setSearchType] = useState(active === "home" ? "anime" : active === "novel" ? "manga" : active);
     const [searchFormats, setSearchFormats] = useState(active === "novel" ? [Format.NOVEL] : active === "manga" ? [Format.MANGA, Format.ONE_SHOT] : []);
@@ -50,6 +53,7 @@ function Navbar({ active }: { active: "home" | "anime" | "manga" | "novel" }) {
                 void searchRequest(input);
             } else {
                 setRequesting(false);
+                setSearch(null);
             }
         }, 1000);
     }
@@ -67,12 +71,24 @@ function Navbar({ active }: { active: "home" | "anime" | "manga" | "novel" }) {
             const req = await fetch("/api/search", { method: "POST", body: JSON.stringify(args), headers: { "Content-Type": "application/json" }});
             if (!req.ok) {
                 setRequesting(false);
+                setSearch({
+                    hits: [],
+                    estimatedTotalHits: 0,
+                    limit: 0,
+                    offset: 0,
+                    processingTimeMs: 0,
+                    query: "ERROR",
+                });
                 return;
             }
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const data: SearchResult = await req.json();
 
             setRequesting(false);
+            setSearch(data);
         } catch (e) {
             setRequesting(false);
+            setSearch(null);
         }
     }
 
@@ -259,6 +275,12 @@ function Navbar({ active }: { active: "home" | "anime" | "manga" | "novel" }) {
                                             </figure>
                                         </div>
                                     ) : null}
+                                    {!requesting && searchData?.query === "ERROR" ? (
+                                        <h1 className="text-white px-2">An error occurred!</h1>
+                                    ) : null}
+                                    {!requesting && (searchData?.hits.length ?? 0) > 0 ? searchData?.hits.map((item, index) => (
+                                        <SearchItem key={index} media={item} />
+                                    )) : null}
                                 </ul>
                             </nav>
                         </div>
