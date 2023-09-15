@@ -644,6 +644,145 @@ export default class AniListBase extends BaseProvider {
         };
     }
 
+    override async fetchIds(format: Format): Promise<string[] | undefined> {
+        const ids: string[] = [];
+
+        if (format === Format.NOVEL || format === Format.MANGA || format === Format.ONE_SHOT) {
+            const mangaIds = await this.fetchMangaIds(format);
+            if (mangaIds) ids.push(...mangaIds);
+        } else {
+            const animeIds = await this.fetchAnimeIds(format);
+            if (animeIds) ids.push(...animeIds);
+        }
+
+        return ids;
+    }
+
+    private async fetchAnimeIds(format: Format): Promise<string[] | undefined> {
+        const idList = await (await fetch("https://raw.githubusercontent.com/5H4D0WILA/IDFetch/main/ids.txt")).text();
+        const list: string[] = idList.split("\n");
+
+        const chunkSize = 10;
+
+        const ids: string[] = [];
+
+        for (let i = 0; i < list.length; i += chunkSize) {
+            const now = Date.now();
+            const chunk = list.slice(i, i + chunkSize);
+            const queries: string[] = [];
+
+            await Promise.all(
+                chunk.map((id) =>
+                    queries.push(`
+            anime${id}:Page(page: 0, perPage: 10){
+                media(id:${id}){
+                    id
+                    type
+                    format
+                }
+            }
+            `),
+                ),
+            );
+
+            const results: any[] = await this.batchRequest(queries, 5).catch((err) => {
+                return [];
+            });
+
+            if (results.includes(null)) {
+                // Too many requests.
+                continue;
+            }
+
+            const batchResults: { id: number; type: Type; format: Format }[] = results
+                .reduce((accumulator, currentObject) => {
+                    const mediaArrays = Object.values(currentObject).map((anime: any) => anime.media);
+                    return accumulator.concat(...mediaArrays);
+                }, [])
+                .map((x: any) => {
+                    if (!x) return null;
+                    return x;
+                })
+                .filter(Boolean);
+
+            for (const media of batchResults) {
+                if (media.format === format) ids.push(String(media.id));
+            }
+
+            console.log(`Finished chunk ${i / chunkSize + 1}/${Math.ceil(list.length / chunkSize)} in ${Date.now() - now}ms`);
+        }
+
+        return ids;
+    }
+
+    private async fetchMangaIds(format: Format): Promise<string[] | undefined> {
+        const req1 = await fetch("https://anilist.co/sitemap/manga-0.xml");
+        const data1 = await req1.text();
+        const req2 = await fetch("https://anilist.co/sitemap/manga-1.xml");
+        const data2 = await req2.text();
+
+        const ids1 = data1.match(/manga\/([0-9]+)/g)?.map((id) => {
+            return id.replace("manga/", "");
+        });
+
+        const ids2 = data2.match(/manga\/([0-9]+)/g)?.map((id) => {
+            return id.replace("manga/", "");
+        });
+        const list = ids1?.concat(ids2 as string[]) ?? [];
+
+        const chunkSize = 10;
+
+        const ids: string[] = [];
+
+        for (let i = 0; i < list.length; i += chunkSize) {
+            const now = Date.now();
+            const chunk = list.slice(i, i + chunkSize);
+            const queries: string[] = [];
+
+            await Promise.all(
+                chunk.map((id) =>
+                    queries.push(`
+            anime${id}:Page(page: 0, perPage: 10){
+                media(id:${id}){
+                    id
+                    type
+                    format
+                }
+            }
+            `),
+                ),
+            );
+
+            const results: any[] = await this.batchRequest(queries, 5).catch((err) => {
+                return [];
+            });
+
+            if (results.includes(null)) {
+                // Too many requests.
+                continue;
+            }
+
+            const batchResults: { id: number; type: Type; format: Format }[] = results
+                .reduce((accumulator, currentObject) => {
+                    const mediaArrays = Object.values(currentObject).map((anime: any) => anime.media);
+                    return accumulator.concat(...mediaArrays);
+                }, [])
+                .map((x: any) => {
+                    if (!x) return null;
+                    return x;
+                })
+                .filter(Boolean);
+
+            for (const media of batchResults) {
+                if (media.format === format) ids.push(String(media.id));
+            }
+
+            console.log(`Finished chunk ${i / chunkSize + 1}/${Math.ceil(list.length / chunkSize)} in ${Date.now() - now}ms`);
+        }
+
+        return ids;
+    }
+
     private anilistMediaGenerator(data: any): AnimeInfo | MangaInfo {
         return {
             id: String(data.id),

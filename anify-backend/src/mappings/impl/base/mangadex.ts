@@ -359,6 +359,23 @@ export default class ManagDexBase extends BaseProvider {
         };
     }
 
+    override async fetchIds(): Promise<string[] | undefined> {
+        const data = await (await this.request("https://raw.githubusercontent.com/ArdaxHz/mangadex-id-map/main/json/manga_map.json")).json();
+        /*
+        {
+            "1": "c0ee660b-f9f2-45c3-8068-5123ff53f84a",
+            "2": "7dbeaa0e-420a-4dc0-b2d3-eb174de266da",
+            ...
+        }
+        */
+        const ids: string[] = [];
+        for (const id in data) {
+            ids.push(String(data[id]));
+        }
+
+        return ids;
+    }
+
     private returnFilledManga(manga: any) {
         const formatString: string = manga.type.toUpperCase();
         const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
