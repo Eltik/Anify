@@ -31,7 +31,7 @@ export default abstract class BaseProvider {
         return undefined;
     }
 
-    async fetchIds(format: Format): Promise<string[] | undefined> {
+    async fetchIds(formats: Format[]): Promise<string[] | undefined> {
         return undefined;
     }
 

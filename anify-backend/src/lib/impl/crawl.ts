@@ -11,11 +11,11 @@ import emitter, { Events } from "..";
 import { get } from "../../database/impl/modify/get";
 import { wait } from "../../helper";
 
-export const crawl = async (format: Format): Promise<void> => {
+export const crawl = async (type: Type, formats: Format[]): Promise<void> => {
     await before();
 
     const provider = await BASE_PROVIDERS.map((provider) => {
-        if (provider.formats?.includes(format)) {
+        if (provider.formats?.includes(formats[0])) {
             return provider;
         } else {
             return null;
@@ -24,10 +24,12 @@ export const crawl = async (format: Format): Promise<void> => {
 
     if (!provider) return;
 
-    const ids = (await provider.fetchIds(format)) ?? [];
+    const ids = (await provider.fetchIds(formats)) ?? [];
+
+    const formatParams = formats.map((f) => `'${f}'`).join(", ");
 
     const idsToRemove: string[] = [];
-    const database = (await db.query(`SELECT id FROM ${format === Format.TV || format === Format.TV_SHORT || format === Format.MOVIE || format === Format.MUSIC || format === Format.OVA || format === Format.ONA || format === Format.SPECIAL ? "anime" : "manga"} WHERE format = $format`).all({ $format: format })) as Anime[] | Manga[];
+    const database = (await db.query(`SELECT id FROM ${type.toLowerCase()} WHERE "format" IN (${formatParams})`).all()) as Anime[] | Manga[];
 
     database.forEach((media) => {
         idsToRemove.push(media.id);
@@ -49,7 +51,7 @@ export const crawl = async (format: Format): Promise<void> => {
 
         await Promise.all(
             chunk.map((id) => {
-                return loadMapping({ id, formats: [format], type: format === Format.TV || format === Format.TV_SHORT || format === Format.MOVIE || format === Format.MUSIC || format === Format.OVA || format === Format.ONA || format === Format.SPECIAL ? Type.ANIME : Type.MANGA }).then((mapping) => {
+                return loadMapping({ id, formats, type }).then((mapping) => {
                     if (mapping) {
                         mappings.push(...(mapping as any));
                     }

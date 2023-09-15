@@ -644,21 +644,19 @@ export default class AniListBase extends BaseProvider {
         };
     }
 
-    override async fetchIds(format: Format): Promise<string[] | undefined> {
+    override async fetchIds(formats: Format[]): Promise<string[] | undefined> {
         const ids: string[] = [];
 
-        if (format === Format.NOVEL || format === Format.MANGA || format === Format.ONE_SHOT) {
-            const mangaIds = await this.fetchMangaIds(format);
-            if (mangaIds) ids.push(...mangaIds);
-        } else {
-            const animeIds = await this.fetchAnimeIds(format);
-            if (animeIds) ids.push(...animeIds);
-        }
+        const animeIds = await this.fetchAnimeIds(formats);
+        if (animeIds) ids.push(...animeIds);
+
+        const mangaIds = await this.fetchMangaIds(formats);
+        if (mangaIds) ids.push(...mangaIds);
 
         return ids;
     }
 
-    private async fetchAnimeIds(format: Format): Promise<string[] | undefined> {
+    private async fetchAnimeIds(formats: Format[]): Promise<string[] | undefined> {
         const idList = await (await fetch("https://raw.githubusercontent.com/5H4D0WILA/IDFetch/main/ids.txt")).text();
         const list: string[] = idList.split("\n");
 
@@ -706,7 +704,7 @@ export default class AniListBase extends BaseProvider {
                 .filter(Boolean);
 
             for (const media of batchResults) {
-                if (media.format === format) ids.push(String(media.id));
+                if (formats.includes(media.format)) ids.push(String(media.id));
             }
 
             console.log(`Finished chunk ${i / chunkSize + 1}/${Math.ceil(list.length / chunkSize)} in ${Date.now() - now}ms`);
@@ -715,7 +713,7 @@ export default class AniListBase extends BaseProvider {
         return ids;
     }
 
-    private async fetchMangaIds(format: Format): Promise<string[] | undefined> {
+    private async fetchMangaIds(formats: Format[]): Promise<string[] | undefined> {
         const req1 = await fetch("https://anilist.co/sitemap/manga-0.xml");
         const data1 = await req1.text();
         const req2 = await fetch("https://anilist.co/sitemap/manga-1.xml");
@@ -774,7 +772,7 @@ export default class AniListBase extends BaseProvider {
                 .filter(Boolean);
 
             for (const media of batchResults) {
-                if (media.format === format) ids.push(String(media.id));
+                if (formats.includes(media.format)) ids.push(String(media.id));
             }
 
             console.log(`Finished chunk ${i / chunkSize + 1}/${Math.ceil(list.length / chunkSize)} in ${Date.now() - now}ms`);

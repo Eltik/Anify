@@ -359,7 +359,7 @@ export default class ManagDexBase extends BaseProvider {
         };
     }
 
-    override async fetchIds(): Promise<string[] | undefined> {
+    override async fetchIds(formats: Format[]): Promise<string[] | undefined> {
         const data = await (await this.request("https://raw.githubusercontent.com/ArdaxHz/mangadex-id-map/main/json/manga_map.json")).json();
         /*
         {
