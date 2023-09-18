@@ -3,8 +3,6 @@ import MangaProvider from ".";
 import { Format, Formats } from "../../../types/enums";
 import { Chapter, Page, Result } from "../../../types/types";
 
-import * as canv from "canvas";
-
 export default class MangaFire extends MangaProvider {
     override rateLimit = 250;
     override id = "mangafire";
@@ -147,9 +145,10 @@ export default class MangaFire extends MangaProvider {
     }
 
     private async descrambleImage(url: string, key: number, index: number): Promise<string> {
+        const canv = require("canvas");
         return new Promise((resolve, reject) => {
             const s = key;
-            canv.loadImage(url).then((image) => {
+            canv.loadImage(url).then((image: any) => {
                 const canvas = canv.createCanvas(image.width, image.height);
                 const context = canvas.getContext("2d");
                 context.drawImage(image, 0, 0);

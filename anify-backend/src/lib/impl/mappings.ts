@@ -37,6 +37,8 @@ export const loadMapping = async (data: { id: string; type: Type; formats: Forma
     }).filter((x) => x !== null)[0];
 
     if (!baseData) {
+        console.log(colors.red("Media not found. Skipping..."));
+
         await emitter.emitAsync(Events.COMPLETED_MAPPING_LOAD, []);
         return [];
     }
@@ -109,6 +111,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
         const search = [provider.search(baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native, baseData?.format, baseData?.year)];
         return Promise.all(search)
             .then((results) => {
+                //console.log(colors.gray("Finished searching on ") + colors.blue(provider.id) + colors.gray(".") + colors.gray(" Found ") + colors.blue(results.length + "") + colors.gray(" results."));
                 return results.find((r) => r?.length !== 0) || [];
             })
             .catch((err) => {

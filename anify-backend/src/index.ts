@@ -8,11 +8,9 @@ import emitter, { Events } from "./lib";
 import { get } from "./database/impl/modify/get";
 import queues from "./worker";
 import { start } from "./server";
-import { mangaProviders } from "./mappings";
 
 before().then(async (_) => {
-    //await start();
-    await mangaProviders.mangafire.fetchPages("/read/mushoku-tensei-isekai-ittara-honki-dasu.oknj/en/chapter-1").then(console.log);
+    await start();
 });
 
 async function before() {
