@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@extractus/article-extractor": "^8.0.2",
+    "canvas": "^2.11.2",
     "cheerio": "^1.0.0-rc.12",
     "colors": "^1.4.0",
     "crypto-js": "^4.1.1",
