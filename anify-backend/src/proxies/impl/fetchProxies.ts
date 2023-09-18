@@ -23,12 +23,10 @@ export async function fetchCorsProxies(): Promise<string[]> {
                 }
             }
 
-            console.log(colors.yellow(`Adding ${proxiesToAdd.length} proxies to the list.`));
-
             CORS_PROXIES.push(...proxiesToAdd);
         }
 
-        console.log(colors.green("Finished importing proxies."));
+        console.log(colors.green("Finished importing ") + colors.yellow(totalProxies) + colors.green(" proxies."));
     } else {
         return [];
     }

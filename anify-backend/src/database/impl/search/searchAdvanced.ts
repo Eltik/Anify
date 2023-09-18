@@ -7,11 +7,11 @@ export const searchAdvanced = async (query: string, type: Type, formats: Format[
     let where = `
         WHERE
         (
-            '%${query}%' IN (synonyms)
-            OR title->>'english' LIKE '%${query}%'
-            OR title->>'romaji' LIKE '%${query}%'
-            OR title->>'native' LIKE '%${query}%'
-            OR synonyms LIKE '%${query}%'
+            '%' || $query || '%' IN (synonyms)
+            OR title->>'english' LIKE '%' || $query || '%'
+            OR title->>'romaji' LIKE '%' || $query || '%'
+            OR title->>'native' LIKE '%' || $query || '%'
+            OR synonyms LIKE '%' || $query || '%'
         )
         ${formats?.length > 0 ? `AND "format" IN (${formats.map((f) => `'${f}'`).join(", ")})` : ""}
     `;
@@ -60,45 +60,52 @@ export const searchAdvanced = async (query: string, type: Type, formats: Format[
         where += `AND (${tagsWhere})`;
     }
 
-    const results = (await db.query(`SELECT * FROM ${type === Type.ANIME ? "anime" : "manga"} ${where} ORDER BY title->>'english' ASC LIMIT ${perPage} OFFSET ${skip}`).all()) as Anime[] | Manga[];
-    return results.map((data) => {
-        try {
-            if (data.type === Type.ANIME) {
-                Object.assign(data, {
-                    title: JSON.parse((data as any).title),
-                    season: (data as any).season.replace(/"/g, ""),
-                    mappings: JSON.parse((data as any).mappings),
-                    synonyms: JSON.parse((data as any).synonyms),
-                    rating: JSON.parse((data as any).rating),
-                    popularity: JSON.parse((data as any).popularity),
-                    relations: JSON.parse((data as any).relations),
-                    genres: JSON.parse((data as any).genres),
-                    tags: JSON.parse((data as any).tags),
-                    episodes: JSON.parse((data as any).episodes),
-                    artwork: JSON.parse((data as any).artwork),
-                    characters: JSON.parse((data as any).characters),
-                });
+    try {
+        const results = (await db.query(`SELECT * FROM ${type === Type.ANIME ? "anime" : "manga"} ${where} ORDER BY title->>'english' ASC LIMIT ${perPage} OFFSET ${skip}`).all({
+            $query: query,
+        })) as Anime[] | Manga[];
+        return results.map((data) => {
+            try {
+                if (data.type === Type.ANIME) {
+                    Object.assign(data, {
+                        title: JSON.parse((data as any).title),
+                        season: (data as any).season.replace(/"/g, ""),
+                        mappings: JSON.parse((data as any).mappings),
+                        synonyms: JSON.parse((data as any).synonyms),
+                        rating: JSON.parse((data as any).rating),
+                        popularity: JSON.parse((data as any).popularity),
+                        relations: JSON.parse((data as any).relations),
+                        genres: JSON.parse((data as any).genres),
+                        tags: JSON.parse((data as any).tags),
+                        episodes: JSON.parse((data as any).episodes),
+                        artwork: JSON.parse((data as any).artwork),
+                        characters: JSON.parse((data as any).characters),
+                    });
 
-                return data;
-            } else {
-                Object.assign(data, {
-                    title: JSON.parse((data as any).title),
-                    mappings: JSON.parse((data as any).mappings),
-                    synonyms: JSON.parse((data as any).synonyms),
-                    rating: JSON.parse((data as any).rating),
-                    popularity: JSON.parse((data as any).popularity),
-                    relations: JSON.parse((data as any).relations),
-                    genres: JSON.parse((data as any).genres),
-                    tags: JSON.parse((data as any).tags),
-                    chapters: JSON.parse((data as any).chapters),
-                    artwork: JSON.parse((data as any).artwork),
-                    characters: JSON.parse((data as any).characters),
-                });
+                    return data;
+                } else {
+                    Object.assign(data, {
+                        title: JSON.parse((data as any).title),
+                        mappings: JSON.parse((data as any).mappings),
+                        synonyms: JSON.parse((data as any).synonyms),
+                        rating: JSON.parse((data as any).rating),
+                        popularity: JSON.parse((data as any).popularity),
+                        relations: JSON.parse((data as any).relations),
+                        genres: JSON.parse((data as any).genres),
+                        tags: JSON.parse((data as any).tags),
+                        chapters: JSON.parse((data as any).chapters),
+                        artwork: JSON.parse((data as any).artwork),
+                        characters: JSON.parse((data as any).characters),
+                    });
 
-                return data;
+                    return data;
+                }
+            } catch (e) {
+                return undefined;
             }
-        } catch (e) {
-            return undefined;
-        }
-    });
+        });
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
 };

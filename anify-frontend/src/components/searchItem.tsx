@@ -50,6 +50,8 @@ const SearchItem = ({ media }: { media: SearchItem }) => {
 };
 
 const handleRating = (rating: { mal?: number; kitsu?: number; anilist?: number; simkl?: number;}) => {
+    if (!rating) return 0;
+    
     const validRatings = Object.values(rating).filter(value => value !== undefined);
     
     if (validRatings.length === 0) {
