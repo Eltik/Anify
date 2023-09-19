@@ -9,6 +9,8 @@ export default class AniListMeta extends MetaProvider {
     override rateLimit = 500;
     override formats: Format[] = [Format.TV, Format.MOVIE, Format.ONA, Format.SPECIAL, Format.TV_SHORT, Format.OVA, Format.MANGA, Format.ONE_SHOT, Format.NOVEL];
 
+    public preferredTitle: "english" | "romaji" | "native" = "native";
+
     private api = "https://graphql.anilist.co";
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {

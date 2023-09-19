@@ -108,7 +108,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
 
     // Search for the media on each provider
     const promises = suitableProviders.map((provider: any) => {
-        const search = [provider.search(baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native, baseData?.format, baseData?.year)];
+        const search = [provider.search(baseData?.title[provider.preferredTitle as "english" | "romaji" | "native"] ?? baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native, baseData?.format, baseData?.year)];
         return Promise.all(search)
             .then((results) => {
                 //console.log(colors.gray("Finished searching on ") + colors.blue(provider.id) + colors.gray(".") + colors.gray(" Found ") + colors.blue(results.length + "") + colors.gray(" results."));
@@ -128,7 +128,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
     // Loop through each provider and find the best match
     for (let i = 0; i < resultsArray.length; i++) {
         const providerData = resultsArray[i];
-        const title: string = (baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native)!;
+        const title: string = (baseData?.title[suitableProviders[i].preferredTitle as "english" | "romaji" | "native"] ?? baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native)!;
 
         const providerTitles = providerData.map((m: Result) => {
             const titles = [m.title, ...(m.altTitles ?? [])];

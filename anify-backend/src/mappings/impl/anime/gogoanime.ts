@@ -11,6 +11,8 @@ export default class GogoAnime extends AnimeProvider {
 
     override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
 
+    public preferredTitle: "english" | "romaji" | "native" = "romaji";
+
     override get subTypes(): SubType[] {
         return [SubType.SUB, SubType.DUB];
     }

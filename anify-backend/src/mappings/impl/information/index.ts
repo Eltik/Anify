@@ -8,6 +8,7 @@ export default abstract class InformationProvider<T extends Anime | Manga, U ext
 
     public providerType: ProviderType = ProviderType.INFORMATION;
     public customProxy: string | undefined;
+    public preferredTitle: "english" | "romaji" | "native" = "english";
 
     async search(query: string, type: Type, formats: Format[]): Promise<U[] | undefined> {
         return [];

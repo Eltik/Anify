@@ -11,6 +11,8 @@ export default abstract class MetaProvider {
     public providerType: ProviderType = ProviderType.META;
     public customProxy: string | undefined;
 
+    public preferredTitle: "english" | "romaji" | "native" = "english";
+
     async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         return undefined;
     }

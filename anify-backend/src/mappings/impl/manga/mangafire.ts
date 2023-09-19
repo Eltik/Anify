@@ -14,27 +14,55 @@ export default class MangaFire extends MangaProvider {
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         const results: Result[] = [];
 
-        // https://mangafire.to/filter?keyword=Mushoku+tensei&type%5B%5D=manga&year%5B%5D=2021&sort=recently_updated
-        const data = await (await this.request(`${this.url}/filter?keyword=${encodeURIComponent(query)}${format ? `&type%5B%5D=${format.toLowerCase()}` : ""}${year && year != 0 ? `&year=%5B%5D=${year}` : ""}&sort=recently_updated`, {}, true)).text();
+        try {
+            const data = await (await this.request(`${this.url}/filter?keyword=${encodeURIComponent(query)}${format ? `&type%5B%5D=${format.toLowerCase()}` : ""}${year && year != 0 ? `&year=%5B%5D=${year}` : ""}&sort=recently_updated`, {}, true)).text();
 
-        const $ = load(data);
+            const $ = load(data);
 
-        $("main div.container div.original div.unit").map((i, el) => {
-            const formatString: string = $(el).find("div.info span.type").text()?.toUpperCase();
-            const format: Format = formatString === "DOUJINSHI" ? Format.MANGA : Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
+            const requestPromises: Promise<void>[] = [];
 
-            results.push({
-                id: $(el).find("a").attr("href") ?? "",
-                altTitles: [],
-                format,
-                img: $(el).find("img").attr("src") ?? "",
-                title: $(el).find("div.info a").first()?.text()?.trim(),
-                year: 0,
-                providerId: this.id,
+            $("main div.container div.original div.unit").map((_, el) => {
+                const formatString: string = $(el).find("div.info span.type").text()?.toUpperCase();
+                const format: Format = formatString === "DOUJINSHI" ? Format.MANGA : formatString === "MANHUA" ? Format.MANGA : formatString === "MANHWA" ? Format.MANGA : Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
+
+                const id = $(el).find("a").attr("href") ?? "";
+
+                requestPromises.push(
+                    this.request(`${this.url}${id}`, {}, true)
+                        .then(async (response) => {
+                            const secondReq = await response.text();
+                            const $$ = load(secondReq);
+
+                            const altTitles =
+                                $$("main div#manga-page div.info h6")
+                                    ?.first()
+                                    ?.text()
+                                    ?.split("; ")
+                                    ?.map((s) => s.trim()) ?? [];
+                            const year = $$("main div#manga-page div.meta").text()?.split("Published: ")[1]?.split(" to")[0]?.trim();
+
+                            results.push({
+                                id,
+                                altTitles,
+                                format,
+                                img: $(el).find("img").attr("src") ?? "",
+                                title: $(el).find("div.info a").first()?.text()?.trim(),
+                                year: year ? new Date(year).getFullYear() : 0,
+                                providerId: this.id,
+                            });
+                        })
+                        .catch((error) => {
+                            console.error(`Error fetching data for ${id}: ${error}`);
+                        }),
+                );
             });
-        });
 
-        return results;
+            await Promise.all(requestPromises);
+
+            return results;
+        } catch (e) {
+            return results;
+        }
     }
 
     override async fetchChapters(id: string): Promise<Chapter[] | undefined> {
@@ -77,12 +105,8 @@ export default class MangaFire extends MangaProvider {
     }
 
     override async fetchPages(id: string): Promise<string | Page[] | undefined> {
-        const pages: Page[] = [];
-
-        const pattern = /\.([^.]+)$/;
-        const match = pattern.exec(id);
-
-        const mangaId = (match ? match[1] : "")?.split("/")[0];
+        const match = id.match(/\.([^.]+)$/);
+        const mangaId = match?.[1]?.split("/")[0];
 
         const data = await (
             await this.request(`${this.url}/ajax/read/${mangaId}/chapter/en`, {
@@ -105,7 +129,7 @@ export default class MangaFire extends MangaProvider {
         });
 
         if (chapterId === "") {
-            return pages;
+            return [];
         }
 
         const imageData: ImageResponse = await (
@@ -126,23 +150,21 @@ export default class MangaFire extends MangaProvider {
             };
         });
 
-        for (let i = 0; i < images.length; i++) {
-            if (images[i].isScrambled) {
-                const key = images[i].scrambledKey;
-                const url = images[i].url;
-                const descrambled = await this.descrambleImage(url, key, i);
-                images[i].url = descrambled;
-            }
-            pages.push({
-                url: images[i].url,
-                headers: {
-                    Referer: `${this.url}${id}`,
-                },
-                index: images[i].index,
-            });
-        }
+        const descrambledImages = await Promise.all(
+            images.map(async (image) => {
+                if (image.isScrambled) {
+                    const descrambled = await this.descrambleImage(image.url, image.scrambledKey, image.index);
+                    image.url = descrambled;
+                }
+                return {
+                    url: image.url,
+                    headers: {},
+                    index: image.index,
+                };
+            }),
+        );
 
-        return pages;
+        return descrambledImages;
     }
 
     private async descrambleImage(url: string, key: number, index: number): Promise<string> {

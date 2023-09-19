@@ -10,6 +10,7 @@ export default abstract class MangaProvider {
 
     public providerType: ProviderType = ProviderType.MANGA;
     public customProxy: string | undefined;
+    public preferredTitle: "english" | "romaji" | "native" = "english";
 
     async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         return undefined;

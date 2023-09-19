@@ -8,6 +8,8 @@ export default class AniList extends InformationProvider<Anime | Manga, AnimeInf
 
     private api = "https://graphql.anilist.co";
 
+    public preferredTitle: "english" | "romaji" | "native" = "native";
+
     override get priorityArea(): MediaInfoKeys[] {
         return ["bannerImage", "relations", "color"];
     }
