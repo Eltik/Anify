@@ -2,6 +2,7 @@ import { load } from "cheerio";
 import MangaProvider from ".";
 import { Format, Formats } from "../../../types/enums";
 import { Chapter, Page, Result } from "../../../types/types";
+import Jimp from "jimp";
 
 export default class MangaFire extends MangaProvider {
     override rateLimit = 250;
@@ -145,18 +146,17 @@ export default class MangaFire extends MangaProvider {
     }
 
     private async descrambleImage(url: string, key: number, index: number): Promise<string> {
-        const canv = require("canvas");
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const s = key;
-            canv.loadImage(url).then((image: any) => {
-                const canvas = canv.createCanvas(image.width, image.height);
-                const context = canvas.getContext("2d");
-                context.drawImage(image, 0, 0);
+            try {
+                const image = await Jimp.read(url);
 
-                const tileWidth = Math.min(200, Math.ceil(image.width / 5));
-                const tileHeight = Math.min(200, Math.ceil(image.height / 5));
-                const numTilesWide = Math.ceil(image.width / tileWidth) - 1;
-                const numTilesHigh = Math.ceil(image.height / tileHeight) - 1;
+                const tileWidth = Math.min(200, Math.ceil(image.getWidth() / 5));
+                const tileHeight = Math.min(200, Math.ceil(image.getHeight() / 5));
+                const numTilesWide = Math.ceil(image.getWidth() / tileWidth) - 1;
+                const numTilesHigh = Math.ceil(image.getHeight() / tileHeight) - 1;
+
+                const newImage = new Jimp(image.getWidth(), image.getHeight());
 
                 for (let y = 0; y <= numTilesHigh; y++) {
                     for (let x = 0; x <= numTilesWide; x++) {
@@ -173,17 +173,21 @@ export default class MangaFire extends MangaProvider {
 
                         const sx = tileX * tileWidth;
                         const sy = tileY * tileHeight;
-                        const sw = Math.min(tileWidth, image.width - x * tileWidth);
-                        const sh = Math.min(tileHeight, image.height - y * tileHeight);
+                        const sw = Math.min(tileWidth, image.getWidth() - x * tileWidth);
+                        const sh = Math.min(tileHeight, image.getHeight() - y * tileHeight);
                         const dx = x * tileWidth;
                         const dy = y * tileHeight;
 
-                        context.drawImage(image, sx, sy, sw, sh, dx, dy, sw, sh);
+                        const tile = image.clone().crop(sx, sy, sw, sh);
+                        newImage.blit(tile, dx, dy);
                     }
                 }
 
-                resolve(canvas.toDataURL());
-            });
+                const base64Data = await newImage.getBase64Async(Jimp.MIME_PNG);
+                resolve(base64Data);
+            } catch (error) {
+                reject(error);
+            }
         });
     }
 }
