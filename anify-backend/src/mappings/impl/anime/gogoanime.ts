@@ -79,6 +79,7 @@ export default class GogoAnime extends AnimeProvider {
                 isFiller: false,
                 img: null,
                 hasDub: id.includes("-dub"),
+                description: null,
             });
         });
 

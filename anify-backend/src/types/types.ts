@@ -139,6 +139,7 @@ export type Episode = {
     isFiller: boolean;
     img: string | null;
     hasDub: boolean;
+    description: string | null;
     updatedAt?: number;
 };
 

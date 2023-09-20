@@ -82,6 +82,7 @@ export default class NineAnime extends AnimeProvider {
                 isFiller: $$(el).find("a").hasClass("filler"),
                 img: null,
                 hasDub: $$(el).find("a").attr("data-dub")?.toString() === "1",
+                description: null,
                 updatedAt,
             };
 

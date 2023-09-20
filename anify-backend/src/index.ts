@@ -13,7 +13,7 @@ import { infoProviders } from "./mappings";
 before().then(async (_) => {
     //await start();
     await get("147103").then(async (data) => {
-        await infoProviders.tmdb.info(data!).then(console.log);
+        await infoProviders.tvdb.fetchContentData(data!).then(console.log);
     });
 });
 

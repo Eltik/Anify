@@ -1,6 +1,6 @@
 import InformationProvider from ".";
 import { Format, Season } from "../../../types/enums";
-import { Anime, AnimeInfo, Character, Manga, MangaInfo, MediaInfoKeys } from "../../../types/types";
+import { Anime, AnimeInfo, Chapter, Character, Episode, Manga, MangaInfo, MediaInfoKeys } from "../../../types/types";
 
 export default class TMDB extends InformationProvider<Anime | Manga, AnimeInfo | MangaInfo> {
     override id = "tmdb";
@@ -68,5 +68,60 @@ export default class TMDB extends InformationProvider<Anime | Manga, AnimeInfo |
         }
 
         return undefined;
+    }
+
+    override async fetchContentData(media: Anime | Manga): Promise<Chapter[] | Episode[] | undefined> {
+        const tmdbId = media.mappings.find((data) => {
+            return data.providerId === "tmdb";
+        })?.id;
+
+        if (!tmdbId) return undefined;
+
+        const episodes: Episode[] = [];
+
+        try {
+            const data = await (await this.request(`${this.api}${tmdbId}?api_key=${this.apiKey}`)).json();
+
+            let seasonId = "";
+            let seasonNumber = 0;
+
+            let closestYearDiff = Infinity;
+
+            const seasons = data.seasons;
+
+            for (const season of seasons) {
+                if (season.air_date && media.year) {
+                    const seasonYear = new Date(season.air_date).getFullYear();
+                    const yearDiff = Math.abs(seasonYear - media.year);
+
+                    if (yearDiff < closestYearDiff || season.episode_count === (media as Anime).totalEpisodes) {
+                        closestYearDiff = yearDiff;
+                        seasonId = String(season.id);
+                        seasonNumber = season.season_number;
+                    }
+                }
+            }
+
+            if (seasonId.length === 0) return undefined;
+
+            const seasonData = await (await this.request(`${this.api}${tmdbId}/season/${seasonNumber}?api_key=${this.apiKey}`)).json();
+
+            for (const episode of seasonData.episodes) {
+                episodes.push({
+                    id: String(episode.id),
+                    description: episode.overview,
+                    hasDub: false,
+                    img: `https://image.tmdb.org/t/p/w500${episode.still_path}`,
+                    isFiller: false,
+                    number: episode.episode_number,
+                    title: episode.name,
+                    updatedAt: new Date(episode.air_date).getTime(),
+                });
+            }
+
+            return episodes;
+        } catch (e) {
+            return undefined;
+        }
     }
 }

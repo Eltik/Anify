@@ -1,6 +1,6 @@
 import InformationProvider from ".";
 import { Format, Season } from "../../../types/enums";
-import { Anime, AnimeInfo, Character, Manga, MangaInfo, MediaInfoKeys } from "../../../types/types";
+import { Anime, AnimeInfo, Chapter, Character, Episode, Manga, MangaInfo, MediaInfoKeys } from "../../../types/types";
 
 export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo | MangaInfo> {
     override id = "tvdb";
@@ -144,6 +144,95 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
         }
 
         return undefined;
+    }
+
+    override async fetchContentData(media: Anime | Manga): Promise<Episode[] | Chapter[] | undefined> {
+        const tvdbId = media.mappings.find((data) => {
+            return data.providerId === "tvdb";
+        })?.id;
+
+        if (!tvdbId) return undefined;
+
+        const token = await this.getToken(this.apiKeys[Math.floor(Math.random() * this.apiKeys.length)]);
+
+        const episodes: Episode[] = [];
+
+        const infoRequest: Response | undefined = await this.request(
+            `${this.tvdbApiUrl}${tvdbId}/extended`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+            false,
+        ).catch(() => {
+            return undefined;
+        });
+
+        if (!infoRequest) return undefined;
+
+        const infoSeasons = (await infoRequest.json()).data?.seasons;
+
+        for (const season of infoSeasons) {
+            const seasonRequest: Response | undefined = await this.request(
+                `${this.tvdbApiUrl}/seasons/${season.id}/extended`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+                false,
+            ).catch(() => {
+                return undefined;
+            });
+
+            if (!seasonRequest) continue;
+
+            const seasonInfo = (await seasonRequest.json())?.data;
+
+            if (Number(seasonInfo?.year) != media.year) continue;
+
+            const list = seasonInfo?.episodes;
+            if (!list) continue;
+
+            for (const episode of list) {
+                const translationRequest = await this.request(
+                    `${this.tvdbApiUrl}/episodes/${episode.id}/translations/eng`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    },
+                    false,
+                ).catch(() => {
+                    return {
+                        json: async () => {
+                            return {
+                                data: {
+                                    name: episode.name,
+                                    overview: episode.overview,
+                                },
+                            };
+                        },
+                    };
+                });
+
+                const translations = (await translationRequest.json()).data;
+
+                episodes.push({
+                    id: String(episode.id),
+                    description: translations.overview ?? "TBD",
+                    hasDub: false,
+                    img: episode.image ? `${this.url}${episode.image}` : null,
+                    isFiller: false,
+                    number: episode.number,
+                    title: translations.name ?? "TBD",
+                    updatedAt: new Date(episode.aired).getTime(),
+                });
+            }
+        }
+
+        return episodes;
     }
 
     private async getToken(key: string): Promise<string | undefined> {

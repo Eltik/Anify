@@ -69,6 +69,7 @@ export default class AnimePahe extends AnimeProvider {
                 img: item.snapshot,
                 isFiller: item.filler === 1,
                 hasDub: false,
+                description: null,
                 updatedAt,
             });
         });
@@ -90,6 +91,7 @@ export default class AnimePahe extends AnimeProvider {
                         img: data.snapshot,
                         isFiller: data.filler === 1,
                         hasDub: false,
+                        description: null,
                         updatedAt,
                     });
                 }
