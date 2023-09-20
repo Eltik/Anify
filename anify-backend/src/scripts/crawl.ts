@@ -1,15 +1,15 @@
-import { db, init } from "../../database";
-import { BASE_PROVIDERS } from "../../mappings";
-import { Format, Type } from "../../types/enums";
-import { Anime, Manga } from "../../types/types";
+import { db, init } from "../database";
+import { BASE_PROVIDERS } from "../mappings";
+import { Format, Type } from "../types/enums";
+import { Anime, Manga } from "../types/types";
 
 import colors from "colors";
-import { loadMapping } from "./mappings";
-import queues from "../../worker";
-import { fetchCorsProxies } from "../../proxies/impl/fetchProxies";
-import emitter, { Events } from "..";
-import { get } from "../../database/impl/modify/get";
-import { wait } from "../../helper";
+import { loadMapping } from "../lib/impl/mappings";
+import queues from "../worker";
+import { fetchCorsProxies } from "../proxies/impl/fetchProxies";
+import emitter, { Events } from "../lib";
+import { get } from "../database/impl/modify/get";
+import { wait } from "../helper";
 
 export const crawl = async (type: Type, formats: Format[]): Promise<void> => {
     await before();

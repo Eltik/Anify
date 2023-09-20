@@ -1,6 +1,6 @@
 import Http from "../../../helper/request";
 import { Format, ProviderType, Type } from "../../../types/enums";
-import { Anime, AnimeInfo, Manga, MangaInfo, MediaInfoKeys } from "../../../types/types";
+import { Anime, AnimeInfo, Chapter, Episode, Manga, MangaInfo, MediaInfoKeys } from "../../../types/types";
 
 export default abstract class InformationProvider<T extends Anime | Manga, U extends AnimeInfo | MangaInfo> {
     abstract id: string;
@@ -10,11 +10,11 @@ export default abstract class InformationProvider<T extends Anime | Manga, U ext
     public customProxy: string | undefined;
     public preferredTitle: "english" | "romaji" | "native" = "english";
 
-    async search(query: string, type: Type, formats: Format[]): Promise<U[] | undefined> {
-        return [];
+    async info(media: T): Promise<U | undefined> {
+        return undefined;
     }
 
-    async info(media: T): Promise<U | undefined> {
+    async fetchContentData(media: T): Promise<Episode[] | Chapter[] | undefined> {
         return undefined;
     }
 

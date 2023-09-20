@@ -110,7 +110,7 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
             const coverImage = !hasPrequelRelation ? coverImages[0]?.image ?? media.coverImage ?? null : media.coverImage ?? null;
 
             return {
-                id: media.id,
+                id: tvdbId,
                 title: {
                     english: null,
                     romaji: null,
