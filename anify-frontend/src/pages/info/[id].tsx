@@ -18,7 +18,7 @@ import Sidebar from "~/components/sidebar";
 import { env } from "~/env.mjs";
 import { capitalize, formatCompactNumber, isValidDate, parseFormat } from "~/helper";
 import { usePreferredList, useTokens, useUserData } from "~/store/store";
-import { type Anime, type Manga, type EpisodeData, type ChapterData, Type, Season, Format, type AnimeRelation, type MangaRelation, type UserData, type UserTokens, type Entry } from "~/types";
+import { type Anime, type Manga, type EpisodeData, type ChapterData, Type, Season, Format, type AnimeRelation, type MangaRelation, type UserData, type UserTokens, type Entry, type Episode } from "~/types";
 
 import NProgress from "nprogress";
 
@@ -383,10 +383,34 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                                         <span className="text-gray-300 text-sm">{media.rating.kitsu}</span>
                                                     </div>
                                                 ) : null}
-                                                {media.rating?.simkl && media.rating.simkl != 0 ? (
+                                                {media.rating?.anidb && media.rating.anidb != 0 ? (
                                                     <div className="flex flex-col gap-1">
-                                                        <span className="text-white text-base">Simkl</span>
-                                                        <span className="text-gray-300 text-sm">{media.rating.simkl}</span>
+                                                        <span className="text-white text-base">AniDB</span>
+                                                        <span className="text-gray-300 text-sm">{media.rating.anidb}</span>
+                                                    </div>
+                                                ) : null}
+                                                {media.rating?.comick && media.rating.comick != 0 ? (
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-white text-base">ComicK</span>
+                                                        <span className="text-gray-300 text-sm">{media.rating.comick}</span>
+                                                    </div>
+                                                ) : null}
+                                                {media.rating?.mangadex && media.rating.mangadex != 0 ? (
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-white text-base">MangaDex</span>
+                                                        <span className="text-gray-300 text-sm">{media.rating.mangadex}</span>
+                                                    </div>
+                                                ) : null}
+                                                {media.rating?.tmdb && media.rating.tmdb != 0 ? (
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-white text-base">TMDB</span>
+                                                        <span className="text-gray-300 text-sm">{media.rating.tmdb}</span>
+                                                    </div>
+                                                ) : null}
+                                                {media.rating?.tvdb && media.rating.tvdb != 0 ? (
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-white text-base">TVDB</span>
+                                                        <span className="text-gray-300 text-sm">{media.rating.tvdb}</span>
                                                     </div>
                                                 ) : null}
                                             </div>
@@ -548,10 +572,90 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                                         <span>Kitsu</span>
                                                     </a>
                                                 ) : null}
-                                                {media.mappings.find((data) => { return data.providerId === "simkl" })?.id ? (
-                                                    <a className="bg-background-light inline-flex text-sm items-center gap-2 min-h-[1.75rem] p-[.3125rem_.5rem] rounded-sm transition-all duration-200 ease-in-out hover:bg-main/80 cursor-pointer" href={`https://simkl.com/${media.type?.toLowerCase()}/${media.mappings.find((data) => { return data.providerId === "simkl" })?.id ?? ""}`} target="_blank">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><title>Simkl</title><path d="M3.84 0A3.832 3.832 0 0 0 0 3.84v16.32A3.832 3.832 0 0 0 3.84 24h16.32A3.832 3.832 0 0 0 24 20.16V3.84A3.832 3.832 0 0 0 20.16 0zm8.567 4.11c2.074 0 3.538.061 4.393.186 1.127.168 1.94.46 2.438.877.672.578 1.009 1.613 1.009 3.104 0 .161-.004.417-.01.768h-4.234c-.014-.358-.039-.607-.074-.746-.098-.41-.42-.64-.966-.692-.484-.043-1.66-.066-3.53-.066-1.85 0-2.946.056-3.289.165-.385.133-.578.474-.578 1.024 0 .528.203.851.61.969.343.095 1.887.187 4.633.275 2.487.073 4.073.165 4.76.275.693.11 1.244.275 1.654.495.41.22.737.532.983.936.37.595.557 1.552.557 2.873 0 1.475-.182 2.557-.546 3.247-.364.683-.96 1.149-1.785 1.398-.812.25-3.05.374-6.71.374-2.226 0-3.832-.062-4.82-.187-1.204-.147-2.068-.434-2.593-.86-.567-.456-.903-1.1-1.008-1.93a10.522 10.522 0 0 1-.085-1.434v-.789H7.44c-.007.74.136 1.216.43 1.428.154.102.33.167.525.203.196.037.54.063 1.03.077a166.2 166.2 0 0 0 2.405.022c1.862-.007 2.94-.018 3.234-.033.553-.044.917-.12 1.092-.23.245-.161.368-.52.368-1.077 0-.38-.078-.648-.231-.802-.211-.212-.712-.325-1.503-.34-.547 0-1.688-.044-3.425-.132-1.794-.088-2.956-.14-3.488-.154-1.387-.044-2.364-.212-2.932-.505-.728-.373-1.205-1.01-1.429-1.91-.126-.498-.189-1.15-.189-1.956 0-1.698.309-2.895.925-3.59.462-.527 1.163-.875 2.102-1.044.848-.146 2.865-.22 6.053-.22z" fill="white"></path></svg>
-                                                        <span>Simkl</span>
+                                                {media.mappings.find((data) => { return data.providerId === "comick" })?.id ? (
+                                                    <a className="bg-background-light inline-flex text-sm items-center gap-2 min-h-[1.75rem] p-[.3125rem_.5rem] rounded-sm transition-all duration-200 ease-in-out hover:bg-main/80 cursor-pointer" href={`https://comick.app/comic/${media.mappings.find((data) => { return data.providerId === "comick" })?.id ?? ""}`} target="_blank">
+                                                        <svg id="Layer_1" data-name="Layer 1" width="16" height="16" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64">
+                                                            <image width="64" height="64" xlinkHref="data:image/png;base64,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"/>
+                                                        </svg>
+                                                        <span>ComicK</span>
+                                                    </a>
+                                                ) : null}
+                                                {media.mappings.find((data) => { return data.providerId === "mangadex" })?.id ? (
+                                                    <a className="bg-background-light inline-flex text-sm items-center gap-2 min-h-[1.75rem] p-[.3125rem_.5rem] rounded-sm transition-all duration-200 ease-in-out hover:bg-main/80 cursor-pointer" href={`https://mangadex.org/title/${media.mappings.find((data) => { return data.providerId === "mangadex" })?.id ?? ""}`} target="_blank">
+                                                        <svg id="Layer_1" data-name="Layer 1" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36.25 30.92">
+                                                            <path d="m32.54,19.67H6.22c-.32,0-.59-.26-.59-.59s.26-.58.59-.58h26.33c.32,0,.58.26.58.58s-.26.59-.58.59Zm0,2.22H6.22c-.32,0-.59-.26-.59-.58s.26-.59.59-.59h26.33c.32,0,.58.26.58.59s-.26.58-.58.58Z" style={{
+                                                                fill: "#ff6740",
+                                                                strokeWidth: "0px"
+                                                            }} />
+                                                            <path d="m28.23,21.23v3.91l1.67-.97,1.68.97v-3.91h-3.35Z" style={{
+                                                                fill: "#ff6740",
+                                                                strokeWidth: "0px"
+                                                            }} />
+                                                            <path d="m33.72,8.87h-4.4v2.44h4.4v-2.44h0Z" style={{
+                                                                fill: "#272b30",
+                                                                strokeWidth: "0px"
+                                                            }} />
+                                                            <path d="m36.08,11.93s-.04-.04-.06-.06c-.5-.44-.93-.96-1.27-1.54v-.02h0c-.38-.66-.62-1.39-.72-2.15,0-.05,0-.09-.01-.14h0c-.04-.28-.16-.53-.33-.73l-.05-.05c-1.4-1.58-3.25-2.69-5.3-3.2-.06-1.21.22-2.42.81-3.48.1-.18.03-.41-.15-.51-.06-.03-.12-.05-.18-.05h-.03c-2.59.42-5.01,1.58-6.97,3.33-1.14,1.02-2.1,2.22-2.85,3.56-.55-.3-1.13-.55-1.72-.76-1.77-.63-3.66-.87-5.54-.7-1.44.13-2.85.5-4.16,1.11C3.38,8.44.4,12.49.04,17.27c-.03.33-.04.67-.04,1v3.23c0,.56.08,1.1.24,1.6.42,1.37,1.35,2.53,2.6,3.23.76.43,1.63.68,2.56.7h8.21c.08,0,.16,0,.24,0,.01,0,.03,0,.04,0,.02,0,.04,0,.06,0,.89.1,1.6.81,1.71,1.7.01.08.02.15.01.23v.04s0,0,0,0c.02.66.36,1.26.92,1.61.91.56,2.11.28,2.67-.63.17-.27.26-.57.28-.88,0-.03,0-.05,0-.08v-.11c0-.66-.11-1.3-.31-1.89-.29-.85-.78-1.62-1.42-2.25-1.09-1.07-2.56-1.68-4.09-1.68h-6.85s-.03,0-.05,0c-.02,0-.03,0-.05,0-1.59-.03-2.87-1.32-2.87-2.92,0-1.61,1.31-2.92,2.92-2.92h26.11c.66,0,1.24-.42,1.44-1.05l.02-.07c.09-.29.27-.55.51-.74h0s.04-.03.06-.05c.03-.02.05-.04.08-.06,1.05-.78,1.47-2.15,1.03-3.39h0Zm-3.49-1.16c-.06,0-.12-.02-.17-.04-.43-.25-.94-.33-1.42-.23-.21.04-.41.11-.6.22h0s-.02.02-.03.02c-.19.08-.4,0-.49-.18-.07-.16-.02-.35.12-.45l.04-.02c.85-.48,1.89-.48,2.74,0l.04.02c.17.11.22.34.1.51-.07.1-.18.16-.31.16Z" style={{
+                                                                fill: "#f1f1f1",
+                                                                strokeWidth: "0px"
+                                                            }} />
+                                                            <path d="m36.08,11.93s-.04-.04-.06-.06c-.5-.44-.93-.96-1.27-1.54v-.02h0c-.38-.66-.62-1.39-.72-2.15,0-.05,0-.09-.01-.14h0c-.04-.28-.16-.53-.33-.73l-.05-.05c-1.4-1.58-3.25-2.69-5.3-3.2-.06-1.21.22-2.42.81-3.48.1-.18.03-.41-.15-.51-.06-.03-.12-.05-.18-.05h-.03c-2.59.42-5.01,1.58-6.97,3.33-1.14,1.02-2.1,2.22-2.85,3.56-.55-.3-1.13-.55-1.72-.76-1.77-.63-3.66-.87-5.54-.7-1.44.13-2.85.5-4.16,1.11C3.38,8.44.4,12.49.04,17.27c-.03.33-.04.67-.04,1v3.23c0,.56.08,1.1.24,1.6.42,1.37,1.35,2.53,2.6,3.23.76.43,1.63.68,2.56.7h8.21c.08,0,.16,0,.24,0,.01,0,.03,0,.04,0,.02,0,.04,0,.06,0,.89.1,1.6.81,1.71,1.7.01.08.02.15.01.23v.04s0,0,0,0c.02.66.36,1.26.92,1.61.91.56,2.11.28,2.67-.63.17-.27.26-.57.28-.88,0-.03,0-.05,0-.08v-.11c0-.66-.11-1.3-.31-1.89-.29-.85-.78-1.62-1.42-2.25-1.09-1.07-2.56-1.68-4.09-1.68h-6.85s-.03,0-.05,0c-.02,0-.03,0-.05,0-1.59-.03-2.87-1.32-2.87-2.92,0-1.61,1.31-2.92,2.92-2.92h26.11c.66,0,1.24-.42,1.44-1.05l.02-.07c.09-.29.27-.55.51-.74h0s.04-.03.06-.05c.03-.02.05-.04.08-.06,1.05-.78,1.47-2.15,1.03-3.39h0Zm-3.49-1.16c-.06,0-.12-.02-.17-.04-.43-.25-.94-.33-1.42-.23-.21.04-.41.11-.6.22h0s-.02.02-.03.02c-.19.08-.4,0-.49-.18-.07-.16-.02-.35.12-.45l.04-.02c.85-.48,1.89-.48,2.74,0l.04.02c.17.11.22.34.1.51-.07.1-.18.16-.31.16Z" style={{
+                                                                fill: "#e6e6e6",
+                                                                strokeWidth: "0px"
+                                                            }} />
+                                                            <path d="m19,6.82c.7,3.38,3.64,5.91,7.15,5.91,2.07,0,3.93-.88,5.26-2.29h-.02c-.14,0-.27.01-.4.04-.21.04-.41.11-.6.21h0s-.02.02-.03.02c-.18.09-.4.01-.49-.17-.02-.05-.04-.11-.04-.16,0-.13.06-.24.16-.31l.04-.02c.59-.33,1.29-.44,1.95-.29.64-.86,1.08-1.85,1.31-2.9-1.36-1.39-3.07-2.37-4.96-2.83-.06-1.21.22-2.42.81-3.48.1-.18.03-.41-.15-.51-.06-.03-.12-.05-.18-.05C28.8,0,28.79,0,28.78,0c-2.59.42-5.01,1.58-6.97,3.33-1.12,1-2.07,2.18-2.81,3.49h0Z" style={{
+                                                                fill: "#ff6740",
+                                                                strokeWidth: "0px"
+                                                            }} />
+                                                            <path d="m34.15,13.81c-.32-.1-.63-.18-.96-.26-.95-.24-1.93-.39-2.91-.46-.65-.05-1.31-.03-1.96.02l-.49.05c-.16.02-.32.06-.48.09-.33.04-.64.16-.96.23.61-.28,1.25-.47,1.91-.57.66-.1,1.33-.13,2-.08.67.05,1.33.15,1.97.31.65.16,1.27.38,1.87.67Zm-.29.6c-.33-.05-.65-.09-.98-.11-.98-.09-1.96-.1-2.94-.02-.65.04-1.3.17-1.93.31l-.48.13c-.16.05-.31.11-.46.16-.32.09-.6.25-.92.37.56-.37,1.16-.65,1.8-.85.64-.2,1.3-.33,1.96-.38.66-.05,1.34-.05,2,.02.66.06,1.32.19,1.95.38Zm-.04.7c-.33.03-.66.05-.99.1-.98.12-1.94.33-2.88.61-.63.18-1.23.44-1.82.72l-.43.23c-.14.08-.28.17-.42.26-.29.16-.54.38-.82.56.47-.48,1-.89,1.58-1.22.58-.33,1.2-.6,1.84-.79.64-.2,1.29-.34,1.95-.42.66-.08,1.33-.1,1.99-.05Z" style={{
+                                                                fill: "#272b30",
+                                                                strokeWidth: "0px"
+                                                            }} />
+                                                            <path d="m36.01,11.87c-.11-.1-.22-.2-.32-.3-.46.28-.6.87-.33,1.33.18.29.49.47.83.47h.01s.02-.08.02-.12c.05-.45,0-.9-.15-1.32l-.06-.06Z" style={{
+                                                                fill: "#f27baa",
+                                                                strokeWidth: "0px"
+                                                            }} />
+                                                            <path d="m27.99,4.54s0,.09,0,.14c-1.17.47-2.24,1.16-3.17,2.02-.42-2.9,1.48-5.62,4.34-6.23-.77,1.22-1.18,2.63-1.18,4.07h0Z" style={{
+                                                                fill: "#fff",
+                                                                strokeWidth: "0px"
+                                                            }} />
+                                                            <path d="m17.81,24.79c-.13-.13-.26-.25-.4-.36-1.45.3-2.67,1.29-3.24,2.66.88.2,1.51.99,1.51,1.89v.04s0,0,0,0c.02.66.36,1.26.92,1.61.91.56,2.11.28,2.67-.63.18-.29.28-.62.29-.96v-.11c0-.66-.11-1.3-.31-1.89-.29-.85-.78-1.62-1.42-2.26h0Z" style={{
+                                                                fill: "#ff6740",
+                                                                strokeWidth: "0px"
+                                                            }} />
+                                                        </svg>
+                                                        <span>MangaDex</span>
+                                                    </a>
+                                                ) : null}
+                                                {media.mappings.find((data) => { return data.providerId === "tvdb" })?.id ? (
+                                                    <a className="bg-background-light inline-flex text-sm items-center gap-2 min-h-[1.75rem] p-[.3125rem_.5rem] rounded-sm transition-all duration-200 ease-in-out hover:bg-main/80 cursor-pointer" href={`#`}>
+                                                        <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 99.57 54" width="32" height="16">
+                                                            <g id="Logo-tvdb">
+                                                                <path id="Combined-Shape" d="m0,5.1C0,1.81,2.96-.44,6.46.07h0l45.64,5.96c2.05.3,3.69,2.51,3.69,4.92h0v6.23c-3.85,2.58-6.37,6.89-6.37,11.78s2.46,9.21,6.37,11.78h0v2.74c0,2.41-1.63,4.62-3.69,4.92h0l-40.5,5.53c-3.5.52-6.46-1.74-6.46-5.02h0L0,5.1Zm19.68,5.73h-6.02v7.88h-3.82v4.56h3.82v8.76c-.18,5.5,1.99,7.97,6.95,8.02h4.64s0-4.56,0-4.56h-2.38c-2.7-.13-3.28-.92-3.19-4.47v-7.75h7.4l6.85,16.78h6.47l9.43-21.33h-6.38l-6.11,14.67-5.57-14.67h-12.1v-7.88Z" style={{
+                                                                    fill: "#6cd591",
+                                                                    strokeWidth: "0px"
+                                                                }} />
+                                                                <path id="Shape" d="m88.61,18.28c3.91,0,6.51.96,8.49,3.15,1.62,1.75,2.47,4.34,2.47,7.23,0,4.2-1.71,7.49-4.81,9.37-2.02,1.23-3.77,1.58-7.73,1.58h-9.79V10.39h6.02v7.88h5.35Zm-5.35,16.78h4.45c3.55,0,5.71-2.37,5.71-6.22s-1.89-6-5.71-6h-4.45v12.22Z" style={{
+                                                                    fill: "#fff",
+                                                                    strokeWidth: "0px"
+                                                                }} />
+                                                                <path id="Shape-2" data-name="Shape" d="m68.01,10.39h6.02v29.22h-10.38c-4.22,0-6.24-.61-8.4-2.5-2.2-1.97-3.32-4.77-3.32-8.32s1.21-6.48,3.77-8.54c1.62-1.31,3.82-1.97,6.65-1.97h5.66v-7.88h0Zm0,12.44h-4.36c-3.5,0-5.62,2.23-5.62,5.96s2.16,6.26,5.62,6.26h4.36v-12.22Z" style={{
+                                                                    fill: "#fff",
+                                                                    strokeWidth: "0px"
+                                                                }} />
+                                                            </g>
+                                                        </svg>
+                                                        <span>TVDB</span>
+                                                    </a>
+                                                ) : null}
+                                                {media.mappings.find((data) => { return data.providerId === "tmdb" })?.id ? (
+                                                    <a className="bg-background-light inline-flex text-sm items-center gap-2 min-h-[1.75rem] p-[.3125rem_.5rem] rounded-sm transition-all duration-200 ease-in-out hover:bg-main/80 cursor-pointer" href={`https://themoviedb.org${media.mappings.find((data) => { return data.providerId === "tmdb" })?.id ?? ""}`} target="_blank">
+                                                        <span>TMDB</span>
+                                                    </a>
+                                                ) : null}
+                                                {media.mappings.find((data) => { return data.providerId === "anidb" })?.id ? (
+                                                    <a className="bg-background-light inline-flex text-sm items-center gap-2 min-h-[1.75rem] p-[.3125rem_.5rem] rounded-sm transition-all duration-200 ease-in-out hover:bg-main/80 cursor-pointer" href={`https://anidb.net${media.mappings.find((data) => { return data.providerId === "anidb" })?.id ?? ""}`} target="_blank">
+                                                        <span>TMDB</span>
                                                     </a>
                                                 ) : null}
                                             </div>
@@ -1105,18 +1209,20 @@ export const getServerSideProps = async ({ query }: { query: { id: string } }) =
     const content = await (await axios.get(`${env.BACKEND_URL}/${contentType}?id=${id}&apikey=${env.API_KEY}`)).data as EpisodeData[] | ChapterData[];
 
     if (media.type === Type.ANIME) {
-        const episodeCovers = await (await axios.get(`${env.BACKEND_URL}/episode-covers?id=${id}&apikey=${env.API_KEY}`)).data as { episode: number, img: string }[];
+        const episodeCovers = await (await axios.get(`${env.BACKEND_URL}/content-metadata?id=${id}&apikey=${env.API_KEY}`)).data as { providerId: string, data: Episode[] }[];
 
         for (let i = 0; i < content.length; i++) {
             const episodes = (content as EpisodeData[])[i]?.episodes ?? [];
             for (let j = 0; j < episodes.length; j++) {
                 const episodeNumber = (episodes[j]?.number ?? 0);
                 for (let k = 0; k < episodeCovers.length; k++) {
-                    if (episodeCovers[k]?.episode === episodeNumber) {
-                        if (!episodes[j]?.img) {
-                            Object.assign((content as EpisodeData[])[i]?.episodes[j] ?? {}, { img: episodeCovers[k]?.img });
+                    for (let l = 0; l < (episodeCovers[k]?.data ?? []).length; l++) {
+                        if (episodeCovers[k]?.data[l]?.number === episodeNumber && episodeCovers[k]?.data[l]?.img) {
+                            if (!episodes[j]?.img) {
+                                Object.assign((content as EpisodeData[])[i]?.episodes[j] ?? {}, { img: episodeCovers[k]?.data[l]?.img });
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
             }

@@ -149,8 +149,8 @@ const Watch: NextPage<Props> = ({ episodeNumber, episodeSelector, episodes, medi
             const providerEpisodes = episodes.find(providerEps => providerEps.providerId === provider);
     
             if (providerEpisodes) {
-                const currentIndex = providerEpisodes.episodes.findIndex(episode => episode.id === watchId);
-                const nextEpisodeId = providerEpisodes.episodes[currentIndex + 1]?.id ?? "";
+                const currentIndex = providerEpisodes.episodes.findIndex((episode: any) => episode.id === watchId);
+                const nextEpisodeId = providerEpisodes.episodes[Number(currentIndex) + 1]?.id ?? "";
                 
                 if (autoNext && nextEpisodeId) {
                     const nextUrl = `/watch/${media.id}/${provider}/${encodeURIComponent(nextEpisodeId)}/${subDub}`;
