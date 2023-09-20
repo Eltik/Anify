@@ -24,7 +24,7 @@ import MangaFire from "./impl/manga/mangafire";
 import MangaSee from "./impl/manga/mangasee";
 import NovelUpdates from "./impl/manga/novelupdates";
 import MetaProvider from "./impl/meta";
-import AniDBMeta from "./impl/meta/aniDb";
+import AniDBMeta from "./impl/meta/anidb";
 import AniListMeta from "./impl/meta/anilist";
 import KitsuMeta from "./impl/meta/kitsu";
 import MALMeta from "./impl/meta/mal";

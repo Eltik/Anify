@@ -64,6 +64,7 @@ export const handler = async (req: Request): Promise<Response> => {
             id: readId,
             number: chapterNumber,
             title: "",
+            rating: 0,
         };
 
         if (chapter) await queues.uploadPages.add({ id, providerId, chapter, pages: (data as Page[] | string) ?? [] });
