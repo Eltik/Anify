@@ -121,6 +121,7 @@ export default class MangaDex extends MangaProvider {
                         title: title?.trim(),
                         number: Number(curChapter.attributes.chapter),
                         updatedAt: new Date(curChapter.attributes.updatedAt ?? 0).getTime(),
+                        rating: null,
                     });
                 }
             });

@@ -8,6 +8,7 @@ import BaseProvider from "./impl/base";
 import AniListBase from "./impl/base/anilist";
 import ManagDexBase from "./impl/base/mangadex";
 import InformationProvider from "./impl/information";
+import AniDB from "./impl/information/anidb";
 import AniList from "./impl/information/anilist";
 import ComicKInfo from "./impl/information/comick";
 import Kitsu from "./impl/information/kitsu";
@@ -23,6 +24,7 @@ import MangaFire from "./impl/manga/mangafire";
 import MangaSee from "./impl/manga/mangasee";
 import NovelUpdates from "./impl/manga/novelupdates";
 import MetaProvider from "./impl/meta";
+import AniDBMeta from "./impl/meta/aniDb";
 import AniListMeta from "./impl/meta/anilist";
 import KitsuMeta from "./impl/meta/kitsu";
 import MALMeta from "./impl/meta/mal";
@@ -47,7 +49,7 @@ const mangaProviders: Record<string, MangaProvider> = MANGA_PROVIDERS.reduce(
     {} as Record<string, MangaProvider>,
 );
 
-const INFORMATION_PROVIDERS: InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>[] = [new AniList(), new Kitsu(), new MAL(), new TVDB(), new TMDB(), new ComicKInfo(), new MangaDexInfo()];
+const INFORMATION_PROVIDERS: InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>[] = [new AniList(), new Kitsu(), new MAL(), new AniDB(), new TVDB(), new TMDB(), new ComicKInfo(), new MangaDexInfo()];
 const infoProviders: Record<string, InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>> = INFORMATION_PROVIDERS.reduce(
     (acc, provider) => {
         acc[provider.id] = provider;
@@ -56,7 +58,7 @@ const infoProviders: Record<string, InformationProvider<Anime | Manga, AnimeInfo
     {} as Record<string, InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>>,
 );
 
-const META_PROVIDERS: MetaProvider[] = [new TheTVDB(), new AniListMeta(), new MALMeta(), new KitsuMeta(), new TheMovieDB()];
+const META_PROVIDERS: MetaProvider[] = [new TheTVDB(), new AniListMeta(), new MALMeta(), new KitsuMeta(), new TheMovieDB(), new AniDBMeta()];
 const metaProviders: Record<string, MetaProvider> = META_PROVIDERS.reduce(
     (acc, provider) => {
         acc[provider.id] = provider;

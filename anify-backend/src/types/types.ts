@@ -140,6 +140,7 @@ export type Episode = {
     img: string | null;
     hasDub: boolean;
     description: string | null;
+    rating: number | null;
     updatedAt?: number;
 };
 
@@ -152,6 +153,7 @@ export type Chapter = {
     id: string;
     title: string;
     number: number;
+    rating: number | null;
     updatedAt?: number;
     mixdrop?: string;
 };

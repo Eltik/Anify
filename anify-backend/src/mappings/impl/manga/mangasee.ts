@@ -47,6 +47,7 @@ export default class MangaSee extends MangaProvider {
                 title: `${i["ChapterName"] && i["ChapterName"].length > 0 ? i["ChapterName"] : `Chapter ${this.processChapterNumber(i["Chapter"])}`}`,
                 number: parseInt(this.processChapterNumber(i["Chapter"])),
                 updatedAt: new Date(i["Date"]).getTime(),
+                rating: null,
             });
         });
 

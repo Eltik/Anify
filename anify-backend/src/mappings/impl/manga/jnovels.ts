@@ -82,6 +82,7 @@ export default class JNovels extends MangaProvider {
                     id: id,
                     title: title?.trim(),
                     number: i + 1,
+                    rating: null,
                 });
             }
         });

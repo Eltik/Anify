@@ -116,6 +116,7 @@ export default class TMDB extends InformationProvider<Anime | Manga, AnimeInfo |
                     number: episode.episode_number,
                     title: episode.name,
                     updatedAt: new Date(episode.air_date).getTime(),
+                    rating: episode.vote_average,
                 });
             }
 

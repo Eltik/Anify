@@ -69,13 +69,13 @@ export default class ComicK extends MangaProvider {
             }
 
             if (canPush) {
-                const updatedAt = new Date(chapter.updated_at ?? 0).getTime();
                 if (chapter.lang === "en") {
                     chapters.push({
                         id: chapter.hid,
                         title: title?.trim(),
                         number: Number(chapter.chap),
-                        updatedAt,
+                        rating: chapter.up_count - chapter.down_count,
+                        updatedAt: chapter.updated_at ? new Date(chapter.updated_at ?? 0).getTime() : undefined,
                     });
                 }
             }

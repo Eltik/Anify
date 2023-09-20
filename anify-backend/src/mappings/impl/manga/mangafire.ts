@@ -98,6 +98,7 @@ export default class MangaFire extends MangaProvider {
                 number: Number($(el).attr("data-number")),
                 title: $(el).find("span").first()?.text()?.trim(), // Can also be $(el).find("a").attr("title")
                 updatedAt: new Date($($(el).find("span")[1])?.text()).getTime(),
+                rating: null,
             });
         });
 

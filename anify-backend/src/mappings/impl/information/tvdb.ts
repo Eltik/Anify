@@ -230,6 +230,7 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
                     isFiller: false,
                     number: episode.number,
                     title: translations.name ?? "TBD",
+                    rating: null,
                     updatedAt: new Date(episode.aired).getTime(),
                 });
             }

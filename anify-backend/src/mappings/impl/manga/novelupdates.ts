@@ -93,6 +93,7 @@ export default class NovelUpdates extends MangaProvider {
                 id: id!,
                 title: title!,
                 number: index + 1,
+                rating: null,
             });
         });
 

@@ -80,6 +80,7 @@ export default class GogoAnime extends AnimeProvider {
                 img: null,
                 hasDub: id.includes("-dub"),
                 description: null,
+                rating: null,
             });
         });
 

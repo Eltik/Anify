@@ -70,6 +70,7 @@ export default class AnimePahe extends AnimeProvider {
                 isFiller: item.filler === 1,
                 hasDub: false,
                 description: null,
+                rating: null,
                 updatedAt,
             });
         });
@@ -92,6 +93,7 @@ export default class AnimePahe extends AnimeProvider {
                         isFiller: data.filler === 1,
                         hasDub: false,
                         description: null,
+                        rating: null,
                         updatedAt,
                     });
                 }

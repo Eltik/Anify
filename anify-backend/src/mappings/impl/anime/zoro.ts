@@ -88,6 +88,7 @@ export default class Zoro extends AnimeProvider {
                 img: null,
                 hasDub: dubCount ? number <= dubCount : false,
                 description: null,
+                rating: null,
             });
         });
 

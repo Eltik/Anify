@@ -121,7 +121,9 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
             });
     });
 
+    console.log(colors.gray("Fetching from providers..."));
     const resultsArray = await Promise.all(promises);
+    console.log(colors.gray("Finished fetching from providers."));
 
     const mappings: MappedResult[] = [];
 
