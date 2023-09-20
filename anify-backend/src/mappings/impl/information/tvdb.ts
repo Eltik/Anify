@@ -173,8 +173,8 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
 
         const infoSeasons = (await infoRequest.json()).data?.seasons;
 
-        for (const season of infoSeasons) {
-            const seasonRequest: Response | undefined = await this.request(
+        const seasonRequests = infoSeasons.map((season: any) =>
+            this.request(
                 `${this.tvdbApiUrl}/seasons/${season.id}/extended`,
                 {
                     headers: {
@@ -182,21 +182,23 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
                     },
                 },
                 false,
-            ).catch(() => {
-                return undefined;
-            });
+            ),
+        );
 
-            if (!seasonRequest) continue;
+        const seasonResponses = await Promise.all(seasonRequests);
 
-            const seasonInfo = (await seasonRequest.json())?.data;
+        for (const seasonResponse of seasonResponses) {
+            if (!seasonResponse) continue;
+
+            const seasonInfo = (await seasonResponse.json())?.data;
 
             if (Number(seasonInfo?.year) != media.year) continue;
 
             const list = seasonInfo?.episodes;
             if (!list) continue;
 
-            for (const episode of list) {
-                const translationRequest = await this.request(
+            const translationRequests = list.map((episode: any) =>
+                this.request(
                     `${this.tvdbApiUrl}/episodes/${episode.id}/translations/eng`,
                     {
                         headers: {
@@ -204,26 +206,27 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
                         },
                     },
                     false,
-                ).catch(() => {
-                    return {
-                        json: async () => {
-                            return {
-                                data: {
-                                    name: episode.name,
-                                    overview: episode.overview,
-                                },
-                            };
+                ).catch(() => ({
+                    json: async () => ({
+                        data: {
+                            name: episode.name,
+                            overview: episode.overview,
                         },
-                    };
-                });
+                    }),
+                })),
+            );
 
-                const translations = (await translationRequest.json()).data;
+            const translationResponses = await Promise.all(translationRequests);
+
+            for (let i = 0; i < list.length; i++) {
+                const episode = list[i];
+                const translations = (await translationResponses[i].json()).data;
 
                 episodes.push({
                     id: String(episode.id),
                     description: translations.overview ?? "TBD",
                     hasDub: false,
-                    img: episode.image ? `${this.url}${episode.image}` : null,
+                    img: episode.image ? episode.image : null,
                     isFiller: false,
                     number: episode.number,
                     title: translations.name ?? "TBD",
@@ -232,7 +235,11 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
             }
         }
 
-        return episodes;
+        // Filter out episodes that have the same number
+        const episodeNumbers = episodes.map((episode) => episode.number);
+        const filteredEpisodes = episodes.filter((episode, index) => episodeNumbers.indexOf(episode.number) === index);
+
+        return filteredEpisodes;
     }
 
     private async getToken(key: string): Promise<string | undefined> {
