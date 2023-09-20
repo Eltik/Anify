@@ -185,6 +185,11 @@ export type Server = {
     type?: SubType;
 };
 
+export type ContentMetadata = {
+    providerId: string;
+    data: Episode[] | Chapter[];
+};
+
 export type Result = {
     id: string;
     title: string;
