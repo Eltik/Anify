@@ -58,7 +58,7 @@ export default class ManagDexBase extends BaseProvider {
             results.push({
                 id,
                 title: {
-                    english: attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "en")?.en ?? null,
+                    english: attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "en")?.en ?? attributes.title[Object.keys(attributes.title).filter((value) => value === "en")[0]] ?? null,
                     romaji: attributes.title["ja-ro"] ?? attributes.title["jp-ro"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja-ro")?.["ja-ro"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp-ro")?.["jp-ro"] ?? null,
                     native: attributes.title["jp"] ?? attributes.title["ja"] ?? attributes.title["ko"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp")?.jp ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja")?.ja ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ko")?.ko ?? null,
                 },
@@ -201,7 +201,7 @@ export default class ManagDexBase extends BaseProvider {
             results.push({
                 id,
                 title: {
-                    english: attributes.title[Object.keys(attributes.title).filter((value) => value === "en")[0]] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "en")?.en ?? null,
+                    english: attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "en")?.en ?? attributes.title[Object.keys(attributes.title).filter((value) => value === "en")[0]] ?? null,
                     romaji: attributes.title["ja-ro"] ?? attributes.title["jp-ro"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja-ro")?.["ja-ro"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp-ro")?.["jp-ro"] ?? null,
                     native: attributes.title["jp"] ?? attributes.title["ja"] ?? attributes.title["ko"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp")?.jp ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja")?.ja ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ko")?.ko ?? null,
                 },
@@ -245,7 +245,7 @@ export default class ManagDexBase extends BaseProvider {
                 id: id,
                 type: Type.MANGA,
                 title: {
-                    english: data.attributes.title[Object.keys(data.attributes.title).filter((value) => value === "en")[0]] ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "en")?.en ?? null,
+                    english: data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "en")?.en ?? data.attributes.title[Object.keys(data.attributes.title).filter((value) => value === "en")[0]] ?? null,
                     romaji: data.attributes.title["ja-ro"] ?? data.attributes.title["jp-ro"] ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja-ro")?.["ja-ro"] ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp-ro")?.["jp-ro"] ?? null,
                     native: data.attributes.title["jp"] ?? data.attributes.title["ja"] ?? data.attributes.title["ko"] ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp")?.jp ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja")?.ja ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ko")?.ko ?? null,
                 },

@@ -7,11 +7,10 @@ export const search = async (query: string, type: Type, formats: Format[], page:
     const where = `
         WHERE
         (
-            '%' || $query || '%' IN (synonyms)
+            JSON_ARRAY_CONTAINS(synonyms, JSON('${query}'))
             OR title->>'english' LIKE '%' || $query || '%'
             OR title->>'romaji' LIKE '%' || $query || '%'
             OR title->>'native' LIKE '%' || $query || '%'
-            OR synonyms LIKE '%' || $query || '%'
         )
         ${formats?.length > 0 ? `AND "format" IN (${formats.map((f) => `'${f}'`).join(", ")})` : ""}
     `;

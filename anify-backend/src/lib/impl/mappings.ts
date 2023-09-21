@@ -121,9 +121,9 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
             });
     });
 
-    console.log(colors.gray("Fetching from providers..."));
+    console.log(colors.gray("Fetching from providers for ") + colors.blue(baseData?.id ?? "") + colors.gray("..."));
     const resultsArray = await Promise.all(promises);
-    console.log(colors.gray("Finished fetching from providers."));
+    console.log(colors.gray("Finished fetching from providers for ") + colors.blue(baseData?.id ?? "") + colors.gray("."));
 
     const mappings: MappedResult[] = [];
 
@@ -154,9 +154,10 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
 
         const best: Result = providerData[bestMatchIndex.bestMatchIndex];
 
-        // Add checks
+        // Add checks if the format is not the same
         if (best.format != Format.UNKNOWN && baseData?.format && baseData?.format != Format.UNKNOWN && best.format != baseData?.format) continue;
-        if (best.year != 0 && baseData?.year && baseData?.year != 0 && best.year != baseData?.year) continue;
+        // Add checks if the year isn't the same. Note that it also checks if the year + 1 or year - 1 is not the same to avoid false positives
+        if (best.year != 0 && baseData?.year && baseData?.year != 0 && best.year != baseData?.year && best.year + 1 != baseData?.year && best.year - 1 != baseData?.year) continue;
 
         const altTitles: string[] = Object.values(baseData?.title ?? {})
             .concat(baseData?.synonyms ?? [])
@@ -164,7 +165,9 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
 
         const sim = similarity(title, best.title, altTitles);
 
-        //if (sim.value < 0.6) continue;
+        // Remove if similarity is too low
+        if (sim.value < 0.3) continue;
+
         if (mappings.filter((m) => m.data.id === best.id).length > 0) continue;
 
         mappings.push({
@@ -359,8 +362,22 @@ export function fillMediaInfo<T extends Anime | Manga, U extends AnimeInfo | Man
 
         for (const special of specialLoadFields) {
             const v = info[special as keyof (AnimeInfo | MangaInfo)];
-
             if (v) {
+                // ak is the english/romaji/native title
+                // av is the actual title
+                for (const [ak, av] of Object.entries(v)) {
+                    if (av && (av as any)?.length) {
+                        if (!(media[special as keyof (Anime | Manga)] as any)[ak]) {
+                            (media[special as keyof (Anime | Manga)] as any)[ak] = {};
+
+                            Object.assign(media[special as keyof (Anime | Manga)] ?? {}, {
+                                [ak]: av,
+                            });
+                        }
+                    }
+                }
+
+                /*
                 for (const [ak, av] of Object.entries(v)) {
                     if (av && (av as any)?.length) {
                         if (media[special as keyof (Anime | Manga)] !== null) {
@@ -368,6 +385,7 @@ export function fillMediaInfo<T extends Anime | Manga, U extends AnimeInfo | Man
                         }
                     }
                 }
+                */
             }
         }
 

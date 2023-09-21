@@ -39,11 +39,11 @@ export default class MangaDex extends MangaProvider {
             const attributes = manga.attributes;
             const relationships = manga.relationships;
 
-            const title = attributes.title["en"] ?? attributes.title["ja"] ?? attributes.title["ja-ro"] ?? attributes.title["ko"] ?? Object.values(attributes.title)[0];
-
-            const altTitles: string[] = attributes.altTitles.map((title: { [key: string]: string }) => {
-                return Object.values(title)[0];
-            });
+            const altTitles: string[] = attributes.altTitles
+                .map((title: { [key: string]: string }) => {
+                    return Object.values(title)[0];
+                })
+                .concat(Object.values(attributes.title));
 
             const id = manga.id;
             let img = null;
@@ -56,9 +56,11 @@ export default class MangaDex extends MangaProvider {
             const formatString: string = manga.type.toUpperCase();
             const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
 
+            const title = attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "en")?.en ?? attributes.title[Object.keys(attributes.title).filter((value) => value === "en")[0]] ?? attributes.title["ja-ro"] ?? attributes.title["jp-ro"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja-ro")?.["ja-ro"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp-ro")?.["jp-ro"] ?? attributes.title["jp"] ?? attributes.title["ja"] ?? attributes.title["ko"] ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp")?.jp ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja")?.ja ?? attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ko")?.ko ?? null;
+
             results.push({
                 id,
-                title: title,
+                title,
                 altTitles: altTitles,
                 img,
                 format,
