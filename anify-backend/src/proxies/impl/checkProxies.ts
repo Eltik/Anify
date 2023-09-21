@@ -11,7 +11,7 @@ export async function checkCorsProxies(): Promise<string[]> {
     console.log(colors.yellow("Importing proxies... Please note that reading the proxies file may take a while."));
     if (toCheck.length === 0) {
         const file = Bun.file("./proxies.json");
-        if (file) {
+        if (await file.exists()) {
             // Check proxies.json
             const proxies = await file.json();
             for (let i = 0; i < proxies.length; i++) {
@@ -61,138 +61,69 @@ export async function checkCorsProxies(): Promise<string[]> {
 }
 
 async function makeRequest(ip: IP): Promise<string | undefined> {
-    const timeout = 3000;
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
 
     try {
         const response = await fetch(`http://${ip.ip}:${ip.port}/iscorsneeded`, {
             signal: controller.signal,
         });
         if (response.status === 200 && (await response.text()) === "no") {
-            const secondResponse = await fetch(`http://${ip.ip}:${ip.port}/https://graphql.anilist.co`, {
-                signal: controller.signal,
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    Origin: "graphql.anilist.co",
-                },
-                body: JSON.stringify({
-                    query: `query ($id: Int) {
-                        Media (id: $id) {
-                            id
-                            title {
-                                romaji
-                                english
-                                native
-                            }
-                        }
-                    }`,
-                    variables: {
-                        id: 21,
-                    },
-                }),
-            }).catch((err) => {
-                return null;
-            });
+            let isOkay = true;
 
-            clearTimeout(id);
-            if (secondResponse?.ok) {
-                let text: any = undefined;
+            console.log(colors.yellow("Testing ") + `${ip.ip}:${ip.port}` + colors.yellow("."));
 
-                try {
-                    text = await secondResponse.json();
-                } catch (e) {
-                    console.log(colors.red(`Error parsing JSON from ${ip.ip}:${ip.port}: ${e}`));
-                }
+            for (const provider of ANIME_PROVIDERS) {
+                console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
 
-                if (!text) {
+                provider.customProxy = `http://${ip.ip}:${ip.port}`;
+
+                const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
                     return undefined;
+                });
+
+                provider.customProxy = undefined;
+
+                if (!providerResponse) {
+                    console.log(colors.red(`${provider.id} failed.`));
+                    isOkay = false;
+                    break;
                 }
+            }
 
-                let isOkay = true;
-
-                for (const provider of ANIME_PROVIDERS) {
-                    console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
-
-                    provider.customProxy = `http://${ip.ip}:${ip.port}`;
-
-                    const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
-                        return undefined;
-                    });
-
-                    if (!providerResponse) {
-                        console.log(colors.red(`${provider.id} failed.`));
-                        isOkay = false;
-                        provider.customProxy = undefined;
-                        break;
-                    }
-
-                    provider.customProxy = undefined;
-                }
-
-                if (isOkay) {
-                    console.log(colors.yellow("Anime providers passed."));
-                } else {
-                    console.log(colors.red("Anime providers failed."));
-                    return undefined;
-                }
-
-                for (const provider of MANGA_PROVIDERS) {
-                    console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
-
-                    provider.customProxy = `http://${ip.ip}:${ip.port}`;
-
-                    const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
-                        return undefined;
-                    });
-
-                    if (!providerResponse) {
-                        isOkay = false;
-                        provider.customProxy = undefined;
-                        break;
-                    }
-
-                    provider.customProxy = undefined;
-                }
-
-                if (isOkay) {
-                    console.log(colors.yellow("Manga providers passed."));
-                } else {
-                    console.log(colors.red("Manga providers failed."));
-                    return undefined;
-                }
-
-                for (const provider of META_PROVIDERS) {
-                    console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
-
-                    provider.customProxy = `http://${ip.ip}:${ip.port}`;
-
-                    const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
-                        return undefined;
-                    });
-
-                    if (!providerResponse) {
-                        isOkay = false;
-                        provider.customProxy = undefined;
-                        break;
-                    }
-
-                    provider.customProxy = undefined;
-                }
-
-                if (isOkay) {
-                    console.log(colors.yellow("Meta providers passed."));
-                    return ip.ip + ":" + ip.port;
-                } else {
-                    console.log(colors.red("Meta providers failed."));
-                    return undefined;
-                }
+            if (isOkay) {
+                console.log(colors.yellow("Anime providers passed."));
             } else {
+                console.log(colors.red("Anime providers failed."));
+                return undefined;
+            }
+
+            for (const provider of MANGA_PROVIDERS) {
+                console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
+
+                provider.customProxy = `http://${ip.ip}:${ip.port}`;
+
+                const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
+                    return undefined;
+                });
+
+                provider.customProxy = undefined;
+
+                if (!providerResponse) {
+                    console.log(colors.red(`${provider.id} failed.`));
+                    isOkay = false;
+                    break;
+                }
+            }
+
+            if (isOkay) {
+                console.log(colors.yellow("Manga providers passed."));
+                return ip.ip + ":" + ip.port;
+            } else {
+                console.log(colors.red("Manga providers failed."));
                 return undefined;
             }
         } else {
+            console.log(colors.red(`${ip.ip}:${ip.port} is not a CORS proxy.`));
             return undefined;
         }
     } catch (error) {

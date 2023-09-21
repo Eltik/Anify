@@ -3,7 +3,7 @@ import { CORS_PROXIES } from "..";
 
 export async function fetchCorsProxies(): Promise<string[]> {
     const file = Bun.file("./goodProxies.json");
-    if (file) {
+    if (await file.exists()) {
         const BATCH_SIZE = 100;
 
         const proxyData = await file.json();

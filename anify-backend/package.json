@@ -1,11 +1,14 @@
 {
   "name": "anify-backend",
-  "description": "Anify Backend",
+  "description": "Advanced anime, manga, and lightnovel scraping web API.",
   "module": "index.ts",
   "type": "module",
   "scripts": {
     "start": "bun run dist/index.js",
     "dev": "bun run src/index.ts",
+    "crawl": "bun run src/scripts/crawl.ts",
+    "check:proxies": "bun run src/scripts/checkProxies.ts",
+    "scrape:proxies": "bun run src/scripts/scrapeProxies.ts",
     "build": "bun build ./src/index.ts --outdir ./dist --target node",
     "prettier": "prettier --write .",
     "eslint": "eslint --ext .ts src/** --fix",

@@ -8,6 +8,7 @@ import emitter, { Events } from "./lib";
 import { get } from "./database/impl/modify/get";
 import queues from "./worker";
 import { start } from "./server";
+import { checkCorsProxies } from "./proxies/impl/checkProxies";
 
 before().then(async (_) => {
     await start();
@@ -16,6 +17,9 @@ before().then(async (_) => {
 async function before() {
     await fetchCorsProxies();
     await init();
+
+    // Check proxies every 12 hours
+    setInterval(checkCorsProxies, 1000 * 60 * 60 * 12);
 
     emitter.on(Events.COMPLETED_MAPPING_LOAD, async (data) => {
         for (let i = 0; i < data.length; i++) {
