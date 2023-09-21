@@ -5,16 +5,11 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "build:db": "npm run db:generate && npm run db:push && npm run db:validate",
-    "db:generate": "npx prisma generate",
-    "db:push": "npx prisma db push",
-    "db:validate": "npx prisma validate",
-    "lint": "next lint",
+    "lint": "bun run prettier && next lint",
     "prettier": "prettier --write .",
     "start": "next start"
   },
   "dependencies": {
-    "@prisma/client": "^4.11.0",
     "@savvywombat/tailwindcss-grid-areas": "^3.0.1",
     "@t3-oss/env-nextjs": "^0.2.1",
     "@vercel/og": "^0.5.4",
@@ -53,7 +48,6 @@
     "postcss": "^8.4.21",
     "prettier": "^2.8.6",
     "prettier-plugin-tailwindcss": "^0.2.6",
-    "prisma": "^4.11.0",
     "tailwindcss": "^3.3.0",
     "typescript": "^5.0.2"
   },

@@ -10,18 +10,20 @@ export default async function handler(request: Request, response: ServerResponse
         return;
     }
 
-    const data = await (await fetch(`${env.AUTH_URL}/user`, {
-        method: "POST",
-        body: JSON.stringify({
-            id: request.body.id
-        }),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })).json() as UserData;
+    const data = (await (
+        await fetch(`${env.AUTH_URL}/user`, {
+            method: "POST",
+            body: JSON.stringify({
+                id: request.body.id,
+            }),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+    ).json()) as UserData;
 
     response.writeHead(200, { "Content-Type": "application/json" });
-    response.write(JSON.stringify(data));    
+    response.write(JSON.stringify(data));
     response.end();
     return;
 }
@@ -29,5 +31,5 @@ export default async function handler(request: Request, response: ServerResponse
 interface Request {
     body: {
         id: string;
-    }
+    };
 }

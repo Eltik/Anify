@@ -19,7 +19,7 @@ export default async function handler(request: Request, response: ServerResponse
 
     const perPage: number = request.body.perPage ?? 10;
     const page: number = request.body.page ?? 0;
-    
+
     const genres: string[] = request.body.genres ?? [];
     const genresExcluded: string[] = request.body.genresExcluded ?? [];
     const tags: string[] = request.body.tags ?? [];
@@ -27,24 +27,26 @@ export default async function handler(request: Request, response: ServerResponse
 
     const formats: string[] = request.body.formats ?? [];
 
-    const data = await (await fetch(`${env.BACKEND_URL}/search-advanced?apikey=${env.API_KEY}`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            type: request.body.type === "manga" ? formats.includes("NOVEL") ? "novel" : "manga" : "anime",
-            query: request.body.query,
-            format: formats,
-            page,
-            perPage,
-            genres,
-            genresExcluded,
-            tags,
-            tagsExcluded,
-            year: 0,
+    const data = (await (
+        await fetch(`${env.BACKEND_URL}/search-advanced?apikey=${env.API_KEY}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                type: request.body.type === "manga" ? (formats.includes("NOVEL") ? "novel" : "manga") : "anime",
+                query: request.body.query,
+                format: formats,
+                page,
+                perPage,
+                genres,
+                genresExcluded,
+                tags,
+                tagsExcluded,
+                year: 0,
+            }),
         })
-    })).json() as Anime[] | Manga[];
+    ).json()) as Anime[] | Manga[];
 
     const newData = {
         hits: data,
@@ -53,7 +55,7 @@ export default async function handler(request: Request, response: ServerResponse
         limit: perPage,
         offset: page * perPage,
         estimatedTotalHits: data.length,
-    }
+    };
 
     response.writeHead(200, { "Content-Type": "application/json" });
     response.write(JSON.stringify(newData));
@@ -71,7 +73,7 @@ interface Request {
         tags?: string[];
         tagsExcluded?: string[];
         formats?: string[];
-    }
+    };
 }
 
 interface Title {

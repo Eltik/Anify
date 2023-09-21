@@ -53,7 +53,7 @@ export default class ManagDexBase extends BaseProvider {
             });
 
             const formatString: string = manga.type.toUpperCase();
-            const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
+            const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.MANGA;
 
             results.push({
                 id,
@@ -196,7 +196,7 @@ export default class ManagDexBase extends BaseProvider {
             });
 
             const formatString: string = manga.type.toUpperCase();
-            const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
+            const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.MANGA;
 
             results.push({
                 id,
@@ -239,7 +239,7 @@ export default class ManagDexBase extends BaseProvider {
             const covers = await (await this.request(`${this.api}/cover?limit=100&manga[]=${id}`, {}, true)).json();
 
             const formatString: string = data.type.toUpperCase();
-            const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
+            const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.MANGA;
 
             return {
                 id: id,

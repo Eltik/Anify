@@ -33,3 +33,4 @@ bun.lockb
 goodProxies.json
 proxies.json
 /builds
+db.sqlite

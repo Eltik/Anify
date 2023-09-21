@@ -1,8 +1,8 @@
 export interface Seasonal {
-    trending: Anime[],
-    popular: Anime[],
-    top: Anime[],
-    seasonal: Anime[]
+    trending: Anime[];
+    popular: Anime[];
+    top: Anime[];
+    seasonal: Anime[];
 }
 
 export interface Stats {
@@ -75,7 +75,7 @@ export interface Anime {
 
 export type AnimeRelation = Anime & {
     relationType: string;
-}
+};
 
 export type Manga = {
     id: string;
@@ -137,7 +137,7 @@ export type Manga = {
 
 export type MangaRelation = Manga & {
     relationType: string;
-}
+};
 
 export const enum Type {
     ANIME = "ANIME",
@@ -356,7 +356,7 @@ export type MixdropItem = {
     url: string;
     yourfile: boolean;
 };
-  
+
 export type MixdropResponse = {
     success: boolean;
     result: Record<string, MixdropItem>;
@@ -394,10 +394,10 @@ export interface ReadHistory {
 
 export interface AuthProviders {
     id: string;
-    url: string,
-    name: string,
-    icon: string,
-    oauth: string,
+    url: string;
+    name: string;
+    icon: string;
+    oauth: string;
 }
 
 export interface UserData {
@@ -417,7 +417,7 @@ export interface UserData {
         fontWidth: string;
         updatedAt: Date;
         createdAt: Date;
-    }
+    };
 }
 
 export interface UserTokens {

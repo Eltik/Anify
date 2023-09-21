@@ -33,14 +33,14 @@ export default {
             rose: colors.rose,
             "background-dark": "#141414",
             "background-primary": "#315045",
-            "background": "#1f1f1f",
+            background: "#1f1f1f",
             "background-light": "#333333",
             "background-token": "rgb(49, 80, 69)",
-            "main": "rgb(76, 184, 117)",
+            main: "rgb(76, 184, 117)",
             "main-dark": "rgb(49, 133, 81)",
             "main-primary": "rgb(168, 241, 218)",
             "main-light": "rgb(132, 254, 179)",
-            "main-text": "rgb(139, 160, 148)"
+            "main-text": "rgb(139, 160, 148)",
         }),
         extend: {
             gridTemplateAreas: {

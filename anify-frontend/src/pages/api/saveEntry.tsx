@@ -30,20 +30,22 @@ export default async function handler(request: Request, response: ServerResponse
     }
 
     try {
-        const data = await (await fetch(`${env.AUTH_URL}/${request.body.provider}/update-entry`, {
-            method: "POST",
-            body: JSON.stringify({
-                userId: request.body.userId,
-                accessToken: request.body.accessToken,
-                entry: request.body.entry
-            }),
-            headers: {
-                "Content-Type": "application/json"
-            }
-        })).json();
-    
+        const data = await (
+            await fetch(`${env.AUTH_URL}/${request.body.provider}/update-entry`, {
+                method: "POST",
+                body: JSON.stringify({
+                    userId: request.body.userId,
+                    accessToken: request.body.accessToken,
+                    entry: request.body.entry,
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+        ).json();
+
         response.writeHead(200, { "Content-Type": "application/json" });
-        response.write(JSON.stringify(data));    
+        response.write(JSON.stringify(data));
         response.end();
         return;
     } catch (e) {
@@ -60,5 +62,5 @@ interface Request {
         userId: string;
         accessToken: string;
         entry: Entry;
-    }
+    };
 }
