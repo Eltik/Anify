@@ -7,11 +7,14 @@ export const searchAdvanced = async (query: string, type: Type, formats: Format[
     let where = `
         WHERE
         (
-            '%' || $query || '%' IN (synonyms)
+            EXISTS (
+                SELECT 1
+                FROM json_each(synonyms) AS s
+                WHERE s.value LIKE '%' || $query || '%'
+            )
             OR title->>'english' LIKE '%' || $query || '%'
             OR title->>'romaji' LIKE '%' || $query || '%'
             OR title->>'native' LIKE '%' || $query || '%'
-            OR synonyms LIKE '%' || $query || '%'
         )
         ${formats?.length > 0 ? `AND "format" IN (${formats.map((f) => `'${f}'`).join(", ")})` : ""}
     `;

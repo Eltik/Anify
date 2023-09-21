@@ -7,7 +7,11 @@ export const search = async (query: string, type: Type, formats: Format[], page:
     const where = `
         WHERE
         (
-            JSON_ARRAY_CONTAINS(synonyms, JSON('${query}'))
+            EXISTS (
+                SELECT 1
+                FROM json_each(synonyms) AS s
+                WHERE s.value LIKE '%' || $query || '%'
+            )
             OR title->>'english' LIKE '%' || $query || '%'
             OR title->>'romaji' LIKE '%' || $query || '%'
             OR title->>'native' LIKE '%' || $query || '%'
