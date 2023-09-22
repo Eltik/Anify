@@ -233,9 +233,23 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
         content,
     ).genEpub();
 
-    await Bun.write(`${path}/book.epub`, book);
+    await Bun.write(`${path}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}.epub`, book);
 
-    return `${path}/book.epub`;
+    // Remove all images
+    const images = readdirSync(path).filter((file) => file.endsWith(".jpg"));
+    for (let i = 0; i < images.length; i++) {
+        const file = images[i];
+        const imgPath = `${path}/${file}`;
+        if (existsSync(imgPath)) {
+            try {
+                unlinkSync(imgPath);
+            } catch (e) {
+                console.log(colors.red("Unable to delete file ") + colors.blue(file + ".jpg") + colors.red("."));
+            }
+        }
+    }
+
+    return `${path}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}.epub`;
 };
 
 export const createMangaPDF = async (providerId: string, chapter: Chapter, pages: Page[]): Promise<string> => {
