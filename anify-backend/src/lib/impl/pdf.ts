@@ -41,6 +41,8 @@ export const loadPDF = async (data: { id: string; providerId: string; chapter: C
     form.append("key", mixdropKey);
     form.append("file", file, `${data.chapter.title.replace(/[^\w .-]/gi, "")}.pdf`);
 
+    console.log(colors.green("Uploading ") + colors.blue(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "") + colors.green(" to Mixdrop..."));
+
     const result = await (
         await fetch("https://ul.mixdrop.co/api", {
             method: "POST",
@@ -54,7 +56,7 @@ export const loadPDF = async (data: { id: string; providerId: string; chapter: C
                 const chaps = chap.chapters;
                 for (const ch of chaps) {
                     if (ch.id === data.chapter.id) {
-                        ch.mixdrop = result[0];
+                        Object.assign(ch, { mixdrop: result.result?.fileref });
                     }
                 }
             }

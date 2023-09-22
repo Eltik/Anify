@@ -10,6 +10,7 @@ export const fetchChapters = async (id: string): Promise<ChapterData[]> => {
     if (!media) return [];
 
     const mappings = media.mappings;
+    const storedChapters = (media as Manga).chapters.data;
     const chapters: ChapterData[] = [];
 
     const promises: Promise<boolean>[] = mappings.map(async (mapping) => {
@@ -22,7 +23,14 @@ export const fetchChapters = async (id: string): Promise<ChapterData[]> => {
             if (data && data.length === 0) return true;
 
             data?.map((chapter) => {
+                const storedChapter = storedChapters.map((provider) => {
+                    if (provider.providerId === mapping.providerId) {
+                        return provider.chapters.find((c) => c.id === chapter.id);
+                    }
+                })[0];
+
                 if (!chapter.updatedAt) chapter.updatedAt = 0;
+                if (storedChapter?.mixdrop) chapter.mixdrop = storedChapter.mixdrop;
             });
 
             if (data) {

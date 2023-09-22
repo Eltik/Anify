@@ -36,7 +36,9 @@ export const loadEpub = async (data: { id: string; providerId: string; chapters:
     const form = new FormData();
     form.append("email", mixdropEmail);
     form.append("key", mixdropKey);
-    form.append("file", file, `${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w .-]/gi, "")}.pdf`);
+    form.append("file", file);
+
+    console.log(colors.green("Uploading ") + colors.blue(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "") + colors.green(" to Mixdrop..."));
 
     const result = await (
         await fetch("https://ul.mixdrop.co/api", {
@@ -50,7 +52,7 @@ export const loadEpub = async (data: { id: string; providerId: string; chapters:
             if (chap.providerId === data.providerId) {
                 const chaps = chap.chapters;
                 for (const ch of chaps) {
-                    ch.mixdrop = result[0];
+                    Object.assign(ch, { mixdrop: result.result?.fileref });
                 }
             }
         }
@@ -112,7 +114,7 @@ export const loadEpub = async (data: { id: string; providerId: string; chapters:
         await emitter.emitAsync(Events.COMPLETED_NOVEL_UPLOAD, result.result?.fileref);
         return pdfPath;
     } else {
-        console.error(colors.red("Failed to upload PDF to Mixdrop."));
+        console.error(colors.red("Failed to upload epub to Mixdrop."));
         return await emitter.emitAsync(Events.COMPLETED_NOVEL_UPLOAD, "");
     }
 };
@@ -126,6 +128,8 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
     if (chapters.length === 0) console.log(colors.red("No chapters found for ") + colors.blue(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? ""));
 
     const path = `./manga/${providerId}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}`.slice(0, -1);
+
+    if (existsSync(`${path}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}.epub`)) return `${path}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}.epub`;
 
     if (!existsSync(path)) {
         mkdirSync(path, { recursive: true });
