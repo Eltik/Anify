@@ -97,7 +97,7 @@ export default class NovelUpdates extends MangaProvider {
             });
         });
 
-        return chapters;
+        return chapters.reverse();
     }
 
     override async fetchPages(id: string): Promise<Page[] | string | undefined> {

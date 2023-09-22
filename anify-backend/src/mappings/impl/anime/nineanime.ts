@@ -248,13 +248,16 @@ export default class NineAnime extends AnimeProvider {
         return await (await this.request(`${this.resolver}/decrypt?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {})).json();
     }
 
-    // This bypass works. However because it sends requests very quickly in a short amount of time, it causes proxies to get banned very quickly.
     /*
+    // This bypass works. However because it sends requests very quickly in a short amount of time, it causes proxies to get banned very quickly.
     override async request(url: string, options: RequestInit = {}, proxyRequest = true): Promise<Response> {
+        if (url.includes(this.resolver ?? "")) {
+            return Http.request(url, options, false);
+        }
         const proxy = proxyRequest ? ((this.customProxy?.length ?? 0) > 0 ? this.customProxy : Http.getRandomUnbannedProxy()) : undefined;
 
         const headers = {
-            "User-Agent": this.userAgent,
+            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1",
             Referer: this.url,
         };
 
@@ -325,10 +328,16 @@ export default class NineAnime extends AnimeProvider {
         // Update URL with __jscheck parameter
         const updatedUrl = this.url.replace(/&?__jscheck=[^&]+/g, "") + (this.url.indexOf("?") < 0 ? "?" : "&") + "__jscheck=" + o;
 
-        const req3 = await Http.request(updatedUrl, { headers }, proxyRequest, 0, proxy);
-        const cookies = req3.headers["set-cookie"];
+        const req3 = await Http.request(updatedUrl, { headers, redirect: "follow" }, proxyRequest, 0, proxy);
+        console.log(req3.headers);
 
-        return Http.request(url, { headers: { Cookie: cookies?.join("; ") ?? "" }, ...options }, proxyRequest, 0, proxy);
+        const cookies = req3.headers.get("set-cookie");
+
+        console.log(await req3.text())
+
+        return Http.request(url, { headers: { Cookie: cookies ?? "" }, ...options }, proxyRequest, 0, proxy);
+
+        //return Http.request(url, { headers: { Cookie: cookies?.join("; ") ?? "" }, ...options }, proxyRequest, 0, proxy);
     }
     */
 
