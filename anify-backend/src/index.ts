@@ -80,5 +80,6 @@ async function before() {
     queues.searchQueue.start();
     queues.seasonalQueue.start();
     queues.skipTimes.start();
-    queues.uploadPages.start();
+    queues.uploadManga.start();
+    queues.uploadNovel.start();
 }

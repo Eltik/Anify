@@ -6,7 +6,8 @@ export enum Events {
     COMPLETED_SEARCH_LOAD = "search.load.completed",
     COMPLETED_SEASONAL_LOAD = "seasonal.load.completed",
     COMPLETED_ENTRY_CREATION = "entry.creation.completed",
-    COMPLETED_PAGES_UPLOAD = "page.upload.completed",
+    COMPLETED_MANGA_UPLOAD = "manga.upload.completed",
+    COMPLETED_NOVEL_UPLOAD = "novel.upload.completed",
 }
 
 const emitter = new EventEmitter2({});

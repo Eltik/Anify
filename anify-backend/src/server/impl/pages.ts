@@ -67,7 +67,7 @@ export const handler = async (req: Request): Promise<Response> => {
             rating: 0,
         };
 
-        if (chapter) await queues.uploadPages.add({ id, providerId, chapter, pages: (data as Page[] | string) ?? [] });
+        if (chapter) await queues.uploadManga.add({ id, providerId, chapter, pages: (data as Page[]) ?? [] });
 
         return new Response(JSON.stringify(data), {
             status: 200,

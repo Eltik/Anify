@@ -1,5 +1,6 @@
 import { cacheTime, redis } from "..";
 import content from "../../content";
+import queues from "../../worker";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -31,6 +32,10 @@ export const handler = async (req: Request): Promise<Response> => {
         }
 
         const data = await content.fetchChapters(String(id));
+
+        // Check if the NovelUpdates provider exists
+        const novelUpdates = data.find((chapter) => chapter.providerId === "novelupdates");
+        if (novelUpdates) queues.uploadNovel.add({ id, providerId: "novelupdates", chapters: novelUpdates.chapters });
 
         await redis.set(`chapters:${id}`, JSON.stringify(data), "EX", cacheTime);
 

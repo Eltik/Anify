@@ -1,6 +1,5 @@
 import { mangaProviders } from "../../mappings";
-import { StreamingServers, SubType } from "../../types/enums";
-import { Page, Source } from "../../types/types";
+import { Page } from "../../types/types";
 
 export const fetchPages = async (providerId: string, readId: string): Promise<string | Page[] | null> => {
     const provider = mangaProviders[providerId];

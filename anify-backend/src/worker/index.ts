@@ -3,7 +3,8 @@ import createEntry from "./impl/entry";
 import searchQueue from "./impl/search";
 import seasonalQueue from "./impl/seasonal";
 import skipTimes from "./impl/skipTimes";
-import uploadPages from "./impl/pdf";
+import uploadManga from "./impl/pdf";
+import uploadNovel from "./impl/epub";
 
 export default {
     mappingQueue,
@@ -11,5 +12,6 @@ export default {
     searchQueue,
     seasonalQueue,
     skipTimes,
-    uploadPages,
+    uploadManga,
+    uploadNovel,
 };
