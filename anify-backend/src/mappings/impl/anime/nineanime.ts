@@ -9,7 +9,7 @@ import Extractor from "../../../helper/extractor";
 export default class NineAnime extends AnimeProvider {
     override rateLimit = 250;
     override id = "9anime";
-    override url = "https://aniwave.to";
+    override url = "https://aniwave.ws";
     override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
 
     private resolver: string | undefined = env.NINEANIME_RESOLVER;
@@ -143,21 +143,14 @@ export default class NineAnime extends AnimeProvider {
             return await new Extractor(source, result).extract(server ?? StreamingServers.MyCloud);
         }
 
-        if (subType === SubType.SUB) {
-            id = id.split(",")[0];
-        } else {
-            id = id.split(",")[1];
-            if (!id) return result;
-        }
-
-        const servers = (await this.fetchServers(id))!;
+        const servers = (await this.fetchServers(id, subType))!;
 
         let s = servers.find((s) => s.name === server);
 
         switch (server) {
             case StreamingServers.VizCloud:
-                s = servers.find((s) => s.name === "vidstream")!;
-                if (!s) throw new Error("Vidstream server found");
+                s = servers.find((s) => s.name === "vidplay")!;
+                if (!s) throw new Error("Vidplay server found");
                 break;
             case StreamingServers.StreamTape:
                 s = servers.find((s) => s.name === "streamtape");
@@ -180,11 +173,35 @@ export default class NineAnime extends AnimeProvider {
         return await this.fetchSources(s.url, subType, server ?? StreamingServers.MyCloud);
     }
 
-    override async fetchServers(id: string): Promise<Server[] | undefined> {
-        const vrf = await this.getVRF(id);
-        const url = `${this.url}/ajax/server/list/${id}?${vrf.vrfQuery}=${encodeURIComponent(vrf.url)}`;
+    override async fetchServers(id: string, subType: SubType): Promise<Server[] | undefined> {
+        let data: any = {};
 
-        const data = await (await this.request(url, {}, true)).json();
+        try {
+            const newId = subType === SubType.DUB ? id.split(",")[id.split(",").length - 1] : id.split(",")[1] ?? id.split(",")[0];
+
+            const vrf = await this.getVRF(newId);
+            const url = `${this.url}/ajax/server/list/${newId}?${vrf.vrfQuery}=${encodeURIComponent(vrf.url)}`;
+
+            const json = await (await this.request(url, {}, true)).json();
+
+            const $ = load(json.result);
+            const sub = $("div.servers div.type").attr("data-type");
+            if (sub === "softsub" && subType === SubType.SUB) {
+                data = json;
+            } else if (sub === "sub" && subType === SubType.SUB) {
+                data = await (await this.request(url, {}, true)).json();
+            } else if (subType === SubType.SUB) {
+                const vrf = await this.getVRF(id.split(",")[0]);
+                const url = `${this.url}/ajax/server/list/${id.split(",")[0]}?${vrf.vrfQuery}=${encodeURIComponent(vrf.url)}`;
+
+                const json = await (await this.request(url, {}, true)).json();
+                data = json;
+            } else {
+                data = await (await this.request(url, {}, true)).json();
+            }
+        } catch (e) {
+            //
+        }
 
         const $ = load(data.result);
 

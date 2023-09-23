@@ -24,7 +24,7 @@ export default abstract class AnimeProvider {
         return undefined;
     }
 
-    async fetchServers(id: string): Promise<Server[] | undefined> {
+    async fetchServers(id: string, subType: SubType = SubType.SUB): Promise<Server[] | undefined> {
         return undefined;
     }
 

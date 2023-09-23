@@ -140,8 +140,8 @@ export default class Extractor {
         for (const track of mainReq.result?.tracks ?? []) {
             result.subtitles.push({
                 url: track.file,
-                lang: track.label ? track.label : track.kind,
-                label: track.kind,
+                lang: track.label ?? track.kind,
+                label: track.label ?? track.kind,
             });
         }
 
@@ -243,8 +243,8 @@ export default class Extractor {
         for (const track of mainReq.result?.tracks ?? []) {
             result.subtitles.push({
                 url: track.file,
-                lang: track.label ? track.label : track.kind,
-                label: track.kind,
+                lang: track.label ?? track.kind,
+                label: track.label ?? track.kind,
             });
         }
 
