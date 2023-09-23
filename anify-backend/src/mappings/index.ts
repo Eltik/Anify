@@ -7,6 +7,7 @@ import Zoro from "./impl/anime/zoro";
 import BaseProvider from "./impl/base";
 import AniListBase from "./impl/base/anilist";
 import ManagDexBase from "./impl/base/mangadex";
+import NovelUpdatesBase from "./impl/base/novelupdates";
 import InformationProvider from "./impl/information";
 import AniDB from "./impl/information/anidb";
 import AniList from "./impl/information/anilist";
@@ -14,6 +15,7 @@ import ComicKInfo from "./impl/information/comick";
 import Kitsu from "./impl/information/kitsu";
 import MAL from "./impl/information/mal";
 import MangaDexInfo from "./impl/information/mangadex";
+import NovelUpdatesInfo from "./impl/information/novelupdates";
 import TMDB from "./impl/information/tmdb";
 import TVDB from "./impl/information/tvdb";
 import MangaProvider from "./impl/manga";
@@ -50,7 +52,7 @@ const mangaProviders: Record<string, MangaProvider> = MANGA_PROVIDERS.reduce(
     {} as Record<string, MangaProvider>,
 );
 
-const INFORMATION_PROVIDERS: InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>[] = [new AniList(), new Kitsu(), new MAL(), new AniDB(), new TVDB(), new TMDB(), new ComicKInfo(), new MangaDexInfo()];
+const INFORMATION_PROVIDERS: InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>[] = [new AniList(), new Kitsu(), new MAL(), new AniDB(), new TVDB(), new TMDB(), new ComicKInfo(), new MangaDexInfo(), new NovelUpdatesInfo()];
 const infoProviders: Record<string, InformationProvider<Anime | Manga, AnimeInfo | MangaInfo>> = INFORMATION_PROVIDERS.reduce(
     (acc, provider) => {
         acc[provider.id] = provider;
@@ -68,7 +70,7 @@ const metaProviders: Record<string, MetaProvider> = META_PROVIDERS.reduce(
     {} as Record<string, MetaProvider>,
 );
 
-const BASE_PROVIDERS: BaseProvider[] = [new AniListBase(), new ManagDexBase()];
+const BASE_PROVIDERS: BaseProvider[] = [new AniListBase(), new ManagDexBase(), new NovelUpdatesBase()];
 const baseProviders: Record<string, BaseProvider> = BASE_PROVIDERS.reduce(
     (acc, provider) => {
         acc[provider.id] = provider;

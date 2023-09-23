@@ -149,6 +149,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
         const bestMatchIndex = findBestMatch2DArray(cleanedTitles, providerTitles);
 
         if (bestMatchIndex.bestMatch.rating < 0.5) {
+            //console.log(colors.gray("No results found for ") + colors.blue(title) + colors.gray(" on ") + colors.blue(suitableProviders[i].id) + colors.gray(".") + colors.gray(" Best match rating: ") + colors.blue(bestMatchIndex.bestMatch.rating + ""));
             continue;
         }
 

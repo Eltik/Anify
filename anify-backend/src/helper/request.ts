@@ -30,7 +30,7 @@ export default class Http {
                 const id = setTimeout(() => {
                     this.updateBannedProxies(proxyUrl);
                     controller.abort();
-                }, 8000);
+                }, 5000);
 
                 try {
                     config = {

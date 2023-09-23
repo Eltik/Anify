@@ -6,7 +6,7 @@ export default class AniListBase extends BaseProvider {
     override id = "anilist";
     override url = "https://anilist.co";
 
-    override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT, Format.NOVEL];
+    override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
 
     private api = "https://graphql.anilist.co";
 

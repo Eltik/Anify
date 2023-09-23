@@ -32,7 +32,7 @@ export default class NovelUpdates extends MangaProvider {
         $("div.search_main_box_nu").each((_, el) => {
             const img = $(el).find("div.search_img_nu img").attr("src");
             const title = $(el).find("div.search_body_nu div.search_title a").text();
-            const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split(this.url)[1];
+            const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split(this.url)[1]?.split("/series/")[1]?.slice(0, -1);
 
             results.push({
                 id: id!,
@@ -53,7 +53,7 @@ export default class NovelUpdates extends MangaProvider {
 
         const data = await (
             await this.request(
-                `${this.url}${id}`,
+                `${this.url}/series/${id}`,
                 {
                     headers: {
                         Cookie: "_ga=;",
