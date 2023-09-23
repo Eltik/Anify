@@ -11,7 +11,7 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
     const newResults: ((Anime | Manga) & { updatedAt?: number })[] = [];
 
     if (type === "ANIME") {
-        let sql = `
+        const sql = `
             SELECT * FROM "anime"
             WHERE "format" IN (${formatParams})
             ORDER BY "latest" DESC
@@ -19,7 +19,7 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
             OFFSET ${skip};
         `;
 
-        let countSql = `
+        const countSql = `
             SELECT COUNT(*) FROM "anime"
             WHERE "format" IN (${formatParams});
         `;
@@ -64,7 +64,7 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
             });
         }
     } else {
-        let sql = `
+        const sql = `
             SELECT * FROM "manga"
             WHERE "format" IN (${formatParams})
             ORDER BY "latest" DESC
@@ -72,7 +72,7 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
             OFFSET ${skip};
         `;
 
-        let countSql = `
+        const countSql = `
             SELECT COUNT(*) FROM "manga"
             WHERE "format" IN (${formatParams});
         `;

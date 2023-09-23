@@ -45,13 +45,21 @@ export interface Anime {
         anilist: number;
         mal: number;
         kitsu: number;
-        simkl: number;
+        comick: number;
+        anidb: number;
+        mangadex: number;
+        tmdb: number;
+        tvdb: number;
     };
     popularity: {
         anilist: number;
         mal: number;
         kitsu: number;
-        simkl: number;
+        comick: number;
+        anidb: number;
+        mangadex: number;
+        tmdb: number;
+        tvdb: number;
     };
     averageRating: number;
     averagePopularity: number;

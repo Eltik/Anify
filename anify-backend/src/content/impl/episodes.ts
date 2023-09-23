@@ -1,4 +1,4 @@
-import { get } from "../../database/impl/modify/get";
+import { get } from "../../database/impl/fetch/get";
 import { update } from "../../database/impl/modify/update";
 import { fillMediaInfo } from "../../lib/impl/mappings";
 import { INFORMATION_PROVIDERS, animeProviders } from "../../mappings";

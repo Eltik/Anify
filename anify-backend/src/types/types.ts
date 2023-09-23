@@ -1,6 +1,5 @@
 import { Format, Genres, MediaStatus, ProviderType, Season, SubType, Type } from "./enums";
 
-// wrapper that turns an type into how its stored in sqlite
 export type Db<T> = {
     [k in keyof T]: T[k] extends string | number ? T[k] : string;
 };

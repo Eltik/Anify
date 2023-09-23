@@ -849,21 +849,6 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                                         <span>TMDB</span>
                                                     </a>
                                                 ) : null}
-                                                {media.mappings.find((data) => {
-                                                    return data.providerId === "anidb";
-                                                })?.id ? (
-                                                    <a
-                                                        className="inline-flex min-h-[1.75rem] cursor-pointer items-center gap-2 rounded-sm bg-background-light p-[.3125rem_.5rem] text-sm transition-all duration-200 ease-in-out hover:bg-main/80"
-                                                        href={`https://anidb.net${
-                                                            media.mappings.find((data) => {
-                                                                return data.providerId === "anidb";
-                                                            })?.id ?? ""
-                                                        }`}
-                                                        target="_blank"
-                                                    >
-                                                        <span>TMDB</span>
-                                                    </a>
-                                                ) : null}
                                             </div>
                                         </div>
                                         {media.synonyms.length > 0 ? (

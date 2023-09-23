@@ -7,15 +7,11 @@
     "dev": "bun run src/index.ts",
     "build": "bun build ./src/index.ts --outdir ./dist --target node",
     "prettier": "prettier --write .",
-    "eslint": "eslint --ext .ts src/** --fix",
-    "lint": "bun run prettier && bun run eslint"
+    "lint": "bun run prettier && tsc"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.3",
-    "@typescript-eslint/eslint-plugin": "^6.7.0",
-    "@typescript-eslint/parser": "^6.7.0",
     "bun-types": "latest",
-    "eslint": "^8.49.0",
     "prettier": "^3.0.3"
   },
   "peerDependencies": {

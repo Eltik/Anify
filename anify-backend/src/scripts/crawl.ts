@@ -8,7 +8,7 @@ import { loadMapping } from "../lib/impl/mappings";
 import queues from "../worker";
 import { fetchCorsProxies } from "../proxies/impl/fetchProxies";
 import emitter, { Events } from "../lib";
-import { get } from "../database/impl/modify/get";
+import { get } from "../database/impl/fetch/get";
 import { wait } from "../helper";
 
 export const crawl = async (type: Type, formats: Format[]): Promise<void> => {

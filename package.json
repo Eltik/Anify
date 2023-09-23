@@ -4,10 +4,9 @@
     "description": "The best Japanese media web application.",
     "private": true,
     "scripts": {
-        "start": "cd anify-startup && bun run dev",
-        "install": "cd anify-manager && bun install && cd ../anify-frontend && npm i && cd ../anify-backend && bun install && cd ../anify-auth && npm i",
-        "lint": "cd anify-frontend && npx next lint && cd ../anify-backend && bun run lint && cd ../anify-auth && bun run lint",
-        "build": "npm run build:ts",
-        "build:ts": "cd anify-manager && tsc && bun run build && cd ../anify-backend && tsc && bun run build && cd ../anify-frontend && npm run build && cd ../anify-auth && npm run build:ts"
+        "start": "cd anify-manager && bun dev",
+        "install": "cd anify-manager && bun install && cd ../anify-frontend && bun install && cd ../anify-backend && bun install && cd ../anify-auth && bun install",
+        "lint": "cd anify-manager && bun run lint && cd ../anify-frontend && bun run lint && cd ../anify-backend && bun run lint && cd ../anify-auth && bun run lint",
+        "build": "cd anify-manager && bun run build && cd ../anify-backend && bun run build && cd ../anify-frontend && bun run build && cd ../anify-auth && bun run build"
     }
 }

@@ -2,7 +2,7 @@ import { db } from "../..";
 import { averageMetric } from "../../../helper";
 import { Type } from "../../../types/enums";
 import { Anime, Manga } from "../../../types/types";
-import { get } from "./get";
+import { get } from "../fetch/get";
 
 export const update = async (data: Anime | Manga) => {
     if (!(await get(data.id))) return null;

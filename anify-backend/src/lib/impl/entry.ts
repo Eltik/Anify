@@ -1,4 +1,4 @@
-import { get } from "../../database/impl/modify/get";
+import { get } from "../../database/impl/fetch/get";
 import { Type } from "../../types/enums";
 import { Anime, Manga } from "../../types/types";
 import emitter, { Events } from "..";

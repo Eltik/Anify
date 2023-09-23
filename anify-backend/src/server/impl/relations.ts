@@ -1,5 +1,5 @@
 import { cacheTime, redis } from "..";
-import { get } from "../../database/impl/modify/get";
+import { get } from "../../database/impl/fetch/get";
 import { Anime, Manga } from "../../types/types";
 
 export const handler = async (req: Request): Promise<Response> => {

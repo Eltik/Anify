@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { Chapter, Manga, UploadStatus } from "../../types/types";
 import { existsSync, mkdirSync, readdirSync, unlinkSync } from "node:fs";
 import { env } from "../../env";
-import { get } from "../../database/impl/modify/get";
+import { get } from "../../database/impl/fetch/get";
 import emitter, { Events } from "..";
 import { update } from "../../database/impl/modify/update";
 import { MediaStatus } from "../../types/enums";

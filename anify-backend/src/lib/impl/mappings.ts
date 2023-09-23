@@ -1,5 +1,5 @@
 import colors from "colors";
-import { get } from "../../database/impl/modify/get";
+import { get } from "../../database/impl/fetch/get";
 import emitter, { Events } from "..";
 import { Anime, AnimeInfo, Manga, MangaInfo, Result } from "../../types/types";
 import { Format, MediaStatus, ProviderType, Season, Type } from "../../types/enums";

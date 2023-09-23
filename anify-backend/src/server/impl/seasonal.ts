@@ -1,6 +1,6 @@
 import { Format, Type } from "../../types/enums";
 import { loadSeasonal } from "../../lib/impl/seasonal";
-import { seasonal } from "../../database/impl/misc/seasonal";
+import { seasonal } from "../../database/impl/fetch/seasonal";
 import { cacheTime, redis } from "..";
 
 export const handler = async (req: Request): Promise<Response> => {

@@ -1,7 +1,5 @@
-import queues from "../../worker";
-import { search } from "../../database/impl/search/search";
 import { Format, Type } from "../../types/enums";
-import { recent } from "../../database/impl/misc/recent";
+import { recent } from "../../database/impl/fetch/recent";
 import { cacheTime, redis } from "..";
 
 export const handler = async (req: Request): Promise<Response> => {

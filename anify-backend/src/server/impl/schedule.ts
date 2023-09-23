@@ -1,6 +1,6 @@
 import { cacheTime, redis } from "..";
 import { Anime } from "../../types/types";
-import { get } from "../../database/impl/modify/get";
+import { get } from "../../database/impl/fetch/get";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {

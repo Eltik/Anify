@@ -1,4 +1,4 @@
-import { get } from "../../database/impl/modify/get";
+import { get } from "../../database/impl/fetch/get";
 import { infoProviders } from "../../mappings";
 import { ContentMetadata } from "../../types/types";
 

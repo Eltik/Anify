@@ -1,5 +1,5 @@
 import { cacheTime, redis } from "..";
-import { get } from "../../database/impl/modify/get";
+import { get } from "../../database/impl/fetch/get";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {

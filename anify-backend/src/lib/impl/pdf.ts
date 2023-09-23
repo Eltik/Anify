@@ -10,7 +10,7 @@ import { promisify } from "node:util";
 import imageSize from "image-size";
 import { env } from "../../env";
 import emitter, { Events } from "..";
-import { get } from "../../database/impl/modify/get";
+import { get } from "../../database/impl/fetch/get";
 import { update } from "../../database/impl/modify/update";
 
 export const loadPDF = async (data: { id: string; providerId: string; chapter: Chapter; pages: Page[] }) => {

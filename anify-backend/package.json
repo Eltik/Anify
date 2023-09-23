@@ -11,16 +11,12 @@
     "scrape:proxies": "bun run src/scripts/scrapeProxies.ts",
     "build": "bun build ./src/index.ts --outdir ./dist --target node",
     "prettier": "prettier --write .",
-    "eslint": "eslint --ext .ts src/** --fix",
-    "lint": "bun run prettier && bun run eslint"
+    "lint": "bun run prettier && bun run eslint && tsc"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.2",
     "@types/pdfkit": "^0.12.10",
-    "@typescript-eslint/eslint-plugin": "latest",
-    "@typescript-eslint/parser": "latest",
     "bun-types": "latest",
-    "eslint": "^8.48.0",
     "prettier": "^3.0.3"
   },
   "peerDependencies": {
