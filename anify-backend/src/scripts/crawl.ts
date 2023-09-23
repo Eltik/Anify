@@ -59,6 +59,8 @@ export const crawl = async (type: Type, formats: Format[]): Promise<void> => {
             }),
         );
 
+        console.log(colors.gray(`Fetched ${mappings.length} mappings.`));
+
         data.push(...(mappings as any));
 
         await wait(1000);
@@ -85,3 +87,5 @@ async function before() {
     queues.mappingQueue.start();
     queues.createEntry.start();
 }
+
+crawl(Type.ANIME, [Format.TV, Format.MOVIE, Format.OVA, Format.ONA, Format.SPECIAL, Format.MUSIC]);
