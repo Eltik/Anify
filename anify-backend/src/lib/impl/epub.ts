@@ -9,6 +9,7 @@ import { env } from "../../env";
 import { get } from "../../database/impl/modify/get";
 import emitter, { Events } from "..";
 import { update } from "../../database/impl/modify/update";
+import { MediaStatus } from "../../types/enums";
 
 export const loadEpub = async (data: { id: string; providerId: string; chapters: Chapter[] }) => {
     const useMixdrop = env.USE_MIXDROP;
@@ -27,7 +28,20 @@ export const loadEpub = async (data: { id: string; providerId: string; chapters:
 
     // Check if the file is removed
     const isRemoved = await checkIsDeleted(mixdropEmail ?? "", mixdropKey ?? "", mixdrop ?? "");
-    if (!isRemoved && mixdrop != undefined) return mixdrop;
+    if (!isRemoved && mixdrop != undefined) {
+        const updatedAt = (manga as Manga).chapters.latest.updatedAt;
+
+        if (updatedAt && updatedAt != 0) {
+            // Check if updatedAt is less than 7 days
+            const now = Date.now();
+            const diff = now - updatedAt;
+            const days = Math.floor(diff / 1000 / 60 / 60 / 24);
+
+            if (days >= 5 && manga.status != MediaStatus.FINISHED) {
+                return mixdrop;
+            }
+        }
+    }
 
     const pdfPath = await createNovelPDF(manga as Manga, data.providerId, data.chapters);
     const file = Bun.file(pdfPath);
@@ -122,6 +136,8 @@ export const loadEpub = async (data: { id: string; providerId: string; chapters:
 export const createNovelPDF = async (manga: Manga, providerId: string, chapters: Chapter[]): Promise<string> => {
     const content: EPubChapter[] = [];
     const imageFiles: { [key: string]: ArrayBuffer } = {};
+
+    console.log(colors.green("Generating EPUB for ") + colors.blue(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "") + colors.green("..."));
 
     let img_id = 0;
 
