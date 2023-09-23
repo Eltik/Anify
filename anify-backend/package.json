@@ -10,7 +10,7 @@
     "check:proxies": "bun run src/scripts/checkProxies.ts",
     "scrape:proxies": "bun run src/scripts/scrapeProxies.ts",
     "build": "bun build ./src/index.ts --outdir ./dist --target node",
-    "prettier": "prettier --write .",
+    "prettier": "bunx prettier --write .",
     "lint": "bun run prettier && bun run eslint && tsc"
   },
   "devDependencies": {

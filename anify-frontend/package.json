@@ -6,7 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "bun run prettier && next lint",
-    "prettier": "prettier --write .",
+    "prettier": "bunx prettier --write .",
     "start": "next start"
   },
   "dependencies": {

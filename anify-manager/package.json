@@ -6,7 +6,7 @@
     "start": "bun run dist/index.js",
     "dev": "bun run src/index.ts",
     "build": "bun build ./src/index.ts --outdir ./dist --target node",
-    "prettier": "prettier --write .",
+    "prettier": "bunx prettier --write .",
     "lint": "bun run prettier && tsc"
   },
   "devDependencies": {
