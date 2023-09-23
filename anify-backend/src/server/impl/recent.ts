@@ -42,7 +42,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const formats = type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL];
 
-        const data = await recent((type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats, 0, 20);
+        const data = await recent(type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase(), formats, 0, 20);
 
         await redis.set(`recent:${type}`, JSON.stringify(data), "EX", cacheTime);
 
