@@ -11,7 +11,7 @@
     "scrape:proxies": "bun run src/scripts/scrapeProxies.ts",
     "build": "bun build ./src/index.ts --outdir ./dist --target node",
     "prettier": "bunx prettier --write .",
-    "lint": "bun run prettier && bun run eslint && tsc"
+    "lint": "bun run prettier && tsc"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.2",
