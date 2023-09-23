@@ -186,19 +186,14 @@ export default class NineAnime extends AnimeProvider {
 
             const $ = load(json.result);
             const sub = $("div.servers div.type").attr("data-type");
+
             if (sub === "softsub" && subType === SubType.SUB) {
                 data = json;
             } else if (sub === "sub" && subType === SubType.SUB) {
-                data = await (await this.request(url, {}, true)).json();
-            } else if (subType === SubType.SUB) {
-                const vrf = await this.getVRF(id.split(",")[0]);
-                const url = `${this.url}/ajax/server/list/${id.split(",")[0]}?${vrf.vrfQuery}=${encodeURIComponent(vrf.url)}`;
-
-                const json = await (await this.request(url, {}, true)).json();
                 data = json;
-            } else {
-                data = await (await this.request(url, {}, true)).json();
-            }
+            } else if (sub === "dub" && subType === SubType.DUB) {
+                data = json;
+            } else return [];
         } catch (e) {
             //
         }
