@@ -288,7 +288,7 @@ export default class ManagDexBase extends BaseProvider {
         }
     }
 
-    override async fetchSeasonal(type: Type, formats: Format[]): Promise<{ trending: AnimeInfo[] | MangaInfo[]; seasonal: AnimeInfo[] | MangaInfo[]; popular: AnimeInfo[] | MangaInfo[]; top: AnimeInfo[] | MangaInfo[] } | undefined> {
+    override async fetchSeasonal(): Promise<{ trending: AnimeInfo[] | MangaInfo[]; seasonal: AnimeInfo[] | MangaInfo[]; popular: AnimeInfo[] | MangaInfo[]; top: AnimeInfo[] | MangaInfo[] } | undefined> {
         const currentDate = new Date();
 
         // Format the date as YYYY-MM-DD
