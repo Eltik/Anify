@@ -36,14 +36,26 @@ export const run: customEmbed<
             components: [
                 {
                     type: 2,
-                    label: `view running processes`,
+                    label: `View Running Processes`,
                     emoji: {
                         id: "1108981152431226891",
                     },
                     style: 1,
-                    custom_id: "kato-running",
+                    custom_id: "anify-running",
                 },
             ],
+        },
+    ],
+});
+
+export const config: customEmbed<{
+    title: string;
+    data?: string;
+}> = createCustomEmbed({
+    embeds: (data) => [
+        {
+            title: data.title,
+            description: data.data,
         },
     ],
 });
@@ -84,7 +96,7 @@ export const viewRunningRepo: customEmbed<string[]> = createCustomEmbed({
                             type: 2,
                             label: `run latest`,
                             style: 1,
-                            custom_id: "kato-run",
+                            custom_id: "anify-run",
                         },
                     ],
                 },
@@ -117,7 +129,7 @@ interface listRepoStats extends Stats {
 export const listRepo: customEmbed<listRepoStats[]> = createCustomEmbed({
     embeds: (repos) => [
         {
-            title: "These are the current repositories",
+            title: "Current Repositories",
             fields: repos.map((x) => ({
                 name: x.name,
                 value: `**Created:** <t:${Math.floor(x.birthtimeMs / 1000)}:R>\n**Last Modified:** <t:${Math.floor(x.mtimeMs / 1000)}:R>`,

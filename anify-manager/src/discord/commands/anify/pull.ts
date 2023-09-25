@@ -24,6 +24,8 @@ export default {
 
         const data = await build(value, ["anify"], 0);
 
-        interaction.editOriginalMessage(response.run.error.message(JSON.stringify(data)));
+        if (data.error) return interaction.editOriginalMessage(response.run.error.message(JSON.stringify(data.error)));
+
+        interaction.editOriginalMessage(response.run.message(data.data));
     },
 };

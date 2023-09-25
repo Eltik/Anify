@@ -100,11 +100,74 @@ export default async function update({ label = "auto", name = Object.keys(buildC
 
             await output.promise;
 
-            const src = buildCommands[repo.name][".env"];
-            writeToLogStream(src, repo.name);
-            if (src) {
-                const dest = `${buildPath}/${repo.name}/.env`;
-                copyFileSync(src, dest);
+            const backend = buildCommands[repo.name].backendEnv;
+            const proxies = buildCommands[repo.name].proxies;
+            const backendFolder = buildCommands[repo.name].backendFolder;
+            const frontend = buildCommands[repo.name].frontendEnv;
+            const frontendFolder = buildCommands[repo.name].frontendFolder;
+            const auth = buildCommands[repo.name].authEnv;
+            const authFolder = buildCommands[repo.name].authFolder;
+
+            if (buildCommands[repo.name].copyProxies && backendFolder && proxies) {
+                const dest = `${buildPath}/${repo.name}/${backendFolder}/goodProxies.json`;
+                try {
+                    copyFileSync(proxies, dest);
+                } catch (error) {
+                    const errorMessage = (error as any).message || error;
+                    console.error(`buildRepo error: ${errorMessage}`);
+                    console.log(backend, dest);
+
+                    writeToLogStream(errorMessage, repo.name);
+                }
+
+                writeToLogStream(dest, repo.name);
+            }
+
+            writeToLogStream(backend, repo.name);
+
+            if (backend && backendFolder) {
+                const dest = `${buildPath}/${repo.name}/${backendFolder}/.env`;
+                try {
+                    copyFileSync(backend, dest);
+                } catch (error) {
+                    const errorMessage = (error as any).message || error;
+                    console.error(`buildRepo error: ${errorMessage}`);
+                    console.log(backend, dest);
+
+                    writeToLogStream(errorMessage, repo.name);
+                }
+
+                writeToLogStream(dest, repo.name);
+            }
+
+            writeToLogStream(frontend, repo.name);
+            if (frontend && frontendFolder) {
+                const dest = `${buildPath}/${repo.name}/${frontendFolder}/.env`;
+                try {
+                    copyFileSync(frontend, dest);
+                } catch (error) {
+                    const errorMessage = (error as any).message || error;
+                    console.error(`buildRepo error: ${errorMessage}`);
+                    console.log(frontend, dest);
+
+                    writeToLogStream(errorMessage, repo.name);
+                }
+
+                writeToLogStream(dest, repo.name);
+            }
+
+            writeToLogStream(auth, repo.name);
+            if (auth && authFolder) {
+                const dest = `${buildPath}/${repo.name}/${authFolder}/.env`;
+                try {
+                    copyFileSync(auth, dest);
+                } catch (error) {
+                    const errorMessage = (error as any).message || error;
+                    console.error(`buildRepo error: ${errorMessage}`);
+                    console.log(auth, dest);
+
+                    writeToLogStream(errorMessage, repo.name);
+                }
 
                 writeToLogStream(dest, repo.name);
             }

@@ -62,14 +62,6 @@ const viewBuilds = async () => {
                 }
 
                 const repositoryFiles = await fs.promises.readdir(repoPath);
-                if (buildCommands[repo.name][".env"]) {
-                    if (!repositoryFiles.includes(".env")) {
-                        health.errors.push({
-                            reason: `Missing .env in ${repo.name}`,
-                            raw: `if (buildCommands[repo.name][".env"]) {`,
-                        });
-                    }
-                }
                 if (!repositoryFiles.includes("node_modules")) {
                     health.errors.push({
                         reason: `Missing node_modules in ${repo.name}`,

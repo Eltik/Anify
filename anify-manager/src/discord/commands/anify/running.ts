@@ -26,7 +26,7 @@ export default {
     },
     onInteraction: async (client: Client, interaction: ComponentInteraction<TextableChannel>) => {
         if (interaction.data.component_type === 2) {
-            if (interaction.data.custom_id === "kato-run") {
+            if (interaction.data.custom_id === "anify-run") {
                 return await interaction.createMessage(await run.logic());
             }
 
