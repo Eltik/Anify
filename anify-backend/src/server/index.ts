@@ -1,6 +1,3 @@
-import { readdirSync } from "node:fs";
-import { join } from "node:path";
-
 import Redis from "ioredis";
 
 import colors from "colors";
@@ -22,9 +19,24 @@ export const cacheTime = env.REDIS_CACHE_TIME || 60 * 60 * 24 * 7 * 2;
 
 export const start = async () => {
     const routes: { [key: string]: { path: string; handler: (req: Request) => Promise<Response> } } = {};
-    const routeFiles = readdirSync(join(import.meta.dir, "./impl"));
+    const routeFiles = [
+        await import("./impl/chapters.ts"),
+        await import("./impl/contentData.ts"),
+        await import("./impl/episodes.ts"),
+        await import("./impl/info.ts"),
+        await import("./impl/pages.ts"),
+        await import("./impl/recent.ts"),
+        await import("./impl/relations.ts"),
+        await import("./impl/schedule.ts"),
+        await import("./impl/search.ts"),
+        await import("./impl/searchAdvanced.ts"),
+        await import("./impl/seasonal.ts"),
+        await import("./impl/sources.ts"),
+        await import("./impl/stats.ts"),
+    ];
+
     for (const file of routeFiles) {
-        const routeModule = await import(join(import.meta.dir, "./impl", file));
+        const routeModule = await file;
         const route = routeModule.default;
 
         if (route) {
@@ -32,6 +44,8 @@ export const start = async () => {
             routes[path] = { path, handler };
         }
     }
+
+    console.log(colors.gray(`Loaded ${colors.yellow(Object.keys(routes).length + "")} routes`));
 
     Bun.serve({
         port: env.PORT,

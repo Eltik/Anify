@@ -37,9 +37,7 @@ export const loadEpub = async (data: { id: string; providerId: string; chapters:
             const diff = now - updatedAt;
             const days = Math.floor(diff / 1000 / 60 / 60 / 24);
 
-            if (days >= 5 && manga.status != MediaStatus.FINISHED) {
-                return mixdrop;
-            }
+            if (days <= 3 || manga.status === MediaStatus.FINISHED) return mixdrop;
         }
     }
 

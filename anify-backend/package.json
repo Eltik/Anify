@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "bun run dist/index.js",
-    "dev": "bun run src/index.ts",
+    "dev": "bun --hot src/index.ts",
     "crawl": "bun run src/scripts/crawl.ts",
     "check:proxies": "bun run src/scripts/checkProxies.ts",
     "scrape:proxies": "bun run src/scripts/scrapeProxies.ts",

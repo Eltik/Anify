@@ -1,3 +1,4 @@
+import { Cookie } from "elysia";
 import { Format, Genres, MediaStatus, ProviderType, Season, SubType, Type } from "./enums";
 
 export type Db<T> = {
@@ -74,6 +75,8 @@ export type Manga = {
     type: Type;
     format: Format;
     relations: Relations[];
+    publisher: string | null;
+    author: string | null;
     totalChapters: number | null;
     chapters: {
         latest: {
@@ -93,7 +96,7 @@ export type AnimeInfo = Pick<Anime, "id" | "title" | "artwork" | "synonyms" | "t
     popularity: number | null;
 };
 
-export type MangaInfo = Pick<Manga, "id" | "title" | "artwork" | "synonyms" | "totalChapters" | "bannerImage" | "coverImage" | "color" | "year" | "status" | "genres" | "description" | "format" | "totalVolumes" | "countryOfOrigin" | "tags" | "relations" | "characters" | "type"> & {
+export type MangaInfo = Pick<Manga, "id" | "title" | "artwork" | "synonyms" | "totalChapters" | "bannerImage" | "coverImage" | "color" | "year" | "status" | "genres" | "description" | "format" | "totalVolumes" | "countryOfOrigin" | "tags" | "relations" | "characters" | "type" | "author" | "publisher"> & {
     rating: number | null;
     popularity: number | null;
 };
