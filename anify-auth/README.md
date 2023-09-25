@@ -1,2 +1,5 @@
 # anify-auth
-This documentation will be updated soon.
+Fully-developed authentication server utilizing popular tracking websites and mapping data to a single database.
+
+## TBD
+This README.md is not finished yet.

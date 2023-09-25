@@ -1,13 +1,13 @@
 import { Format, MediaStatus } from "~/types";
 
 export function capitalize(s: string) {
-    s = s.toLowerCase();
+    s = s?.toLowerCase();
     return s && (s[0]?.toUpperCase() ?? "") + s.slice(1);
 }
 
 export function truncate(text: string, maxLength: number) {
     if (text.length > maxLength) {
-        return text.substring(0, maxLength - 3) + '...';
+        return text.substring(0, maxLength - 3) + "...";
     } else {
         return text;
     }
@@ -35,6 +35,6 @@ export function formatCompactNumber(number: number) {
     }
 }
 
-export function isValidDate(d: any) {
+export function isValidDate(d: Date | number | string) {
     return d instanceof Date && !isNaN(Number(d));
 }

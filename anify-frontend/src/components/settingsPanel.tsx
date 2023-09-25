@@ -19,7 +19,7 @@ export function SettingsPanel(props: any) {
     const menuCon = useRef(null);
     const [DMenu, setDMenu] = useState<any>();
 
-    function createElement(config:any) {
+    function createElement(config: any) {
         let temp;
         if ("element" in config) {
             temp = document.createElement(config.element);
@@ -59,7 +59,7 @@ export function SettingsPanel(props: any) {
      */
     class Toggle {
         element: any;
-        constructor(element:any) {
+        constructor(element: any) {
             this.element = element;
         }
         /**
@@ -101,27 +101,20 @@ export function SettingsPanel(props: any) {
         DDMinstance: any;
         sceneID: any;
         sceneElem: any;
-        constructor(element:any, DDMinstance:any, sceneID:any, sceneElem:any) {
+        constructor(element: any, DDMinstance: any, sceneID: any, sceneElem: any) {
             this.element = element;
             this.DDMinstance = DDMinstance;
             this.sceneID = sceneID;
             this.sceneElem = sceneElem;
         }
         select() {
-            Selectables.selectWithoutCallback(
-                this.element,
-                this.DDMinstance,
-                this.sceneID,
-                this.sceneElem
-            );
+            Selectables.selectWithoutCallback(this.element, this.DDMinstance, this.sceneID, this.sceneElem);
         }
         selectWithCallback() {
             this.element.click();
         }
-        static selectWithoutCallback(element:any, DDMinstance:any, sceneID:any, sceneElem:any) {
-            const parentElement = element.parentElement
-                ? element.parentElement
-                : sceneElem;
+        static selectWithoutCallback(element: any, DDMinstance: any, sceneID: any, sceneElem: any) {
+            const parentElement = element.parentElement ? element.parentElement : sceneElem;
             const siblings = parentElement.children;
             for (let i = 0; i < siblings.length; i++) {
                 const child = siblings[i];
@@ -132,9 +125,7 @@ export function SettingsPanel(props: any) {
             element.classList.add("selected");
             if (sceneID) {
                 const selectedValue = element.getAttribute("data-alttext");
-                DDMinstance.selectedValues[sceneID] = selectedValue
-                    ? selectedValue
-                    : element.innerText;
+                DDMinstance.selectedValues[sceneID] = selectedValue ? selectedValue : element.innerText;
                 DDMinstance.updateSelectVals(sceneID);
             }
         }
@@ -149,46 +140,25 @@ export function SettingsPanel(props: any) {
          * @param {dropDownMenu} dropDownMenuInstance The drop down menu that the scene is a part of
          *
          */
-        constructor(config:any, dropDownMenuInstance:any) {
+        constructor(config: any, dropDownMenuInstance: any) {
             this.data = config;
             this.DDMinstance = dropDownMenuInstance;
         }
-        addItem(config:any, isHeading = false) {
+        addItem(config: any, isHeading = false) {
             let _a, _b;
             if (!this.DDMinstance) return;
             if (!this.data) return;
             const sceneElem = this.element.querySelector(".scene");
             if (sceneElem) {
-                const item = this.DDMinstance.makeItem(
-                    config,
-                    isHeading,
-                    this.data.id,
-                    sceneElem
-                );
-                if (
-                    config.selected &&
-                    config.triggerCallbackIfSelected === true
-                ) {
+                const item = this.DDMinstance.makeItem(config, isHeading, this.data.id, sceneElem);
+                if (config.selected && config.triggerCallbackIfSelected === true) {
                     item.click();
                 }
                 sceneElem.append(item);
             }
             if (this.element.classList.contains("active")) {
-                this.DDMinstance.menuCon.style.height =
-                    ((_b =
-                        (_a = this.element.querySelector(".scene")) === null ||
-                        _a === void 0
-                            ? void 0
-                            : _a.offsetHeight) !== null && _b !== void 0
-                        ? _b
-                        : 100) + "px";
-                        this.DDMinstance.menuCon.style.setProperty('--height', ((_b =
-                          (_a = this.element.querySelector(".scene")) === null ||
-                          _a === void 0
-                              ? void 0
-                              : _a.offsetHeight) !== null && _b !== void 0
-                          ? _b
-                          : 100) + "px")
+                this.DDMinstance.menuCon.style.height = ((_b = (_a = this.element.querySelector(".scene")) === null || _a === void 0 ? void 0 : _a.offsetHeight) !== null && _b !== void 0 ? _b : 100) + "px";
+                this.DDMinstance.menuCon.style.setProperty("--height", ((_b = (_a = this.element.querySelector(".scene")) === null || _a === void 0 ? void 0 : _a.offsetHeight) !== null && _b !== void 0 ? _b : 100) + "px");
             }
         }
         delete() {
@@ -224,7 +194,7 @@ export function SettingsPanel(props: any) {
         selections: any;
         menuCon: any;
         selectedValues: any;
-        constructor(scenes:Menu[], menuCon:any) {
+        constructor(scenes: Menu[], menuCon: any) {
             this.scenes = {};
             this.menuCon = menuCon;
             this.history = [];
@@ -248,23 +218,16 @@ export function SettingsPanel(props: any) {
          * Opens a scene
          * @param {string} id the sceneID
          */
-        open(id:any) {
+        open(id: any) {
             if (id && id in this.scenes) {
-                if (
-                    !this.history.length ||
-                    (this.history.length &&
-                        this.history[this.history.length - 1] != id)
-                ) {
+                if (!this.history.length || (this.history.length && this.history[this.history.length - 1] != id)) {
                     this.history.push(id);
                 }
                 for (const sceneID in this.scenes) {
                     if (sceneID === id) {
                         this.scenes[sceneID].element.classList.add("active");
-                        this.menuCon.style.height =
-                            this.scenes[sceneID].element.querySelector(".scene")
-                                .offsetHeight + "px";
-                        this.menuCon.style.setProperty('--height', this.scenes[sceneID].element.querySelector(".scene")
-                        .offsetHeight + "px")
+                        this.menuCon.style.height = this.scenes[sceneID].element.querySelector(".scene").offsetHeight + "px";
+                        this.menuCon.style.setProperty("--height", this.scenes[sceneID].element.querySelector(".scene").offsetHeight + "px");
                     } else {
                         this.scenes[sceneID].element.classList.remove("active");
                     }
@@ -287,7 +250,7 @@ export function SettingsPanel(props: any) {
          * Opens the menu
          */
         openMenu() {
-          this.menuCon.style.display = "flex"
+            this.menuCon.style.display = "flex";
         }
         /**
          * Closes the menu
@@ -302,34 +265,29 @@ export function SettingsPanel(props: any) {
          * @param {string} sceneID the sceneID of the scene of which this menuItem is a part of
          * @returns {HTMLElement}
          */
-        makeItem(itemConfig:any, isHeading:any, sceneID:any, sceneElem:any) {
+        makeItem(itemConfig: any, isHeading: any, sceneID: any, sceneElem: any) {
             const item = itemConfig;
             let shouldShowValue = false;
             if (item.open) {
                 item.selectedValue = this.selectedValues[item.open];
                 if (this.scenes[item.open] instanceof Scene) {
-                    shouldShowValue =
-                        this.scenes[item.open].data.selectableScene === true;
+                    shouldShowValue = this.scenes[item.open].data.selectableScene === true;
                 }
             }
-            const tempConfig:any = {
+            const tempConfig: any = {
                 class: "menuItemText",
             };
             if (item.html) {
-                tempConfig.innerHTML = isHeading
-                    ? `<div style="display: flex; align-items: center; gap: 8px;"><svg width="10px" height="10px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="#8a8a8a"><path fill="#8a8a8a" d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 278.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg>${item.html}</div>`
-                    : item.html;
+                tempConfig.innerHTML = isHeading ? `<div style="display: flex; align-items: center; gap: 8px;"><svg width="10px" height="10px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="#8a8a8a"><path fill="#8a8a8a" d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 278.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg>${item.html}</div>` : item.html;
             } else {
-                tempConfig.innerHTML = isHeading
-                    ? `<div style="display: flex; align-items: center; gap: 8px;"><svg width="10px" height="10px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="#8a8a8a"><path fill="#8a8a8a" d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 278.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg>${item.text}</div>`
-                    : item.text;
+                tempConfig.innerHTML = isHeading ? `<div style="display: flex; align-items: center; gap: 8px;"><svg width="10px" height="10px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="#8a8a8a"><path fill="#8a8a8a" d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 278.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg>${item.text}</div>` : item.text;
             }
             if (item.altText) {
                 tempConfig.attributes = {
                     "data-alttext": item.altText,
                 };
             }
-            const menuConfig:any = {
+            const menuConfig: any = {
                 class: isHeading ? "menuHeading" : "menuItem",
             };
             if (item.attributes) {
@@ -364,9 +322,7 @@ export function SettingsPanel(props: any) {
             if (item.callback) {
                 menuItem.addEventListener("click", () => {
                     let _a;
-                    (_a = item.callback) === null || _a === void 0
-                        ? void 0
-                        : _a.bind(menuItem)();
+                    (_a = item.callback) === null || _a === void 0 ? void 0 : _a.bind(menuItem)();
                 });
             }
             // Should be before selectWithoutCallback is called to make sure
@@ -374,32 +330,17 @@ export function SettingsPanel(props: any) {
             menuItem.append(menuItemText);
             if (item.selected) {
                 if (sceneID) {
-                    Selectables.selectWithoutCallback(
-                        menuItem,
-                        this,
-                        sceneID,
-                        sceneElem
-                    );
+                    Selectables.selectWithoutCallback(menuItem, this, sceneID, sceneElem);
                     this.updateSelectVals(sceneID);
                 }
             }
             if (item.highlightable) {
                 if (item.id) {
-                    this.selections[item.id] = new Selectables(
-                        menuItem,
-                        this,
-                        sceneID,
-                        sceneElem
-                    );
+                    this.selections[item.id] = new Selectables(menuItem, this, sceneID, sceneElem);
                 }
                 menuItem.setAttribute("highlightable", "true");
                 menuItem.addEventListener("click", () => {
-                    Selectables.selectWithoutCallback(
-                        menuItem,
-                        this,
-                        sceneID,
-                        sceneElem
-                    );
+                    Selectables.selectWithoutCallback(menuItem, this, sceneID, sceneElem);
                 });
             }
             if (item.textBox) {
@@ -417,7 +358,7 @@ export function SettingsPanel(props: any) {
                 if (item.value) {
                     textBox.value = item.value;
                 }
-                textBox.addEventListener("input", function (event:any) {
+                textBox.addEventListener("input", function (event: any) {
                     if (item.onInput) {
                         item.onInput(event);
                     }
@@ -468,9 +409,7 @@ export function SettingsPanel(props: any) {
                             }
                         },
                     },
-                    attributes: {
-
-                    }
+                    attributes: {},
                 };
                 if (item.customId) {
                     (elementConfig.attributes as any).customId = item.customId;
@@ -487,14 +426,14 @@ export function SettingsPanel(props: any) {
          * Updates all menuItems that point to the scene with a particular sceneID
          * @param {string} sceneID the sceneID of the scene whose selected values will be updated
          */
-        updateSelectVals(sceneID:any) {
+        updateSelectVals(sceneID: any) {
             if (this.selectedValuesDOM[sceneID]) {
                 for (const elems of this.selectedValuesDOM[sceneID].elements) {
                     elems.innerText = this.selectedValues[sceneID];
                 }
             }
         }
-        makeScene(config:any) {
+        makeScene(config: any) {
             const scene = createElement({
                 class: "scene",
             });
@@ -502,17 +441,11 @@ export function SettingsPanel(props: any) {
                 class: "sceneCon",
             });
             const openScene = this.scenes[config.id];
-            if (
-                openScene === null || openScene === void 0
-                    ? void 0
-                    : openScene.element
-            ) {
+            if (openScene === null || openScene === void 0 ? void 0 : openScene.element) {
                 return;
             }
             if (config.heading) {
-                scene.append(
-                    this.makeItem(config.heading, true, config.id, scene)
-                );
+                scene.append(this.makeItem(config.heading, true, config.id, scene));
             }
             for (const item of config.items) {
                 const newItemConfig = item;
@@ -522,16 +455,14 @@ export function SettingsPanel(props: any) {
                         this.makeScene(this.scenes[item.open].data);
                     }
                 }
-                scene.append(
-                    this.makeItem(newItemConfig, false, config.id, scene)
-                );
+                scene.append(this.makeItem(newItemConfig, false, config.id, scene));
             }
             sceneCon.append(scene);
             this.scenes[config.id].element = sceneCon;
             this.menuCon.append(sceneCon);
             return sceneCon;
         }
-        addScene(config:any) {
+        addScene(config: any) {
             this.scenes[config.id] = new Scene(config, this);
             const sceneDIV = this.makeScene(config);
             if (sceneDIV) {
@@ -539,13 +470,13 @@ export function SettingsPanel(props: any) {
                 config.element = sceneDIV;
             }
         }
-        deleteScene(id:any) {
+        deleteScene(id: any) {
             if (id in this.scenes) {
                 this.scenes[id].delete();
                 delete this.scenes[id];
             }
         }
-        deleteItem(item:any) {
+        deleteItem(item: any) {
             if (item.id && item.id in this.selections) {
                 delete this.selections[item.id];
             }
@@ -563,7 +494,7 @@ export function SettingsPanel(props: any) {
                 }
             }
         }
-        deleteSceneFromHistory(val:any) {
+        deleteSceneFromHistory(val: any) {
             for (let i = this.history.length - 1; i >= 0; i--) {
                 if (this.history[i] == val) {
                     this.history.splice(i, 1);
@@ -575,7 +506,7 @@ export function SettingsPanel(props: any) {
          * @param {string} id the id of the toggle
          * @returns {Toggle | null}
          */
-        getToggle(id:any) {
+        getToggle(id: any) {
             if (id in this.toggles) {
                 return this.toggles[id];
             }
@@ -586,7 +517,7 @@ export function SettingsPanel(props: any) {
          * @param {string} id the id of the scene
          * @returns {Scene | null}
          */
-        getScene(id:any) {
+        getScene(id: any) {
             if (id in this.scenes) {
                 return this.scenes[id];
             }
@@ -595,10 +526,7 @@ export function SettingsPanel(props: any) {
     }
 
     useEffect(() => {
-        const tempData = new dropDownMenu(
-            props.menuCon,
-            menuCon.current
-        );
+        const tempData = new dropDownMenu(props.menuCon, menuCon.current);
 
         setDMenu(tempData);
     }, []);
@@ -621,7 +549,7 @@ export function SettingsPanel(props: any) {
     }, [props.isOpen]);
 
     return (
-        <div className={`transition-all duration-300 ${props.isOpen ? "opacity-100 pointer-events-auto -translate-y-0" : "opacity-0 pointer-events-none translate-y-5"}`}>
+        <div className={`transition-all duration-300 ${props.isOpen ? "pointer-events-auto -translate-y-0 opacity-100" : "pointer-events-none translate-y-5 opacity-0"}`}>
             <div className="menuCon" ref={menuCon}></div>
         </div>
     );
@@ -636,7 +564,7 @@ export interface Menu {
         text?: string;
         hideSubArrow?: boolean;
         back?: boolean;
-    }
+    };
 }
 
 export interface MenuItem {
@@ -653,5 +581,5 @@ export interface MenuItem {
     onInput?: (value: any) => any;
     altText?: string;
     iconID?: string;
-    open?: string
+    open?: string;
 }

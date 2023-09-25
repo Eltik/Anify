@@ -1,49 +1,23 @@
 {
-    "devDependencies": {
-        "@types/node": "^18.16.2",
-        "@typescript-eslint/eslint-plugin": "^5.59.2",
-        "prettier": "2.8.8",
-        "prisma": "^4.13.0",
-        "prisma-json-types-generator": "^2.3.1",
-        "rimraf": "^5.0.0",
-        "ts-node": "^10.9.1",
-        "tsconfig-paths": "^4.2.0",
-        "tscpaths": "^0.0.9",
-        "tslib": "^2.5.0",
-        "typescript": "^4.9.5"
-    },
-    "name": "anify-manager",
-    "description": "Manages Anify instances.",
-    "version": "1.0.0",
-    "source": "src/index.ts",
-    "scripts": {
-        "start": "node dist/index.js",
-        "start:bot": "ts-node -r tsconfig-paths/register src/scripts/startBot.ts",
-        "dev": "ts-node -r tsconfig-paths/register src/index.ts",
-        "test": "ts-node -r tsconfig-paths/register src/test.ts",
-        "build": "npm run build:ts && npm run lint",
-        "build:ts": "tsc --project tsconfig.json && tscpaths -p tsconfig.json -s ./src -o ./dist",
-        "clean": "rimraf dist/",
-        "eslint": "eslint --ext .ts src/** --fix",
-        "prettier": "prettier --write .",
-        "lint": "npm run prettier && npm run eslint"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/Eltik/Anify.git"
-    },
-    "author": "eltik",
-    "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/Eltik/Anify/issues"
-    },
-    "homepage": "https://github.com/Eltik/Anify#readme",
-    "dependencies": {
-        "axios": "^0.27.2",
-        "colors": "^1.4.0",
-        "crypto-js": "^4.1.1",
-        "discord.js": "^14.11.0",
-        "dotenv": "^16.0.3",
-        "pm2": "^5.3.0"
-    }
+  "name": "anify-manager-recode",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run dist/index.js",
+    "dev": "bun run src/index.ts",
+    "build": "bun build ./src/index.ts --outdir ./dist --target node",
+    "prettier": "bunx prettier --write .",
+    "lint": "bun run prettier && tsc"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "eris": "^0.17.2",
+    "pm2": "^5.3.0"
+  }
 }

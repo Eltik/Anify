@@ -1,7 +1,29 @@
-import { clean } from "./title";
+import { clean, sanitizeTitle } from "./title";
+
+export function similarity(externalTitle: string, title: string, titleArray: string[] = []): { same: boolean; value: number } {
+    if (!title) {
+        title = "";
+    }
+    let simi = compareTwoStrings(sanitizeTitle(title.toLowerCase()), externalTitle.toLowerCase());
+    titleArray.forEach((el) => {
+        if (el) {
+            const tempSimi = compareTwoStrings(title.toLowerCase(), el.toLowerCase());
+            if (tempSimi > simi) simi = tempSimi;
+        }
+    });
+    let found = false;
+    if (simi > 0.6) {
+        found = true;
+    }
+
+    return {
+        same: found,
+        value: simi,
+    };
+}
 
 // From npm package string-similarity
-export function compareTwoStrings(first, second): number {
+export function compareTwoStrings(first: string, second: string): number {
     first = first.replace(/\s+/g, "");
     second = second.replace(/\s+/g, "");
 

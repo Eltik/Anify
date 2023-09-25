@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-export function ChaptersPanel({ contentSelector, showChapters }: { contentSelector: { title: string, number: number, length: string, url: string, selected: boolean }[], showChapters: boolean }) {
+export function ChaptersPanel({ contentSelector, showChapters }: { contentSelector: { title: string; number: number; length: string; url: string; selected: boolean }[]; showChapters: boolean }) {
     const [selectedChapter, setSelectedChapter] = useState(0);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
 
@@ -14,31 +14,35 @@ export function ChaptersPanel({ contentSelector, showChapters }: { contentSelect
     useEffect(() => {
         contentSelector?.forEach((el, i: number) => {
             if (el.selected) {
-                setSelectedChapter(i)
+                setSelectedChapter(i);
             }
-        })
+        });
 
         setMinChapters(selectedChapter - amount);
         setMaxChapters(selectedChapter + amount > contentSelector.length ? contentSelector.length : selectedChapter + amount);
-    }, [contentSelector, selectedChapter])
+    }, [contentSelector, selectedChapter]);
 
     const loadMoreChapters = () => {
         setIsLoadingMore(true);
 
         setMinChapters(minChapters - amount < 0 ? 0 : minChapters - amount);
         setMaxChapters(maxChapters + amount > contentSelector.length ? contentSelector.length : maxChapters + amount);
-        
+
         setIsLoadingMore(false);
     };
 
     return (
-        <div ref={ref} style={{
-            backgroundColor: "rgba(10,10,10,0.8)",
-            outline: "1px solid rgba(255, 255, 255, 0.04)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)"
-        }} className={`w-[280px] pt-[12px] rounded-[12px] transition-all duration-300 overflow-x-hidden overflow-y-auto absolute max-h-[80vh] sm:max-h-[50vh] top-[55px] right-[20px] ${showChapters ? "opacity-100 pointer-events-auto -translate-y-0" : "opacity-0 pointer-events-none translate-y-5"}`}>
-            <div className="pl-[12px] flex justify-between items-center mb-[8px] mr-[20px] pt-[10px] pb-[14px] border-b-[1px] border-b-[#8a8a8a] text-white text-lg">
+        <div
+            ref={ref}
+            style={{
+                backgroundColor: "rgba(10,10,10,0.8)",
+                outline: "1px solid rgba(255, 255, 255, 0.04)",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+            }}
+            className={`absolute right-[20px] top-[55px] max-h-[80vh] w-[280px] overflow-y-auto overflow-x-hidden rounded-[12px] pt-[12px] transition-all duration-300 sm:max-h-[50vh] ${showChapters ? "pointer-events-auto -translate-y-0 opacity-100" : "pointer-events-none translate-y-5 opacity-0"}`}
+        >
+            <div className="mb-[8px] mr-[20px] flex items-center justify-between border-b-[1px] border-b-[#8a8a8a] pb-[14px] pl-[12px] pt-[10px] text-lg text-white">
                 Chapters
                 <svg width="20" height="18" viewBox="0 0 20 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path d="M10.6061 17.1678C10.284 17.1678 10.0228 16.9066 10.0228 16.5844L10.0228 1.41778C10.0228 1.09561 10.284 0.834442 10.6061 0.834442L12.3561 0.834442C12.6783 0.834442 12.9395 1.09561 12.9395 1.41778L12.9395 16.5844C12.9395 16.9066 12.6783 17.1678 12.3561 17.1678H10.6061Z" />
@@ -49,20 +53,25 @@ export function ChaptersPanel({ contentSelector, showChapters }: { contentSelect
             {contentSelector.map((el, i: number) => {
                 if (i < minChapters || i >= maxChapters) return null;
                 return (
-                    <Link key={i} href={`${el.url ?? ""}`} className={`chapterItem ${selectedChapter === i ? "active" : ""} cursor-pointer`} onClick={() => {
-                        setSelectedChapter(i)
-                    }}>
-                        <h4 className="w-[42px] h-[52px] flex justify-center pt-[8px] font-normal text-zinc-500 text-sm pr-2">{el.number}</h4>
+                    <Link
+                        key={i}
+                        href={`${el.url ?? ""}`}
+                        className={`chapterItem ${selectedChapter === i ? "active" : ""} cursor-pointer`}
+                        onClick={() => {
+                            setSelectedChapter(i);
+                        }}
+                    >
+                        <h4 className="flex h-[52px] w-[42px] justify-center pr-2 pt-[8px] text-sm font-normal text-zinc-500">{el.number}</h4>
                         <div className="flex flex-col">
-                            <h4 className="font-medium text-white text-base line-clamp-1">{el.title}</h4>
-                            <h4 className="text-[#8a8a8a] font-normal text-sm">{el.length}</h4>
+                            <h4 className="line-clamp-1 text-base font-medium text-white">{el.title}</h4>
+                            <h4 className="text-sm font-normal text-[#8a8a8a]">{el.length}</h4>
                         </div>
                     </Link>
-                )
+                );
             })}
 
-            <button className={`text-white text-sm ${isLoadingMore ? 'opacity-50 pointer-events-none' : 'hover:text-main-light hover:bg-gray-100/20'} w-full px-2 py-1 transition-all duration-200 rounded-b-md bg-gray-50/10`} onClick={loadMoreChapters}>
-                {isLoadingMore ? 'Loading...' : 'Load More'}
+            <button className={`text-sm text-white ${isLoadingMore ? "pointer-events-none opacity-50" : "hover:bg-gray-100/20 hover:text-main-light"} w-full rounded-b-md bg-gray-50/10 px-2 py-1 transition-all duration-200`} onClick={loadMoreChapters}>
+                {isLoadingMore ? "Loading..." : "Load More"}
             </button>
         </div>
     );

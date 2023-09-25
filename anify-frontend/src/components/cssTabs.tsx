@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { type PointerEvent, type FocusEvent, useEffect, useRef, useState, type CSSProperties } from "react";
-import { Tab } from "~/helper/useTabs";
+import { type Tab } from "~/helper/useTabs";
 
 // Credit: https://www.joshuawootonn.com/vercel-tabs-component
-function CSSTabs ({ tabs, selectedTabIndex, setSelectedTab }: Props) {
+function CSSTabs({ tabs, selectedTabIndex, setSelectedTab }: Props) {
     const [buttonRefs, setButtonRefs] = useState<Array<HTMLButtonElement | null>>([]);
 
     useEffect(() => {
@@ -64,17 +64,17 @@ function CSSTabs ({ tabs, selectedTabIndex, setSelectedTab }: Props) {
 
     return (
         <>
-            <nav ref={navRef} className="flex md:flex-col w-full flex-shrink-0 justify-center items-center relative z-0 md:py-2 md:pr-1" onPointerLeave={onLeaveTabs}>
+            <nav ref={navRef} className="relative z-0 flex w-full flex-shrink-0 items-center justify-center md:flex-col md:py-2 md:pr-1" onPointerLeave={onLeaveTabs}>
                 {tabs.map((item, i) => {
                     return (
-                        <Link href={item.href} key={i} className={"text-white flex items-center justify-center w-[75%] md:w-12 md:h-12 md:mt-0"}>
-                            <button className={`text-md relative rounded-md flex items-center justify-center h-8 w-full md:w-auto px-4 py-6 z-20 bg-transparent text-sm cursor-pointer select-none transition-colors ${hoveredTabIndex === i || selectedTabIndex === i ? "text-main-primary bg-main-primary/20" : ""} border-t-4 md:border-l-4 md:border-t-0 ${selectedTabIndex === i ? "border-main-primary" : "border-transparent"}`} ref={(el) => (buttonRefs[i] = el)} onPointerEnter={(e) => onEnterTab(e, i)} onFocus={(e) => onEnterTab(e, i)} onClick={() => onSelectTab(i)}>
+                        <Link href={item.href} key={i} className={"flex w-[75%] items-center justify-center text-white md:mt-0 md:h-12 md:w-12"}>
+                            <button className={`text-md relative z-20 flex h-8 w-full cursor-pointer select-none items-center justify-center rounded-md bg-transparent px-4 py-6 text-sm transition-colors md:w-auto ${hoveredTabIndex === i || selectedTabIndex === i ? "bg-main-primary/20 text-main-primary" : ""} border-t-4 md:border-l-4 md:border-t-0 ${selectedTabIndex === i ? "border-main-primary" : "border-transparent"}`} ref={(el) => (buttonRefs[i] = el)} onPointerEnter={(e) => onEnterTab(e, i)} onFocus={(e) => onEnterTab(e, i)} onClick={() => onSelectTab(i)}>
                                 {item.svg ?? item.label}
                             </button>
                         </Link>
                     );
                 })}
-                <div className="absolute z-10 top-0 left-0 rounded-md bg-main-primary/10 transition-[width] border-main-primary border-t-4 md:border-l-4 md:border-t-0" style={hoverStyles} />
+                <div className="absolute left-0 top-0 z-10 rounded-md border-t-4 border-main-primary bg-main-primary/10 transition-[width] md:border-l-4 md:border-t-0" style={hoverStyles} />
             </nav>
         </>
     );

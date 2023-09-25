@@ -1,86 +1,85 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import { fetchCorsProxies } from "./proxies/impl/fetchProxies";
+import { checkCorsProxies } from "./proxies/impl/checkProxies";
+import { MediaStatus } from "./types/enums";
+import { init } from "./database";
+import emitter, { Events } from "./lib";
+import { get } from "./database/impl/fetch/get";
 import queues from "./worker";
-import emitter, { Events } from "@/src/helper/event";
-import { start } from "./server/server";
-import Database from "./database";
-import { MediaStatus } from "./mapping";
-import { fetchCorsProxies } from "./helper/proxies";
+import { start } from "./server";
 
-emitter.on(Events.COMPLETED_SEASONAL_LOAD, async (data) => {
-    for (let i = 0; i < data.trending.length; i++) {
-        if (data.trending[i].status === MediaStatus.NOT_YET_RELEASED) {
-            continue;
-        }
-        const existing = await Database.info(String(data.trending[i].aniListId));
-        if (!existing) {
-            queues.mappingQueue.add({ id: data.trending[i].aniListId, type: data.trending[i].type });
-        }
-    }
-
-    for (let i = 0; i < data.popular.length; i++) {
-        if (data.popular[i].status === MediaStatus.NOT_YET_RELEASED) {
-            continue;
-        }
-        const existing = await Database.info(String(data.popular[i].aniListId));
-        if (!existing) queues.mappingQueue.add({ id: data.popular[i].aniListId, type: data.popular[i].type });
-    }
-
-    for (let i = 0; i < data.top.length; i++) {
-        if (data.top[i].status === MediaStatus.NOT_YET_RELEASED) {
-            continue;
-        }
-        const existing = await Database.info(String(data.top[i].aniListId));
-        if (!existing) queues.mappingQueue.add({ id: data.top[i].aniListId, type: data.top[i].type });
-    }
-
-    for (let i = 0; i < data.seasonal.length; i++) {
-        if (data.seasonal[i].status === MediaStatus.NOT_YET_RELEASED) {
-            continue;
-        }
-        const existing = await Database.info(String(data.seasonal[i].aniListId));
-        if (!existing) queues.mappingQueue.add({ id: data.seasonal[i].aniListId, type: data.seasonal[i].type });
-    }
+before().then(async (_) => {
+    await start();
 });
 
-emitter.on(Events.COMPLETED_MAPPING_LOAD, async (data) => {
-    for (let i = 0; i < data.length; i++) {
-        if (await Database.info(String(data[i].aniListId))) {
-            continue;
-        }
-        queues.createEntry.add({ toInsert: data[i], type: data[i].type });
-    }
-});
+async function before() {
+    await fetchCorsProxies();
+    await init();
 
-emitter.on(Events.COMPLETED_SEARCH_LOAD, (data) => {
-    if (data[0]?.aniListId) {
+    // Check proxies every 12 hours
+    setInterval(checkCorsProxies, 1000 * 60 * 60 * 12);
+
+    emitter.on(Events.COMPLETED_MAPPING_LOAD, async (data) => {
+        for (let i = 0; i < data.length; i++) {
+            if (await get(String(data[i].id))) {
+                continue;
+            }
+            queues.createEntry.add({ toInsert: data[i], type: data[i].type });
+        }
+    });
+
+    emitter.on(Events.COMPLETED_SEARCH_LOAD, (data) => {
         for (let i = 0; i < data.length; i++) {
             if (data[i].status === MediaStatus.NOT_YET_RELEASED) {
                 continue;
             }
-            queues.mappingQueue.add({ id: data[i].aniListId, type: data[i].type });
+            queues.mappingQueue.add({ id: data[i].id, type: data[i].type, formats: [data[i].format] });
         }
-    }
-});
+    });
 
-// Todo: For inserting all skip times, merge the episodescrape repo so that it adds a bunch of events lol
-emitter.on(Events.COMPLETED_SKIPTIMES_LOAD, (data) => {
-    // Do something
-});
+    emitter.on(Events.COMPLETED_SEASONAL_LOAD, async (data) => {
+        for (let i = 0; i < data.trending.length; i++) {
+            if (data.trending[i].status === MediaStatus.NOT_YET_RELEASED) {
+                continue;
+            }
+            const existing = await get(String(data.trending[i].id));
+            if (!existing) {
+                queues.mappingQueue.add({ id: data.trending[i].id, type: data.trending[i].type, formats: [data.trending[i].format] });
+            }
+        }
 
-emitter.on(Events.COMPLETED_PAGE_UPLOAD, (data) => {
-    // Do something
-});
+        for (let i = 0; i < data.popular.length; i++) {
+            if (data.popular[i].status === MediaStatus.NOT_YET_RELEASED) {
+                continue;
+            }
+            const existing = await get(String(data.popular[i].id));
+            if (!existing) queues.mappingQueue.add({ id: data.popular[i].id, type: data.popular[i].type, formats: [data.popular[i].format] });
+        }
 
-queues.seasonQueue.start();
-queues.mappingQueue.start();
-queues.createEntry.start();
-queues.searchQueue.start();
-queues.skipTimes.start();
-queues.uploadPages.start();
+        for (let i = 0; i < data.top.length; i++) {
+            if (data.top[i].status === MediaStatus.NOT_YET_RELEASED) {
+                continue;
+            }
+            const existing = await get(String(data.top[i].id));
+            if (!existing) queues.mappingQueue.add({ id: data.top[i].id, type: data.top[i].type, formats: [data.top[i].format] });
+        }
 
-fetchCorsProxies().then(async () => {
-    await Database.initializeDatabase();
-    await start();
-});
+        for (let i = 0; i < data.seasonal.length; i++) {
+            if (data.seasonal[i].status === MediaStatus.NOT_YET_RELEASED) {
+                continue;
+            }
+            const existing = await get(String(data.seasonal[i].id));
+            if (!existing) queues.mappingQueue.add({ id: data.seasonal[i].id, type: data.seasonal[i].type, formats: [data.seasonal[i].format] });
+        }
+    });
+
+    queues.mappingQueue.start();
+    queues.createEntry.start();
+    queues.searchQueue.start();
+    queues.seasonalQueue.start();
+    queues.skipTimes.start();
+    queues.uploadManga.start();
+    queues.uploadNovel.start();
+}

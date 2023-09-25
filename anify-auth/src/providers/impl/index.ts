@@ -1,5 +1,4 @@
-import { isValidDate } from "@/src/helper";
-import { FastifyInstance, FastifyReply, FastifyRequest, RegisterOptions } from "fastify";
+import { isValidDate } from "../../helper";
 
 export default abstract class AuthProvider {
     abstract rateLimit: number;
@@ -15,8 +14,8 @@ export default abstract class AuthProvider {
         this.routes = this.routes.bind(this);
     }
 
-    async handleAuth(req: FastifyRequest, res: FastifyReply): Promise<void | undefined> {
-        return;
+    async handleAuth(req: Request, res: Response): Promise<Response | undefined> {
+        return undefined;
     }
 
     async fetchList(userId: string, accessToken: string): Promise<ListData[] | undefined> {
@@ -49,105 +48,142 @@ export default abstract class AuthProvider {
         return entry;
     }
 
-    async routes(fastify: FastifyInstance, options: RegisterOptions): Promise<void> {
-        fastify.get("/", (_, reply) => {
-            reply.status(200).send({ oauth: this.oauthURL });
+    routes(): { path: string; handler: any }[] {
+        const routes: { path: string; handler: any }[] = [];
+
+        routes.push({
+            path: "/",
+            handler: () => {
+                return new Response(JSON.stringify({ oauth: this.oauthURL }), { headers: { "Content-Type": "application/json" } });
+            },
         });
 
-        fastify.get("/entry", async (request, reply) => {
-            const { userId, accessToken, mediaId } = request.query as { userId: string; accessToken: string; mediaId: string };
+        routes.push({
+            path: "/entry",
+            handler: async (req: Request) => {
+                const url = new URL(req.url);
+                const paths = url.pathname.split("/");
+                paths.shift();
 
-            if (!userId || userId.length === 0) {
-                return reply.status(400).send({ error: "No user ID provided." });
-            }
-            if (!accessToken || accessToken.length === 0) {
-                return reply.status(400).send({ error: "No access token provided." });
-            }
-            if (!mediaId || mediaId.length === 0) {
-                return reply.status(400).send({ error: "No media ID provided." });
-            }
+                const body =
+                    req.method === "POST"
+                        ? await req.json().catch(() => {
+                              return null;
+                          })
+                        : null;
 
-            const list = await this.fetchEntry(userId, accessToken, mediaId);
-            return list;
-        });
+                const userId = body?.userId || paths[0] || url.searchParams.get("userId");
+                const accessToken = body?.accessToken || paths[1] || url.searchParams.get("accessToken");
+                const mediaId = body?.mediaId || paths[2] || url.searchParams.get("mediaId");
 
-        fastify.post("/entry", async (request, reply) => {
-            const { userId, accessToken, mediaId } = request.body as { userId: string; accessToken: string; mediaId: string };
-
-            if (!userId || userId.length === 0) {
-                return reply.status(400).send({ error: "No user ID provided." });
-            }
-            if (!accessToken || accessToken.length === 0) {
-                return reply.status(400).send({ error: "No access token provided." });
-            }
-            if (!mediaId || mediaId.length === 0) {
-                return reply.status(400).send({ error: "No media ID provided." });
-            }
-
-            const list = await this.fetchEntry(userId, accessToken, mediaId);
-            return list;
-        });
-
-        fastify.post("/update-entry", async (request, reply) => {
-            const { userId, accessToken, entry } = request.body as { userId: string; accessToken: string; entry: Entry };
-
-            if (!userId || userId.length === 0) {
-                return reply.status(400).send({ error: "No user ID provided." });
-            }
-            if (!accessToken || accessToken.length === 0) {
-                return reply.status(400).send({ error: "No access token provided." });
-            }
-            if (!entry) {
-                return reply.status(400).send({ error: "No entry provided." });
-            }
-
-            const fieldsToChange: (keyof Entry)[] = ["startedAt", "completedAt", "updatedAt", "createdAt"];
-
-            for (const field of fieldsToChange) {
-                if (entry[field] !== undefined && entry[field] !== null && !isNaN(entry[field] as any)) {
-                    (entry[field] as any) = new Date(entry[field] as any);
+                if (!userId || userId.length === 0) {
+                    return new Response(JSON.stringify({ error: "No user ID provided." }), { status: 400, headers: { "Content-Type": "application/json" } });
                 }
-            }
 
-            const list = await this.updateEntry(userId, accessToken, entry);
-            return list;
+                if (!accessToken || accessToken.length === 0) {
+                    return new Response(JSON.stringify({ error: "No access token provided." }), { status: 400, headers: { "Content-Type": "application/json" } });
+                }
+
+                if (!mediaId || mediaId.length === 0) {
+                    return new Response(JSON.stringify({ error: "No media ID provided." }), { status: 400, headers: { "Content-Type": "application/json" } });
+                }
+
+                const list = await this.fetchEntry(userId, accessToken, mediaId);
+                return new Response(JSON.stringify(list), { headers: { "Content-Type": "application/json" } });
+            },
         });
 
-        fastify.get("/list", async (request, reply) => {
-            const { userId, accessToken } = request.query as { userId: string; accessToken: string };
+        routes.push({
+            path: "/update-entry",
+            handler: async (req: Request) => {
+                const url = new URL(req.url);
+                const paths = url.pathname.split("/");
+                paths.shift();
 
-            if (!userId || userId.length === 0) {
-                return reply.status(400).send({ error: "No user ID provided." });
-            }
-            if (!accessToken || accessToken.length === 0) {
-                return reply.status(400).send({ error: "No access token provided." });
-            }
+                const body =
+                    req.method === "POST"
+                        ? await req.json().catch(() => {
+                              return null;
+                          })
+                        : null;
 
-            const list = await this.fetchList(userId, accessToken);
-            return list;
+                const userId = body?.userId || paths[0] || url.searchParams.get("userId");
+                const accessToken = body?.accessToken || paths[1] || url.searchParams.get("accessToken");
+                const entry = body?.entry || paths[2] || url.searchParams.get("entry");
+
+                if (!userId || userId.length === 0) {
+                    return new Response(JSON.stringify({ error: "No user ID provided." }), { status: 400, headers: { "Content-Type": "application/json" } });
+                }
+
+                if (!accessToken || accessToken.length === 0) {
+                    return new Response(JSON.stringify({ error: "No access token provided." }), { status: 400, headers: { "Content-Type": "application/json" } });
+                }
+
+                if (!entry) {
+                    return new Response(JSON.stringify({ error: "No entry provided." }), { status: 400, headers: { "Content-Type": "application/json" } });
+                }
+
+                const fieldsToChange: (keyof Entry)[] = ["startedAt", "completedAt", "updatedAt", "createdAt"];
+
+                for (const field of fieldsToChange) {
+                    if (entry[field] !== undefined && entry[field] !== null && !isNaN(entry[field] as any)) {
+                        (entry[field] as any) = new Date(entry[field] as any);
+                    }
+                }
+
+                const list = await this.updateEntry(userId, accessToken, entry);
+                return new Response(JSON.stringify(list), { headers: { "Content-Type": "application/json" } });
+            },
         });
 
-        fastify.post("/list", async (request, reply) => {
-            const { userId, accessToken } = request.body as { userId: string; accessToken: string };
+        routes.push({
+            path: "/list",
+            handler: async (req: Request) => {
+                const url = new URL(req.url);
+                const paths = url.pathname.split("/");
+                paths.shift();
 
-            if (!userId || userId.length === 0) {
-                return reply.status(400).send({ error: "No user ID provided." });
-            }
-            if (!accessToken || accessToken.length === 0) {
-                return reply.status(400).send({ error: "No access token provided." });
-            }
+                const body =
+                    req.method === "POST"
+                        ? await req.json().catch(() => {
+                              return null;
+                          })
+                        : null;
 
-            const list = await this.fetchList(userId, accessToken);
-            return list;
+                const userId = body?.userId || paths[0] || url.searchParams.get("userId");
+                const accessToken = body?.accessToken || paths[1] || url.searchParams.get("accessToken");
+
+                if (!userId || userId.length === 0) {
+                    return new Response(JSON.stringify({ error: "No user ID provided." }), { status: 400, headers: { "Content-Type": "application/json" } });
+                }
+
+                if (!accessToken || accessToken.length === 0) {
+                    return new Response(JSON.stringify({ error: "No access token provided." }), { status: 400, headers: { "Content-Type": "application/json" } });
+                }
+
+                const list = await this.fetchList(userId, accessToken);
+                return new Response(JSON.stringify(list), { headers: { "Content-Type": "application/json" } });
+            },
         });
 
-        fastify.get("/oauth", (_, reply) => {
-            reply.status(200).send({ oauth: this.oauthURL });
+        routes.push({
+            path: "/oauth",
+            handler: async (req: Request) => {
+                return new Response(JSON.stringify({ oauth: this.oauthURL }), { headers: { "Content-Type": "application/json" } });
+            },
         });
 
-        fastify.get("/callback", async (request, reply) => {
-            return (await this.handleAuth(request, reply)) || reply.status(500).send({ error: "Something went wrong." });
+        routes.push({
+            path: "/callback",
+            handler: async (req: Request, res: Response) => {
+                const data = await this.handleAuth(req, res);
+                if (!data) return new Response(JSON.stringify({ error: "Something went wrong." }), { status: 500, headers: { "Content-Type": "application/json" } });
+
+                return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json" } });
+            },
         });
+
+        return routes;
     }
 
     abstract get oauthURL(): string;

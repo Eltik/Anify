@@ -9,3 +9,4 @@ node_modules
 Dockerfile
 Dockerfile.*
 .eslintrc
+*.html

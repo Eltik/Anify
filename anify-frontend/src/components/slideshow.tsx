@@ -8,7 +8,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-const Slideshow = ({ media, recent }: { media: Anime[] | Manga[], recent?: boolean }) => {
+const Slideshow = ({ media, recent }: { media: Anime[] | Manga[]; recent?: boolean }) => {
     return (
         <>
             <Swiper slidesPerView={"auto"} className="relative h-fit" freeMode={true}>
@@ -17,11 +17,11 @@ const Slideshow = ({ media, recent }: { media: Anime[] | Manga[], recent?: boole
                         <SwiperSlide key={index} className="!w-fit px-2">
                             <MediaItem media={media} recent={recent} />
                         </SwiperSlide>
-                    )
+                    );
                 })}
             </Swiper>
         </>
-    )
+    );
 };
 
 export default Slideshow;

@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 
 export function generateUUID(): string {
     const pattern = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
@@ -9,17 +9,17 @@ export function generateUUID(): string {
     });
 }
 
-export function isValidDate(d) {
+export function isValidDate(d: any) {
     return d instanceof Date && !isNaN(Number(d));
 }
 
 export async function hashPassword(password: string): Promise<{ password: string; salt: string }> {
-    const saltRounds = 10;
-    const salt = await bcrypt.genSalt(saltRounds);
+    const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
-    return { password: hash, salt };
+
+    return { password: hash, salt: salt };
 }
 
-export async function dehashPassword(password: string, hash: string): Promise<string> {
+export async function dehashPassword(password: string, hash: string): Promise<boolean> {
     return await bcrypt.compare(password, hash);
 }

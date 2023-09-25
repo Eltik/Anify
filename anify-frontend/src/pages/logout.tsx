@@ -12,7 +12,7 @@ const Logout: NextPage<any> = () => {
         useTokens.setState({ tokens: [] });
 
         window.location.href = "/";
-    })
+    });
 
     return (
         <>
@@ -37,15 +37,15 @@ const Logout: NextPage<any> = () => {
             <Sidebar active="home" />
             <Navbar active="home" />
             <main>
-                <div className="md:ml-24 md:mr-6 mx-auto mt-24 mb-8">
-                    <div className="flex flex-col justify-center items-center">
-                        <h1 className="text-4xl font-bold text-center text-white">Logging out...</h1>
+                <div className="mx-auto mb-8 mt-24 md:ml-24 md:mr-6">
+                    <div className="flex flex-col items-center justify-center">
+                        <h1 className="text-center text-4xl font-bold text-white">Logging out...</h1>
                     </div>
                 </div>
                 <Footer />
             </main>
         </>
-    )
+    );
 };
 
 export default Logout;

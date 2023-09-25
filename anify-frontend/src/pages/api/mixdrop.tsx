@@ -11,15 +11,17 @@ export default async function handler(request: Request, response: ServerResponse
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const data: MixdropResponse = await (await fetch(`${env.BACKEND_URL}/pages-download?apikey=${env.API_KEY}`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            id: request.body.id
+    const data: MixdropResponse = await (
+        await fetch(`${env.BACKEND_URL}/pages-download?apikey=${env.API_KEY}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                id: request.body.id,
+            }),
         })
-    })).json();
+    ).json();
 
     response.writeHead(200, { "Content-Type": "application/json" });
     response.write(JSON.stringify(data));
@@ -29,5 +31,5 @@ export default async function handler(request: Request, response: ServerResponse
 interface Request {
     body: {
         id: string;
-    }
+    };
 }

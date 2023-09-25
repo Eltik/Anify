@@ -1,6 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config();
-
-import { checkCorsProxies } from "../helper/proxies";
+import { checkCorsProxies } from "../proxies/impl/checkProxies";
 
 checkCorsProxies().then(console.log);

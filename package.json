@@ -4,12 +4,9 @@
     "description": "The best Japanese media web application.",
     "private": true,
     "scripts": {
-        "start": "cd anify-manager && npm run dev",
-        "cli": "cd anify-cli && npm run cli",
-        "install": "cd anify-manager && npm i && cd ../anify-frontend && npm i && cd ../anify-backend && npm i && cd ../anify-auth && npm i",
-        "lint": "cd anify-frontend && npx next lint && cd ../anify-backend && npm run lint && cd ../anify-auth && npm run lint",
-        "build": "npm run build:ts && npm run build:db",
-        "build:ts": "cd anify-manager && npm run build:ts && cd ../anify-backend && npm run build:ts && cd ../anify-frontend && npm run build && cd ../anify-auth && npm run build:ts",
-        "build:db": "cd anify-frontend && npm run build:db && cd ../anify-backend && npm run build:db && cd ../anify-auth && npm run build:db"
+        "start": "cd anify-startup && bun start",
+        "install": "cd anify-startup && bun install && cd ../anify-manager && bun install && cd ../anify-frontend && bun install && cd ../anify-backend && bun install && cd ../anify-auth && bun install",
+        "lint": "cd anify-startup && tsc && cd ../anify-manager && bun run lint && cd ../anify-frontend && bun run lint && cd ../anify-backend && bun run lint && cd ../anify-auth && bun run lint",
+        "build": "cd anify-startup && bun run build && cd ../anify-manager && bun run build && cd ../anify-backend && bun run build && cd ../anify-frontend && bun run build && cd ../anify-auth && bun run build"
     }
 }

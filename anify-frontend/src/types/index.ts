@@ -1,8 +1,8 @@
 export interface Seasonal {
-    trending: Anime[],
-    popular: Anime[],
-    top: Anime[],
-    seasonal: Anime[]
+    trending: Anime[];
+    popular: Anime[];
+    top: Anime[];
+    seasonal: Anime[];
 }
 
 export interface Stats {
@@ -45,13 +45,21 @@ export interface Anime {
         anilist: number;
         mal: number;
         kitsu: number;
-        simkl: number;
+        comick: number;
+        anidb: number;
+        mangadex: number;
+        tmdb: number;
+        tvdb: number;
     };
     popularity: {
         anilist: number;
         mal: number;
         kitsu: number;
-        simkl: number;
+        comick: number;
+        anidb: number;
+        mangadex: number;
+        tmdb: number;
+        tvdb: number;
     };
     averageRating: number;
     averagePopularity: number;
@@ -75,7 +83,7 @@ export interface Anime {
 
 export type AnimeRelation = Anime & {
     relationType: string;
-}
+};
 
 export type Manga = {
     id: string;
@@ -99,13 +107,21 @@ export type Manga = {
         anilist: number;
         mal: number;
         kitsu: number;
-        simkl: number;
+        comick: number;
+        anidb: number;
+        mangadex: number;
+        tmdb: number;
+        tvdb: number;
     };
     popularity: {
         anilist: number;
         mal: number;
         kitsu: number;
-        simkl: number;
+        comick: number;
+        anidb: number;
+        mangadex: number;
+        tmdb: number;
+        tvdb: number;
     };
     averageRating: number;
     averagePopularity: number;
@@ -129,7 +145,7 @@ export type Manga = {
 
 export type MangaRelation = Manga & {
     relationType: string;
-}
+};
 
 export const enum Type {
     ANIME = "ANIME",
@@ -348,7 +364,7 @@ export type MixdropItem = {
     url: string;
     yourfile: boolean;
 };
-  
+
 export type MixdropResponse = {
     success: boolean;
     result: Record<string, MixdropItem>;
@@ -386,10 +402,10 @@ export interface ReadHistory {
 
 export interface AuthProviders {
     id: string;
-    url: string,
-    name: string,
-    icon: string,
-    oauth: string,
+    url: string;
+    name: string;
+    icon: string;
+    oauth: string;
 }
 
 export interface UserData {
@@ -409,7 +425,7 @@ export interface UserData {
         fontWidth: string;
         updatedAt: Date;
         createdAt: Date;
-    }
+    };
 }
 
 export interface UserTokens {

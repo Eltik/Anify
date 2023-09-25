@@ -29,3 +29,10 @@ yarn-error.log*
 manami.json
 database.json
 /manga
+**/manga
+bun.lockb
+goodProxies.json
+proxies.json
+/builds
+db.sqlite
+dump.rdb

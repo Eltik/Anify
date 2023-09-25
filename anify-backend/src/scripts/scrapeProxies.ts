@@ -1,6 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config();
-
-import { scrapeCorsProxies } from "../helper/proxies";
+import { scrapeCorsProxies } from "../proxies/impl/scrapeProxies";
 
 scrapeCorsProxies().then(console.log);
