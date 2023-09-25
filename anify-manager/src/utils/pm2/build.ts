@@ -52,7 +52,11 @@ export default async function build(label: string, name: string[], count: number
             writeToLogStream(`Cloning ${repo.name}`, repo.name);
             let localCommand = `cd ${buildPath} && git clone ${repo.url} ${repo.name}`;
 
+            writeToLogStream(localCommand, repo.name);
+
             output = await execPromise(localCommand, {});
+
+            writeToLogStream("Cloning finished", repo.name);
 
             writeToLogStream(output.stdout, repo.name);
             writeToLogStream(output.stderr, repo.name);

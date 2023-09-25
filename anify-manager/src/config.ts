@@ -5,7 +5,7 @@ export const buildCommands: {
     };
 } = {
     anify: {
-        command: "npm run install && npm run lint && npm run build",
+        command: "bun i && bun run lint && bun run build",
         ".env": `.env`,
     },
 };
@@ -13,7 +13,7 @@ export const buildCommands: {
 export const runCommands: {
     [key: string]: string;
 } = {
-    anify: "npm run start",
+    anify: "start",
 };
 
 export const repositories = [

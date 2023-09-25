@@ -26,7 +26,7 @@ const run = async (folderName: string): Promise<BuildDetail[]> => {
         await new Promise<void>((resolve, reject) => {
             pm2.start(
                 {
-                    script: `pnpm`,
+                    script: `bun`,
                     args: value.split(" "),
                     cwd: `./builds/${latestBuild}/${key}`,
                     name: latestBuild + "-" + key,

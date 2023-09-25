@@ -23,9 +23,10 @@ export const cacheTime = env.REDIS_CACHE_TIME || 60 * 60 * 24 * 7 * 2;
 
 export const start = async () => {
     const routes: { [key: string]: { path: string; handler: (req: Request) => Promise<Response> } } = {};
-    const routeFiles = readdirSync(join(import.meta.dir, "./impl"));
+    const routeFiles = [await import("./impl/createUser.ts"), await import("./impl/login.ts"), await import("./impl/providers.ts"), await import("./impl/updateUser.ts"), await import("./impl/user.ts")];
+
     for (const file of routeFiles) {
-        const routeModule = await import(join(import.meta.dir, "./impl", file));
+        const routeModule = await file;
         const route = routeModule.default;
 
         if (route) {
@@ -33,6 +34,8 @@ export const start = async () => {
             routes[path] = { path, handler };
         }
     }
+
+    console.log(colors.gray(`Loaded ${colors.yellow(Object.keys(routes).length + "")} routes`));
 
     Bun.serve({
         port: env.PORT,
