@@ -3,10 +3,10 @@ import colors from "colors";
 
 export default class Http {
     private static bannedProxies: string[] = [];
-    public static unbannedProxies: string[] | undefined = Array.isArray(CORS_PROXIES) ? [...(CORS_PROXIES)] : undefined;
+    public static unbannedProxies: string[] | undefined = Array.isArray(CORS_PROXIES) ? CORS_PROXIES : undefined;
 
     static updateBannedProxies(proxyUrl: string): void {
-        if (!this.unbannedProxies) this.unbannedProxies = Array.isArray(CORS_PROXIES) ? [...(CORS_PROXIES)] : [];
+        if (!this.unbannedProxies) this.unbannedProxies = Array.isArray(CORS_PROXIES) ? CORS_PROXIES : [];
 
         if (!this.bannedProxies.includes(proxyUrl)) {
             this.bannedProxies.push(proxyUrl);
@@ -15,10 +15,10 @@ export default class Http {
     }
 
     static getRandomUnbannedProxy(): string | undefined {
-        if (!this.unbannedProxies) this.unbannedProxies = Array.isArray(CORS_PROXIES) ? [...(CORS_PROXIES)] : [];
-        
+        if (!this.unbannedProxies) this.unbannedProxies = Array.isArray(CORS_PROXIES) ? CORS_PROXIES : [];
+
         if (this.unbannedProxies.length === 0) return undefined;
-        
+
         return this.unbannedProxies[Math.floor(Math.random() * this.unbannedProxies.length)];
     }
 
@@ -27,7 +27,7 @@ export default class Http {
             if (proxyRequest) {
                 const proxyUrl = customProxy || this.getRandomUnbannedProxy();
                 if (!proxyUrl) {
-                    return Promise.reject(new Error('No unbanned proxies available'));
+                    return Promise.reject(new Error("No unbanned proxies available"));
                 }
 
                 const modifyUrl = `${proxyUrl}/${url}`;
@@ -46,13 +46,16 @@ export default class Http {
                             Origin: "https://anify.tv",
                         },
                     };
-                    const response = await fetch(modifyUrl, { signal: controller.signal, ...config }).catch((err) => ({
-                        ok: false,
-                        status: 500,
-                        statusText: 'Timeout',
-                        json: () => Promise.resolve({ error: err }),
-                    } as Response));
-                    
+                    const response = await fetch(modifyUrl, { signal: controller.signal, ...config }).catch(
+                        (err) =>
+                            ({
+                                ok: false,
+                                status: 500,
+                                statusText: "Timeout",
+                                json: () => Promise.resolve({ error: err }),
+                            }) as Response,
+                    );
+
                     if (!response.ok) {
                         this.updateBannedProxies(proxyUrl);
                     }

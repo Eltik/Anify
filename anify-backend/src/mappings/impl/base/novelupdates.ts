@@ -113,6 +113,8 @@ export default class NovelUpdatesBase extends BaseProvider {
                             trailer: null,
                             type: Type.MANGA,
                             year,
+                            publisher: $$("div#showopublisher a").text(),
+                            author: $$("div#showauthors a").text(),
                         });
                     })
                     .catch((error) => {
@@ -195,6 +197,8 @@ export default class NovelUpdatesBase extends BaseProvider {
                             trailer: null,
                             type: Type.MANGA,
                             year,
+                            publisher: $$("div#showopublisher a").text(),
+                            author: $$("div#showauthors a").text(),
                         });
                     })
                     .catch((error) => {
@@ -251,7 +255,8 @@ export default class NovelUpdatesBase extends BaseProvider {
         };
     }
 
-    override async fetchSeasonal(): Promise<{ trending: AnimeInfo[] | MangaInfo[]; seasonal: AnimeInfo[] | MangaInfo[]; popular: AnimeInfo[] | MangaInfo[]; top: AnimeInfo[] | MangaInfo[] } | undefined> {const promises = [this.fetchSeasonalData(`${this.url}/series-ranking/?rank=month&org=496&ge=280,4,281&rl=0`), this.fetchSeasonalData(`${this.url}/series-ranking/?rank=popmonth&org=496&ge=280,4,281&rl=0`), this.fetchSeasonalData(`${this.url}/series-ranking/?rank=popular&org=496&ge=280,4,281&rl=0`), this.fetchSeasonalData(`${this.url}/series-ranking/?rank=sixmonths&org=496&ge=280,4,281&rl=0`)];
+    override async fetchSeasonal(): Promise<{ trending: AnimeInfo[] | MangaInfo[]; seasonal: AnimeInfo[] | MangaInfo[]; popular: AnimeInfo[] | MangaInfo[]; top: AnimeInfo[] | MangaInfo[] } | undefined> {
+        const promises = [this.fetchSeasonalData(`${this.url}/series-ranking/?rank=month&org=496&ge=280,4,281&rl=0`), this.fetchSeasonalData(`${this.url}/series-ranking/?rank=popmonth&org=496&ge=280,4,281&rl=0`), this.fetchSeasonalData(`${this.url}/series-ranking/?rank=popular&org=496&ge=280,4,281&rl=0`), this.fetchSeasonalData(`${this.url}/series-ranking/?rank=sixmonths&org=496&ge=280,4,281&rl=0`)];
 
         const [trending, seasonal, popular, top] = await Promise.all(promises);
 
@@ -329,6 +334,8 @@ export default class NovelUpdatesBase extends BaseProvider {
                             trailer: null,
                             type: Type.MANGA,
                             year,
+                            publisher: $$("div#showopublisher a").text(),
+                            author: $$("div#showauthors a").text(),
                         });
                     })
                     .catch((error) => {

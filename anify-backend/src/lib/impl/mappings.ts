@@ -304,6 +304,8 @@ export async function createMedia(mappings: MappedResult[], type: Type): Promise
                     tags: [],
                     artwork: [],
                     characters: [],
+                    author: null,
+                    publisher: null,
                 };
 
                 results.push(manga);

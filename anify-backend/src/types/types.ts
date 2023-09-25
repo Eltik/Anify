@@ -1,4 +1,3 @@
-import { Cookie } from "elysia";
 import { Format, Genres, MediaStatus, ProviderType, Season, SubType, Type } from "./enums";
 
 export type Db<T> = {

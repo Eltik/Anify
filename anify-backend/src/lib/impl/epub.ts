@@ -141,7 +141,7 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
 
     if (chapters.length === 0) console.log(colors.red("No chapters found for ") + colors.blue(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? ""));
 
-    const path = `./manga/${providerId}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}`.slice(0, -1);
+    const path = join(import.meta.dir, `../manga/${providerId}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}`.slice(0, -1));
 
     if (existsSync(`${path}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}.epub`)) return `${path}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}.epub`;
 
@@ -157,7 +157,7 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
     content.push({
         title: manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "",
         content: `
-            <img src="file://${join(import.meta.dir, `../../../${path}/cover.jpg`)}">
+            <img src="file://${`${path}/cover.jpg`}">
             <p>${manga.description ?? ""}</p>
             <br />
             <ul>
@@ -166,6 +166,7 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
                 <li><b>Year Released:</b> ${manga.year ?? "N/A"}</li>
                 <li><b>Genres:</b> ${manga.genres.join(", ")}</li>
                 <li><b>Country:</b> ${manga.countryOfOrigin ?? "Unknown"}</li>
+                <li><b>Status:</b> ${manga.status}</li>
             </ul>
             <br />
             <h4><b>Alternative Titles:</b></h4>
@@ -174,6 +175,14 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
                 <li><b>Japanese:</b> ${manga.title.native ?? "N/A"}</li>
                 <li><b>Romaji:</b> ${manga.title.romaji ?? "N/A"}</li>
                 <li><b>Synonyms</b>: ${manga.synonyms.join(", ")}</li>
+            </ul>
+            <br />
+            <h4><b>Links:</b></h4>
+            <ul>
+                <li><b>Anilist:</b> <a href="https://anilist.co/manga/${manga.id}">https://anilist.co/manga/${manga.id}</a></li>
+                <li><b>Kitsu:</b> <a href="https://kitsu.io/manga/${manga.id}">https://kitsu.io/manga/${manga.id}</a></li>
+                <li><b>MyAnimeList:</b> <a href="https://myanimelist.net/manga/${manga.id}">https://myanimelist.net/manga/${manga.id}</a></li>
+                <li><b>MangaUpdates:</b> <a href="https://www.mangaupdates.com/series.html?id=${manga.id}">https://www.mangaupdates.com/series.html?id=${manga.id}</a></li>
             </ul>
         `,
     });
@@ -196,7 +205,7 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
                     imageFiles[imgName] = await img_resp.arrayBuffer(); // Store image data
                     await Bun.write(`${path}/${imgName}`, imageFiles[imgName]);
 
-                    const newSource = `file://${join(import.meta.dir, `../../../${path}/${imgName}`)}`;
+                    const newSource = `file://${`${path}/${imgName}`}`;
 
                     $(images.toArray()[j]).replaceWith(`<img src="${newSource}">`);
 
@@ -232,11 +241,12 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
     const book = await new EPub(
         {
             title: manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "",
-            cover: `file://${join(import.meta.dir, `../../../${path}/cover.jpg`)}`,
+            cover: `file://${`${path}/cover.jpg`}`,
             lang: "en",
             date: new Date(Date.now()).toDateString(),
             description: manga.description ?? "",
             author: providerId,
+            ignoreFailedDownloads: true,
         },
         content,
     ).genEpub();

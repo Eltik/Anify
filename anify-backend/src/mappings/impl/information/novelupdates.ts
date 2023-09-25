@@ -63,7 +63,7 @@ export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga,
             type: Type.MANGA,
             year,
             publisher: $$("div#showopublisher a").text(),
-            author: $$("div#showauthors a").text()
+            author: $$("div#showauthors a").text(),
         };
     }
 }
