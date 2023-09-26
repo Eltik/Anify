@@ -22,7 +22,7 @@ export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga,
 
         if (!novelUpdatesId) return undefined;
 
-        const data = await (await this.request(`${this.url}/series/${novelUpdatesId}`, { headers: { Cookie: "_ga=;" } }, true)).text();
+        const data = await (await this.request(`${this.url}/series/${novelUpdatesId}`, { headers: { Cookie: "_ga=;" } })).text();
         const $$ = load(data);
 
         const synonyms = $$("div#editassociated").html()?.split("<br>") ?? [];
@@ -36,9 +36,7 @@ export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga,
             color: null,
             countryOfOrigin: $$("div#showlang a").text()?.trim() ?? null,
             coverImage: $$("div.seriesimg img").attr("src") ?? null,
-            currentEpisode: null,
             description: $$("div#editdescription").text()?.trim() ?? null,
-            duration: null,
             format: Format.NOVEL,
             genres: $$("div#seriesgenre a")
                 .map((_, el) => $$(el).text())
@@ -46,7 +44,6 @@ export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga,
             popularity: Number($$("b.rlist").text()?.trim() ?? 0) * 2,
             rating: Number($$("h5.seriesother span.uvotes").text()?.split(" /")[0]?.substring(1) ?? 0) * 2,
             relations: [],
-            season: Season.UNKNOWN,
             status: $$("div#editstatus").text()?.includes("Complete") ? MediaStatus.FINISHED : MediaStatus.RELEASING,
             synonyms,
             tags: $$("div#showtags a")
@@ -59,7 +56,6 @@ export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga,
             },
             totalChapters: isNaN(Number($$("div#editstatus").text()?.split(" / ")[1]?.split(" Chapters")[0]?.trim())) ? null : Number($$("div#editstatus").text()?.split(" / ")[1]?.split(" Chapters")[0]?.trim()),
             totalVolumes: isNaN(Number($$("div#editstatus").text()?.split(" / ")[0].split(" Volumes")[0]?.trim())) ? null : Number($$("div#editstatus").text()?.split(" / ")[0].split(" Volumes")[0]?.trim()),
-            trailer: null,
             type: Type.MANGA,
             year,
             publisher: $$("div#showopublisher a").text(),
@@ -67,51 +63,3 @@ export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga,
         };
     }
 }
-
-type JikanResponse = {
-    mal_id: number;
-    url: string;
-    title: string;
-    title_english: string | null;
-    title_japanese: string | null;
-    title_synonyms: string[];
-    type: string;
-    status: string;
-    synopsis: string | null;
-    images: {
-        jpg: {
-            image_url: string | null;
-            small_image_url: string | null;
-            large_image_url: string | null;
-        };
-        webp: {
-            image_url: string | null;
-            small_image_url: string | null;
-            large_image_url: string | null;
-        };
-    };
-    duration: string;
-    episodes: number | null;
-    popularity: number | null;
-    score: number | null;
-    season: string;
-    year: number | null;
-    genres: { name: string }[];
-    trailer: {
-        youtube_id: string | null;
-        url: string | null;
-        embed_url: string | null;
-        images: {
-            image_url: string | null;
-            small_image_url: string | null;
-            medium_image_url: string | null;
-            large_image_url: string | null;
-            maximum_image_url: string | null;
-        };
-    };
-    approved: boolean;
-    titles: {
-        type: string;
-        title: string;
-    }[];
-};

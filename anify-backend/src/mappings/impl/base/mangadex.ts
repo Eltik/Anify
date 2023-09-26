@@ -12,7 +12,7 @@ export default class ManagDexBase extends BaseProvider {
     private api = "https://api.mangadex.org";
 
     override async search(query: string, type: Type, formats: Format[], page: number, perPage: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
-        const results: AnimeInfo[] | MangaInfo[] = [];
+        const results: MangaInfo[] = [];
 
         let mangaList: any[] = [];
 
@@ -72,8 +72,6 @@ export default class ManagDexBase extends BaseProvider {
                 color: null,
                 countryOfOrigin: attributes.publicationDemographic ?? attributes.originalLanguage?.toUpperCase() ?? null,
                 description: attributes.description.en ?? Object.values(attributes.description)[0],
-                currentEpisode: null,
-                duration: null,
                 genres: attributes.tags.filter((tag: any) => tag.attributes.group === "genre").map((tag: any) => tag.attributes.name.en),
                 totalChapters: attributes.lastChapter ?? null,
                 totalVolumes: attributes.lastVolume ?? null,
@@ -82,8 +80,6 @@ export default class ManagDexBase extends BaseProvider {
                 popularity: null,
                 relations: [],
                 rating: null,
-                season: Season.UNKNOWN,
-                trailer: null,
                 type: Type.MANGA,
                 author: manga.relationships.filter((element: any) => element.type === "author").map((element: any) => element.attributes.name.en) ?? null,
                 publisher: manga.relationships.filter((element: any) => element.type === "publisher").map((element: any) => element.attributes.name.en) ?? null,
@@ -94,7 +90,7 @@ export default class ManagDexBase extends BaseProvider {
     }
 
     override async searchAdvanced(query: string, type: Type, formats: Format[], page: number, perPage: number, genres?: Genres[], genresExcluded?: Genres[], year?: number, tags?: string[], tagsExcluded?: string[]): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
-        const results: AnimeInfo[] | MangaInfo[] = [];
+        const results: MangaInfo[] = [];
 
         let mangaList: any[] = [];
 
@@ -217,8 +213,6 @@ export default class ManagDexBase extends BaseProvider {
                 color: null,
                 countryOfOrigin: attributes.publicationDemographic ?? attributes.originalLanguage?.toUpperCase() ?? null,
                 description: attributes.description.en ?? Object.values(attributes.description)[0],
-                currentEpisode: null,
-                duration: null,
                 genres: attributes.tags.filter((tag: any) => tag.attributes.group === "genre").map((tag: any) => tag.attributes.name.en),
                 totalChapters: attributes.lastChapter ?? null,
                 totalVolumes: attributes.lastVolume ?? null,
@@ -227,8 +221,6 @@ export default class ManagDexBase extends BaseProvider {
                 popularity: null,
                 relations: [],
                 rating: null,
-                season: Season.UNKNOWN,
-                trailer: null,
                 type: Type.MANGA,
                 author: manga.relationships.filter((element: any) => element.type === "author").map((element: any) => element.attributes.name.en) ?? null,
                 publisher: manga.relationships.filter((element: any) => element.type === "publisher").map((element: any) => element.attributes.name.en) ?? null,
@@ -275,17 +267,15 @@ export default class ManagDexBase extends BaseProvider {
                 totalVolumes: data.attributes.lastVolume ?? null,
                 status: data.attributes.status === "ongoing" ? MediaStatus.RELEASING : data.attributes.status === "completed" ? MediaStatus.FINISHED : null,
                 color: null,
-                currentEpisode: null,
-                duration: null,
                 popularity: null,
                 relations: [],
                 tags: data.attributes.tags.filter((tag: any) => tag.attributes.group === "theme").map((tag: any) => tag.attributes.name.en),
                 rating: null,
-                season: Season.UNKNOWN,
-                trailer: null,
                 format,
                 coverImage: `${this.url}/covers/${id}/${data.relationships.find((element: any) => element.type === "cover_art").id}.jpg`,
                 bannerImage: null,
+                author: data.relationships.filter((element: any) => element.type === "author").map((element: any) => element.attributes.name.en) ?? null,
+                publisher: data.relationships.filter((element: any) => element.type === "publisher").map((element: any) => element.attributes.name.en) ?? null,
             };
         } catch (e) {
             return undefined;
@@ -380,7 +370,7 @@ export default class ManagDexBase extends BaseProvider {
         return ids;
     }
 
-    private returnFilledManga(manga: any) {
+    private returnFilledManga(manga: any): MangaInfo {
         const formatString: string = manga.type.toUpperCase();
         const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
 

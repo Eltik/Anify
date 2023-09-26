@@ -86,7 +86,7 @@ export default class AniDB extends InformationProvider<Anime | Manga, AnimeInfo 
             duration: null,
             format: Format.UNKNOWN,
             genres: [],
-        };
+        } as AnimeInfo;
     }
 
     override async fetchContentData(media: Anime | Manga): Promise<Episode[] | Chapter[] | undefined> {

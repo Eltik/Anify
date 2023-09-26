@@ -68,7 +68,9 @@ export default class MangaDexInfo extends InformationProvider<Anime | Manga, Ani
                 format: Format.UNKNOWN,
                 coverImage: `${this.url}/covers/${mangadexId}/${data.relationships.find((element: any) => element.type === "cover_art").id}.jpg`,
                 bannerImage: null,
-            };
+                author: data.relationships.find((element: any) => element.type === "author")?.attributes.name ?? null,
+                publisher: data.relationships.find((element: any) => element.type === "publisher")?.attributes.name ?? null,
+            } as MangaInfo;
         } catch (e) {
             return undefined;
         }

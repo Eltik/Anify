@@ -80,7 +80,7 @@ export default class MAL extends InformationProvider<Anime | Manga, AnimeInfo | 
             totalChapters: null,
             totalVolumes: null,
             type: media.type,
-        };
+        } as AnimeInfo | MangaInfo;
     }
 }
 

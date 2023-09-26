@@ -5,7 +5,7 @@ import { Anime, AnimeInfo, Db, Manga, MangaInfo } from "../../../types/types";
 export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: AnimeInfo[] | MangaInfo[], top: AnimeInfo[] | MangaInfo[], seasonal: AnimeInfo[] | MangaInfo[], fields: string[]) => {
     // Create a function to sort media by id
     const sortMediaById = (mediaArray: Anime[] | Manga[], ids: string[]) => {
-        return ids.map((id) => mediaArray.find((media: Anime | Manga) => media.id === id));
+        return ids.map((id) => (mediaArray as Array<Anime | Manga>).find((media: Anime | Manga) => media.id === id));
     };
 
     // Fetch all media based on their types

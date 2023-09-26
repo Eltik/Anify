@@ -515,49 +515,90 @@ export default class AniListBase extends BaseProvider {
             });
         }
 
-        return {
-            id: String(data.id),
-            title: {
-                english: data.title.english ?? null,
-                romaji: data.title.romaji ?? null,
-                native: data.title.native ?? null,
-            },
-            trailer: null,
-            currentEpisode: data.status === MediaStatus.FINISHED || data.status === MediaStatus.CANCELLED ? data.episodes ?? 0 : 0,
-            duration: data.duration ?? null,
-            coverImage: data.coverImage.extraLarge ?? null,
-            bannerImage: data.bannerImage ?? null,
-            popularity: Number(data.popularity),
-            synonyms: data.synonyms ?? [],
-            totalEpisodes: data.episodes ?? 0,
-            totalChapters: data.chapters ?? 0,
-            color: null,
-            status: data.status as MediaStatus,
-            season: data.season as Season,
-            genres: (data.genres as Genres[]) ?? [],
-            rating: data.meanScore ? data.meanScore / 10 : null,
-            description: data.description ?? null,
-            type: data.type,
-            format: data.format,
-            year: data.seasonYear ?? data.startDate?.year ?? null,
-            countryOfOrigin: data.countryOfOrigin ?? null,
-            tags: data.tags.map((tag) => tag.name),
-            relations,
-            characters,
-            artwork: [
-                {
-                    type: "poster",
-                    img: data.coverImage.extraLarge,
-                    providerId: this.id,
+        if (data.type === Type.ANIME)
+            return {
+                id: String(data.id),
+                title: {
+                    english: data.title.english ?? null,
+                    romaji: data.title.romaji ?? null,
+                    native: data.title.native ?? null,
                 },
-                {
-                    type: "banner",
-                    img: data.bannerImage,
-                    providerId: this.id,
+                trailer: null,
+                currentEpisode: data.status === MediaStatus.FINISHED || data.status === MediaStatus.CANCELLED ? data.episodes ?? 0 : 0,
+                duration: data.duration ?? null,
+                coverImage: data.coverImage.extraLarge ?? null,
+                bannerImage: data.bannerImage ?? null,
+                popularity: Number(data.popularity),
+                synonyms: data.synonyms ?? [],
+                totalEpisodes: data.episodes ?? 0,
+                color: null,
+                status: data.status as MediaStatus,
+                season: data.season as Season,
+                genres: (data.genres as Genres[]) ?? [],
+                rating: data.meanScore ? data.meanScore / 10 : null,
+                description: data.description ?? null,
+                type: data.type,
+                format: data.format,
+                year: data.seasonYear ?? data.startDate?.year ?? null,
+                countryOfOrigin: data.countryOfOrigin ?? null,
+                tags: data.tags.map((tag) => tag.name),
+                relations,
+                characters,
+                artwork: [
+                    {
+                        type: "poster",
+                        img: data.coverImage.extraLarge,
+                        providerId: this.id,
+                    },
+                    {
+                        type: "banner",
+                        img: data.bannerImage,
+                        providerId: this.id,
+                    },
+                ],
+            };
+        else {
+            return {
+                id: String(data.id),
+                title: {
+                    english: data.title.english ?? null,
+                    romaji: data.title.romaji ?? null,
+                    native: data.title.native ?? null,
                 },
-            ],
-            totalVolumes: data.volumes ?? 0,
-        };
+                coverImage: data.coverImage.extraLarge ?? null,
+                bannerImage: data.bannerImage ?? null,
+                popularity: Number(data.popularity),
+                synonyms: data.synonyms ?? [],
+                totalChapters: data.chapters ?? 0,
+                color: null,
+                status: data.status as MediaStatus,
+                genres: (data.genres as Genres[]) ?? [],
+                rating: data.meanScore ? data.meanScore / 10 : null,
+                description: data.description ?? null,
+                type: data.type,
+                format: data.format,
+                year: data.seasonYear ?? data.startDate?.year ?? null,
+                countryOfOrigin: data.countryOfOrigin ?? null,
+                tags: data.tags.map((tag) => tag.name),
+                relations,
+                characters,
+                artwork: [
+                    {
+                        type: "poster",
+                        img: data.coverImage.extraLarge,
+                        providerId: this.id,
+                    },
+                    {
+                        type: "banner",
+                        img: data.bannerImage,
+                        providerId: this.id,
+                    },
+                ],
+                totalVolumes: data.volumes ?? 0,
+                author: null,
+                publisher: null,
+            };
+        }
     }
 
     override async fetchSeasonal(type: Type, formats: Format[]): Promise<{ trending: AnimeInfo[] | MangaInfo[]; seasonal: AnimeInfo[] | MangaInfo[]; popular: AnimeInfo[] | MangaInfo[]; top: AnimeInfo[] | MangaInfo[] } | undefined> {

@@ -81,7 +81,9 @@ export default class ComicKInfo extends InformationProvider<Anime | Manga, Anime
             totalVolumes: null,
             trailer: null,
             year: data.year,
-        };
+            author: null,
+            publisher: null,
+        } as MangaInfo;
     }
 }
 

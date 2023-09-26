@@ -48,18 +48,14 @@ export default class NovelUpdatesBase extends BaseProvider {
     };
 
     override async search(query: string, type: Type, formats: Format[], page: number, perPage: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
-        const results: AnimeInfo[] | MangaInfo[] = [];
+        const results: MangaInfo[] = [];
 
-        const searchData = await this.request(
-            `${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444&ge=280&sort=sread&order=desc${page ? `&pg=${page}` : ""}`,
-            {
-                method: "GET",
-                headers: {
-                    Referer: this.url,
-                },
+        const searchData = await this.request(`${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444&ge=280&sort=sread&order=desc${page ? `&pg=${page}` : ""}`, {
+            method: "GET",
+            headers: {
+                Referer: this.url,
             },
-            true,
-        );
+        });
 
         const data = await searchData.text();
 
@@ -71,7 +67,7 @@ export default class NovelUpdatesBase extends BaseProvider {
             const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split(this.url)[1]?.split("/series/")[1]?.slice(0, -1);
 
             requestPromises.push(
-                this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } }, true)
+                this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } })
                     .then(async (response) => {
                         const secondReq = await response.text();
                         const $$ = load(secondReq);
@@ -87,9 +83,7 @@ export default class NovelUpdatesBase extends BaseProvider {
                             color: null,
                             countryOfOrigin: $$("div#showlang a").text()?.trim() ?? null,
                             coverImage: $$("div.seriesimg img").attr("src") ?? null,
-                            currentEpisode: null,
                             description: $$("div#editdescription").text()?.trim() ?? null,
-                            duration: null,
                             format: Format.NOVEL,
                             genres: $$("div#seriesgenre a")
                                 .map((_, el) => $$(el).text())
@@ -97,7 +91,6 @@ export default class NovelUpdatesBase extends BaseProvider {
                             popularity: Number($$("b.rlist").text()?.trim() ?? 0) * 2,
                             rating: Number($$("h5.seriesother span.uvotes").text()?.split(" /")[0]?.substring(1) ?? 0) * 2,
                             relations: [],
-                            season: Season.UNKNOWN,
                             status: $$("div#editstatus").text()?.includes("Complete") ? MediaStatus.FINISHED : MediaStatus.RELEASING,
                             synonyms,
                             tags: $$("div#showtags a")
@@ -110,7 +103,6 @@ export default class NovelUpdatesBase extends BaseProvider {
                             },
                             totalChapters: isNaN(Number($$("div#editstatus").text()?.split(" / ")[1]?.split(" Chapters")[0]?.trim())) ? null : Number($$("div#editstatus").text()?.split(" / ")[1]?.split(" Chapters")[0]?.trim()),
                             totalVolumes: isNaN(Number($$("div#editstatus").text()?.split(" / ")[0].split(" Volumes")[0]?.trim())) ? null : Number($$("div#editstatus").text()?.split(" / ")[0].split(" Volumes")[0]?.trim()),
-                            trailer: null,
                             type: Type.MANGA,
                             year,
                             publisher: $$("div#showopublisher a").text(),
@@ -128,22 +120,18 @@ export default class NovelUpdatesBase extends BaseProvider {
     }
 
     override async searchAdvanced(query: string, type: Type, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = [], year = 0, tags: string[] = [], tagsExcluded: string[] = []): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
-        const results: AnimeInfo[] | MangaInfo[] = [];
+        const results: MangaInfo[] = [];
 
         const genreNumbers = genres.map((genre) => this.genreMappings[genre.toUpperCase() as keyof typeof this.genreMappings]).filter((genreNumber) => genreNumber !== undefined);
 
         const excludedGenreNumbers = genresExcluded.map((genre) => this.genreMappings[genre.toUpperCase() as keyof typeof this.genreMappings]).filter((genreNumber) => genreNumber !== undefined);
 
-        const searchData = await this.request(
-            `${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444${genres.length > 0 ? `&gi=${genreNumbers.join(",")}` : ""}&ge=280${genresExcluded.length > 0 ? `,${excludedGenreNumbers.join(",")}` : ""}&sort=sread&order=desc${page ? `&pg=${page}` : ""}`,
-            {
-                method: "GET",
-                headers: {
-                    Referer: this.url,
-                },
+        const searchData = await this.request(`${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444${genres.length > 0 ? `&gi=${genreNumbers.join(",")}` : ""}&ge=280${genresExcluded.length > 0 ? `,${excludedGenreNumbers.join(",")}` : ""}&sort=sread&order=desc${page ? `&pg=${page}` : ""}`, {
+            method: "GET",
+            headers: {
+                Referer: this.url,
             },
-            true,
-        );
+        });
 
         const data = await searchData.text();
 
@@ -155,7 +143,7 @@ export default class NovelUpdatesBase extends BaseProvider {
             const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split(this.url)[1]?.split("/series/")[1]?.slice(0, -1);
 
             requestPromises.push(
-                this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } }, true)
+                this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } })
                     .then(async (response) => {
                         const secondReq = await response.text();
                         const $$ = load(secondReq);
@@ -171,9 +159,7 @@ export default class NovelUpdatesBase extends BaseProvider {
                             color: null,
                             countryOfOrigin: $$("div#showlang a").text()?.trim() ?? null,
                             coverImage: $$("div.seriesimg img").attr("src") ?? null,
-                            currentEpisode: null,
                             description: $$("div#editdescription").text()?.trim() ?? null,
-                            duration: null,
                             format: Format.NOVEL,
                             genres: $$("div#seriesgenre a")
                                 .map((_, el) => $$(el).text())
@@ -181,7 +167,6 @@ export default class NovelUpdatesBase extends BaseProvider {
                             popularity: Number($$("b.rlist").text()?.trim() ?? 0) * 2,
                             rating: Number($$("h5.seriesother span.uvotes").text()?.split(" /")[0]?.substring(1) ?? 0) * 2,
                             relations: [],
-                            season: Season.UNKNOWN,
                             status: $$("div#editstatus").text()?.includes("Complete") ? MediaStatus.FINISHED : MediaStatus.RELEASING,
                             synonyms,
                             tags: $$("div#showtags a")
@@ -194,7 +179,6 @@ export default class NovelUpdatesBase extends BaseProvider {
                             },
                             totalChapters: isNaN(Number($$("div#editstatus").text()?.split(" / ")[1]?.split(" Chapters")[0]?.trim())) ? null : Number($$("div#editstatus").text()?.split(" / ")[1]?.split(" Chapters")[0]?.trim()),
                             totalVolumes: isNaN(Number($$("div#editstatus").text()?.split(" / ")[0].split(" Volumes")[0]?.trim())) ? null : Number($$("div#editstatus").text()?.split(" / ")[0].split(" Volumes")[0]?.trim()),
-                            trailer: null,
                             type: Type.MANGA,
                             year,
                             publisher: $$("div#showopublisher a").text(),
@@ -212,7 +196,7 @@ export default class NovelUpdatesBase extends BaseProvider {
     }
 
     override async getMedia(id: string): Promise<AnimeInfo | MangaInfo | undefined> {
-        const data = await (await this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } }, true)).text();
+        const data = await (await this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } })).text();
         const $$ = load(data);
 
         const synonyms = $$("div#editassociated").html()?.split("<br>") ?? [];
@@ -226,9 +210,7 @@ export default class NovelUpdatesBase extends BaseProvider {
             color: null,
             countryOfOrigin: $$("div#showlang a").text()?.trim() ?? null,
             coverImage: $$("div.seriesimg img").attr("src") ?? null,
-            currentEpisode: null,
             description: $$("div#editdescription").text()?.trim() ?? null,
-            duration: null,
             format: Format.NOVEL,
             genres: $$("div#seriesgenre a")
                 .map((_, el) => $$(el).text())
@@ -236,7 +218,6 @@ export default class NovelUpdatesBase extends BaseProvider {
             popularity: Number($$("b.rlist").text()?.trim() ?? 0),
             rating: Number($$("h5.seriesother span.uvotes").text()?.split(" /")[0]?.substring(1) ?? 0),
             relations: [],
-            season: Season.UNKNOWN,
             status: $$("div#editstatus").text()?.includes("Complete") ? MediaStatus.FINISHED : MediaStatus.RELEASING,
             synonyms,
             tags: $$("div#showtags a")
@@ -249,9 +230,10 @@ export default class NovelUpdatesBase extends BaseProvider {
             },
             totalChapters: isNaN(Number($$("div#editstatus").text()?.split(" / ")[1]?.split(" Chapters")[0]?.trim())) ? null : Number($$("div#editstatus").text()?.split(" / ")[1]?.split(" Chapters")[0]?.trim()),
             totalVolumes: isNaN(Number($$("div#editstatus").text()?.split(" / ")[0].split(" Volumes")[0]?.trim())) ? null : Number($$("div#editstatus").text()?.split(" / ")[0].split(" Volumes")[0]?.trim()),
-            trailer: null,
             type: Type.MANGA,
             year,
+            author: $$("div#showauthors a").text(),
+            publisher: $$("div#showopublisher a").text(),
         };
     }
 
@@ -269,18 +251,14 @@ export default class NovelUpdatesBase extends BaseProvider {
     }
 
     private async fetchSeasonalData(url: string) {
-        const results: AnimeInfo[] | MangaInfo[] = [];
+        const results: MangaInfo[] = [];
 
-        const searchData = await this.request(
-            url,
-            {
-                method: "GET",
-                headers: {
-                    Referer: this.url,
-                },
+        const searchData = await this.request(url, {
+            method: "GET",
+            headers: {
+                Referer: this.url,
             },
-            true,
-        );
+        });
 
         const data = await searchData.text();
 
@@ -292,7 +270,7 @@ export default class NovelUpdatesBase extends BaseProvider {
             const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split(this.url)[1]?.split("/series/")[1]?.slice(0, -1);
 
             requestPromises.push(
-                this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } }, true)
+                this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } })
                     .then(async (response) => {
                         const secondReq = await response.text();
                         const $$ = load(secondReq);
@@ -308,9 +286,7 @@ export default class NovelUpdatesBase extends BaseProvider {
                             color: null,
                             countryOfOrigin: $$("div#showlang a").text()?.trim() ?? null,
                             coverImage: $$("div.seriesimg img").attr("src") ?? null,
-                            currentEpisode: null,
                             description: $$("div#editdescription").text()?.trim() ?? null,
-                            duration: null,
                             format: Format.NOVEL,
                             genres: $$("div#seriesgenre a")
                                 .map((_, el) => $$(el).text())
@@ -318,7 +294,6 @@ export default class NovelUpdatesBase extends BaseProvider {
                             popularity: Number($$("b.rlist").text()?.trim() ?? 0) * 2,
                             rating: Number($$("h5.seriesother span.uvotes").text()?.split(" /")[0]?.substring(1) ?? 0) * 2,
                             relations: [],
-                            season: Season.UNKNOWN,
                             status: $$("div#editstatus").text()?.includes("Complete") ? MediaStatus.FINISHED : MediaStatus.RELEASING,
                             synonyms,
                             tags: $$("div#showtags a")
@@ -331,7 +306,6 @@ export default class NovelUpdatesBase extends BaseProvider {
                             },
                             totalChapters: isNaN(Number($$("div#editstatus").text()?.split(" / ")[1]?.split(" Chapters")[0]?.trim())) ? null : Number($$("div#editstatus").text()?.split(" / ")[1]?.split(" Chapters")[0]?.trim()),
                             totalVolumes: isNaN(Number($$("div#editstatus").text()?.split(" / ")[0].split(" Volumes")[0]?.trim())) ? null : Number($$("div#editstatus").text()?.split(" / ")[0].split(" Volumes")[0]?.trim()),
-                            trailer: null,
                             type: Type.MANGA,
                             year,
                             publisher: $$("div#showopublisher a").text(),

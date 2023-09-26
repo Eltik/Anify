@@ -42,7 +42,7 @@ export const get = async (id: string): Promise<Anime | Manga | undefined> => {
                 artwork: JSON.parse(anime.artwork),
                 characters: JSON.parse(anime.characters),
             });
-            
+
             return parsedAnime as unknown as Anime;
         } catch (e) {
             return undefined;
