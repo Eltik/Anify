@@ -1,54 +1,56 @@
 import { db } from "../..";
 import { Type } from "../../../types/enums";
-import { Anime, AnimeInfo, Manga, MangaInfo } from "../../../types/types";
+import { Anime, AnimeInfo, Db, Manga, MangaInfo } from "../../../types/types";
 
 export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: AnimeInfo[] | MangaInfo[], top: AnimeInfo[] | MangaInfo[], seasonal: AnimeInfo[] | MangaInfo[], fields: string[]) => {
     // Create a function to sort media by id
     const sortMediaById = (mediaArray: Anime[] | Manga[], ids: string[]) => {
-        return ids.map((id) => (mediaArray as any[]).find((media: Anime | Manga) => String(media.id) === id));
+        return ids.map((id) => mediaArray.find((media: Anime | Manga) => media.id === id));
     };
 
     // Fetch all media based on their types
     const fetchMediaByType = async (type: Type, ids: string[]) => {
-        return ((await db.query(`SELECT * FROM ${type === Type.ANIME ? "anime" : "manga"} WHERE id IN (${ids.map((id) => `'${id}'`).join(", ")}) ORDER BY title->>'english' ASC`)).all() as Anime[] | Manga[])
+        return db
+            .query<Db<Anime> | Db<Manga>, []>(`SELECT * FROM ${type === Type.ANIME ? "anime" : "manga"} WHERE id IN (${ids.map((id) => `'${id}'`).join(", ")}) ORDER BY title->>'english' ASC`)
+            .all()
             .map((media) => {
                 if (media.type === Type.ANIME) {
                     try {
-                        Object.assign(media, {
-                            title: JSON.parse((media as any).title),
-                            season: (media as any).season.replace(/"/g, ""),
-                            mappings: JSON.parse((media as any).mappings),
-                            synonyms: JSON.parse((media as any).synonyms),
-                            rating: JSON.parse((media as any).rating),
-                            popularity: JSON.parse((media as any).popularity),
-                            relations: JSON.parse((media as any).relations),
-                            genres: JSON.parse((media as any).genres),
-                            tags: JSON.parse((media as any).tags),
-                            episodes: JSON.parse((media as any).episodes),
-                            artwork: JSON.parse((media as any).artwork),
-                            characters: JSON.parse((media as any).characters),
+                        let parsedAnime = Object.assign(media, {
+                            title: JSON.parse(media.title),
+                            season: media.season.replace(/"/g, ""),
+                            mappings: JSON.parse(media.mappings),
+                            synonyms: JSON.parse(media.synonyms),
+                            rating: JSON.parse(media.rating),
+                            popularity: JSON.parse(media.popularity),
+                            relations: JSON.parse(media.relations),
+                            genres: JSON.parse(media.genres),
+                            tags: JSON.parse(media.tags),
+                            episodes: JSON.parse(media.episodes),
+                            artwork: JSON.parse(media.artwork),
+                            characters: JSON.parse(media.characters),
                         });
-                        return media as Anime;
+                        return parsedAnime as unknown as Anime;
                     } catch (e) {
                         return undefined;
                     }
                 } else {
                     try {
-                        Object.assign(media, {
-                            title: JSON.parse((media as any).title),
-                            mappings: JSON.parse((media as any).mappings),
-                            synonyms: JSON.parse((media as any).synonyms),
-                            rating: JSON.parse((media as any).rating),
-                            popularity: JSON.parse((media as any).popularity),
-                            relations: JSON.parse((media as any).relations),
-                            genres: JSON.parse((media as any).genres),
-                            tags: JSON.parse((media as any).tags),
-                            chapters: JSON.parse((media as any).chapters),
-                            artwork: JSON.parse((media as any).artwork),
-                            characters: JSON.parse((media as any).characters),
+                        let parsedManga = Object.assign(media, {
+                            title: JSON.parse(media.title),
+                            mappings: JSON.parse(media.mappings),
+                            synonyms: JSON.parse(media.synonyms),
+                            rating: JSON.parse(media.rating),
+                            popularity: JSON.parse(media.popularity),
+                            relations: JSON.parse(media.relations),
+                            genres: JSON.parse(media.genres),
+                            tags: JSON.parse(media.tags),
+                            chapters: JSON.parse(media.chapters),
+                            artwork: JSON.parse(media.artwork),
+                            characters: JSON.parse(media.characters),
                         });
 
-                        return media as Manga;
+                        return parsedManga as unknown as Manga;
                     } catch (e) {
                         return undefined;
                     }
@@ -102,6 +104,7 @@ export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: Ani
             // Delete fields that don't exist in the fields array
             Object.keys(media).forEach((key) => {
                 if (!fields.includes(key)) {
+                    // @ts-ignore we know key can be used to index media since its from object.keys(media)
                     delete media[key];
                 }
             });

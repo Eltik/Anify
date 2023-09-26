@@ -29,7 +29,7 @@ export type Anime = {
     popularity: { [key: string]: number } | null;
     averageRating?: number;
     averagePopularity?: number;
-    type: Type;
+    type: Type.ANIME;
     genres: Genres[];
     format: Format;
     relations: Relations[];
@@ -71,7 +71,7 @@ export type Manga = {
     averageRating?: number;
     averagePopularity?: number;
     genres: Genres[];
-    type: Type;
+    type: Type.MANGA;
     format: Format;
     relations: Relations[];
     publisher: string | null;
