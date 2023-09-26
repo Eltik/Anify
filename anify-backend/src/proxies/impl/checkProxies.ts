@@ -9,6 +9,7 @@ const toCheck: string[] = [];
 export async function checkCorsProxies(): Promise<string[]> {
     const goodIps: string[] = [];
     console.log(colors.yellow("Importing proxies... Please note that reading the proxies file may take a while."));
+
     if (toCheck.length === 0) {
         const file = Bun.file("./proxies.json");
         if (await file.exists()) {
@@ -21,7 +22,7 @@ export async function checkCorsProxies(): Promise<string[]> {
                 const url = `http://${ip}:${port}`;
                 toCheck.push(url);
             }
-            console.log(colors.green("Finished importing current proxies."));
+            console.log(colors.green(`Finished importing ${colors.yellow(toCheck.length + "")} current proxies.`));
         }
     }
     console.log(colors.yellow("Checking proxies..."));
@@ -63,10 +64,24 @@ export async function checkCorsProxies(): Promise<string[]> {
 async function makeRequest(ip: IP): Promise<string | undefined> {
     const controller = new AbortController();
 
+    console.log(colors.gray("Checking ") + `${ip.ip}:${ip.port}` + colors.gray(".") + colors.gray(" (Timeout: 5 seconds)"));
+
+    setTimeout(() => {
+        controller.abort();
+    }, 5000);
+
     try {
         const response = await fetch(`http://${ip.ip}:${ip.port}/iscorsneeded`, {
             signal: controller.signal,
-        });
+        }).catch(
+            (err) =>
+                ({
+                    ok: false,
+                    status: 500,
+                    statusText: "Timeout",
+                    json: () => Promise.resolve({ error: err }),
+                }) as Response,
+        );
         if (response.status === 200 && (await response.text()) === "no") {
             let isOkay = true;
 

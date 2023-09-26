@@ -22,7 +22,7 @@ export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga,
 
         if (!novelUpdatesId) return undefined;
 
-        const data = await (await this.request(`${this.url}/series/${novelUpdatesId}`, { headers: { Cookie: "_ga=;" } })).text();
+        const data = await (await this.request(`${this.url}/series/${novelUpdatesId}`, { headers: { Cookie: "_ga=;" } }, true)).text();
         const $$ = load(data);
 
         const synonyms = $$("div#editassociated").html()?.split("<br>") ?? [];

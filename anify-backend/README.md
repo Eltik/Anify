@@ -92,9 +92,9 @@ $ bun run build
 ```
 
 ### Crawl Anime/Manga/Light Novels
-Crawls through a list of IDs and populates the database. Will take a long time to complete.
+Crawls through a list of IDs and populates the database. Will take a long time to complete. Arguments can be `manga`, `anime`, or `novel` for crawling specific types of media.
 ```bash
-$ bun run crawl
+$ bun run crawl ("manga" / "anime" / "novel")
 ```
 
 ### Scrape CORS Proxies

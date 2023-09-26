@@ -12,6 +12,7 @@ import { get } from "../database/impl/fetch/get";
 import { wait } from "../helper";
 
 export const crawl = async (type: Type, formats: Format[]): Promise<void> => {
+    console.log(colors.green(`Crawling ${type.toLowerCase()}s with formats ${formats.join(", ")}...`));
     await before();
 
     const provider = BASE_PROVIDERS.map((provider) => {
@@ -88,4 +89,5 @@ async function before() {
     queues.createEntry.start();
 }
 
-crawl(Type.ANIME, [Format.TV, Format.MOVIE, Format.OVA, Format.ONA, Format.SPECIAL, Format.MUSIC]);
+const type = process.argv.slice(2)?.toString()?.toLowerCase() ?? "anime";
+crawl(type === "anime" ? Type.ANIME : type === "manga" ? Type.MANGA : Type.ANIME, type === "anime" ? [Format.TV, Format.TV_SHORT, Format.MOVIE, Format.OVA, Format.ONA, Format.SPECIAL, Format.MUSIC] : type === "manga" ? [Format.MANGA, Format.ONE_SHOT] : type === "novel" ? [Format.NOVEL] : [Format.TV, Format.TV_SHORT, Format.MOVIE, Format.OVA, Format.ONA, Format.SPECIAL, Format.MUSIC]);

@@ -111,8 +111,7 @@ export default class NovelUpdates extends MangaProvider {
                     },
                     redirect: "follow",
                 },
-                // Temporarily disable proxying requests to novelupdates
-                // true
+                true,
             )
         ).text();
 
