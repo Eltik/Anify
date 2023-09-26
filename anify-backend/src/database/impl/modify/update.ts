@@ -72,21 +72,21 @@ export const update = async (data: Anime | Manga) => {
 
     if (data.type === Type.ANIME) {
         Object.assign(params, {
-            $trailer: (data as Anime).trailer,
-            $season: JSON.stringify((data as Anime).season),
-            $currentEpisode: (data as Anime).currentEpisode,
-            $duration: (data as Anime).duration,
-            $totalEpisodes: (data as Anime).totalEpisodes,
-            $episodes: JSON.stringify((data as Anime).episodes),
+            $trailer: data.trailer,
+            $season: JSON.stringify(data.season),
+            $currentEpisode: data.currentEpisode,
+            $duration: data.duration,
+            $totalEpisodes: data.totalEpisodes,
+            $episodes: JSON.stringify(data.episodes),
         });
     } else {
         Object.assign(params, {
-            $totalChapters: (data as Manga).totalChapters,
-            $totalVolumes: (data as Manga).totalVolumes,
-            $chapters: JSON.stringify((data as Manga).chapters),
+            $totalChapters: data.totalChapters,
+            $totalVolumes: data.totalVolumes,
+            $chapters: JSON.stringify(data.chapters),
         });
     }
 
-    const update = await db.prepare(query).run(params);
+    const update = db.prepare(query).run(params);
     return update;
 };

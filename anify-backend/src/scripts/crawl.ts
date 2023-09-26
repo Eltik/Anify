@@ -14,7 +14,7 @@ import { wait } from "../helper";
 export const crawl = async (type: Type, formats: Format[]): Promise<void> => {
     await before();
 
-    const provider = await BASE_PROVIDERS.map((provider) => {
+    const provider = BASE_PROVIDERS.map((provider) => {
         if (provider.formats?.includes(formats[0])) {
             return provider;
         } else {

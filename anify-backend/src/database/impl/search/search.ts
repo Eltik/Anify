@@ -1,8 +1,10 @@
 import { db } from "../..";
 import { Format, Type } from "../../../types/enums";
-import { Anime, Manga } from "../../../types/types";
+import { Anime, Db, Manga } from "../../../types/types";
 
-export const search = async (query: string, type: Type, formats: Format[], page: number, perPage: number) => {
+type ReturnType<T> = T extends "ANIME" ? Anime[] : Manga[];
+
+export const search = async <T extends "ANIME" | "MANGA">(query: string, type: T, formats: Format[], page: number, perPage: number): Promise<ReturnType<T>> => {
     const skip = page > 0 ? perPage * (page - 1) : 0;
     const where = `
         WHERE
@@ -19,41 +21,42 @@ export const search = async (query: string, type: Type, formats: Format[], page:
         ${formats?.length > 0 ? `AND "format" IN (${formats.map((f) => `'${f}'`).join(", ")})` : ""}
     `;
 
-    const results = (await db.query(`SELECT * FROM ${type === Type.ANIME ? "anime" : "manga"} ${where} ORDER BY title->>'english' ASC LIMIT ${perPage} OFFSET ${skip}`).all({
+    const results = db.query<Db<Anime> | Db<Manga>, { $query: string }>(`SELECT * FROM ${type === Type.ANIME ? "anime" : "manga"} ${where} ORDER BY title->>'english' ASC LIMIT ${perPage} OFFSET ${skip}`).all({
         $query: query,
-    })) as Anime[] | Manga[];
-    return results.map((data) => {
+    });
+
+    let parsedResults = results.map((data) => {
         try {
             if (data.type === Type.ANIME) {
                 Object.assign(data, {
-                    title: JSON.parse((data as any).title),
-                    season: (data as any).season.replace(/"/g, ""),
-                    mappings: JSON.parse((data as any).mappings),
-                    synonyms: JSON.parse((data as any).synonyms),
-                    rating: JSON.parse((data as any).rating),
-                    popularity: JSON.parse((data as any).popularity),
-                    relations: JSON.parse((data as any).relations),
-                    genres: JSON.parse((data as any).genres),
-                    tags: JSON.parse((data as any).tags),
-                    episodes: JSON.parse((data as any).episodes),
-                    artwork: JSON.parse((data as any).artwork),
-                    characters: JSON.parse((data as any).characters),
+                    title: JSON.parse(data.title),
+                    season: data.season.replace(/"/g, ""),
+                    mappings: JSON.parse(data.mappings),
+                    synonyms: JSON.parse(data.synonyms),
+                    rating: JSON.parse(data.rating),
+                    popularity: JSON.parse(data.popularity),
+                    relations: JSON.parse(data.relations),
+                    genres: JSON.parse(data.genres),
+                    tags: JSON.parse(data.tags),
+                    episodes: JSON.parse(data.episodes),
+                    artwork: JSON.parse(data.artwork),
+                    characters: JSON.parse(data.characters),
                 });
 
                 return data;
             } else {
                 Object.assign(data, {
-                    title: JSON.parse((data as any).title),
-                    mappings: JSON.parse((data as any).mappings),
-                    synonyms: JSON.parse((data as any).synonyms),
-                    rating: JSON.parse((data as any).rating),
-                    popularity: JSON.parse((data as any).popularity),
-                    relations: JSON.parse((data as any).relations),
-                    genres: JSON.parse((data as any).genres),
-                    tags: JSON.parse((data as any).tags),
-                    chapters: JSON.parse((data as any).chapters),
-                    artwork: JSON.parse((data as any).artwork),
-                    characters: JSON.parse((data as any).characters),
+                    title: JSON.parse(data.title),
+                    mappings: JSON.parse(data.mappings),
+                    synonyms: JSON.parse(data.synonyms),
+                    rating: JSON.parse(data.rating),
+                    popularity: JSON.parse(data.popularity),
+                    relations: JSON.parse(data.relations),
+                    genres: JSON.parse(data.genres),
+                    tags: JSON.parse(data.tags),
+                    chapters: JSON.parse(data.chapters),
+                    artwork: JSON.parse(data.artwork),
+                    characters: JSON.parse(data.characters),
                 });
 
                 return data;
@@ -62,4 +65,6 @@ export const search = async (query: string, type: Type, formats: Format[], page:
             return undefined;
         }
     });
+
+    return parsedResults as unknown as ReturnType<T>;
 };

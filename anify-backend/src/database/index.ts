@@ -87,8 +87,8 @@ export const init = async () => {
     );
     `;
 
-    await db.query(anime).run();
-    await db.query(manga).run();
-    await db.query(skipTimes).run();
-    await db.query(apiKey).run();
+    db.query(anime).run();
+    db.query(manga).run();
+    db.query(skipTimes).run();
+    db.query(apiKey).run();
 };

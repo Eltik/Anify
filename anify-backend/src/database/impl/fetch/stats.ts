@@ -1,5 +1,4 @@
 import { db } from "../..";
-import { Anime, Manga } from "../../../types/types";
 
 export const stats = async (): Promise<{ anime: number; manga: number; novels: number; skipTimes: number; apiKeys: number } | undefined> => {
     const anime = await db.query("SELECT COUNT(*) FROM anime").get();
