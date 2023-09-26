@@ -100,6 +100,7 @@ const route = {
     method: "GET",
     path: "/sources",
     handler,
+    rateLimit: 60,
 };
 
 export default route;

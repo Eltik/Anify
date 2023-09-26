@@ -10,7 +10,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const cached = await redis.get(`stats`);
         if (cached) {
-            return new Response(JSON.stringify(cached), {
+            return new Response(cached, {
                 status: 200,
                 headers: { "Content-Type": "application/json" },
             });
@@ -42,6 +42,7 @@ export const handler = async (req: Request): Promise<Response> => {
 const route = {
     path: "/stats",
     handler,
+    rateLimit: 60,
 };
 
 export default route;

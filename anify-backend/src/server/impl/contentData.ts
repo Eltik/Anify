@@ -50,6 +50,7 @@ export const handler = async (req: Request): Promise<Response> => {
 const route = {
     path: "/content-metadata",
     handler,
+    rateLimit: 50,
 };
 
 export default route;

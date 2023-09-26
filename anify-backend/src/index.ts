@@ -8,7 +8,9 @@ import { init } from "./database";
 import emitter, { Events } from "./lib";
 import { get } from "./database/impl/fetch/get";
 import queues from "./worker";
-import { start } from "./server";
+import { redis, start } from "./server";
+
+import colors from "colors";
 
 before().then(async (_) => {
     await start();

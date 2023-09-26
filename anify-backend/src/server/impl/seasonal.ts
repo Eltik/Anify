@@ -73,6 +73,7 @@ export const handler = async (req: Request): Promise<Response> => {
 const route = {
     path: "/seasonal",
     handler,
+    rateLimit: 35,
 };
 
 export default route;

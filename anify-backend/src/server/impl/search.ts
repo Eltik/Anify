@@ -72,6 +72,7 @@ export const handler = async (req: Request): Promise<Response> => {
 const route = {
     path: "/search",
     handler,
+    rateLimit: 30,
 };
 
 export default route;

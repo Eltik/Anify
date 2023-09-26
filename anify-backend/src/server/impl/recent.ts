@@ -60,6 +60,7 @@ export const handler = async (req: Request): Promise<Response> => {
 const route = {
     path: "/recent",
     handler,
+    rateLimit: 60,
 };
 
 export default route;

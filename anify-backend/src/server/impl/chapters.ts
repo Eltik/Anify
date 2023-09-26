@@ -55,6 +55,7 @@ export const handler = async (req: Request): Promise<Response> => {
 const route = {
     path: "/chapters",
     handler,
+    rateLimit: 40,
 };
 
 export default route;
