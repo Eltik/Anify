@@ -250,3 +250,11 @@ type FileData = {
     url: string;
     yourfile: boolean;
 };
+
+export type Key = {
+    id: string;
+    key: string;
+    requestCount: number;
+    createdAt: number;
+    updatedAt: number;
+};

@@ -9,6 +9,8 @@ export default class TMDB extends InformationProvider<Anime | Manga, AnimeInfo |
     private api = "https://api.themoviedb.org/3";
     private apiKey = "5201b54eb0968700e693a30576d7d4dc";
 
+    public needsProxy: boolean = true;
+
     override get priorityArea(): MediaInfoKeys[] {
         return ["description"];
     }
