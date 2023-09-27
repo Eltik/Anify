@@ -25,15 +25,11 @@ export default class TheTVDB extends MetaProvider {
 
         const formattedType = format === Format.TV || Format.TV_SHORT || Format.SPECIAL ? "series" : format === Format.MOVIE ? "movie" : undefined;
 
-        const data = await this.request(
-            `${this.tvdbApiUrl}/search?query=${encodeURIComponent(query)}${year && !isSeason ? `&year=${year}` : ""}${formattedType ? `&type=${formattedType}` : ""}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+        const data = await this.request(`${this.tvdbApiUrl}/search?query=${encodeURIComponent(query)}${year && !isSeason ? `&year=${year}` : ""}${formattedType ? `&type=${formattedType}` : ""}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
             },
-            false,
-        );
+        });
 
         if (data?.ok) {
             const searchData: Search[] = (await data.json()).data;
@@ -57,19 +53,15 @@ export default class TheTVDB extends MetaProvider {
     }
 
     private async getToken(key: string): Promise<string | undefined> {
-        const data: Response | undefined = await this.request(
-            `${this.tvdbApiUrl}/login`,
-            {
-                body: JSON.stringify({
-                    apikey: `${key}`,
-                }),
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+        const data: Response | undefined = await this.request(`${this.tvdbApiUrl}/login`, {
+            body: JSON.stringify({
+                apikey: `${key}`,
+            }),
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
             },
-            false,
-        ).catch((err) => {
+        }).catch((err) => {
             console.error(err);
             return undefined;
         });

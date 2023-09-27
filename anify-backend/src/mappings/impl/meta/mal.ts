@@ -8,6 +8,8 @@ export default class MALMeta extends MetaProvider {
 
     private api = "https://api.jikan.moe/v4";
 
+    public needsProxy: boolean = true;
+
     override rateLimit = 500;
     override formats: Format[] = [Format.TV, Format.MOVIE, Format.ONA, Format.SPECIAL, Format.TV_SHORT, Format.OVA, Format.MANGA, Format.ONE_SHOT, Format.NOVEL];
 
@@ -15,8 +17,8 @@ export default class MALMeta extends MetaProvider {
         const results: Result[] = [];
 
         try {
-            const anime = await (await this.request(`${this.api}/anime?q=${encodeURIComponent(query)}&sfw`, {}, true)).json();
-            const manga = await (await this.request(`${this.api}/manga?q=${encodeURIComponent(query)}&sfw`, {}, true)).json();
+            const anime = await (await this.request(`${this.api}/anime?q=${encodeURIComponent(query)}&sfw`)).json();
+            const manga = await (await this.request(`${this.api}/manga?q=${encodeURIComponent(query)}&sfw`)).json();
 
             for (const data of anime.data) {
                 results.push({

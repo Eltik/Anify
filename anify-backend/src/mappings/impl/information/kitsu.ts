@@ -8,6 +8,8 @@ export default class Kitsu extends InformationProvider<Anime | Manga, AnimeInfo 
 
     private kitsuApiUrl = "https://kitsu.io/api/edge";
 
+    public needsProxy: boolean = true;
+
     override get priorityArea(): MediaInfoKeys[] {
         return ["coverImage"];
     }
@@ -24,13 +26,13 @@ export default class Kitsu extends InformationProvider<Anime | Manga, AnimeInfo 
         if (!kitsuId) return undefined;
 
         try {
-            const kitsuResponse: KitsuResponse = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}`, {}, true)).json();
+            const kitsuResponse: KitsuResponse = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}`)).json();
 
             const attributes = kitsuResponse?.data?.attributes;
 
             if (!attributes) return undefined;
 
-            const kitsuGenre = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}/genres`, {}, true)).json();
+            const kitsuGenre = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}/genres`)).json();
             const genres = kitsuGenre?.data;
 
             const artwork: Artwork[] = [];

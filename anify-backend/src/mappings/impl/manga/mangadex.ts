@@ -8,6 +8,8 @@ export default class MangaDex extends MangaProvider {
     override id = "mangadex";
     override url = "https://mangadex.org";
 
+    public needsProxy: boolean = true;
+
     override formats: Format[] = [Format.MANGA, Format.ONE_SHOT];
 
     private api = "https://api.mangadex.org";
@@ -28,8 +30,6 @@ export default class MangaDex extends MangaProvider {
             uri.searchParams.append("includes[]", "cover_art");
 
             const data = await (await this.request(uri.href)).json();
-            // API rate limit
-            await wait(250);
 
             mangaList = [...mangaList, ...data.data];
         }
@@ -82,8 +82,6 @@ export default class MangaDex extends MangaProvider {
                 run = false;
                 break;
             }
-
-            await wait(250);
 
             const data = await request.json();
 
@@ -142,8 +140,6 @@ export default class MangaDex extends MangaProvider {
         if (!req) {
             return [];
         }
-
-        await wait(250);
 
         const data = await req.json();
 

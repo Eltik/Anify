@@ -8,6 +8,8 @@ export default class AniListBase extends BaseProvider {
 
     override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
 
+    public needsProxy: boolean = true;
+
     private api = "https://graphql.anilist.co";
 
     override async search(query: string, type: Type, formats: Format[], page: number, perPage: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
@@ -37,19 +39,15 @@ export default class AniListBase extends BaseProvider {
             },
         };
 
-        const req = await this.request(
-            this.api,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    origin: "graphql.anilist.co",
-                },
-                body: JSON.stringify(aniListArgs),
+        const req = await this.request(this.api, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                origin: "graphql.anilist.co",
             },
-            true,
-        );
+            body: JSON.stringify(aniListArgs),
+        });
         const json = await req?.json();
         const media = json.data.Page.media;
 
@@ -260,19 +258,15 @@ export default class AniListBase extends BaseProvider {
 
         if (tags.length === 0) delete aniListArgs.variables.tags;
 
-        const req = await this.request(
-            this.api,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    origin: "graphql.anilist.co",
-                },
-                body: JSON.stringify(aniListArgs),
+        const req = await this.request(this.api, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                origin: "graphql.anilist.co",
             },
-            true,
-        );
+            body: JSON.stringify(aniListArgs),
+        });
         const json = await req?.json();
         const media = json.data.Page.media;
 
@@ -464,22 +458,18 @@ export default class AniListBase extends BaseProvider {
             id: id,
         };
 
-        const req = await this.request(
-            this.api,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    origin: "graphql.anilist.co",
-                },
-                body: JSON.stringify({
-                    query,
-                    variables,
-                }),
+        const req = await this.request(this.api, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                origin: "graphql.anilist.co",
             },
-            true,
-        );
+            body: JSON.stringify({
+                query,
+                variables,
+            }),
+        });
         const data: Media = (await req.json()).data?.Media;
         if (!data) return undefined;
 
@@ -642,18 +632,14 @@ export default class AniListBase extends BaseProvider {
         };
 
         const req = await (
-            await this.request(
-                this.api,
-                {
-                    body: JSON.stringify(aniListArgs),
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Origin: "https://anilist.co",
-                    },
+            await this.request(this.api, {
+                body: JSON.stringify(aniListArgs),
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Origin: "https://anilist.co",
                 },
-                true,
-            )
+            })
         ).json();
 
         const data = req?.data;
@@ -894,22 +880,18 @@ export default class AniListBase extends BaseProvider {
 
     private async executeGraphQLQuery(query: string) {
         const variables = {};
-        return await this.request(
-            this.api,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    origin: "graphql.anilist.co",
-                },
-                body: JSON.stringify({
-                    query,
-                    variables,
-                }),
+        return await this.request(this.api, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                origin: "graphql.anilist.co",
             },
-            true,
-        ).catch((err) => {
+            body: JSON.stringify({
+                query,
+                variables,
+            }),
+        }).catch((err) => {
             console.error(err);
             return null;
         });

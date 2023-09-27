@@ -10,6 +10,7 @@ export default abstract class BaseProvider {
 
     public providerType: ProviderType = ProviderType.BASE;
     public customProxy: string | undefined;
+    public needsProxy: boolean = false;
 
     async search(query: string, type: Type, formats: Format[], page: number, perPage: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         return undefined;
@@ -35,7 +36,12 @@ export default abstract class BaseProvider {
         return undefined;
     }
 
-    async request(url: string, config: RequestInit = {}, proxyRequest = true): Promise<Response> {
+    async request(url: string, config: RequestInit = {}, proxyRequest?: boolean): Promise<Response> {
+        if (proxyRequest === undefined && this.needsProxy) proxyRequest = true;
+        if (proxyRequest !== undefined && proxyRequest === false && this.needsProxy) proxyRequest = false;
+        if (proxyRequest === undefined && !this.needsProxy) proxyRequest = false;
+        if (proxyRequest !== undefined && proxyRequest === true && !this.needsProxy) proxyRequest = true;
+
         return Http.request(url, config, proxyRequest, 0, this.customProxy);
     }
 }

@@ -6,6 +6,8 @@ export default class AniListMeta extends MetaProvider {
     override id = "anilist";
     override url = "https://anilist.co";
 
+    public needsProxy: boolean = true;
+
     override rateLimit = 500;
     override formats: Format[] = [Format.TV, Format.MOVIE, Format.ONA, Format.SPECIAL, Format.TV_SHORT, Format.OVA, Format.MANGA, Format.ONE_SHOT, Format.NOVEL];
 
@@ -40,19 +42,15 @@ export default class AniListMeta extends MetaProvider {
                 perPage: 15,
             },
         };
-        const req = await this.request(
-            this.api,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    origin: "graphql.anilist.co",
-                },
-                body: JSON.stringify(aniListArgs),
+        const req = await this.request(this.api, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                origin: "graphql.anilist.co",
             },
-            true,
-        );
+            body: JSON.stringify(aniListArgs),
+        });
         const json = await req?.json();
         const media = json.data.Page.media;
 
@@ -69,53 +67,6 @@ export default class AniListMeta extends MetaProvider {
         });
 
         return results;
-    }
-
-    public async batchRequest(queries: string[], maxQueries: number): Promise<any[]> {
-        const results: any[] = [];
-
-        const processBatch = async (batch: string[]) => {
-            const currentQuery = `{${batch.join("\n")}}`;
-            const result = await this.executeGraphQLQuery(currentQuery);
-            if (result) {
-                const data = await result.json();
-                results.push(...Object.values(data));
-            }
-        };
-
-        const batchedQueries: string[][] = [];
-        for (let i = 0; i < queries.length; i += maxQueries) {
-            batchedQueries.push(queries.slice(i, i + maxQueries));
-        }
-
-        for await (const batch of batchedQueries) {
-            await processBatch(batch);
-        }
-
-        return results;
-    }
-
-    private async executeGraphQLQuery(query: string) {
-        const variables = {};
-        return await this.request(
-            this.api,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    origin: "graphql.anilist.co",
-                },
-                body: JSON.stringify({
-                    query,
-                    variables,
-                }),
-            },
-            true,
-        ).catch((err) => {
-            console.error(err);
-            return null;
-        });
     }
 
     public query = `

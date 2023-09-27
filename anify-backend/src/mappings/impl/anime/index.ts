@@ -11,6 +11,7 @@ export default abstract class AnimeProvider {
     public providerType: ProviderType = ProviderType.ANIME;
     public customProxy: string | undefined;
     public preferredTitle: "english" | "romaji" | "native" = "english";
+    public needsProxy: boolean = false;
 
     async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         return undefined;
@@ -28,7 +29,12 @@ export default abstract class AnimeProvider {
         return undefined;
     }
 
-    async request(url: string, config: RequestInit = {}, proxyRequest = false): Promise<Response> {
+    async request(url: string, config: RequestInit = {}, proxyRequest?: boolean): Promise<Response> {
+        if (proxyRequest === undefined && this.needsProxy) proxyRequest = true;
+        if (proxyRequest !== undefined && proxyRequest === false && this.needsProxy) proxyRequest = false;
+        if (proxyRequest === undefined && !this.needsProxy) proxyRequest = false;
+        if (proxyRequest !== undefined && proxyRequest === true && !this.needsProxy) proxyRequest = true;
+
         return Http.request(url, config, proxyRequest, 0, this.customProxy);
     }
 

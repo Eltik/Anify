@@ -9,6 +9,8 @@ export default class ManagDexBase extends BaseProvider {
 
     override formats: Format[] = [Format.MANGA, Format.ONE_SHOT];
 
+    public needsProxy: boolean = true;
+
     private api = "https://api.mangadex.org";
 
     override async search(query: string, type: Type, formats: Format[], page: number, perPage: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
@@ -27,8 +29,6 @@ export default class ManagDexBase extends BaseProvider {
             uri.searchParams.append("includes[]", "cover_art");
 
             const data = await (await this.request(uri.href)).json();
-            // API rate limit
-            await wait(250);
 
             mangaList = [...mangaList, ...data.data];
         }
@@ -98,7 +98,7 @@ export default class ManagDexBase extends BaseProvider {
         const tagList: { name: string; uid: string }[] = [];
 
         if ((Array.isArray(tags) && tags.length > 0) || (Array.isArray(tagsExcluded) && tagsExcluded.length > 0)) {
-            const data = await (await this.request(`${this.api}/manga/tag`, {}, true)).json();
+            const data = await (await this.request(`${this.api}/manga/tag`)).json();
 
             for (const item of data) {
                 if (item.attributes?.group === "theme") {
@@ -168,8 +168,6 @@ export default class ManagDexBase extends BaseProvider {
             }
 
             const data = await (await this.request(uri.href)).json();
-            // API rate limit
-            await wait(250);
 
             mangaList = [...mangaList, ...data.data];
         }
@@ -231,8 +229,8 @@ export default class ManagDexBase extends BaseProvider {
 
     override async getMedia(id: string): Promise<AnimeInfo | MangaInfo | undefined> {
         try {
-            const data = (await (await this.request(`${this.api}/manga/${id}`, {}, true)).json()).data;
-            const covers = await (await this.request(`${this.api}/cover?limit=100&manga[]=${id}`, {}, true)).json();
+            const data = (await (await this.request(`${this.api}/manga/${id}`)).json()).data;
+            const covers = await (await this.request(`${this.api}/cover?limit=100&manga[]=${id}`)).json();
 
             const formatString: string = data.type.toUpperCase();
             const format: Format = formatString === "ADAPTATION" ? Format.MANGA : Formats.includes(formatString as Format) ? (formatString as Format) : Format.MANGA;
@@ -291,22 +289,22 @@ export default class ManagDexBase extends BaseProvider {
         const day = String(currentDate.getDate()).padStart(2, "0");
         const createdAtParam = `${year}-${month}-${day}T00:00:00`;
 
-        const trending = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true&createdAtSince=${createdAtParam}`, {}, true)).json().catch(() => {
+        const trending = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true&createdAtSince=${createdAtParam}`)).json().catch(() => {
             return {
                 data: [],
             };
         });
-        const popular = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`, {}, true)).json().catch(() => {
+        const popular = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`)).json().catch(() => {
             return {
                 data: [],
             };
         });
-        const top = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[rating]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`, {}, true)).json().catch(() => {
+        const top = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[rating]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`)).json().catch(() => {
             return {
                 data: [],
             };
         });
-        const seasonalReq = await (await this.request(`${this.api}/list/1b9f88f8-9880-464d-9ed9-59b7e36392e2?includes[]=user`, {}, true)).json().catch(() => {
+        const seasonalReq = await (await this.request(`${this.api}/list/1b9f88f8-9880-464d-9ed9-59b7e36392e2?includes[]=user`)).json().catch(() => {
             return {
                 data: [],
             };
@@ -318,7 +316,7 @@ export default class ManagDexBase extends BaseProvider {
                 seasonalIDs.push(item.id);
             }
         }
-        const seasonal = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&ids[]=${seasonalIDs.join("&ids[]=")}`, {}, true)).json().catch(() => {
+        const seasonal = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&ids[]=${seasonalIDs.join("&ids[]=")}`)).json().catch(() => {
             return {
                 data: [],
             };

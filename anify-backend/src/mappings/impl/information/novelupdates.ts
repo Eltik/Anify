@@ -1,11 +1,13 @@
 import { load } from "cheerio";
 import InformationProvider from ".";
-import { Format, Genres, MediaStatus, Season, Type } from "../../../types/enums";
+import { Format, Genres, MediaStatus, Type } from "../../../types/enums";
 import { Anime, AnimeInfo, Manga, MangaInfo, MediaInfoKeys } from "../../../types/types";
 
 export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga, AnimeInfo | MangaInfo> {
     override id = "novelupdates";
     override url = "https://www.novelupdates.com";
+
+    public needsProxy: boolean = true;
 
     override get priorityArea(): MediaInfoKeys[] {
         return [];
@@ -22,7 +24,7 @@ export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga,
 
         if (!novelUpdatesId) return undefined;
 
-        const data = await (await this.request(`${this.url}/series/${novelUpdatesId}`, { headers: { Cookie: "_ga=;" } }, true)).text();
+        const data = await (await this.request(`${this.url}/series/${novelUpdatesId}`, { headers: { Cookie: "_ga=;" } })).text();
         const $$ = load(data);
 
         const synonyms = $$("div#editassociated").html()?.split("<br>") ?? [];

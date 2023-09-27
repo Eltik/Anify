@@ -10,6 +10,7 @@ export default abstract class MangaProvider {
 
     public providerType: ProviderType = ProviderType.MANGA;
     public customProxy: string | undefined;
+    public needsProxy: boolean = false;
     public preferredTitle: "english" | "romaji" | "native" = "english";
 
     async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
@@ -24,7 +25,12 @@ export default abstract class MangaProvider {
         return undefined;
     }
 
-    async request(url: string, config: RequestInit = {}, proxyRequest = false): Promise<Response> {
+    async request(url: string, config: RequestInit = {}, proxyRequest?: boolean): Promise<Response> {
+        if (proxyRequest === undefined && this.needsProxy) proxyRequest = true;
+        if (proxyRequest !== undefined && proxyRequest === false && this.needsProxy) proxyRequest = false;
+        if (proxyRequest === undefined && !this.needsProxy) proxyRequest = false;
+        if (proxyRequest !== undefined && proxyRequest === true && !this.needsProxy) proxyRequest = true;
+
         return Http.request(url, config, proxyRequest, 0, this.customProxy);
     }
 

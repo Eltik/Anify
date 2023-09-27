@@ -7,13 +7,15 @@ export default class AniDBMeta extends MetaProvider {
     override id = "anidb";
     override url = "https://anidb.net";
 
+    public needsProxy: boolean = true;
+
     override rateLimit = 500;
     override formats: Format[] = [Format.TV, Format.MOVIE, Format.ONA, Format.SPECIAL, Format.TV_SHORT, Format.OVA];
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         const results: Result[] = [];
 
-        const data = await (await this.request(`https://anidb.net/search/fulltext/?adb.search=${encodeURIComponent(query)}&do.search=1&entity.animetb=1&field.titles=1`, {}, true)).text();
+        const data = await (await this.request(`https://anidb.net/search/fulltext/?adb.search=${encodeURIComponent(query)}&do.search=1&entity.animetb=1&field.titles=1`)).text();
 
         const $ = load(data);
 

@@ -11,11 +11,13 @@ export default class MangaFire extends MangaProvider {
 
     override formats: Format[] = [Format.MANGA, Format.ONE_SHOT];
 
+    public needsProxy: boolean = true;
+
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         const results: Result[] = [];
 
         try {
-            const data = await (await this.request(`${this.url}/filter?keyword=${encodeURIComponent(query)}${format ? `&type%5B%5D=${format.toLowerCase()}` : ""}${year && year != 0 ? `&year=%5B%5D=${year}` : ""}&sort=recently_updated`, {}, true)).text();
+            const data = await (await this.request(`${this.url}/filter?keyword=${encodeURIComponent(query)}${format ? `&type%5B%5D=${format.toLowerCase()}` : ""}${year && year != 0 ? `&year=%5B%5D=${year}` : ""}&sort=recently_updated`)).text();
 
             const $ = load(data);
 
@@ -28,7 +30,7 @@ export default class MangaFire extends MangaProvider {
                 const id = $(el).find("a").attr("href") ?? "";
 
                 requestPromises.push(
-                    this.request(`${this.url}${id}`, {}, true)
+                    this.request(`${this.url}${id}`)
                         .then(async (response) => {
                             const secondReq = await response.text();
                             const $$ = load(secondReq);
@@ -74,16 +76,12 @@ export default class MangaFire extends MangaProvider {
         const mangaId = match ? match[1] : "";
 
         const data = await (
-            await this.request(
-                `${this.url}/ajax/manga/${mangaId}/chapter/en`,
-                {
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest",
-                        Referer: `${this.url}${id}`,
-                    },
+            await this.request(`${this.url}/ajax/manga/${mangaId}/chapter/en`, {
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    Referer: `${this.url}${id}`,
                 },
-                true,
-            )
+            })
         ).json();
 
         if (data.status !== 200) {

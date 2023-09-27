@@ -9,6 +9,8 @@ export default class NovelUpdatesBase extends BaseProvider {
 
     override formats: Format[] = [Format.NOVEL];
 
+    public needsProxy: boolean = true;
+
     private genreMappings = {
         ACTION: 8,
         ADULT: 280,
@@ -50,16 +52,12 @@ export default class NovelUpdatesBase extends BaseProvider {
     override async search(query: string, type: Type, formats: Format[], page: number, perPage: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         const results: MangaInfo[] = [];
 
-        const searchData = await this.request(
-            `${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444&ge=280&sort=sread&order=desc${page ? `&pg=${page}` : ""}`,
-            {
-                method: "GET",
-                headers: {
-                    Referer: this.url,
-                },
+        const searchData = await this.request(`${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444&ge=280&sort=sread&order=desc${page ? `&pg=${page}` : ""}`, {
+            method: "GET",
+            headers: {
+                Referer: this.url,
             },
-            true,
-        );
+        });
 
         const data = await searchData.text();
 
@@ -71,7 +69,7 @@ export default class NovelUpdatesBase extends BaseProvider {
             const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split(this.url)[1]?.split("/series/")[1]?.slice(0, -1);
 
             requestPromises.push(
-                this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } }, true)
+                this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } })
                     .then(async (response) => {
                         const secondReq = await response.text();
                         const $$ = load(secondReq);
@@ -130,16 +128,12 @@ export default class NovelUpdatesBase extends BaseProvider {
 
         const excludedGenreNumbers = genresExcluded.map((genre) => this.genreMappings[genre.toUpperCase() as keyof typeof this.genreMappings]).filter((genreNumber) => genreNumber !== undefined);
 
-        const searchData = await this.request(
-            `${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444${genres.length > 0 ? `&gi=${genreNumbers.join(",")}` : ""}&ge=280${genresExcluded.length > 0 ? `,${excludedGenreNumbers.join(",")}` : ""}&sort=sread&order=desc${page ? `&pg=${page}` : ""}`,
-            {
-                method: "GET",
-                headers: {
-                    Referer: this.url,
-                },
+        const searchData = await this.request(`${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444${genres.length > 0 ? `&gi=${genreNumbers.join(",")}` : ""}&ge=280${genresExcluded.length > 0 ? `,${excludedGenreNumbers.join(",")}` : ""}&sort=sread&order=desc${page ? `&pg=${page}` : ""}`, {
+            method: "GET",
+            headers: {
+                Referer: this.url,
             },
-            true,
-        );
+        });
 
         const data = await searchData.text();
 
@@ -151,7 +145,7 @@ export default class NovelUpdatesBase extends BaseProvider {
             const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split(this.url)[1]?.split("/series/")[1]?.slice(0, -1);
 
             requestPromises.push(
-                this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } }, true)
+                this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } })
                     .then(async (response) => {
                         const secondReq = await response.text();
                         const $$ = load(secondReq);
@@ -204,7 +198,7 @@ export default class NovelUpdatesBase extends BaseProvider {
     }
 
     override async getMedia(id: string): Promise<AnimeInfo | MangaInfo | undefined> {
-        const data = await (await this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } }, true)).text();
+        const data = await (await this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } })).text();
         const $$ = load(data);
 
         const synonyms = $$("div#editassociated").html()?.split("<br>") ?? [];
@@ -261,16 +255,12 @@ export default class NovelUpdatesBase extends BaseProvider {
     private async fetchSeasonalData(url: string) {
         const results: MangaInfo[] = [];
 
-        const searchData = await this.request(
-            url,
-            {
-                method: "GET",
-                headers: {
-                    Referer: this.url,
-                },
+        const searchData = await this.request(url, {
+            method: "GET",
+            headers: {
+                Referer: this.url,
             },
-            true,
-        );
+        });
 
         const data = await searchData.text();
 
@@ -282,7 +272,7 @@ export default class NovelUpdatesBase extends BaseProvider {
             const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split(this.url)[1]?.split("/series/")[1]?.slice(0, -1);
 
             requestPromises.push(
-                this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } }, true)
+                this.request(`${this.url}/series/${id}`, { headers: { Cookie: "_ga=;" } })
                     .then(async (response) => {
                         const secondReq = await response.text();
                         const $$ = load(secondReq);

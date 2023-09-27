@@ -8,6 +8,8 @@ export default class KitsuMeta extends MetaProvider {
     override url = "https://kitsu.io";
     override formats: Format[] = [Format.TV, Format.MOVIE, Format.ONA, Format.SPECIAL, Format.TV_SHORT, Format.OVA, Format.MANGA, Format.ONE_SHOT, Format.NOVEL];
 
+    public needsProxy: boolean = true;
+
     private kitsuApiUrl = "https://kitsu.io/api/edge";
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
@@ -15,16 +17,12 @@ export default class KitsuMeta extends MetaProvider {
 
         try {
             const data = await (
-                await this.request(
-                    `${this.kitsuApiUrl}/anime?filter[text]=${encodeURIComponent(query)}`,
-                    {
-                        headers: {
-                            Accept: "application/vnd.api+json",
-                            "Content-Type": "application/vnd.api+json",
-                        },
+                await this.request(`${this.kitsuApiUrl}/anime?filter[text]=${encodeURIComponent(query)}`, {
+                    headers: {
+                        Accept: "application/vnd.api+json",
+                        "Content-Type": "application/vnd.api+json",
                     },
-                    true,
-                )
+                })
             ).json();
 
             if (data.data.length > 0) {
@@ -51,16 +49,12 @@ export default class KitsuMeta extends MetaProvider {
 
         try {
             const data = await (
-                await this.request(
-                    `${this.kitsuApiUrl}/manga?filter[text]=${encodeURIComponent(query)}`,
-                    {
-                        headers: {
-                            Accept: "application/vnd.api+json",
-                            "Content-Type": "application/vnd.api+json",
-                        },
+                await this.request(`${this.kitsuApiUrl}/manga?filter[text]=${encodeURIComponent(query)}`, {
+                    headers: {
+                        Accept: "application/vnd.api+json",
+                        "Content-Type": "application/vnd.api+json",
                     },
-                    true,
-                )
+                })
             ).json();
 
             if (data.data.length > 0) {

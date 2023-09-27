@@ -27,15 +27,11 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
 
         const token = await this.getToken(this.apiKeys[Math.floor(Math.random() * this.apiKeys.length)]);
 
-        const data: Response | undefined = await this.request(
-            `${this.tvdbApiUrl}${tvdbId}/extended`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+        const data: Response | undefined = await this.request(`${this.tvdbApiUrl}${tvdbId}/extended`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
             },
-            false,
-        ).catch(() => {
+        }).catch(() => {
             return undefined;
         });
 
@@ -157,15 +153,11 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
 
         const episodes: Episode[] = [];
 
-        const infoRequest: Response | undefined = await this.request(
-            `${this.tvdbApiUrl}${tvdbId}/extended`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+        const infoRequest: Response | undefined = await this.request(`${this.tvdbApiUrl}${tvdbId}/extended`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
             },
-            false,
-        ).catch(() => {
+        }).catch(() => {
             return undefined;
         });
 
@@ -174,15 +166,11 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
         const infoSeasons = (await infoRequest.json()).data?.seasons;
 
         const seasonRequests = infoSeasons.map((season: any) =>
-            this.request(
-                `${this.tvdbApiUrl}/seasons/${season.id}/extended`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+            this.request(`${this.tvdbApiUrl}/seasons/${season.id}/extended`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
                 },
-                false,
-            ),
+            }),
         );
 
         const seasonResponses = await Promise.all(seasonRequests);
@@ -198,15 +186,11 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
             if (!list) continue;
 
             const translationRequests = list.map((episode: any) =>
-                this.request(
-                    `${this.tvdbApiUrl}/episodes/${episode.id}/translations/eng`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
+                this.request(`${this.tvdbApiUrl}/episodes/${episode.id}/translations/eng`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
                     },
-                    false,
-                ).catch(() => ({
+                }).catch(() => ({
                     json: async () => ({
                         data: {
                             name: episode.name,
@@ -244,19 +228,15 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
     }
 
     private async getToken(key: string): Promise<string | undefined> {
-        const data: Response | undefined = await this.request(
-            `${this.tvdbApiUrl}/login`,
-            {
-                body: JSON.stringify({
-                    apikey: `${key}`,
-                }),
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+        const data: Response | undefined = await this.request(`${this.tvdbApiUrl}/login`, {
+            body: JSON.stringify({
+                apikey: `${key}`,
+            }),
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
             },
-            false,
-        ).catch((err) => {
+        }).catch((err) => {
             console.error(err);
             return undefined;
         });

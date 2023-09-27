@@ -1,6 +1,6 @@
 import colors from "colors";
 import { CORS_PROXIES } from "..";
-import { ANIME_PROVIDERS, BASE_PROVIDERS, MANGA_PROVIDERS } from "../../mappings";
+import { ANIME_PROVIDERS, BASE_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS } from "../../mappings";
 import { Format, Type } from "../../types/enums";
 
 const toCheck: string[] = [];
@@ -36,7 +36,10 @@ export async function checkCorsProxies(): Promise<string[]> {
         })
         .filter((obj) => obj.port != 8080);
 
-    for (const ip of ips) {
+    for (let i = 0; i < ips.length; i++) {
+        const ip = ips[i];
+        console.log(colors.green("Iteration ") + (i + 1) + colors.green(" of ") + ips.length + colors.green(".") + colors.gray(" (Timeout: 5 seconds)"));
+
         const result = await makeRequest(ip);
         if (result) goodIps.push(result) && console.log(colors.green(result + " passed!"));
         else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
@@ -56,15 +59,13 @@ async function makeRequest(ip: IP): Promise<string | undefined> {
     return new Promise(async (resolve, reject) => {
         const controller = new AbortController();
 
-        console.log(colors.gray("Checking ") + `${ip.ip}:${ip.port}` + colors.gray(".") + colors.gray(" (Timeout: 5 seconds)"));
+        console.log(colors.gray("Checking ") + `${ip.ip}:${ip.port}` + colors.gray("."));
 
         setTimeout(() => {
             controller.abort();
         }, 5000);
 
         controller.signal.addEventListener("abort", () => {
-            console.log(colors.red(`http://${ip.ip}:${ip.port} aborted.`));
-
             return resolve(undefined);
         });
 
@@ -87,6 +88,7 @@ async function makeRequest(ip: IP): Promise<string | undefined> {
                 // Check all providers
                 let isOkay = true;
                 for (const provider of BASE_PROVIDERS) {
+                    if (!provider.needsProxy) continue;
                     console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
 
                     provider.customProxy = `http://${ip.ip}:${ip.port}`;
@@ -108,6 +110,7 @@ async function makeRequest(ip: IP): Promise<string | undefined> {
                 else return undefined;
 
                 for (const provider of ANIME_PROVIDERS) {
+                    if (!provider.needsProxy) continue;
                     console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
 
                     provider.customProxy = `http://${ip.ip}:${ip.port}`;
@@ -126,8 +129,10 @@ async function makeRequest(ip: IP): Promise<string | undefined> {
                 }
 
                 if (isOkay) console.log(colors.yellow("Anime providers passed."));
+                else return resolve(undefined);
 
                 for (const provider of MANGA_PROVIDERS) {
+                    if (!provider.needsProxy) continue;
                     console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
 
                     provider.customProxy = `http://${ip.ip}:${ip.port}`;
@@ -146,11 +151,29 @@ async function makeRequest(ip: IP): Promise<string | undefined> {
                 }
 
                 if (isOkay) console.log(colors.yellow("Manga providers passed."));
-                else return undefined;
+                else return resolve(undefined);
+
+                for (const provider of META_PROVIDERS) {
+                    if (!provider.needsProxy) continue;
+                    console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
+
+                    provider.customProxy = `http://${ip.ip}:${ip.port}`;
+
+                    const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
+                        return undefined;
+                    });
+
+                    provider.customProxy = undefined;
+
+                    if (!providerResponse) {
+                        console.log(colors.red(`${provider.id} failed.`));
+                        isOkay = false;
+                        break;
+                    }
+                }
 
                 return resolve(ip.ip + ":" + ip.port);
             } else {
-                console.log(colors.red(`${ip.ip}:${ip.port} is not a CORS proxy.`));
                 return resolve(undefined);
             }
         } catch (error) {

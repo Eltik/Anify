@@ -9,21 +9,19 @@ export default class NovelUpdates extends MangaProvider {
     override id = "novelupdates";
     override url = "https://www.novelupdates.com";
 
+    public needsProxy: boolean = true;
+
     override formats: Format[] = [Format.NOVEL];
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         const results: Result[] = [];
 
-        const searchData = await this.request(
-            `${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444&ge=280&sort=sread&order=desc`,
-            {
-                method: "GET",
-                headers: {
-                    Referer: this.url,
-                },
+        const searchData = await this.request(`${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444&ge=280&sort=sread&order=desc`, {
+            method: "GET",
+            headers: {
+                Referer: this.url,
             },
-            true,
-        );
+        });
 
         const data = await searchData.text();
 
@@ -52,15 +50,11 @@ export default class NovelUpdates extends MangaProvider {
         const chapters: Chapter[] = [];
 
         const data = await (
-            await this.request(
-                `${this.url}/series/${id}`,
-                {
-                    headers: {
-                        Cookie: "_ga=;",
-                    },
+            await this.request(`${this.url}/series/${id}`, {
+                headers: {
+                    Cookie: "_ga=;",
                 },
-                true,
-            )
+            })
         ).text();
 
         const $ = load(data);
@@ -69,18 +63,14 @@ export default class NovelUpdates extends MangaProvider {
 
         const chapterData = (
             await (
-                await this.request(
-                    `${this.url}/wp-admin/admin-ajax.php`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                            Cookie: "_ga=;",
-                        },
-                        body: `action=nd_getchapters&mypostid=${postId}&mypostid2=0`,
+                await this.request(`${this.url}/wp-admin/admin-ajax.php`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                        Cookie: "_ga=;",
                     },
-                    true,
-                )
+                    body: `action=nd_getchapters&mypostid=${postId}&mypostid2=0`,
+                })
             ).text()
         ).substring(1);
 
@@ -102,17 +92,13 @@ export default class NovelUpdates extends MangaProvider {
 
     override async fetchPages(id: string): Promise<Page[] | string | undefined> {
         const data = await (
-            await this.request(
-                `${this.url}/extnu/${id}/`,
-                {
-                    method: "GET",
-                    headers: {
-                        Cookie: "_ga=;",
-                    },
-                    redirect: "follow",
+            await this.request(`${this.url}/extnu/${id}/`, {
+                method: "GET",
+                headers: {
+                    Cookie: "_ga=;",
                 },
-                true,
-            )
+                redirect: "follow",
+            })
         ).text();
 
         const article = await extract(data);

@@ -8,6 +8,8 @@ export default class ComicKInfo extends InformationProvider<Anime | Manga, Anime
 
     private api = "https://api.comick.fun";
 
+    public needsProxy: boolean = true;
+
     override get priorityArea(): MediaInfoKeys[] {
         return ["coverImage", "description"];
     }
@@ -23,11 +25,11 @@ export default class ComicKInfo extends InformationProvider<Anime | Manga, Anime
 
         if (!comicKId) return undefined;
 
-        const req = await this.request(`${this.api}/comic/${comicKId}`, {}, true);
+        const req = await this.request(`${this.api}/comic/${comicKId}`);
 
         if (!req.ok) return undefined;
 
-        const coverReq = await this.request(`${this.api}/comic/${comicKId}/covers`, {}, true);
+        const coverReq = await this.request(`${this.api}/comic/${comicKId}/covers`);
         const covers: Covers = await coverReq.json();
 
         const data: Comic = (await req.json()).comic;

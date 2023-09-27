@@ -7,13 +7,15 @@ export default class ComicK extends MangaProvider {
     override id = "comick";
     override url = "https://comick.app";
 
+    public needsProxy: boolean = true;
+
     override formats: Format[] = [Format.MANGA, Format.ONE_SHOT];
 
     // Docs: https://upload.comick.app/docs/static/index.html
     private api = "https://api.comick.fun";
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
-        const data: SearchResult[] = await (await this.request(`${this.api}/v1.0/search?q=${encodeURIComponent(query)}&limit=25&page=1${year ? `&from=${year}&to=${year}` : ""}`, {}, true)).json();
+        const data: SearchResult[] = await (await this.request(`${this.api}/v1.0/search?q=${encodeURIComponent(query)}&limit=25&page=1${year ? `&from=${year}&to=${year}` : ""}`)).json();
 
         const results: Result[] = [];
 
@@ -47,7 +49,7 @@ export default class ComicK extends MangaProvider {
             return chapterList;
         }
 
-        const data = await (await this.request(`${this.api}/comic/${comicId}/chapters?lang=en&page=0&limit=1000000`, {}, true))?.json();
+        const data = await (await this.request(`${this.api}/comic/${comicId}/chapters?lang=en&page=0&limit=1000000`))?.json();
 
         const chapters: Chapter[] = [];
 
@@ -87,7 +89,7 @@ export default class ComicK extends MangaProvider {
     }
 
     override async fetchPages(id: string): Promise<Page[] | string | undefined> {
-        const data = await (await this.request(`${this.api}/chapter/${id}`, {}, true))?.json();
+        const data = await (await this.request(`${this.api}/chapter/${id}`))?.json();
 
         const pages: Page[] = [];
 
@@ -103,7 +105,7 @@ export default class ComicK extends MangaProvider {
     }
 
     private async getComicId(id: string): Promise<string | null> {
-        const json = await (await this.request(`${this.api}${id}`, {}, true))?.json();
+        const json = await (await this.request(`${this.api}${id}`))?.json();
         const data: Comic = json.comic;
         return data ? data.hid : null;
     }

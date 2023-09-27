@@ -7,6 +7,8 @@ export default class AniDB extends InformationProvider<Anime | Manga, AnimeInfo 
     override id = "anidb";
     override url = "https://anidb.net";
 
+    public needsProxy: boolean = true;
+
     override get priorityArea(): MediaInfoKeys[] {
         return [];
     }
@@ -22,7 +24,7 @@ export default class AniDB extends InformationProvider<Anime | Manga, AnimeInfo 
 
         if (!aniDbId) return undefined;
 
-        const data = await (await this.request(`${this.url}${aniDbId}`, {}, true)).text();
+        const data = await (await this.request(`${this.url}${aniDbId}`)).text();
 
         const $ = load(data);
 
@@ -96,7 +98,7 @@ export default class AniDB extends InformationProvider<Anime | Manga, AnimeInfo 
 
         if (!aniDbId) return undefined;
 
-        const data = await (await this.request(`${this.url}${aniDbId}`, {}, true)).text();
+        const data = await (await this.request(`${this.url}${aniDbId}`)).text();
 
         const $ = load(data);
 
