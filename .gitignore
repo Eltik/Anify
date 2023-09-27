@@ -31,7 +31,10 @@ database.json
 /manga
 **/manga
 bun.lockb
-goodProxies.json
+animeProxies.json
+baseProxies.json
+mangaProxies.json
+metaProxies.json
 proxies.json
 /builds
 db.sqlite

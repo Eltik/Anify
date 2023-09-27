@@ -31,7 +31,7 @@ export default abstract class MangaProvider {
         if (proxyRequest === undefined && !this.needsProxy) proxyRequest = false;
         if (proxyRequest !== undefined && proxyRequest === true && !this.needsProxy) proxyRequest = true;
 
-        return Http.request(url, config, proxyRequest, 0, this.customProxy);
+        return Http.request("MANGA", url, config, proxyRequest, 0, this.customProxy);
     }
 
     padNum(number: string, places: number): string {

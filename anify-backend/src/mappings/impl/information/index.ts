@@ -33,6 +33,6 @@ export default abstract class InformationProvider<T extends Anime | Manga, U ext
         if (proxyRequest === undefined && !this.needsProxy) proxyRequest = false;
         if (proxyRequest !== undefined && proxyRequest === true && !this.needsProxy) proxyRequest = true;
 
-        return Http.request(url, config, proxyRequest, 0, this.customProxy);
+        return Http.request("META", url, config, proxyRequest, 0, this.customProxy);
     }
 }

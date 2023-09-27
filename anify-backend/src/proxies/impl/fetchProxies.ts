@@ -1,12 +1,40 @@
 import colors from "colors";
-import { CORS_PROXIES } from "..";
+import { ANIME_PROXIES, BASE_PROXIES, MANGA_PROXIES, META_PROXIES } from "..";
 
-export async function fetchCorsProxies(): Promise<string[]> {
-    const file = Bun.file("./goodProxies.json");
-    if (await file.exists()) {
+export async function fetchCorsProxies(): Promise<{
+    base: string[];
+    anime: string[];
+    manga: string[];
+    meta: string[];
+}> {
+    const base = await loadProxies("./baseProxies.json");
+    BASE_PROXIES.push(...base);
+
+    const anime = await loadProxies("./animeProxies.json");
+    ANIME_PROXIES.push(...anime);
+
+    const manga = await loadProxies("./mangaProxies.json");
+    MANGA_PROXIES.push(...manga);
+
+    const meta = await loadProxies("./metaProxies.json");
+    META_PROXIES.push(...meta);
+
+    return {
+        base: BASE_PROXIES,
+        anime: ANIME_PROXIES,
+        manga: BASE_PROXIES,
+        meta: BASE_PROXIES,
+    };
+}
+
+async function loadProxies(fileName: string) {
+    const base = Bun.file(fileName);
+    const proxies: string[] = [];
+
+    if (await base.exists()) {
         const BATCH_SIZE = 100;
 
-        const proxyData = await file.json();
+        const proxyData = await base.json();
         const totalProxies = proxyData.length;
         let currentIndex = 0;
 
@@ -23,12 +51,11 @@ export async function fetchCorsProxies(): Promise<string[]> {
                 }
             }
 
-            CORS_PROXIES.push(...proxiesToAdd);
+            proxies.push(...proxiesToAdd);
         }
 
-        console.log(colors.green("Finished importing ") + colors.yellow(totalProxies) + colors.green(" proxies."));
-    } else {
-        return [];
+        console.log(colors.green("Finished importing ") + colors.yellow(totalProxies) + colors.green(" proxies from ") + colors.yellow(fileName) + colors.green("."));
     }
-    return CORS_PROXIES;
+
+    return proxies;
 }

@@ -35,7 +35,7 @@ export default abstract class AnimeProvider {
         if (proxyRequest === undefined && !this.needsProxy) proxyRequest = false;
         if (proxyRequest !== undefined && proxyRequest === true && !this.needsProxy) proxyRequest = true;
 
-        return Http.request(url, config, proxyRequest, 0, this.customProxy);
+        return Http.request("ANIME", url, config, proxyRequest, 0, this.customProxy);
     }
 
     abstract get subTypes(): SubType[];
