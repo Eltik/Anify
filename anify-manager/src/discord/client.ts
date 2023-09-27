@@ -4,6 +4,7 @@ import { env } from "../env";
 import { lstatSync, readdirSync } from "fs";
 import { join } from "path";
 import { ApplicationCommand, AutocompleteInteraction, Client, CommandInteraction, ComponentInteraction } from "eris";
+import { channels } from "../config";
 
 export interface CustomClient extends Client {
     commands: Map<string, any>;
@@ -124,6 +125,96 @@ client.on("interactionCreate", async (interaction) => {
 
 client.on("error", (err: Error) => {
     console.error(err);
+});
+
+const socket = new WebSocket("ws://localhost:3061/entry", {
+    headers: {
+        "client-name": "anify-backend",
+    },
+});
+
+socket.addEventListener("message", (event) => {
+    try {
+        const data = JSON.parse(String(event.data));
+
+        client.createMessage(channels.logs, {
+            embeds: [
+                {
+                    title: data.title.english ?? data.title.romaji ?? data.title.native ?? "Unknown Title",
+                    description: `\`\`\`${data.description?.replace(/<[^>]*>?/gm, "")?.substring(0, 4000) ?? "No description provided."}\`\`\``,
+                    color: Number(data.color) ?? 0x000000,
+                    author: {
+                        name: data.author ?? data.publisher ?? data.season?.toLowerCase(),
+                        icon_url: data.coverImage ?? "https://anify.tv/favicon.ico",
+                        url: "https://anify.tv",
+                    },
+                    fields: [
+                        {
+                            name: data.type === "ANIME" ? "Season" : "Country",
+                            value: data.type === "ANIME" ? data.season?.toLowerCase() : data.countryOfOrigin,
+                            inline: true,
+                        },
+                        {
+                            name: "Status",
+                            value: data.status?.toLowerCase(),
+                            inline: true,
+                        },
+                        {
+                            name: data.type === "ANIME" ? "Episodes" : "Chapters",
+                            value: data.type === "ANIME" ? data.totalEpisodes?.toString() : data.totalChapters?.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: "Genres",
+                            value: `\`${data.genres?.slice(0, 4).join(", ")}\``,
+                            inline: true,
+                        },
+                        {
+                            name: "Tags",
+                            value: `\`${data.tags?.slice(0, 5).join(", ")}\``,
+                            inline: true,
+                        },
+                        {
+                            name: "Format",
+                            value: data.format?.toLowerCase(),
+                            inline: true,
+                        },
+                        {
+                            name: "Rating",
+                            value: `\`${data.averageRating?.toString()}/10\``,
+                            inline: true,
+                        },
+                        {
+                            name: "Popularity",
+                            value: `\`${data.averagePopularity?.toString()}\``,
+                            inline: true,
+                        },
+                    ],
+                    image: {
+                        url: data.coverImage ?? "https://anify.tv/favicon.ico",
+                    },
+                    thumbnail: {
+                        url: data.bannerImage ?? "https://anify.tv/favicon.ico",
+                    },
+                },
+            ],
+        });
+    } catch (e) {
+        console.log(e);
+    }
+});
+
+socket.addEventListener("open", (event) => {
+    console.log("Connected to backend websocket.");
+});
+
+socket.addEventListener("close", (event) => {
+    console.log("Disconnected from backend websocket.");
+});
+
+socket.addEventListener("error", (event) => {
+    console.log("Error with websocket.");
+    console.log(event);
 });
 
 client.connect().catch(console.error);

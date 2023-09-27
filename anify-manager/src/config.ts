@@ -36,3 +36,7 @@ export const repositories = [
         name: "anify",
     },
 ];
+
+export const channels = {
+    logs: "1034958914363600967",
+};

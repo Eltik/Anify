@@ -9,9 +9,11 @@ import emitter, { Events } from "./lib";
 import { get } from "./database/impl/fetch/get";
 import queues from "./worker";
 import { start } from "./server";
+import { startWebsocket } from "./websocket";
 
 before().then(async (_) => {
     await start();
+    await startWebsocket();
 });
 
 async function before() {
