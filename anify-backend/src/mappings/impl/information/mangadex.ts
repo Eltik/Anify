@@ -1,5 +1,5 @@
 import InformationProvider from ".";
-import { Format, MediaStatus, Season } from "../../../types/enums";
+import { Format, Formats, MediaStatus, Season } from "../../../types/enums";
 import { Anime, AnimeInfo, Manga, MangaInfo, MediaInfoKeys } from "../../../types/types";
 
 export default class MangaDexInfo extends InformationProvider<Anime | Manga, AnimeInfo | MangaInfo> {
@@ -26,6 +26,9 @@ export default class MangaDexInfo extends InformationProvider<Anime | Manga, Ani
         try {
             const data = (await (await this.request(`${this.api}/manga/${mangadexId}`, {}, true)).json()).data;
             const covers = await (await this.request(`${this.api}/cover?limit=100&manga[]=${mangadexId}`, {}, true)).json();
+
+            const formatString: string = data.type.toUpperCase();
+            const format: Format = formatString === "ADAPTATION" ? Format.MANGA : Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
 
             return {
                 id: mangadexId,
@@ -65,7 +68,7 @@ export default class MangaDexInfo extends InformationProvider<Anime | Manga, Ani
                 rating: null,
                 season: Season.UNKNOWN,
                 trailer: null,
-                format: Format.UNKNOWN,
+                format,
                 coverImage: `${this.url}/covers/${mangadexId}/${data.relationships.find((element: any) => element.type === "cover_art").id}.jpg`,
                 bannerImage: null,
                 author: data.relationships.find((element: any) => element.type === "author")?.attributes.name ?? null,

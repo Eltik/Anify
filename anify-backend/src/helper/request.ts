@@ -88,7 +88,7 @@ export default class Http {
                         throw error;
                     }
                 } else {
-                    return fetch(url, config);
+                    return resolve(fetch(url, config));
                 }
             } catch (e) {
                 console.log(e);

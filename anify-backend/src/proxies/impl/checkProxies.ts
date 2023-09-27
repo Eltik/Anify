@@ -1,14 +1,7 @@
 import colors from "colors";
-import { isString } from "../../helper";
-import ChunkedExecutor from "../executor";
 import { CORS_PROXIES } from "..";
-import { ANIME_PROVIDERS, BASE_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS } from "../../mappings";
+import { ANIME_PROVIDERS, BASE_PROVIDERS, MANGA_PROVIDERS } from "../../mappings";
 import { Format, Type } from "../../types/enums";
-import BaseProvider from "../../mappings/impl/base";
-import AnimeProvider from "../../mappings/impl/anime";
-import MangaProvider from "../../mappings/impl/manga";
-import InformationProvider from "../../mappings/impl/information";
-import MetaProvider from "../../mappings/impl/meta";
 
 const toCheck: string[] = [];
 
@@ -133,6 +126,26 @@ async function makeRequest(ip: IP): Promise<string | undefined> {
                 }
 
                 if (isOkay) console.log(colors.yellow("Anime providers passed."));
+
+                for (const provider of MANGA_PROVIDERS) {
+                    console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
+
+                    provider.customProxy = `http://${ip.ip}:${ip.port}`;
+
+                    const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
+                        return undefined;
+                    });
+
+                    provider.customProxy = undefined;
+
+                    if (!providerResponse) {
+                        console.log(colors.red(`${provider.id} failed.`));
+                        isOkay = false;
+                        break;
+                    }
+                }
+
+                if (isOkay) console.log(colors.yellow("Manga providers passed."));
                 else return undefined;
 
                 return resolve(ip.ip + ":" + ip.port);
