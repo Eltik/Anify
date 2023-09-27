@@ -4,6 +4,11 @@ import ChunkedExecutor from "../executor";
 import { CORS_PROXIES } from "..";
 import { ANIME_PROVIDERS, BASE_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS } from "../../mappings";
 import { Format, Type } from "../../types/enums";
+import BaseProvider from "../../mappings/impl/base";
+import AnimeProvider from "../../mappings/impl/anime";
+import MangaProvider from "../../mappings/impl/manga";
+import InformationProvider from "../../mappings/impl/information";
+import MetaProvider from "../../mappings/impl/meta";
 
 const toCheck: string[] = [];
 
@@ -38,21 +43,13 @@ export async function checkCorsProxies(): Promise<string[]> {
         })
         .filter((obj) => obj.port != 8080);
 
-    const chunkSize = 25;
-    const perChunkCallback = (chunk: IP[]) => {
-        console.log(colors.gray(`Checking ${chunk.length} proxies...`));
-    };
-
-    const perResultsCallback = (result: (string | undefined)[]) => {
-        const ips = result.filter(isString);
-        goodIps.push(...ips);
-        console.log(colors.green(`${ips.length} proxies are good!`));
+    for (const ip of ips) {
+        const result = await makeRequest(ip);
+        if (result) goodIps.push(result) && console.log(colors.green(result + " passed!"));
+        else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
 
         Bun.write("./goodProxies.json", JSON.stringify(goodIps, null, 4));
-    };
-
-    const executor = new ChunkedExecutor<IP, string | undefined>(ips, chunkSize, makeRequest, perChunkCallback, perResultsCallback);
-    await executor.execute();
+    }
 
     console.log(colors.gray("Finished checking proxies."));
 
@@ -63,113 +60,90 @@ export async function checkCorsProxies(): Promise<string[]> {
 }
 
 async function makeRequest(ip: IP): Promise<string | undefined> {
-    const controller = new AbortController();
+    return new Promise(async (resolve, reject) => {
+        const controller = new AbortController();
 
-    console.log(colors.gray("Checking ") + `${ip.ip}:${ip.port}` + colors.gray(".") + colors.gray(" (Timeout: 5 seconds)"));
+        console.log(colors.gray("Checking ") + `${ip.ip}:${ip.port}` + colors.gray(".") + colors.gray(" (Timeout: 5 seconds)"));
 
-    setTimeout(() => {
-        controller.abort();
-    }, 5000);
+        setTimeout(() => {
+            controller.abort();
+        }, 5000);
 
-    try {
-        const response = await fetch(`http://${ip.ip}:${ip.port}/iscorsneeded`, {
-            signal: controller.signal,
-        }).catch(
-            (err) =>
-                ({
-                    ok: false,
-                    status: 500,
-                    statusText: "Timeout",
-                    json: () => Promise.resolve({ error: err }),
-                }) as Response,
-        );
-        if (response.status === 200 && (await response.text()) === "no") {
-            let isOkay = true;
+        controller.signal.addEventListener("abort", () => {
+            console.log(colors.red(`http://${ip.ip}:${ip.port} aborted.`));
 
-            console.log(colors.yellow("Testing ") + `${ip.ip}:${ip.port}` + colors.yellow("."));
+            return resolve(undefined);
+        });
 
-            for (const provider of BASE_PROVIDERS) {
-                console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
+        try {
+            const response = await fetch(`http://${ip.ip}:${ip.port}/iscorsneeded`, {
+                signal: controller.signal,
+            }).catch(
+                (err) =>
+                    ({
+                        ok: false,
+                        status: 500,
+                        statusText: "Timeout",
+                        json: () => Promise.resolve({ error: err }),
+                    }) as Response,
+            );
 
-                provider.customProxy = `http://${ip.ip}:${ip.port}`;
+            if (response.status === 200 && (await response.text()) === "no") {
+                console.log(colors.green(`http://${ip.ip}:${ip.port} is a CORS proxy.`));
 
-                const providerResponse = await provider.search("Mushoku Tensei", provider.formats.includes(Format.TV) ? Type.ANIME : Type.MANGA, provider.formats, 0, 10).catch(() => {
-                    return undefined;
-                });
+                // Check all providers
+                let isOkay = true;
+                for (const provider of BASE_PROVIDERS) {
+                    console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
 
-                provider.customProxy = undefined;
+                    provider.customProxy = `http://${ip.ip}:${ip.port}`;
 
-                if (!providerResponse) {
-                    console.log(colors.red(`${provider.id} failed.`));
-                    isOkay = false;
-                    break;
+                    const providerResponse = await provider.search("Mushoku Tensei", provider.formats.includes(Format.TV) ? Type.ANIME : Type.MANGA, provider.formats, 0, 10).catch(() => {
+                        return undefined;
+                    });
+
+                    provider.customProxy = undefined;
+
+                    if (!providerResponse) {
+                        console.log(colors.red(`${provider.id} failed.`));
+                        isOkay = false;
+                        break;
+                    }
                 }
-            }
 
-            if (isOkay) {
-                console.log(colors.yellow("Base providers passed."));
-            } else {
-                console.log(colors.red("Base providers failed."));
-                return undefined;
-            }
+                if (isOkay) console.log(colors.yellow("Base providers passed."));
+                else return undefined;
 
-            for (const provider of ANIME_PROVIDERS) {
-                console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
+                for (const provider of ANIME_PROVIDERS) {
+                    console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
 
-                provider.customProxy = `http://${ip.ip}:${ip.port}`;
+                    provider.customProxy = `http://${ip.ip}:${ip.port}`;
 
-                const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
-                    return undefined;
-                });
+                    const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
+                        return undefined;
+                    });
 
-                provider.customProxy = undefined;
+                    provider.customProxy = undefined;
 
-                if (!providerResponse) {
-                    console.log(colors.red(`${provider.id} failed.`));
-                    isOkay = false;
-                    break;
+                    if (!providerResponse) {
+                        console.log(colors.red(`${provider.id} failed.`));
+                        isOkay = false;
+                        break;
+                    }
                 }
-            }
 
-            if (isOkay) {
-                console.log(colors.yellow("Anime providers passed."));
+                if (isOkay) console.log(colors.yellow("Anime providers passed."));
+                else return undefined;
+
+                return resolve(ip.ip + ":" + ip.port);
             } else {
-                console.log(colors.red("Anime providers failed."));
-                return undefined;
+                console.log(colors.red(`${ip.ip}:${ip.port} is not a CORS proxy.`));
+                return resolve(undefined);
             }
-
-            for (const provider of MANGA_PROVIDERS) {
-                console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
-
-                provider.customProxy = `http://${ip.ip}:${ip.port}`;
-
-                const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
-                    return undefined;
-                });
-
-                provider.customProxy = undefined;
-
-                if (!providerResponse) {
-                    console.log(colors.red(`${provider.id} failed.`));
-                    isOkay = false;
-                    break;
-                }
-            }
-
-            if (isOkay) {
-                console.log(colors.yellow("Manga providers passed."));
-                return ip.ip + ":" + ip.port;
-            } else {
-                console.log(colors.red("Manga providers failed."));
-                return undefined;
-            }
-        } else {
-            console.log(colors.red(`${ip.ip}:${ip.port} is not a CORS proxy.`));
-            return undefined;
+        } catch (error) {
+            return resolve(undefined);
         }
-    } catch (error) {
-        return undefined;
-    }
+    });
 }
 
 interface IP {
