@@ -16,7 +16,7 @@ export const handler = async (req: Request): Promise<Response> => {
                   })
                 : null;
 
-        const id = body.id ?? paths[1] ?? url.searchParams.get("id") ?? null;
+        const id = body?.id ?? paths[1] ?? url.searchParams.get("id") ?? null;
         if (!id) {
             return new Response(JSON.stringify({ error: "No ID provided." }), {
                 status: 400,
@@ -24,7 +24,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const episodeNumber = Number(body.episodeNumber ?? paths[2] ?? url.searchParams.get("episodeNumber") ?? null);
+        const episodeNumber = Number(body?.episodeNumber ?? paths[2] ?? url.searchParams.get("episodeNumber") ?? null);
         if (!episodeNumber) {
             return new Response(JSON.stringify({ error: "No episode number provided." }), {
                 status: 400,
@@ -32,7 +32,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const providerId = body.providerId ?? paths[3] ?? url.searchParams.get("providerId") ?? null;
+        const providerId = body?.providerId ?? paths[3] ?? url.searchParams.get("providerId") ?? null;
         if (!providerId) {
             return new Response(JSON.stringify({ error: "No provider ID provided." }), {
                 status: 400,
@@ -40,7 +40,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const watchId = decodeURIComponent(body.watchId ?? paths[4] ?? url.searchParams.get("watchId") ?? "");
+        const watchId = decodeURIComponent(body?.watchId ?? paths[4] ?? url.searchParams.get("watchId") ?? "");
         if (!watchId || watchId.length === 0) {
             return new Response(JSON.stringify({ error: "No watch ID provided." }), {
                 status: 400,
@@ -48,7 +48,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const subType = decodeURIComponent(body.subType ?? paths[5] ?? url.searchParams.get("subType") ?? "");
+        const subType = decodeURIComponent(body?.subType ?? paths[5] ?? url.searchParams.get("subType") ?? "");
         if (!subType || subType.length === 0) {
             return new Response(JSON.stringify({ error: "No sub type provided." }), {
                 status: 400,
@@ -61,7 +61,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const server = body.server ?? paths[6] ?? url.searchParams.get("server") ?? undefined ? (decodeURIComponent(body.server ?? paths[6] ?? url.searchParams.get("server") ?? undefined) as StreamingServers) : undefined;
+        const server = body?.server ?? paths[6] ?? url.searchParams.get("server") ?? undefined ? (decodeURIComponent(body?.server ?? paths[6] ?? url.searchParams.get("server") ?? undefined) as StreamingServers) : undefined;
 
         const cached = await redis.get(`sources:${id}:${episodeNumber}:${providerId}:${watchId}:${subType}:${server}`);
         if (cached) {

@@ -16,7 +16,7 @@ export const handler = async (req: Request): Promise<Response> => {
                   })
                 : null;
 
-        const id = body.id ?? paths[1] ?? url.searchParams.get("id") ?? null;
+        const id = body?.id ?? paths[1] ?? url.searchParams.get("id") ?? null;
         if (!id) {
             return new Response(JSON.stringify({ error: "No media ID provided." }), {
                 status: 400,
@@ -24,7 +24,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const chapterNumber = Number(body.chapterNumber ?? paths[2] ?? url.searchParams.get("chapterNumber") ?? null);
+        const chapterNumber = Number(body?.chapterNumber ?? paths[2] ?? url.searchParams.get("chapterNumber") ?? null);
         if (!chapterNumber) {
             return new Response(JSON.stringify({ error: "No chapter number provided." }), {
                 status: 400,
