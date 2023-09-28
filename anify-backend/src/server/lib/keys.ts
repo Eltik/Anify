@@ -8,7 +8,5 @@ export const apiKeyMiddleware = async (req: Request): Promise<boolean> => {
         return false;
     }
 
-    await redis.incr(`apikeys:${key}:requests`);
-
     return true;
 };

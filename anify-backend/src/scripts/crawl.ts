@@ -90,4 +90,10 @@ async function before() {
 }
 
 const type = process.argv.slice(2)?.toString()?.toLowerCase() ?? "anime";
-crawl(type === "anime" ? Type.ANIME : type === "manga" ? Type.MANGA : Type.ANIME, type === "anime" ? [Format.TV, Format.TV_SHORT, Format.MOVIE, Format.OVA, Format.ONA, Format.SPECIAL, Format.MUSIC] : type === "manga" ? [Format.MANGA, Format.ONE_SHOT] : type === "novel" ? [Format.NOVEL] : [Format.TV, Format.TV_SHORT, Format.MOVIE, Format.OVA, Format.ONA, Format.SPECIAL, Format.MUSIC]);
+crawl(type === "anime" ? Type.ANIME : type === "manga" ? Type.MANGA : Type.ANIME, type === "anime" ? [Format.TV, Format.TV_SHORT, Format.MOVIE, Format.OVA, Format.ONA, Format.SPECIAL, Format.MUSIC] : type === "manga" ? [Format.MANGA, Format.ONE_SHOT] : type === "novel" ? [Format.NOVEL] : [Format.TV, Format.TV_SHORT, Format.MOVIE, Format.OVA, Format.ONA, Format.SPECIAL, Format.MUSIC]).then((data) => {
+    // Hang infinitely
+    console.log(data);
+    console.log("Successfully crawled!");
+
+    setInterval(() => {}, 1000);
+});

@@ -33,40 +33,46 @@ export default class TMDB extends InformationProvider<Anime | Manga, AnimeInfo |
         if (!data) return undefined;
 
         if (data.ok) {
-            const info = await data.json();
+            try {
+                const info = await data.json();
 
-            return {
-                id: tmdbId,
-                title: {
-                    english: info.name,
-                    romaji: null,
-                    native: info.original_name,
-                },
-                currentEpisode: info.last_episode_to_air?.episode_number,
-                trailer: null,
-                duration: info.episode_run_time[0] ?? null,
-                color: null,
-                bannerImage: info.backdrop_path ? `https://image.tmdb.org/t/p/w500${info.backdrop_path}` : null,
-                coverImage: info.poster_path ? `https://image.tmdb.org/t/p/w500${info.poster_path}` : null,
-                status: null,
-                format: Format.UNKNOWN,
-                season: Season.UNKNOWN,
-                synonyms: [],
-                description: info.overview,
-                year: info.first_air_date ? new Date(info.first_air_date).getFullYear() : 0,
-                totalEpisodes: info.number_of_episodes,
-                genres: info.genres?.map((genre: { id: number; name: string }) => genre.name),
-                rating: info.vote_average,
-                popularity: info.popularity,
-                countryOfOrigin: info.origin_country[0] ?? null,
-                tags: [],
-                relations: [],
-                artwork: [],
-                characters: [],
-                totalChapters: null,
-                totalVolumes: null,
-                type: media.type,
-            } as AnimeInfo;
+                if (!info) return undefined;
+
+                return {
+                    id: tmdbId,
+                    title: {
+                        english: info.name,
+                        romaji: null,
+                        native: info.original_name,
+                    },
+                    currentEpisode: info.last_episode_to_air?.episode_number,
+                    trailer: null,
+                    duration: info.episode_run_time[0] ?? null,
+                    color: null,
+                    bannerImage: info.backdrop_path ? `https://image.tmdb.org/t/p/w500${info.backdrop_path}` : null,
+                    coverImage: info.poster_path ? `https://image.tmdb.org/t/p/w500${info.poster_path}` : null,
+                    status: null,
+                    format: Format.UNKNOWN,
+                    season: Season.UNKNOWN,
+                    synonyms: [],
+                    description: info.overview,
+                    year: info.first_air_date ? new Date(info.first_air_date).getFullYear() : 0,
+                    totalEpisodes: info.number_of_episodes,
+                    genres: info.genres?.map((genre: { id: number; name: string }) => genre.name),
+                    rating: info.vote_average,
+                    popularity: info.popularity,
+                    countryOfOrigin: info.origin_country[0] ?? null,
+                    tags: [],
+                    relations: [],
+                    artwork: [],
+                    characters: [],
+                    totalChapters: null,
+                    totalVolumes: null,
+                    type: media.type,
+                } as AnimeInfo;
+            } catch (e) {
+                return undefined;
+            }
         }
 
         return undefined;

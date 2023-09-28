@@ -5,6 +5,9 @@ import { load } from "cheerio";
 import { env } from "../../../env";
 import { Format, Formats, StreamingServers, SubType } from "../../../types/enums";
 import Extractor from "../../../helper/extractor";
+import Http from "../../../helper/request";
+import { isString } from "../../../helper";
+import vm from "node:vm";
 
 export default class NineAnime extends AnimeProvider {
     override rateLimit = 250;
@@ -262,13 +265,12 @@ export default class NineAnime extends AnimeProvider {
         return await (await this.request(`${this.resolver}/decrypt?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json();
     }
 
-    /*
     // This bypass works. However because it sends requests very quickly in a short amount of time, it causes proxies to get banned very quickly.
     override async request(url: string, options: RequestInit = {}, proxyRequest = true): Promise<Response> {
         if (url.includes(this.resolver ?? "")) {
             return Http.request("ANIME", url, options, false);
         }
-        const proxy = proxyRequest ? ((this.customProxy?.length ?? 0) > 0 ? this.customProxy : Http.getRandomUnbannedProxy()) : undefined;
+        const proxy = proxyRequest ? ((this.customProxy?.length ?? 0) > 0 ? this.customProxy : Http.getRandomUnbannedProxy("ANIME")) : undefined;
 
         const headers = {
             "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1",
@@ -319,7 +321,7 @@ export default class NineAnime extends AnimeProvider {
         const code = EvalDecode("${data2}");
         data = code;
         `,
-            context
+            context,
         );
 
         const kMatch = context.data.match(/var k='([^']+)'/);
@@ -347,13 +349,12 @@ export default class NineAnime extends AnimeProvider {
 
         const cookies = req3.headers.get("set-cookie");
 
-        console.log(await req3.text())
+        console.log(await req3.text());
 
         return Http.request("ANIME", url, { headers: { Cookie: cookies ?? "" }, ...options }, proxyRequest, 0, proxy);
 
         //return Http.request(url, { headers: { Cookie: cookies?.join("; ") ?? "" }, ...options }, proxyRequest, 0, proxy);
     }
-    */
 
     /*
     The waf page evals this:
