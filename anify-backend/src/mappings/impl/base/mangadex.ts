@@ -235,6 +235,8 @@ export default class ManagDexBase extends BaseProvider {
             const formatString: string = data.type.toUpperCase();
             const format: Format = formatString === "ADAPTATION" ? Format.MANGA : Formats.includes(formatString as Format) ? (formatString as Format) : Format.MANGA;
 
+            if (!data.attributes) return undefined;
+
             return {
                 id: id,
                 type: Type.MANGA,

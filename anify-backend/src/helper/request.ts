@@ -44,12 +44,13 @@ export default class Http {
     }
 
     static async request(proxyType: "BASE" | "ANIME" | "MANGA" | "META", url: string, config: RequestInit = {}, proxyRequest = true, requests = 0, customProxy: string | undefined = undefined): Promise<Response> {
+
         return new Promise(async (resolve, reject) => {
             try {
                 if (proxyRequest) {
                     const proxyUrl = customProxy || this.getRandomUnbannedProxy(proxyType);
                     if (!proxyUrl) {
-                        return Promise.reject(new Error("No unbanned proxies available"));
+                        throw new Error("No proxy available.");
                     }
 
                     const modifyUrl = `${proxyUrl}/${url}`;

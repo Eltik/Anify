@@ -1,6 +1,6 @@
 import Http from "../../../helper/request";
 import { Format, ProviderType } from "../../../types/enums";
-import { Chapter, Page, Result } from "../../../types/types";
+import { Chapter, Manga, Page, Result } from "../../../types/types";
 
 export default abstract class MangaProvider {
     abstract rateLimit: number;
@@ -18,6 +18,10 @@ export default abstract class MangaProvider {
     }
 
     async fetchChapters(id: string): Promise<Chapter[] | undefined> {
+        return undefined;
+    }
+
+    async fetchRecent(): Promise<Manga[] | undefined> {
         return undefined;
     }
 

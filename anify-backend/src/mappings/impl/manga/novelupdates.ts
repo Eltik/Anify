@@ -13,7 +13,9 @@ export default class NovelUpdates extends MangaProvider {
 
     override formats: Format[] = [Format.NOVEL];
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string, format?: Format, year?: number, retries = 0): Promise<Result[] | undefined> {
+        if (retries >= 5) return undefined;
+
         const results: Result[] = [];
 
         const searchData = await this.request(`${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444&ge=280&sort=sread&order=desc`, {
@@ -26,6 +28,11 @@ export default class NovelUpdates extends MangaProvider {
         const data = await searchData.text();
 
         const $ = load(data);
+
+        const title = $("title").html();
+        if (title === "Just a moment..." || title === "Attention Required! | Cloudflare") {
+            return this.search(query, format, year, retries + 1);
+        }
 
         $("div.search_main_box_nu").each((_, el) => {
             const img = $(el).find("div.search_img_nu img").attr("src");
@@ -46,7 +53,9 @@ export default class NovelUpdates extends MangaProvider {
         return results;
     }
 
-    override async fetchChapters(id: string): Promise<Chapter[] | undefined> {
+    override async fetchChapters(id: string, retries = 0): Promise<Chapter[] | undefined> {
+        if (retries >= 5) return undefined;
+
         const chapters: Chapter[] = [];
 
         const data = await (
@@ -58,6 +67,11 @@ export default class NovelUpdates extends MangaProvider {
         ).text();
 
         const $ = load(data);
+
+        const title = $("title").html();
+        if (title === "Just a moment..." || title === "Attention Required! | Cloudflare") {
+            return this.fetchChapters(id, retries + 1);
+        }
 
         const postId = $("input#mypostid").attr("value");
 

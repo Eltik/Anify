@@ -1,6 +1,6 @@
 import Http from "../../../helper/request";
 import { Format, ProviderType, StreamingServers, SubType } from "../../../types/enums";
-import { Episode, Result, Server, Source } from "../../../types/types";
+import { Anime, Episode, Result, Server, Source } from "../../../types/types";
 
 export default abstract class AnimeProvider {
     abstract rateLimit: number;
@@ -18,6 +18,10 @@ export default abstract class AnimeProvider {
     }
 
     async fetchEpisodes(id: string): Promise<Episode[] | undefined> {
+        return undefined;
+    }
+
+    async fetchRecent(): Promise<Anime[] | undefined> {
         return undefined;
     }
 

@@ -47,7 +47,7 @@ export const start = async () => {
         port: env.PORT,
         async fetch(req: Request) {
             const url = new URL(req.url);
-            if (url.pathname === "/") return new Response("Welcome to Anify API! 🎉 Documentation can be viewed at https://docs.anify.tv. Join our Discord https://anify.tv/discord for more information.", { headers: { "Content-Type": "application/json" } });
+            if (url.pathname === "/") return new Response("Welcome to Anify API! 🎉 Documentation can be viewed at https://docs.anify.tv. Join our Discord https://anify.tv/discord for more information.");
 
             const pathName = `/${url.pathname.split("/").slice(1)[0]}`;
 

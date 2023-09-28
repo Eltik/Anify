@@ -17,7 +17,9 @@ export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga,
         return ["synonyms", "genres", "tags"];
     }
 
-    override async info(media: Anime | Manga): Promise<AnimeInfo | MangaInfo | undefined> {
+    override async info(media: Anime | Manga, retries = 0): Promise<AnimeInfo | MangaInfo | undefined> {
+        if (retries >= 5) return undefined;
+
         const novelUpdatesId = media.mappings.find((data) => {
             return data.providerId === "novelupdates";
         })?.id;
@@ -26,6 +28,11 @@ export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga,
 
         const data = await (await this.request(`${this.url}/series/${novelUpdatesId}`, { headers: { Cookie: "_ga=;" } })).text();
         const $$ = load(data);
+
+        const title = $$("title").html();
+        if (title === "Just a moment..." || title === "Attention Required! | Cloudflare") {
+            return this.info(media, retries + 1);
+        }
 
         const synonyms = $$("div#editassociated").html()?.split("<br>") ?? [];
         const year = Number($$("div#edityear").text()?.trim() ?? 0);
