@@ -80,7 +80,7 @@ export const fetchChapters = async (id: string): Promise<ChapterData[]> => {
     }
 
     Object.assign(media, {
-        currentChapter: (media as Manga).currentChapter ?? 0 < latestChapter ? latestChapter : (media as Manga).currentChapter,
+        currentChapter: ((media as Manga).currentChapter ?? 0) < latestChapter ? latestChapter : (media as Manga).currentChapter,
         totalEpisodes,
         chapters: {
             latest: {

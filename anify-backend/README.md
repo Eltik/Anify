@@ -109,6 +109,24 @@ Checks the `proxies.json` file (see [Scrape CORS Proxies](#scrape-cors-proxies))
 $ bun run check:proxies
 ```
 
+### Export Database
+Exports the database into a JSON file. An additional argument can be sent to name the export file. By default it is `database.json`.
+```bash
+$ bun run export ("<name>.json")
+```
+
+### Import Database
+Imports a database from a given JSON file. An additional argument can be sent to import from a specific JSON file. By default it is `database.json`.
+```bash
+$ bun run import ("<name>.json")
+```
+
+### Wipe/Clear Database
+Clears the database by deleting the anime, manga, skip times, and api key tables. **This is a dangerous action and is only recommended for development.**
+```bash
+$ bun run clear
+```
+
 ### Lint
 Lints and typechecks the `/src` directory using Prettier and eslint.
 ```bash
