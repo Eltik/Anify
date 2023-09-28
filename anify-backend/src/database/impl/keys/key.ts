@@ -1,7 +1,7 @@
 import { db } from "../..";
 import { Db, Key } from "../../../types/types";
 
-export const key = async (id: string): Promise<Key | undefined> => {
+export const getKey = async (id: string): Promise<Key | undefined> => {
     const key = db.query<Db<Key>, { $id: string }>(`SELECT * FROM apiKey WHERE id = $id`).get({ $id: id });
     return key
         ? {
@@ -14,7 +14,7 @@ export const key = async (id: string): Promise<Key | undefined> => {
         : undefined;
 };
 
-export const keyAll = async (): Promise<Key[] | undefined> => {
+export const getKeys = async (): Promise<Key[] | undefined> => {
     const keys = db.query(`SELECT * FROM apiKey`).all() as Db<Key>[];
     return keys;
 };

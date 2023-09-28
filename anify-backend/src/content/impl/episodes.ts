@@ -72,7 +72,7 @@ export const fetchEpisodes = async (id: string): Promise<EpisodeData[]> => {
     }
 
     Object.assign(media, {
-        currentEpisode: (media as Anime).currentEpisode ?? latestEpisode,
+        currentEpisode: (media as Anime).currentEpisode ?? 0 < latestEpisode ? latestEpisode : (media as Anime).currentEpisode,
         totalEpisodes,
         episodes: {
             latest: {

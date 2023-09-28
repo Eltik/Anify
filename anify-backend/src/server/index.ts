@@ -5,7 +5,7 @@ import colors from "colors";
 import { env } from "../env";
 import { rateLimitMiddleware } from "./lib/rateLimit.ts";
 import { apiKeyMiddleware } from "./lib/keys.ts";
-import { keyAll } from "../database/impl/fetch/key.ts";
+import { getKeys } from "../database/impl/keys/key.ts";
 
 export const redis: Redis = env.REDIS_URL
     ? new Redis((env.REDIS_URL as string) || "redis://localhost:6379")
@@ -21,7 +21,7 @@ export const redis: Redis = env.REDIS_URL
 export const cacheTime = env.REDIS_CACHE_TIME || 60 * 60 * 24 * 7 * 2;
 
 export const start = async () => {
-    const apiKeys = await keyAll();
+    const apiKeys = await getKeys();
     for (const key of apiKeys ?? []) {
         await redis.sadd("apikeys", key.key);
     }
