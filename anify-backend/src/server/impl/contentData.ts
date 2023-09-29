@@ -22,7 +22,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const cached = await redis.get(`chapters:${id}`);
+        const cached = await redis.get(`content-metadata:${id}`);
         if (cached) {
             return new Response(cached, {
                 status: 200,
@@ -32,7 +32,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const data = await content.fetchMetaData(String(id));
 
-        await redis.set(`chapters:${id}`, JSON.stringify(data), "EX", cacheTime);
+        await redis.set(`content-metadata:${id}`, JSON.stringify(data), "EX", cacheTime);
 
         return new Response(JSON.stringify(data), {
             status: 200,

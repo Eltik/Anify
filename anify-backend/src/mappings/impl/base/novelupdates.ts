@@ -125,7 +125,7 @@ export default class NovelUpdatesBase extends BaseProvider {
 
     override async getMedia(id: string, retries = 0): Promise<AnimeInfo | MangaInfo | undefined> {
         if (retries >= 10) {
-            console.error(`Failed to fetch data for ${id} after 10 retries.`)
+            console.error(`Failed to fetch data for ${id} after 10 retries.`);
             return undefined;
         }
 
@@ -190,7 +190,7 @@ export default class NovelUpdatesBase extends BaseProvider {
 
     private async fetchSeasonalData(url: string, retries = 0): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         if (retries >= 10) {
-            console.error(`Failed to fetch seasonal data for ${url} after 10 retries.`)
+            console.error(`Failed to fetch seasonal data for ${url} after 10 retries.`);
             return undefined;
         }
 
@@ -216,6 +216,8 @@ export default class NovelUpdatesBase extends BaseProvider {
 
         $("div.search_main_box_nu").map((_, el) => {
             const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split(this.url)[1]?.split("/series/")[1]?.slice(0, -1);
+
+            if (!id) return;
 
             requestPromises.push(
                 this.getMedia(id!)

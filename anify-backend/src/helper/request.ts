@@ -44,7 +44,6 @@ export default class Http {
     }
 
     static async request(proxyType: "BASE" | "ANIME" | "MANGA" | "META", url: string, config: RequestInit = {}, proxyRequest = true, requests = 0, customProxy: string | undefined = undefined): Promise<Response> {
-
         return new Promise(async (resolve, reject) => {
             try {
                 if (proxyRequest) {
@@ -62,7 +61,7 @@ export default class Http {
                     }, 5000);
 
                     controller.signal.addEventListener("abort", () => {
-                        console.log(colors.red(`http://${proxyUrl} aborted.`));
+                        console.log(colors.red(`${proxyUrl} aborted.`));
 
                         return resolve({
                             ok: false,
