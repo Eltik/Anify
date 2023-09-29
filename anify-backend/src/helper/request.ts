@@ -58,7 +58,7 @@ export default class Http {
                     const id = setTimeout(() => {
                         this.updateBannedProxies(proxyType, proxyUrl);
                         controller.abort();
-                    }, 5000);
+                    }, 10000);
 
                     controller.signal.addEventListener("abort", () => {
                         console.log(colors.red(`${modifyUrl} aborted.`));
