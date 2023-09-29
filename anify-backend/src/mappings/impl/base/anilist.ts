@@ -9,6 +9,7 @@ export default class AniListBase extends BaseProvider {
     override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
 
     public needsProxy: boolean = true;
+    public useGoogleTranslate: boolean = false;
 
     private api = "https://graphql.anilist.co";
 

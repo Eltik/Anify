@@ -9,9 +9,11 @@ export default abstract class MangaProvider {
     abstract formats: Format[];
 
     public providerType: ProviderType = ProviderType.MANGA;
+    public preferredTitle: "english" | "romaji" | "native" = "english";
+
     public customProxy: string | undefined;
     public needsProxy: boolean = false;
-    public preferredTitle: "english" | "romaji" | "native" = "english";
+    public useGoogleTranslate: boolean = true;
 
     async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         return undefined;
@@ -35,7 +37,7 @@ export default abstract class MangaProvider {
         if (proxyRequest === undefined && !this.needsProxy) proxyRequest = false;
         if (proxyRequest !== undefined && proxyRequest === true && !this.needsProxy) proxyRequest = true;
 
-        return Http.request("MANGA", url, config, proxyRequest, 0, this.customProxy);
+        return Http.request("MANGA", this.useGoogleTranslate, url, config, proxyRequest, 0, this.customProxy);
     }
 
     padNum(number: string, places: number): string {

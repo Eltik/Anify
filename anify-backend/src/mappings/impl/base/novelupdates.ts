@@ -66,7 +66,7 @@ export default class NovelUpdatesBase extends BaseProvider {
         const requestPromises: Promise<void>[] = [];
 
         $("div.search_main_box_nu").map((_, el) => {
-            const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split(this.url)[1]?.split("/series/")[1]?.slice(0, -1);
+            const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split("/series/")[1].split("/")[0];
 
             requestPromises.push(
                 this.getMedia(id!)
@@ -105,7 +105,7 @@ export default class NovelUpdatesBase extends BaseProvider {
         const requestPromises: Promise<void>[] = [];
 
         $("div.search_main_box_nu").map((_, el) => {
-            const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split(this.url)[1]?.split("/series/")[1]?.slice(0, -1);
+            const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split("/series/")[1].split("/")[0];
 
             requestPromises.push(
                 this.getMedia(id!)
@@ -137,7 +137,11 @@ export default class NovelUpdatesBase extends BaseProvider {
             return this.getMedia(id, retries + 1);
         }
 
-        const synonyms = $$("div#editassociated").html()?.split("<br>") ?? [];
+        const synonyms =
+            $$("div#editassociated")
+                .html()
+                ?.split("<br>")
+                .map((item) => item.trim()) ?? [];
         const year = Number($$("div#edityear").text()?.trim() ?? 0);
 
         return {
@@ -154,7 +158,7 @@ export default class NovelUpdatesBase extends BaseProvider {
                 .map((_, el) => $$(el).text())
                 .get() as Genres[],
             popularity: Number($$("b.rlist").text()?.trim() ?? 0),
-            rating: Number($$("h5.seriesother span.uvotes").text()?.split(" /")[0]?.substring(1) ?? 0),
+            rating: Number($$("h5.seriesother span.uvotes").text()?.split(" /")[0]?.substring(1) ?? 0) * 2,
             relations: [],
             status: $$("div#editstatus").text()?.includes("Complete") ? MediaStatus.FINISHED : MediaStatus.RELEASING,
             synonyms,
@@ -215,7 +219,7 @@ export default class NovelUpdatesBase extends BaseProvider {
         }
 
         $("div.search_main_box_nu").map((_, el) => {
-            const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split(this.url)[1]?.split("/series/")[1]?.slice(0, -1);
+            const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split("/series/")[1].split("/")[0];
 
             if (!id) return;
 

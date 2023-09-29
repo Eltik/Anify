@@ -3,6 +3,7 @@ import { extract } from "@extractus/article-extractor";
 import MangaProvider from ".";
 import { Format } from "../../../types/enums";
 import { Chapter, Page, Result } from "../../../types/types";
+import Http from "../../../helper/request";
 
 export default class NovelUpdates extends MangaProvider {
     override rateLimit = 1000;
@@ -37,7 +38,7 @@ export default class NovelUpdates extends MangaProvider {
         $("div.search_main_box_nu").each((_, el) => {
             const img = $(el).find("div.search_img_nu img").attr("src");
             const title = $(el).find("div.search_body_nu div.search_title a").text();
-            const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split(this.url)[1]?.split("/series/")[1]?.slice(0, -1);
+            const id = $(el).find("div.search_body_nu div.search_title a").attr("href")?.split("/series/")[1].split("/")[0];
 
             results.push({
                 id: id!,
@@ -77,14 +78,20 @@ export default class NovelUpdates extends MangaProvider {
 
         const chapterData = (
             await (
-                await this.request(`${this.url}/wp-admin/admin-ajax.php`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                        Cookie: "_ga=;",
+                await Http.request(
+                    "MANGA",
+                    false,
+                    `${this.url}/wp-admin/admin-ajax.php`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                            Cookie: "_ga=;",
+                        },
+                        body: `action=nd_getchapters&mypostid=${postId}&mypostid2=0`,
                     },
-                    body: `action=nd_getchapters&mypostid=${postId}&mypostid2=0`,
-                })
+                    false,
+                )
             ).text()
         ).substring(1);
 

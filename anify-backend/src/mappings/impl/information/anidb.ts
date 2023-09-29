@@ -8,6 +8,7 @@ export default class AniDB extends InformationProvider<Anime | Manga, AnimeInfo 
     override url = "https://anidb.net";
 
     public needsProxy: boolean = true;
+    public useGoogleTranslate: boolean = false;
 
     override get priorityArea(): MediaInfoKeys[] {
         return [];
@@ -79,7 +80,7 @@ export default class AniDB extends InformationProvider<Anime | Manga, AnimeInfo 
             season: $("div.info tr.season td.value a").text()?.split(" ")[0].toUpperCase() as Season,
             countryOfOrigin: null,
             relations: [],
-            rating: Number($("div.info tr.rating td.value a span.value").text() ?? 0) * 5,
+            rating: Number($("div.info tr.rating td.value a span.value").text() ?? 0) * 2,
             popularity: Number($("div.info tr.rating td.value span.count").attr("content") ?? 0),
             artwork: [],
             color: null,

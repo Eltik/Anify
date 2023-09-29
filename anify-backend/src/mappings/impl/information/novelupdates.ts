@@ -34,7 +34,11 @@ export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga,
             return this.info(media, retries + 1);
         }
 
-        const synonyms = $$("div#editassociated").html()?.split("<br>") ?? [];
+        const synonyms =
+            $$("div#editassociated")
+                .html()
+                ?.split("<br>")
+                .map((item) => item.trim()) ?? [];
         const year = Number($$("div#edityear").text()?.trim() ?? 0);
 
         return {

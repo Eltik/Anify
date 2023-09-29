@@ -43,16 +43,16 @@ export default class Http {
         return this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"][Math.floor(Math.random() * this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"].length)];
     }
 
-    static async request(proxyType: "BASE" | "ANIME" | "MANGA" | "META", url: string, config: RequestInit = {}, proxyRequest = true, requests = 0, customProxy: string | undefined = undefined): Promise<Response> {
+    static async request(proxyType: "BASE" | "ANIME" | "MANGA" | "META", useGoogleTranslate: boolean, url: string, config: RequestInit = {}, proxyRequest = true, requests = 0, customProxy: string | undefined = undefined): Promise<Response> {
         return new Promise(async (resolve, reject) => {
             try {
                 if (proxyRequest) {
-                    const proxyUrl = customProxy || this.getRandomUnbannedProxy(proxyType);
+                    const proxyUrl = useGoogleTranslate ? "http://translate.google.com/translate?sl=ja&tl=en&u=" : customProxy || this.getRandomUnbannedProxy(proxyType);
                     if (!proxyUrl) {
                         throw new Error("No proxy available.");
                     }
 
-                    const modifyUrl = `${proxyUrl}/${url}`;
+                    const modifyUrl = useGoogleTranslate ? `${proxyUrl}${encodeURIComponent(url)}` : `${proxyUrl}/${url}`;
 
                     const controller = new AbortController();
                     const id = setTimeout(() => {
@@ -61,7 +61,7 @@ export default class Http {
                     }, 5000);
 
                     controller.signal.addEventListener("abort", () => {
-                        console.log(colors.red(`${proxyUrl} aborted.`));
+                        console.log(colors.red(`${modifyUrl} aborted.`));
 
                         return resolve({
                             ok: false,
@@ -98,7 +98,7 @@ export default class Http {
                                 return response;
                             }
 
-                            return this.request(proxyType, url, config, proxyRequest, requests + 1);
+                            return this.request(proxyType, useGoogleTranslate, url, config, proxyRequest, requests + 1);
                         }
 
                         clearTimeout(id);

@@ -48,33 +48,64 @@ export async function checkCorsProxies(): Promise<{
         const ip = ips[i];
         console.log(colors.green("Iteration ") + (i + 1) + colors.green(" of ") + ips.length + colors.green(".") + colors.gray(" (Timeout: 5 seconds)"));
 
-        const base = await makeRequest(ip, "BASE");
-        if (base) baseIps.push(base) && console.log(colors.green(base.length + " passed!"));
-        else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
+        const promises = [];
 
-        // Write to file
-        Bun.write("./baseProxies.json", JSON.stringify(baseIps, null, 4));
+        promises.push(
+            new Promise(async (resolve, reject) => {
+                const base = await makeRequest(ip, "BASE");
+                if (base) baseIps.push(base) && console.log(colors.green(base.length + " passed!"));
+                else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
 
-        const anime = await makeRequest(ip, "ANIME");
-        if (anime) animeIps.push(anime) && console.log(colors.green(anime.length + " passed!"));
-        else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
+                // Write to file
+                Bun.write("./baseProxies.json", JSON.stringify(baseIps, null, 4));
 
-        // Write to file
-        Bun.write("./animeProxies.json", JSON.stringify(animeIps, null, 4));
+                resolve(true);
+            }),
+        );
 
-        const manga = await makeRequest(ip, "MANGA");
-        if (manga) mangaIps.push(manga) && console.log(colors.green(manga.length + " passed!"));
-        else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
+        promises.push(
+            new Promise(async (resolve, reject) => {
+                const anime = await makeRequest(ip, "ANIME");
+                if (anime) animeIps.push(anime) && console.log(colors.green(anime.length + " passed!"));
+                else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
 
-        // Write to file
-        Bun.write("./mangaProxies.json", JSON.stringify(mangaIps, null, 4));
+                // Write to file
+                Bun.write("./animeProxies.json", JSON.stringify(animeIps, null, 4));
 
-        const meta = await makeRequest(ip, "META");
-        if (meta) metaIps.push(meta) && console.log(colors.green(meta.length + " passed!"));
-        else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
+                resolve(true);
+            }),
+        );
 
-        // Write to file
-        Bun.write("./metaProxies.json", JSON.stringify(metaIps, null, 4));
+        promises.push(
+            new Promise(async (resolve, reject) => {
+                const manga = await makeRequest(ip, "MANGA");
+                if (manga) mangaIps.push(manga) && console.log(colors.green(manga.length + " passed!"));
+                else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
+
+                // Write to file
+                Bun.write("./mangaProxies.json", JSON.stringify(mangaIps, null, 4));
+
+                resolve(true);
+            }),
+        );
+
+        promises.push(
+            new Promise(async (resolve, reject) => {
+                const meta = await makeRequest(ip, "META");
+                if (meta) metaIps.push(meta) && console.log(colors.green(meta.length + " passed!"));
+                else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
+
+                // Write to file
+                Bun.write("./metaProxies.json", JSON.stringify(metaIps, null, 4));
+
+                resolve(true);
+            }),
+        );
+
+        console.log(colors.gray("Waiting for promises to resolve..."));
+        await Promise.all(promises);
+
+        console.log(colors.gray("Finished iteration ") + (i + 1) + colors.gray(" of ") + ips.length + colors.gray("."));
     }
 
     BASE_PROXIES.length = 0;
@@ -132,7 +163,7 @@ async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): P
                 let isOkay = true;
                 if (type === "BASE") {
                     for (const provider of BASE_PROVIDERS) {
-                        if (!provider.needsProxy) continue;
+                        if (!provider.needsProxy || provider.useGoogleTranslate) continue;
                         console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
 
                         provider.customProxy = `http://${ip.ip}:${ip.port}`;
@@ -158,7 +189,7 @@ async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): P
 
                 if (type === "ANIME") {
                     for (const provider of ANIME_PROVIDERS) {
-                        if (!provider.needsProxy) continue;
+                        if (!provider.needsProxy || provider.useGoogleTranslate) continue;
                         console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
 
                         provider.customProxy = `http://${ip.ip}:${ip.port}`;
@@ -184,7 +215,7 @@ async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): P
 
                 if (type === "MANGA") {
                     for (const provider of MANGA_PROVIDERS) {
-                        if (!provider.needsProxy) continue;
+                        if (!provider.needsProxy || provider.useGoogleTranslate) continue;
                         console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
 
                         provider.customProxy = `http://${ip.ip}:${ip.port}`;
@@ -210,7 +241,7 @@ async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): P
 
                 if (type === "META") {
                     for (const provider of META_PROVIDERS) {
-                        if (!provider.needsProxy) continue;
+                        if (!provider.needsProxy || provider.useGoogleTranslate) continue;
                         console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
 
                         provider.customProxy = `http://${ip.ip}:${ip.port}`;

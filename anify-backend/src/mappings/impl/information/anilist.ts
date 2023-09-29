@@ -9,6 +9,7 @@ export default class AniList extends InformationProvider<Anime | Manga, AnimeInf
     private api = "https://graphql.anilist.co";
 
     public needsProxy: boolean = true;
+    public useGoogleTranslate: boolean = false;
 
     public preferredTitle: "english" | "romaji" | "native" = "native";
 

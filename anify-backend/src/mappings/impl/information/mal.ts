@@ -27,7 +27,7 @@ export default class MAL extends InformationProvider<Anime | Manga, AnimeInfo | 
 
         const req = await this.request(`${this.api}/${media.type.toLowerCase()}/${malId}/full`, {
             headers: {
-                origin: "https://jikan.moe",
+                Origin: "https://jikan.moe",
             },
         });
 

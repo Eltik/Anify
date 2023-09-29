@@ -167,7 +167,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
         const sim = similarity(title, best.title, altTitles);
 
         // Remove if similarity is too low
-        if (sim.value < 0.3) continue;
+        if (sim.value < 0.4) continue;
 
         if (mappings.filter((m) => m.data.id === best.id).length > 0) continue;
 

@@ -9,10 +9,11 @@ export default abstract class MetaProvider {
     abstract formats: Format[];
 
     public providerType: ProviderType = ProviderType.META;
+    public preferredTitle: "english" | "romaji" | "native" = "english";
+
     public customProxy: string | undefined;
     public needsProxy: boolean = false;
-
-    public preferredTitle: "english" | "romaji" | "native" = "english";
+    public useGoogleTranslate: boolean = true;
 
     async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         return undefined;
@@ -24,6 +25,6 @@ export default abstract class MetaProvider {
         if (proxyRequest === undefined && !this.needsProxy) proxyRequest = false;
         if (proxyRequest !== undefined && proxyRequest === true && !this.needsProxy) proxyRequest = true;
 
-        return Http.request("META", url, config, proxyRequest, 0, this.customProxy);
+        return Http.request("META", this.useGoogleTranslate, url, config, proxyRequest, 0, this.customProxy);
     }
 }

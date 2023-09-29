@@ -7,6 +7,7 @@ export default class AniListMeta extends MetaProvider {
     override url = "https://anilist.co";
 
     public needsProxy: boolean = true;
+    public useGoogleTranslate: boolean = false;
 
     override rateLimit = 500;
     override formats: Format[] = [Format.TV, Format.MOVIE, Format.ONA, Format.SPECIAL, Format.TV_SHORT, Format.OVA, Format.MANGA, Format.ONE_SHOT, Format.NOVEL];

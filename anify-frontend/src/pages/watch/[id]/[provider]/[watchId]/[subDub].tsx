@@ -831,7 +831,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     const media = (await axios.get(String(env.BACKEND_URL) + "/info/" + String(id) + "?apikey=" + String(env.API_KEY))).data as Anime;
     const content = (await axios.get(String(env.BACKEND_URL) + "/episodes/" + String(id) + "?apikey=" + String(env.API_KEY))).data as EpisodeData[];
-    const episodeCovers = (await (await axios.get(`${env.BACKEND_URL}/episode-covers?id=${String(id)}&apikey=${env.API_KEY}`)).data) as { episode: number; img: string }[];
+    const episodeCovers = (await (await axios.get(`${env.BACKEND_URL}/content-metadata?id=${String(id)}&apikey=${env.API_KEY}`)).data) as { episode: number; img: string }[];
 
     for (let i = 0; i < content.length; i++) {
         const episodes = content[i]?.episodes ?? [];

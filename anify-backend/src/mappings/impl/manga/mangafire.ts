@@ -12,6 +12,7 @@ export default class MangaFire extends MangaProvider {
     override formats: Format[] = [Format.MANGA, Format.ONE_SHOT];
 
     public needsProxy: boolean = true;
+    public useGoogleTranslate: boolean = false;
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         const results: Result[] = [];
