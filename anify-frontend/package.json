@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "npx next build",
     "dev": "next dev",
     "lint": "bun run prettier && next lint",
     "prettier": "bunx prettier --write .",
