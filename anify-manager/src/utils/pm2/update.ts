@@ -92,7 +92,7 @@ export default async function update({ label = "auto", name = Object.keys(buildC
 
             await output.promise;
 
-            localCommand = `cd ${buildPath}/${repo.name} && pnpm install`;
+            localCommand = `cd ${buildPath}/${repo.name} && npm install`;
             output = customPromisify(localCommand);
 
             output.child.stdout?.on("data", (d) => writeToLogStream(d, repo.name));
