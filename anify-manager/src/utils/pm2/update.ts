@@ -109,9 +109,11 @@ export default async function update({ label = "auto", name = Object.keys(buildC
             const authFolder = buildCommands[repo.name].authFolder;
 
             if (buildCommands[repo.name].copyProxies && backendFolder && proxies) {
-                const dest = `${buildPath}/${repo.name}/${backendFolder}/goodProxies.json`;
+                const dest = [`${buildPath}/${repo.name}/${backendFolder}/animeProxies.json`, `${buildPath}/${repo.name}/${backendFolder}/baseProxies.json`, `${buildPath}/${repo.name}/${backendFolder}/mangaProxies.json`, `${buildPath}/${repo.name}/${backendFolder}/metaProxies.json`, `${buildPath}/${repo.name}/${backendFolder}/proxies.json`];
                 try {
-                    copyFileSync(proxies, dest);
+                    for (let i = 0; i < dest.length; i++) {
+                        copyFileSync(proxies[i], dest[i]);
+                    }
                 } catch (error) {
                     const errorMessage = (error as any).message || error;
                     console.error(`buildRepo error: ${errorMessage}`);

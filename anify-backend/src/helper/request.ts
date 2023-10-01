@@ -29,10 +29,12 @@ export default class Http {
     static updateBannedProxies(proxyType: "BASE" | "ANIME" | "MANGA" | "META", proxyUrl: string): void {
         if (!this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"]) this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"] = proxyType === "BASE" ? (Array.isArray(BASE_PROXIES) ? BASE_PROXIES : []) : proxyType === "ANIME" ? (Array.isArray(ANIME_PROXIES) ? ANIME_PROXIES : []) : proxyType === "MANGA" ? (Array.isArray(MANGA_PROXIES) ? MANGA_PROXIES : []) : proxyType === "META" ? (Array.isArray(META_PROXIES) ? META_PROXIES : []) : [];
 
+        /*
         if (!this.bannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"].includes(proxyUrl)) {
             this.bannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"].push(proxyUrl);
             this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"] = (proxyType === "BASE" ? (Array.isArray(BASE_PROXIES) ? BASE_PROXIES : []) : proxyType === "ANIME" ? (Array.isArray(ANIME_PROXIES) ? ANIME_PROXIES : []) : proxyType === "MANGA" ? (Array.isArray(MANGA_PROXIES) ? MANGA_PROXIES : []) : proxyType === "META" ? (Array.isArray(META_PROXIES) ? META_PROXIES : []) : []).filter((proxy) => !this.bannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"].includes(proxy));
         }
+        */
     }
 
     static getRandomUnbannedProxy(proxyType: "BASE" | "ANIME" | "MANGA" | "META"): string | undefined {
@@ -113,11 +115,7 @@ export default class Http {
                 }
             } catch (e) {
                 console.log(e);
-                return resolve({
-                    ok: false,
-                    status: 500,
-                    statusText: "Internal Server Error",
-                } as Response);
+                throw e;
             }
         });
     }

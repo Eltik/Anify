@@ -2,15 +2,13 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { fetchCorsProxies } from "./proxies/impl/fetchProxies";
-import { checkCorsProxies } from "./proxies/impl/checkProxies";
-import { Format, MediaStatus } from "./types/enums";
+import { MediaStatus } from "./types/enums";
 import { init } from "./database";
 import emitter, { Events } from "./lib";
 import { get } from "./database/impl/fetch/get";
 import queues from "./worker";
 import { start } from "./server";
 import { startWebsocket } from "./websocket";
-import { metaProviders } from "./mappings";
 
 before().then(async (_) => {
     await start();
@@ -20,9 +18,6 @@ before().then(async (_) => {
 async function before() {
     await fetchCorsProxies();
     await init();
-
-    // Check proxies every 12 hours
-    setInterval(checkCorsProxies, 1000 * 60 * 60 * 12);
 
     emitter.on(Events.COMPLETED_MAPPING_LOAD, async (data) => {
         for (let i = 0; i < data.length; i++) {
