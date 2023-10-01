@@ -53,11 +53,11 @@ export const start = async () => {
 
             // Rate limit requests.
             const apiKey = await apiKeyMiddleware(req);
-            const requests = !apiKey ? await rateLimitMiddleware(req) : null;
-            // return new Response(JSON.stringify({ error: "Too many requests" }), { status: 429, headers: { "Content-Type": "application/json" } });
 
             if (routes[pathName]) {
                 const { path, handler, rateLimit } = routes[pathName];
+                const requests = !apiKey ? await rateLimitMiddleware(req, pathName) : null;
+
                 if (requests && requests.requests > rateLimit) {
                     if (requests.requests > rateLimit * 2) console.log(colors.red(`Rate limit significantly exceeded for ${requests.ip}`));
 
