@@ -6,17 +6,22 @@ type ReturnType<T> = T extends "ANIME" ? Anime[] : Manga[];
 
 export const search = async <T extends "ANIME" | "MANGA">(query: string, type: T, formats: Format[], page: number, perPage: number): Promise<ReturnType<T>> => {
     const skip = page > 0 ? perPage * (page - 1) : 0;
+    
     const where = `
         WHERE
         (
             EXISTS (
                 SELECT 1
                 FROM json_each(synonyms) AS s
-                WHERE s.value LIKE '%' || $query || '%'
+                WHERE value LIKE '%' || $query || '%'
+                OR value = $query
             )
             OR title->>'english' LIKE '%' || $query || '%'
+            OR title->>'english' = $query
             OR title->>'romaji' LIKE '%' || $query || '%'
+            OR title->>'romaji' = $query
             OR title->>'native' LIKE '%' || $query || '%'
+            OR title->>'native' = $query
         )
         ${formats?.length > 0 ? `AND "format" IN (${formats.map((f) => `'${f}'`).join(", ")})` : ""}
     `;

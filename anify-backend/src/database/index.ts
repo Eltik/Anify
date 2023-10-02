@@ -37,6 +37,24 @@ export const init = async () => {
     );
     `;
 
+    const animeFts3 = `
+    CREATE VIRTUAL TABLE IF NOT EXISTS anime_fts USING fts3(
+        content='anime',
+        title,
+        description,
+        synonyms
+    )
+    `;
+
+    const createAnimeTrigger = `
+        CREATE TRIGGER IF NOT EXISTS anime_after_insert
+        AFTER INSERT ON anime
+        BEGIN
+            INSERT INTO anime_fts(rowid, title, synonyms, description)
+            VALUES (new.id, new.title, new.synonyms, new.description);
+        END;
+    `;
+
     const manga = `
     CREATE TABLE IF NOT EXISTS manga (
         id TEXT PRIMARY KEY,
@@ -88,6 +106,8 @@ export const init = async () => {
     `;
 
     db.query(anime).run();
+    db.query(animeFts3).run();
+    db.query(createAnimeTrigger).run();
     db.query(manga).run();
     db.query(skipTimes).run();
     db.query(apiKey).run();
