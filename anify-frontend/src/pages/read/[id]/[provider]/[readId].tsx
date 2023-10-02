@@ -584,7 +584,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     if (mixdrop) {
         downloadLink = (await (
-            await axios.post(String(env.BACKEND_URL) + "/pages-download?apikey=" + String(env.API_KEY), {
+            await axios.post(String(env.BACKEND_URL) + "/mixdrop?apikey=" + String(env.API_KEY), {
                 id: mixdrop,
             })
         ).data) as MixdropResponse;

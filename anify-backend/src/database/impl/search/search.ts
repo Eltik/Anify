@@ -17,17 +17,16 @@ export const search = async <T extends "ANIME" | "MANGA">(query: string, type: T
 
     const results = db
         .query<Db<Anime> | Db<Manga>, { $query: string }>(
-            `
-        SELECT *,
-            bm25(
-              ${type === Type.ANIME ? "anime_fts" : "manga_fts"},
-              1.0 + 0.1 * (
-                SELECT COUNT(*) FROM ${type === Type.ANIME ? "anime_fts" : "manga_fts"}
-              ) / (SELECT COUNT(*) FROM ${type === Type.ANIME ? "anime" : "manga"})
-            ) as bm25_rank
-        FROM ${type === Type.ANIME ? "anime_fts" : "manga_fts"} ${where}
-        ORDER BY bm25_rank DESC, title->>'english' ASC
-        LIMIT ${perPage} OFFSET ${skip}`,
+            `SELECT *,
+                bm25(
+                    ${type === Type.ANIME ? "anime_fts" : "manga_fts"},
+                    1.0 + 0.1 *
+                    (SELECT COUNT(*) FROM ${type === Type.ANIME ? "anime_fts" : "manga_fts"}) /
+                    (SELECT COUNT(*) FROM ${type === Type.ANIME ? "anime" : "manga"})
+                ) as bm25_rank
+            FROM ${type === Type.ANIME ? "anime_fts" : "manga_fts"} ${where}
+            ORDER BY bm25_rank DESC, title->>'english' ASC
+            LIMIT ${perPage} OFFSET ${skip}`,
         )
         .all({
             $query: query,

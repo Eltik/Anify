@@ -12,7 +12,7 @@ export default async function handler(request: Request, response: ServerResponse
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const data: MixdropResponse = await (
-        await fetch(`${env.BACKEND_URL}/pages-download?apikey=${env.API_KEY}`, {
+        await fetch(`${env.BACKEND_URL}/mixdrop?apikey=${env.API_KEY}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

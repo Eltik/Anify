@@ -4,18 +4,12 @@ import { Anime, Manga } from "../../../types/types";
 
 export const searchAdvanced = async (query: string, type: Type, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = [], year = 0, tags: string[] = [], tagsExcluded: string[] = []) => {
     const skip = page > 0 ? perPage * (page - 1) : 0;
+
     let where = `
         WHERE
-        (
-            EXISTS (
-                SELECT 1
-                FROM json_each(synonyms) AS s
-                WHERE s.value LIKE '%' || $query || '%'
-            )
-            OR title->>'english' LIKE '%' || $query || '%'
-            OR title->>'romaji' LIKE '%' || $query || '%'
-            OR title->>'native' LIKE '%' || $query || '%'
-        )
+        ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH
+        'title:${query}*' OR ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH
+        'synonyms:${query}*'
         ${formats?.length > 0 ? `AND "format" IN (${formats.map((f) => `'${f}'`).join(", ")})` : ""}
     `;
 
@@ -64,9 +58,22 @@ export const searchAdvanced = async (query: string, type: Type, formats: Format[
     }
 
     try {
-        const results = (await db.query(`SELECT * FROM ${type === Type.ANIME ? "anime" : "manga"} ${where} ORDER BY title->>'english' ASC LIMIT ${perPage} OFFSET ${skip}`).all({
-            $query: query,
-        })) as Anime[] | Manga[];
+        const results = (await db
+            .query(
+                `SELECT *,
+                bm25(
+                    ${type === Type.ANIME ? "anime_fts" : "manga_fts"},
+                    1.0 + 0.1 *
+                    (SELECT COUNT(*) FROM ${type === Type.ANIME ? "anime_fts" : "manga_fts"}) /
+                    (SELECT COUNT(*) FROM ${type === Type.ANIME ? "anime" : "manga"})
+                ) as bm25_rank
+            FROM ${type === Type.ANIME ? "anime_fts" : "manga_fts"} ${where}
+            ORDER BY bm25_rank DESC, title->>'english' ASC
+            LIMIT ${perPage} OFFSET ${skip}`,
+            )
+            .all({
+                $query: query,
+            })) as Anime[] | Manga[];
         return results.map((data) => {
             try {
                 if (data.type === Type.ANIME) {

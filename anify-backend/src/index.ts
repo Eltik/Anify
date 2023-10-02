@@ -2,27 +2,18 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { fetchCorsProxies } from "./proxies/impl/fetchProxies";
-import { Format, MediaStatus, Type } from "./types/enums";
+import { MediaStatus } from "./types/enums";
 import { init } from "./database";
 import emitter, { Events } from "./lib";
 import { get } from "./database/impl/fetch/get";
 import queues from "./worker";
 import { start } from "./server";
 import { startWebsocket } from "./websocket";
-import { search } from "./database/impl/search/search";
-import { loadSearch } from "./lib/impl/search";
 
 before().then(async (_) => {
     await start();
     await startWebsocket();
-    //await temp()
-    //await search("Dragon ball", Type.ANIME, [Format.TV], 0, 10).then(console.log)
 });
-
-async function temp() {
-    const search = "Dragon Ball";
-    await loadSearch({ query: search, type: Type.ANIME, formats: [Format.TV] });
-}
 
 async function before() {
     await fetchCorsProxies();

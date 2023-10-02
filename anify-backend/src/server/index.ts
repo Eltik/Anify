@@ -29,7 +29,7 @@ export const start = async () => {
     console.log(colors.gray(`Loaded ${colors.yellow(apiKeys?.length + "")} API keys`));
 
     const routes: { [key: string]: { path: string; handler: (req: Request) => Promise<Response>; rateLimit: number } } = {};
-    const routeFiles = [await import("./impl/chapters.ts"), await import("./impl/contentData.ts"), await import("./impl/episodes.ts"), await import("./impl/info.ts"), await import("./impl/pages.ts"), await import("./impl/recent.ts"), await import("./impl/relations.ts"), await import("./impl/schedule.ts"), await import("./impl/search.ts"), await import("./impl/searchAdvanced.ts"), await import("./impl/seasonal.ts"), await import("./impl/sources.ts"), await import("./impl/stats.ts")];
+    const routeFiles = [await import("./impl/chapters.ts"), await import("./impl/contentData.ts"), await import("./impl/episodes.ts"), await import("./impl/info.ts"), await import("./impl/pages.ts"), await import("./impl/recent.ts"), await import("./impl/relations.ts"), await import("./impl/schedule.ts"), await import("./impl/search.ts"), await import("./impl/searchAdvanced.ts"), await import("./impl/seasonal.ts"), await import("./impl/sources.ts"), await import("./impl/stats.ts"), await import("./impl/mixdrop.ts")];
 
     for (const file of routeFiles) {
         const routeModule = await file;
