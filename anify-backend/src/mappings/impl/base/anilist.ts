@@ -740,7 +740,9 @@ export default class AniListBase extends BaseProvider {
 
             const batchResults: { id: number; type: Type; format: Format }[] = results
                 .reduce((accumulator, currentObject) => {
-                    const mediaArrays = Object.values(currentObject).map((anime: any) => anime.media);
+                    const mediaArrays = Object.values(currentObject)
+                        .map((anime: any) => anime?.media)
+                        .filter(Boolean);
                     return accumulator.concat(...mediaArrays);
                 }, [])
                 .map((x: any) => {
@@ -808,7 +810,9 @@ export default class AniListBase extends BaseProvider {
 
             const batchResults: { id: number; type: Type; format: Format }[] = results
                 .reduce((accumulator, currentObject) => {
-                    const mediaArrays = Object.values(currentObject).map((anime: any) => anime.media);
+                    const mediaArrays = Object.values(currentObject)
+                        .map((anime: any) => anime?.media)
+                        .filter(Boolean);
                     return accumulator.concat(...mediaArrays);
                 }, [])
                 .map((x: any) => {

@@ -37,12 +37,37 @@ export const init = async () => {
     );
     `;
 
-    const animeFts3 = `
-    CREATE VIRTUAL TABLE IF NOT EXISTS anime_fts USING fts3(
-        content='anime',
+    const animeFts = `
+    CREATE VIRTUAL TABLE IF NOT EXISTS anime_fts USING fts5(
+        id UNINDEXED,
+        slug,
+        coverImage,
+        bannerImage,
+        trailer,
+        status,
+        season,
         title,
+        currentEpisode,
+        mappings,
+        synonyms,
+        countryOfOrigin,
         description,
-        synonyms
+        duration,
+        color,
+        year,
+        rating,
+        popularity,
+        type,
+        format,
+        relations,
+        totalEpisodes,
+        genres,
+        tags,
+        episodes,
+        averageRating,
+        averagePopularity,
+        artwork,
+        characters
     )
     `;
 
@@ -50,8 +75,38 @@ export const init = async () => {
         CREATE TRIGGER IF NOT EXISTS anime_after_insert
         AFTER INSERT ON anime
         BEGIN
-            INSERT INTO anime_fts(rowid, title, synonyms, description)
-            VALUES (new.id, new.title, new.synonyms, new.description);
+            INSERT INTO anime_fts
+            VALUES (
+                new.id,
+                new.slug,
+                new.coverImage,
+                new.bannerImage,
+                new.trailer,
+                new.status,
+                new.season,
+                new.title,
+                new.currentEpisode,
+                new.mappings,
+                new.synonyms,
+                new.countryOfOrigin,
+                new.description,
+                new.duration,
+                new.color,
+                new.year,
+                new.rating,
+                new.popularity,
+                new.type,
+                new.format,
+                new.relations,
+                new.totalEpisodes,
+                new.genres,
+                new.tags,
+                new.episodes,
+                new.averageRating,
+                new.averagePopularity,
+                new.artwork,
+                new.characters
+            );
         END;
     `;
 
@@ -88,6 +143,77 @@ export const init = async () => {
     );
     `;
 
+    const mangaFts = `
+    CREATE VIRTUAL TABLE IF NOT EXISTS manga_fts USING fts5(
+        id UNINDEXED,
+        slug,
+        coverImage,
+        bannerImage,
+        status,
+        title,
+        mappings,
+        synonyms,
+        countryOfOrigin,
+        description,
+        duration,
+        color,
+        year,
+        rating,
+        popularity,
+        type,
+        format,
+        relations,
+        currentChapter,
+        totalChapters,
+        totalVolumes,
+        genres,
+        tags,
+        chapters,
+        averageRating,
+        averagePopularity,
+        artwork,
+        characters
+    )
+    `;
+
+    const createMangaTrigger = `
+        CREATE TRIGGER IF NOT EXISTS manga_after_insert
+        AFTER INSERT ON manga
+        BEGIN
+            INSERT INTO manga_fts
+            VALUES (
+                new.id,
+                new.slug,
+                new.coverImage,
+                new.bannerImage,
+                new.status,
+                new.title,
+                new.mappings,
+                new.synonyms,
+                new.countryOfOrigin,
+                new.description,
+                new.duration,
+                new.color,
+                new.year,
+                new.rating,
+                new.popularity,
+                new.type,
+                new.format,
+                new.relations,
+                new.currentChapter,
+                new.totalChapters,
+                new.totalVolumes,
+                new.genres,
+                new.tags,
+                new.chapters,
+                new.averageRating,
+                new.averagePopularity,
+                new.artwork,
+                new.characters
+            );
+        END;
+    `;
+
     const skipTimes = `
     CREATE TABLE IF NOT EXISTS skipTimes (
         id TEXT PRIMARY KEY,
@@ -106,9 +232,11 @@ export const init = async () => {
     `;
 
     db.query(anime).run();
-    db.query(animeFts3).run();
+    db.query(animeFts).run();
     db.query(createAnimeTrigger).run();
     db.query(manga).run();
+    db.query(mangaFts).run();
+    db.query(createMangaTrigger).run();
     db.query(skipTimes).run();
     db.query(apiKey).run();
 };
