@@ -53,7 +53,7 @@ export default class AniListMeta extends MetaProvider {
             body: JSON.stringify(aniListArgs),
         });
         const json = await req?.json();
-        const media = json.data.Page.media;
+        const media = json.data?.Page?.media;
 
         media.map((data: Media) => {
             results.push({

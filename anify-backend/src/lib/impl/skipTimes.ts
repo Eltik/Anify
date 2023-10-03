@@ -32,16 +32,25 @@ export const loadSkipTimes = async (data: { id: string; episode: number; toInser
     }
 
     if (data.toInsert.intro.end > 0 || data.toInsert.outro.end > 0) {
-        toInsert?.episodes.push({
-            intro: data.toInsert.intro,
-            outro: data.toInsert.outro,
-            number: data.episode,
-        });
+        if (!Array.isArray(toInsert?.episodes) || !toInsert.episodes || !toInsert.episodes.length) {
+            toInsert.episodes = [
+                {
+                    intro: data.toInsert.intro,
+                    outro: data.toInsert.outro,
+                    number: data.episode,
+                },
+            ];
+        } else {
+            toInsert?.episodes.push({
+                intro: data.toInsert.intro,
+                outro: data.toInsert.outro,
+                number: data.episode,
+            });
+        }
     }
 
     await updateSkipTimes({ id: data.id, episodes: toInsert.episodes });
 
-    // temp
     console.log(colors.green(`Inserted skip times for ${data.id} episode ${data.episode}`));
 
     const skipTimes = toInsert.episodes.find((e) => e.number === data.episode);
