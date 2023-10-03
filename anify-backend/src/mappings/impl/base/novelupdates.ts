@@ -129,10 +129,25 @@ export default class NovelUpdatesBase extends BaseProvider {
             return undefined;
         }
 
-        const data = await (await this.request(`${this.url}/series/${id}`, { headers: { Referer: this.url } })).text();
-        const $$ = load(data);
+        let data = await (await this.request(`${this.url}/series/${id}`, { headers: { Referer: this.url } })).text();
+        let $$ = load(data);
 
         const title = $$("title").html();
+        if (title === "Page not found - Novel Updates") {
+            data = await (
+                await this.request(
+                    `${this.url}/series/${id}`,
+                    {
+                        headers: {
+                            Referer: this.url,
+                        },
+                    },
+                    false,
+                )
+            ).text();
+
+            $$ = load(data);
+        }
         if (title === "Just a moment..." || title === "Attention Required! | Cloudflare") {
             return this.getMedia(id, retries + 1);
         }

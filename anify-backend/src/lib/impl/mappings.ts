@@ -36,7 +36,7 @@ export const loadMapping = async (data: { id: string; type: Type; formats: Forma
         }
     }).filter((x) => x !== null)[0];
 
-    if (!baseData) {
+    if (!baseData || ((!baseData.title.english || baseData.title.english?.length === 0) && (!baseData.title.romaji || baseData.title.romaji?.length === 0) && (!baseData.title.native || baseData.title.native?.length === 0))) {
         console.log(colors.red("Media not found. Skipping..."));
 
         await emitter.emitAsync(Events.COMPLETED_MAPPING_LOAD, []);

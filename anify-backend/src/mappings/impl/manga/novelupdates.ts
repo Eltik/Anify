@@ -59,17 +59,25 @@ export default class NovelUpdates extends MangaProvider {
 
         const chapters: Chapter[] = [];
 
-        const data = await (
-            await this.request(`${this.url}/series/${id}`, {
-                headers: {
-                    Cookie: "_ga=;",
-                },
-            })
-        ).text();
-
-        const $ = load(data);
+        let data = await (await this.request(`${this.url}/series/${id}`, { headers: { Referer: this.url } })).text();
+        let $ = load(data);
 
         const title = $("title").html();
+        if (title === "Page not found - Novel Updates") {
+            data = await (
+                await this.request(
+                    `${this.url}/series/${id}`,
+                    {
+                        headers: {
+                            Referer: this.url,
+                        },
+                    },
+                    false,
+                )
+            ).text();
+
+            $ = load(data);
+        }
         if (title === "Just a moment..." || title === "Attention Required! | Cloudflare") {
             return this.fetchChapters(id, retries + 1);
         }
