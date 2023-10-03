@@ -277,12 +277,12 @@ export default class NineAnime extends AnimeProvider {
             Referer: this.url,
         };
 
-        const req1 = await Http.request("ANIME", true, this.url, { headers }, proxyRequest, 0, proxy);
+        const req1 = await Http.request("ANIME", this.useGoogleTranslate, this.url, { headers }, proxyRequest, 0, proxy);
 
         const data1 = await req1.text();
 
         if (!isString(data1)) {
-            return Http.request("ANIME", true, url, options, proxyRequest, 0, proxy);
+            return Http.request("ANIME", this.useGoogleTranslate, url, options, proxyRequest, 0, proxy);
         }
 
         // Extract _a and _b values
@@ -291,11 +291,11 @@ export default class NineAnime extends AnimeProvider {
         const _a = _aMatch?.[1];
         const _b = _bMatch?.[1];
         if (!_a || !_b) {
-            return Http.request("ANIME", true, url, options, proxyRequest, 0, proxy);
+            return Http.request("ANIME", this.useGoogleTranslate, url, options, proxyRequest, 0, proxy);
         }
 
         // Now fetch k value
-        const req2 = await Http.request("ANIME", true, `${this.url}/waf-js-run`, { headers }, proxyRequest, 0, proxy);
+        const req2 = await Http.request("ANIME", this.useGoogleTranslate, `${this.url}/waf-js-run`, { headers }, proxyRequest, 0, proxy);
         const data2 = await req2.text();
 
         const context = { global: global, data: "" };
@@ -327,7 +327,7 @@ export default class NineAnime extends AnimeProvider {
         const kMatch = context.data.match(/var k='([^']+)'/);
         if (!kMatch) {
             console.error("Failed to extract k value");
-            return Http.request("ANIME", true, url, options, proxyRequest, 0, proxy);
+            return Http.request("ANIME", this.useGoogleTranslate, url, options, proxyRequest, 0, proxy);
         }
         const k = kMatch[1];
 
@@ -335,7 +335,7 @@ export default class NineAnime extends AnimeProvider {
         const l = k.length;
         if (l !== _a.length || l !== _b.length) {
             console.error("Length of k, _a and _b do not match");
-            return Http.request("ANIME", true, url, options, proxyRequest, 0, proxy);
+            return Http.request("ANIME", this.useGoogleTranslate, url, options, proxyRequest, 0, proxy);
         }
         const o = Array.from(k)
             .map((char, i) => char + _a[i] + _b[i])
@@ -344,14 +344,14 @@ export default class NineAnime extends AnimeProvider {
         // Update URL with __jscheck parameter
         const updatedUrl = this.url.replace(/&?__jscheck=[^&]+/g, "") + (this.url.indexOf("?") < 0 ? "?" : "&") + "__jscheck=" + o;
 
-        const req3 = await Http.request("ANIME", true, updatedUrl, { headers, redirect: "follow" }, proxyRequest, 0, proxy);
+        const req3 = await Http.request("ANIME", this.useGoogleTranslate, updatedUrl, { headers, redirect: "follow" }, proxyRequest, 0, proxy);
         console.log(req3.headers);
 
         const cookies = req3.headers.get("set-cookie");
 
         console.log(await req3.text());
 
-        return Http.request("ANIME", true, url, { headers: { Cookie: cookies ?? "" }, ...options }, proxyRequest, 0, proxy);
+        return Http.request("ANIME", this.useGoogleTranslate, url, { headers: { Cookie: cookies ?? "" }, ...options }, proxyRequest, 0, proxy);
 
         //return Http.request(url, { headers: { Cookie: cookies?.join("; ") ?? "" }, ...options }, proxyRequest, 0, proxy);
     }

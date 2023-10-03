@@ -1,6 +1,6 @@
 import { load } from "cheerio";
 import MangaProvider from ".";
-import { Format, Formats } from "../../../types/enums";
+import { Format } from "../../../types/enums";
 import { Chapter, Page, Result } from "../../../types/types";
 import Jimp from "jimp";
 
@@ -25,9 +25,6 @@ export default class MangaFire extends MangaProvider {
             const requestPromises: Promise<void>[] = [];
 
             $("main div.container div.original div.unit").map((_, el) => {
-                const formatString: string = $(el).find("div.info span.type").text()?.toUpperCase();
-                const format: Format = formatString === "DOUJINSHI" ? Format.MANGA : formatString === "MANHUA" ? Format.MANGA : formatString === "MANHWA" ? Format.MANGA : Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
-
                 const id = $(el).find("a").attr("href") ?? "";
 
                 requestPromises.push(
@@ -47,7 +44,7 @@ export default class MangaFire extends MangaProvider {
                             results.push({
                                 id,
                                 altTitles,
-                                format,
+                                format: Format.UNKNOWN,
                                 img: $(el).find("img").attr("src") ?? "",
                                 title: $(el).find("div.info a").first()?.text()?.trim(),
                                 year: year ? new Date(year).getFullYear() : 0,
@@ -64,7 +61,7 @@ export default class MangaFire extends MangaProvider {
 
             return results;
         } catch (e) {
-            return results;
+            return undefined;
         }
     }
 

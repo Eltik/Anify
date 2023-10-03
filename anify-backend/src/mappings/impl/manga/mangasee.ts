@@ -16,7 +16,7 @@ export default class MangaSee extends MangaProvider {
         const results: Result[] = [];
 
         for (let i = 0; i < list.length; i++) {
-            if (stringSearch(list[i].s, query) >= 0.875) {
+            if (stringSearch(list[i].s, query) >= 0.6) {
                 results.push({
                     title: list[i].s,
                     id: `/manga/${list[i].i}`,

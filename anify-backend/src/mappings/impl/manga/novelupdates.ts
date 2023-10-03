@@ -3,7 +3,6 @@ import { extract } from "@extractus/article-extractor";
 import MangaProvider from ".";
 import { Format } from "../../../types/enums";
 import { Chapter, Page, Result } from "../../../types/types";
-import Http from "../../../helper/request";
 
 export default class NovelUpdates extends MangaProvider {
     override rateLimit = 1000;
@@ -64,19 +63,19 @@ export default class NovelUpdates extends MangaProvider {
 
         const title = $("title").html();
         if (title === "Page not found - Novel Updates") {
+            this.useGoogleTranslate = false;
+
             data = await (
-                await this.request(
-                    `${this.url}/series/${id}`,
-                    {
-                        headers: {
-                            Referer: this.url,
-                        },
+                await this.request(`${this.url}/series/${id}`, {
+                    headers: {
+                        Referer: this.url,
                     },
-                    false,
-                )
+                })
             ).text();
 
             $ = load(data);
+
+            this.useGoogleTranslate = true;
         }
         if (title === "Just a moment..." || title === "Attention Required! | Cloudflare") {
             return this.fetchChapters(id, retries + 1);
@@ -84,24 +83,22 @@ export default class NovelUpdates extends MangaProvider {
 
         const postId = $("input#mypostid").attr("value");
 
+        this.useGoogleTranslate = false;
+
         const chapterData = (
             await (
-                await Http.request(
-                    "MANGA",
-                    false,
-                    `${this.url}/wp-admin/admin-ajax.php`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                            Cookie: "_ga=;",
-                        },
-                        body: `action=nd_getchapters&mypostid=${postId}&mypostid2=0`,
+                await this.request(`${this.url}/wp-admin/admin-ajax.php`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                        Cookie: "_ga=;",
                     },
-                    false,
-                )
+                    body: `action=nd_getchapters&mypostid=${postId}&mypostid2=0`,
+                })
             ).text()
         ).substring(1);
+
+        this.useGoogleTranslate = true;
 
         const $$ = load(chapterData);
         $$("li.sp_li_chp a[data-id]").each((index, el) => {

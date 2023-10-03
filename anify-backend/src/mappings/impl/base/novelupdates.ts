@@ -1,6 +1,6 @@
 import { load } from "cheerio";
 import BaseProvider from ".";
-import { Format, Genres, MediaStatus, Season, Type } from "../../../types/enums";
+import { Format, Genres, MediaStatus, Type } from "../../../types/enums";
 import { AnimeInfo, MangaInfo } from "../../../types/types";
 
 export default class NovelUpdatesBase extends BaseProvider {
@@ -134,19 +134,19 @@ export default class NovelUpdatesBase extends BaseProvider {
 
         const title = $$("title").html();
         if (title === "Page not found - Novel Updates") {
+            this.useGoogleTranslate = false;
+
             data = await (
-                await this.request(
-                    `${this.url}/series/${id}`,
-                    {
-                        headers: {
-                            Referer: this.url,
-                        },
+                await this.request(`${this.url}/series/${id}`, {
+                    headers: {
+                        Referer: this.url,
                     },
-                    false,
-                )
+                })
             ).text();
 
             $$ = load(data);
+
+            this.useGoogleTranslate = true;
         }
         if (title === "Just a moment..." || title === "Attention Required! | Cloudflare") {
             return this.getMedia(id, retries + 1);
