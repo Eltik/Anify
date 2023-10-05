@@ -58,7 +58,9 @@ export const crawl = async (type: Type, formats: Format[]): Promise<void> => {
                     }
                 });
             }),
-        );
+        ).catch((err) => {
+            console.log(colors.red(`Error while fetching chunk ${i / chunkSize + 1}/${Math.ceil(cleanedIds.length / chunkSize)}: ${err}`));
+        });
 
         console.log(colors.gray(`Fetched ${mappings.length} mappings.`));
 
