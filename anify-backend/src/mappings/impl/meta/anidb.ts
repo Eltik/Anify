@@ -8,7 +8,6 @@ export default class AniDBMeta extends MetaProvider {
     override url = "https://anidb.net";
 
     public needsProxy: boolean = true;
-    public useGoogleTranslate: boolean = false;
 
     override rateLimit = 500;
     override formats: Format[] = [Format.TV, Format.MOVIE, Format.ONA, Format.SPECIAL, Format.TV_SHORT, Format.OVA];
@@ -28,23 +27,44 @@ export default class AniDBMeta extends MetaProvider {
 
         const $ = load(data);
 
+        const promises: Promise<void>[] = [];
+
         $("table.search_results tbody tr.g_odd").map((i, el) => {
-            results.push({
-                id: $(el).find("td.relid a").attr("href") ?? "",
-                altTitles:
-                    ($(el)
-                        .find("td.excerpt")
-                        .text()
-                        ?.split(" - ")
-                        .map((title) => (title.trim() === "…" || title.trim().includes("…") ? undefined : title.trim()))
-                        .filter(Boolean) as string[]) ?? [],
-                title: $(el).find("td.relid a").text()?.trim(),
-                format: format ? format : Format.UNKNOWN,
-                img: $(el).find("td.thumb img").attr("src") ?? "",
-                providerId: this.id,
-                year: 0,
-            });
+            promises.push(
+                new Promise(async (resolve, reject) => {
+                    const id = ($(el).find("td.relid a").attr("href") ?? "").split("/anime/")[1];
+                    const req = await (await this.request(`${this.url}/anime/${id}`)).text();
+                    const $$ = load(req);
+
+                    const english = $$("div.info div.titles tr.official").first()?.find("td.value label").text();
+                    const romaji = $$("div.info div.titles tr.romaji td.value span").text();
+                    const native = $$("div.info div.titles tr.official").last()?.find("td.value label").text();
+                    const synonyms =
+                        $$("div.info div.titles tr.syn td.value")
+                            .text()
+                            ?.split(", ")
+                            .map((data) => data.trim())
+                            .concat($("div.titles tr.short td.value").text()) ?? [];
+                    const year = Number.isNaN(new Date($$("div.info tr.year td.value span").first()?.text().trim()).getFullYear()) ? 0 : new Date($$("div.info tr.year td.value span").first()?.text().trim()).getFullYear();
+
+                    const altTitles = [english, romaji, native, ...synonyms].filter(Boolean);
+
+                    results.push({
+                        id: `/anime/${id}`,
+                        altTitles,
+                        title: $(el).find("td.relid a").text()?.trim(),
+                        format: format ? format : Format.UNKNOWN,
+                        img: $(el).find("td.thumb img").attr("src") ?? "",
+                        providerId: this.id,
+                        year,
+                    });
+
+                    resolve();
+                }),
+            );
         });
+
+        await Promise.all(promises);
 
         return results;
     }
