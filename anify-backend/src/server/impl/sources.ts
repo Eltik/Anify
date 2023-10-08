@@ -20,7 +20,7 @@ export const handler = async (req: Request): Promise<Response> => {
         if (!id) {
             return new Response(JSON.stringify({ error: "No ID provided." }), {
                 status: 400,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
             });
         }
 
@@ -28,7 +28,7 @@ export const handler = async (req: Request): Promise<Response> => {
         if (!episodeNumber) {
             return new Response(JSON.stringify({ error: "No episode number provided." }), {
                 status: 400,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
             });
         }
 
@@ -36,7 +36,7 @@ export const handler = async (req: Request): Promise<Response> => {
         if (!providerId) {
             return new Response(JSON.stringify({ error: "No provider ID provided." }), {
                 status: 400,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
             });
         }
 
@@ -44,7 +44,7 @@ export const handler = async (req: Request): Promise<Response> => {
         if (!watchId || watchId.length === 0) {
             return new Response(JSON.stringify({ error: "No watch ID provided." }), {
                 status: 400,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
             });
         }
 
@@ -52,12 +52,12 @@ export const handler = async (req: Request): Promise<Response> => {
         if (!subType || subType.length === 0) {
             return new Response(JSON.stringify({ error: "No sub type provided." }), {
                 status: 400,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
             });
         } else if (!["SUB", "DUB"].includes(subType.toUpperCase())) {
             return new Response(JSON.stringify({ error: "Sub type is invalid." }), {
                 status: 400,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
             });
         }
 
@@ -67,7 +67,7 @@ export const handler = async (req: Request): Promise<Response> => {
         if (cached) {
             return new Response(cached, {
                 status: 200,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
             });
         }
 
@@ -76,7 +76,7 @@ export const handler = async (req: Request): Promise<Response> => {
         if (!data)
             return new Response(JSON.stringify({ error: "Sources not found." }), {
                 status: 404,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
             });
 
         if (data) queues.skipTimes.add({ id, episode: episodeNumber, toInsert: data });
@@ -85,13 +85,13 @@ export const handler = async (req: Request): Promise<Response> => {
 
         return new Response(JSON.stringify(data), {
             status: 200,
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
         });
     } catch (e) {
         console.error(e);
         return new Response(JSON.stringify({ error: "An error occurred." }), {
             status: 500,
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
         });
     }
 };

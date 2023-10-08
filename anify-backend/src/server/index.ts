@@ -47,7 +47,14 @@ export const start = async () => {
         port: env.PORT,
         async fetch(req: Request) {
             const url = new URL(req.url);
-            if (url.pathname === "/") return new Response("Welcome to Anify API! 🎉 Documentation can be viewed at https://docs.anify.tv. Join our Discord https://anify.tv/discord for more information.");
+            if (url.pathname === "/")
+                return new Response("Welcome to Anify API! 🎉 Documentation can be viewed at https://docs.anify.tv. Join our Discord https://anify.tv/discord for more information.", {
+                    headers: {
+                        "Access-Control-Allow-Origin": "*",
+                        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                        "Access-Control-Max-Age": "2592000",
+                    },
+                });
 
             const pathName = `/${url.pathname.split("/").slice(1)[0]}`;
 
@@ -61,13 +68,13 @@ export const start = async () => {
                 if (requests && requests.requests > rateLimit) {
                     if (requests.requests > rateLimit * 2) console.log(colors.red(`Rate limit significantly exceeded for ${requests.ip}`));
 
-                    return new Response(JSON.stringify({ error: "Too many requests" }), { status: 429, headers: { "Content-Type": "application/json" } });
+                    return new Response(JSON.stringify({ error: "Too many requests" }), { status: 429, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" } });
                 }
 
                 return handler(req);
             }
 
-            return new Response(JSON.stringify({ error: "Route not found" }), { status: 404, headers: { "Content-Type": "application/json" } });
+            return new Response(JSON.stringify({ error: "Route not found" }), { status: 404, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" } });
         },
     });
 

@@ -21,7 +21,7 @@ export const handler = async (req: Request): Promise<Response> => {
         if (!validTypes.includes(type.toLowerCase())) {
             return new Response(JSON.stringify({ error: "Invalid type provided." }), {
                 status: 400,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
             });
         }
 
@@ -29,7 +29,7 @@ export const handler = async (req: Request): Promise<Response> => {
         if (cached) {
             return new Response(cached, {
                 status: 200,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
             });
         }
 
@@ -92,13 +92,13 @@ export const handler = async (req: Request): Promise<Response> => {
 
         return new Response(JSON.stringify(formattedResponse), {
             status: 200,
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
         });
     } catch (e) {
         console.error(e);
         return new Response(JSON.stringify({ error: "An error occurred." }), {
             status: 500,
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
         });
     }
 };
