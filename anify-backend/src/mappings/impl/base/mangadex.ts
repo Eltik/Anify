@@ -232,6 +232,8 @@ export default class ManagDexBase extends BaseProvider {
             const data = (await (await this.request(`${this.api}/manga/${id}`)).json()).data;
             const covers = await (await this.request(`${this.api}/cover?limit=100&manga[]=${id}`)).json();
 
+            if (data.attributes.contentRating === "erotica" || data.attributes.contentRating === "pornographic") return undefined;
+
             const formatString: string = data.type.toUpperCase();
             const format: Format = formatString === "ADAPTATION" ? Format.MANGA : Formats.includes(formatString as Format) ? (formatString as Format) : Format.MANGA;
 
@@ -354,7 +356,7 @@ export default class ManagDexBase extends BaseProvider {
     }
 
     override async fetchIds(formats: Format[]): Promise<string[] | undefined> {
-        const data = await (await this.request("https://raw.githubusercontent.com/ArdaxHz/mangadex-id-map/main/json/manga_map.json")).json();
+        const data = await (await fetch("https://raw.githubusercontent.com/ArdaxHz/mangadex-id-map/main/json/manga_map.json")).json();
         /*
         {
             "1": "c0ee660b-f9f2-45c3-8068-5123ff53f84a",

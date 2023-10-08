@@ -9,12 +9,14 @@ export const deleteEntry = async (id: string): Promise<void> => {
 
         try {
             db.query(`DELETE FROM manga WHERE id = $id`).run({ $id: id });
+            db.query(`DELETE FROM manga_fts WHERE id = $id`).run({ $id: id });
         } catch (e) {
             return undefined;
         }
     } else {
         try {
             db.query(`DELETE FROM anime WHERE id = $id`).run({ $id: id });
+            db.query(`DELETE FROM anime_fts WHERE id = $id`).run({ $id: id });
         } catch (e) {
             return undefined;
         }

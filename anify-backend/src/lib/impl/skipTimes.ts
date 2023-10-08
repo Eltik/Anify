@@ -49,6 +49,11 @@ export const loadSkipTimes = async (data: { id: string; episode: number; toInser
         }
     }
 
+    if (!Array.isArray(toInsert?.episodes) || !toInsert.episodes || !toInsert.episodes.length) {
+        await emitter.emitAsync(Events.COMPLETED_SKIPTIMES_LOAD, null);
+        return null;
+    }
+
     await updateSkipTimes({ id: data.id, episodes: toInsert.episodes });
 
     console.log(colors.green(`Inserted skip times for ${data.id} episode ${data.episode}`));
