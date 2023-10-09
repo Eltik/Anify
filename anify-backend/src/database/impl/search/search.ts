@@ -2,21 +2,30 @@ import { db } from "../..";
 import { Format, Type } from "../../../types/enums";
 import { Anime, Db, Manga } from "../../../types/types";
 
-type ReturnType<T> = T extends "ANIME" ? Anime[] : Manga[];
+type ReturnType<T> = T extends Type.ANIME ? Anime[] : Manga[];
 
-export const search = async <T extends "ANIME" | "MANGA">(query: string, type: T, formats: Format[], page: number, perPage: number): Promise<ReturnType<T>> => {
+export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, type: T, formats: Format[], page: number, perPage: number): Promise<ReturnType<T>> => {
     const skip = page > 0 ? perPage * (page - 1) : 0;
 
     const where = `
         WHERE
-        ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH
-        'title:${query}*' OR ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH
-        'synonyms:${query}*'
+        (
+            ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH 'title:' || :query || '*' 
+            OR 
+            ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH 'synonyms:' || :query || '*'
+        )
         ${formats?.length > 0 ? `AND "format" IN (${formats.map((f) => `'${f}'`).join(", ")})` : ""}
     `;
 
     const results = db
-        .query<Db<Anime> | Db<Manga>, { $query: string }>(
+        .query<
+            Db<Anime> | Db<Manga>,
+            {
+                ":query": string;
+                ":perPage": number;
+                ":skip": number;
+            }
+        >(
             `SELECT *,
                 bm25(
                     ${type === Type.ANIME ? "anime_fts" : "manga_fts"},
@@ -26,10 +35,12 @@ export const search = async <T extends "ANIME" | "MANGA">(query: string, type: T
                 ) as bm25_rank
             FROM ${type === Type.ANIME ? "anime_fts" : "manga_fts"} ${where}
             ORDER BY bm25_rank DESC, title->>'english' ASC
-            LIMIT ${perPage} OFFSET ${skip}`,
+            LIMIT :perPage OFFSET :skip`,
         )
         .all({
-            $query: query,
+            ":query": query,
+            ":perPage": perPage,
+            ":skip": skip,
         });
 
     let parsedResults = results.map((data) => {

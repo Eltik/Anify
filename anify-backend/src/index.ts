@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { fetchCorsProxies } from "./proxies/impl/fetchProxies";
-import { MediaStatus } from "./types/enums";
+import { Format, Genres, MediaStatus, Type } from "./types/enums";
 import { init } from "./database";
 import emitter, { Events } from "./lib";
 import { get } from "./database/impl/fetch/get";

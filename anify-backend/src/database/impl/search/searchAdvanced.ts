@@ -1,15 +1,19 @@
 import { db } from "../..";
 import { Format, Genres, Type } from "../../../types/enums";
-import { Anime, Manga } from "../../../types/types";
+import { Anime, Db, Manga } from "../../../types/types";
 
-export const searchAdvanced = async (query: string, type: Type, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = [], year = 0, tags: string[] = [], tagsExcluded: string[] = []) => {
+type ReturnType<T> = T extends Type.ANIME ? Anime[] : Manga[];
+
+export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(query: string, type: T, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = [], year = 0, tags: string[] = [], tagsExcluded: string[] = []) => {
     const skip = page > 0 ? perPage * (page - 1) : 0;
 
     let where = `
         WHERE
-        ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH
-        'title:${query}*' OR ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH
-        'synonyms:${query}*'
+        (
+            ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH 'title:' || :query || '*' 
+            OR 
+            ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH 'synonyms:' || :query || '*'
+        )
         ${formats?.length > 0 ? `AND "format" IN (${formats.map((f) => `'${f}'`).join(", ")})` : ""}
     `;
 
@@ -58,8 +62,15 @@ export const searchAdvanced = async (query: string, type: Type, formats: Format[
     }
 
     try {
-        const results = (await db
-            .query(
+        const results = await db
+            .query<
+                Db<Anime> | Db<Manga>,
+                {
+                    ":query": string;
+                    ":perPage": number;
+                    ":skip": number;
+                }
+            >(
                 `SELECT *,
                 bm25(
                     ${type === Type.ANIME ? "anime_fts" : "manga_fts"},
@@ -69,11 +80,13 @@ export const searchAdvanced = async (query: string, type: Type, formats: Format[
                 ) as bm25_rank
             FROM ${type === Type.ANIME ? "anime_fts" : "manga_fts"} ${where}
             ORDER BY bm25_rank DESC, title->>'english' ASC
-            LIMIT ${perPage} OFFSET ${skip}`,
+            LIMIT :perPage OFFSET :skip`,
             )
             .all({
-                $query: query,
-            })) as Anime[] | Manga[];
+                ":query": query,
+                ":perPage": perPage,
+                ":skip": skip,
+            });
         return results.map((data) => {
             try {
                 if (data.type === Type.ANIME) {
