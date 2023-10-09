@@ -2,21 +2,17 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { fetchCorsProxies } from "./proxies/impl/fetchProxies";
-import { Format, Genres, MediaStatus, Type } from "./types/enums";
+import { MediaStatus } from "./types/enums";
 import { init } from "./database";
 import emitter, { Events } from "./lib";
 import { get } from "./database/impl/fetch/get";
 import queues from "./worker";
 import { start } from "./server";
 import { startWebsocket } from "./websocket";
-import { search } from "./database/impl/search/search";
-import { searchAdvanced } from "./database/impl/search/searchAdvanced";
-import { relations } from "./database/impl/fetch/relations";
 
 before().then(async (_) => {
     await start();
     await startWebsocket();
-    //await relations("21").then(console.log)
 });
 
 async function before() {
