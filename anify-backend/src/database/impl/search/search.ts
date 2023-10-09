@@ -13,11 +13,11 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
             EXISTS (
                 SELECT 1
                 FROM json_each(synonyms) AS s
-                WHERE s.value LIKE '%' || $query || '%'
+                WHERE s.value LIKE $query
             )
-            OR title->>'english' LIKE '%' || $query || '%'
-            OR title->>'romaji' LIKE '%' || $query || '%'
-            OR title->>'native' LIKE '%' || $query || '%'
+            OR title->>'english' LIKE $query
+            OR title->>'romaji' LIKE $query
+            OR title->>'native' LIKE $query
         )
         ${formats?.length > 0 ? `AND "format" IN (${formats.map((f) => `'${f}'`).join(", ")})` : ""}
     `;
@@ -27,15 +27,17 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
             Db<Anime> | Db<Manga>,
             {
                 $query: string;
+                $limit: number;
+                $offset: number;
             }
         >(
             `SELECT *
                 FROM ${type === Type.ANIME ? "anime" : "manga"}
                 ${where}
             ORDER BY title->>'english' ASC
-            LIMIT ${perPage} OFFSET ${skip}`,
+            LIMIT $limit OFFSET $offset`,
         )
-        .all({ $query: query });
+        .all({ $query: query, $limit: perPage, $offset: skip });
 
     let parsedResults = results.map((data) => {
         try {

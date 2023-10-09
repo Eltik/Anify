@@ -72,15 +72,17 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(query: s
                 Db<Anime> | Db<Manga>,
                 {
                     $query: string;
+                    $limit: number;
+                    $offset: number;
                 }
             >(
                 `SELECT *
                     FROM ${type === Type.ANIME ? "anime" : "manga"}
                     ${where}
                 ORDER BY title->>'english' ASC
-                LIMIT ${perPage} OFFSET ${skip}`,
+                LIMIT $limit OFFSET $offset`,
             )
-            .all({ $query: query });
+            .all({ $query: query, $limit: perPage, $offset: skip });
         let parsedResults = results.map((data) => {
             try {
                 if (data.type === Type.ANIME) {

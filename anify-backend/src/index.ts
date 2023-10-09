@@ -11,11 +11,12 @@ import { start } from "./server";
 import { startWebsocket } from "./websocket";
 import { search } from "./database/impl/search/search";
 import { searchAdvanced } from "./database/impl/search/searchAdvanced";
+import { relations } from "./database/impl/fetch/relations";
 
 before().then(async (_) => {
-    //await start();
-    //await startWebsocket();
-    await search("dragon ball", Type.ANIME, [Format.TV], 0, 10).then(console.log);
+    await start();
+    await startWebsocket();
+    //await relations("21").then(console.log)
 });
 
 async function before() {

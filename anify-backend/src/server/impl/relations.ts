@@ -1,6 +1,6 @@
 import { cacheTime, redis } from "..";
 import { get } from "../../database/impl/fetch/get";
-import { Anime, Manga } from "../../types/types";
+import { relations } from "../../database/impl/fetch/relations";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -39,18 +39,11 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const relations: Anime[] | Manga[] = [];
-        for (const relation of data.relations) {
-            const possible = await get(String(relation.id));
-            if (possible) {
-                Object.assign(possible, { relationType: relation.type });
-                relations.push(possible as any);
-            }
-        }
+        const res = await relations(String(id));
 
-        await redis.set(`relations:${id}`, JSON.stringify(relations), "EX", cacheTime);
+        await redis.set(`relations:${id}`, JSON.stringify(res), "EX", cacheTime);
 
-        return new Response(JSON.stringify(relations), {
+        return new Response(JSON.stringify(res), {
             status: 200,
             headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000" },
         });
