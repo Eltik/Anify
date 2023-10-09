@@ -8,9 +8,7 @@ const clearData = async () => {
     const apiKey = await db.query("SELECT * FROM apiKey").all();
 
     await db.query("DELETE FROM anime").run();
-    await db.query("DELETE FROM anime_fts").run();
     await db.query("DELETE FROM manga").run();
-    await db.query("DELETE FROM manga_fts").run();
     await db.query("DELETE FROM skipTimes").run();
     await db.query("DELETE FROM apiKey").run();
 

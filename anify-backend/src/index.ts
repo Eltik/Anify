@@ -9,10 +9,13 @@ import { get } from "./database/impl/fetch/get";
 import queues from "./worker";
 import { start } from "./server";
 import { startWebsocket } from "./websocket";
+import { search } from "./database/impl/search/search";
+import { searchAdvanced } from "./database/impl/search/searchAdvanced";
 
 before().then(async (_) => {
-    await start();
-    await startWebsocket();
+    //await start();
+    //await startWebsocket();
+    await search("dragon ball", Type.ANIME, [Format.TV], 0, 10).then(console.log);
 });
 
 async function before() {

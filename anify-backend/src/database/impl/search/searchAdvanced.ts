@@ -10,9 +10,14 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(query: s
     let where = `
         WHERE
         (
-            ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH 'title:' || :query || '*' 
-            OR 
-            ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH 'synonyms:' || :query || '*'
+            EXISTS (
+                SELECT 1
+                FROM json_each(synonyms) AS s
+                WHERE s.value LIKE '%' || $query || '%'
+            )
+            OR title->>'english' LIKE '%' || $query || '%'
+            OR title->>'romaji' LIKE '%' || $query || '%'
+            OR title->>'native' LIKE '%' || $query || '%'
         )
         ${formats?.length > 0 ? `AND "format" IN (${formats.map((f) => `'${f}'`).join(", ")})` : ""}
     `;
@@ -62,63 +67,52 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(query: s
     }
 
     try {
-        const results = await db
+        const results = db
             .query<
                 Db<Anime> | Db<Manga>,
                 {
-                    ":query": string;
-                    ":perPage": number;
-                    ":skip": number;
+                    $query: string;
                 }
             >(
-                `SELECT *,
-                bm25(
-                    ${type === Type.ANIME ? "anime_fts" : "manga_fts"},
-                    1.0 + 0.1 *
-                    (SELECT COUNT(*) FROM ${type === Type.ANIME ? "anime_fts" : "manga_fts"}) /
-                    (SELECT COUNT(*) FROM ${type === Type.ANIME ? "anime" : "manga"})
-                ) as bm25_rank
-            FROM ${type === Type.ANIME ? "anime_fts" : "manga_fts"} ${where}
-            ORDER BY bm25_rank DESC, title->>'english' ASC
-            LIMIT :perPage OFFSET :skip`,
+                `SELECT *
+                    FROM ${type === Type.ANIME ? "anime" : "manga"}
+                    ${where}
+                ORDER BY title->>'english' ASC
+                LIMIT ${perPage} OFFSET ${skip}`,
             )
-            .all({
-                ":query": query,
-                ":perPage": perPage,
-                ":skip": skip,
-            });
-        return results.map((data) => {
+            .all({ $query: query });
+        let parsedResults = results.map((data) => {
             try {
                 if (data.type === Type.ANIME) {
                     Object.assign(data, {
-                        title: JSON.parse((data as any).title),
-                        season: (data as any).season.replace(/"/g, ""),
-                        mappings: JSON.parse((data as any).mappings),
-                        synonyms: JSON.parse((data as any).synonyms),
-                        rating: JSON.parse((data as any).rating),
-                        popularity: JSON.parse((data as any).popularity),
-                        relations: JSON.parse((data as any).relations),
-                        genres: JSON.parse((data as any).genres),
-                        tags: JSON.parse((data as any).tags),
-                        episodes: JSON.parse((data as any).episodes),
-                        artwork: JSON.parse((data as any).artwork),
-                        characters: JSON.parse((data as any).characters),
+                        title: JSON.parse(data.title),
+                        season: data.season.replace(/"/g, ""),
+                        mappings: JSON.parse(data.mappings),
+                        synonyms: JSON.parse(data.synonyms),
+                        rating: JSON.parse(data.rating),
+                        popularity: JSON.parse(data.popularity),
+                        relations: JSON.parse(data.relations),
+                        genres: JSON.parse(data.genres),
+                        tags: JSON.parse(data.tags),
+                        episodes: JSON.parse(data.episodes),
+                        artwork: JSON.parse(data.artwork),
+                        characters: JSON.parse(data.characters),
                     });
 
                     return data;
                 } else {
                     Object.assign(data, {
-                        title: JSON.parse((data as any).title),
-                        mappings: JSON.parse((data as any).mappings),
-                        synonyms: JSON.parse((data as any).synonyms),
-                        rating: JSON.parse((data as any).rating),
-                        popularity: JSON.parse((data as any).popularity),
-                        relations: JSON.parse((data as any).relations),
-                        genres: JSON.parse((data as any).genres),
-                        tags: JSON.parse((data as any).tags),
-                        chapters: JSON.parse((data as any).chapters),
-                        artwork: JSON.parse((data as any).artwork),
-                        characters: JSON.parse((data as any).characters),
+                        title: JSON.parse(data.title),
+                        mappings: JSON.parse(data.mappings),
+                        synonyms: JSON.parse(data.synonyms),
+                        rating: JSON.parse(data.rating),
+                        popularity: JSON.parse(data.popularity),
+                        relations: JSON.parse(data.relations),
+                        genres: JSON.parse(data.genres),
+                        tags: JSON.parse(data.tags),
+                        chapters: JSON.parse(data.chapters),
+                        artwork: JSON.parse(data.artwork),
+                        characters: JSON.parse(data.characters),
                     });
 
                     return data;
@@ -127,6 +121,8 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(query: s
                 return undefined;
             }
         });
+
+        return parsedResults as unknown as ReturnType<T>;
     } catch (e) {
         console.error(e);
         return [];

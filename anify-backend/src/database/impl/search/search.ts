@@ -10,9 +10,14 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
     const where = `
         WHERE
         (
-            ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH 'title:' || :query || '*' 
-            OR 
-            ${type === Type.ANIME ? "anime_fts" : "manga_fts"} MATCH 'synonyms:' || :query || '*'
+            EXISTS (
+                SELECT 1
+                FROM json_each(synonyms) AS s
+                WHERE s.value LIKE '%' || $query || '%'
+            )
+            OR title->>'english' LIKE '%' || $query || '%'
+            OR title->>'romaji' LIKE '%' || $query || '%'
+            OR title->>'native' LIKE '%' || $query || '%'
         )
         ${formats?.length > 0 ? `AND "format" IN (${formats.map((f) => `'${f}'`).join(", ")})` : ""}
     `;
@@ -21,27 +26,16 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
         .query<
             Db<Anime> | Db<Manga>,
             {
-                ":query": string;
-                ":perPage": number;
-                ":skip": number;
+                $query: string;
             }
         >(
-            `SELECT *,
-                bm25(
-                    ${type === Type.ANIME ? "anime_fts" : "manga_fts"},
-                    1.0 + 0.1 *
-                    (SELECT COUNT(*) FROM ${type === Type.ANIME ? "anime_fts" : "manga_fts"}) /
-                    (SELECT COUNT(*) FROM ${type === Type.ANIME ? "anime" : "manga"})
-                ) as bm25_rank
-            FROM ${type === Type.ANIME ? "anime_fts" : "manga_fts"} ${where}
-            ORDER BY bm25_rank DESC, title->>'english' ASC
-            LIMIT :perPage OFFSET :skip`,
+            `SELECT *
+                FROM ${type === Type.ANIME ? "anime" : "manga"}
+                ${where}
+            ORDER BY title->>'english' ASC
+            LIMIT ${perPage} OFFSET ${skip}`,
         )
-        .all({
-            ":query": query,
-            ":perPage": perPage,
-            ":skip": skip,
-        });
+        .all({ $query: query });
 
     let parsedResults = results.map((data) => {
         try {
