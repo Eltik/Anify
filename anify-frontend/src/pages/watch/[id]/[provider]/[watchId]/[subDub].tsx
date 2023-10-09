@@ -196,7 +196,7 @@ const Watch: NextPage<Props> = ({ episodeNumber, episodeSelector, episodes, medi
             const tracks = playerRef.current?.textTracks.toArray();
 
             tracks?.forEach((track) => {
-                if (track.kind === "subtitles" && track.label?.toLowerCase() === "english") {
+                if (track.kind === "subtitles" && (track.label?.toLowerCase() === "english" || track.label?.toLowerCase().includes("english"))) {
                     track.mode = "showing";
                 } else if (track.kind === "subtitles") {
                     track.mode = "disabled";
@@ -585,7 +585,7 @@ const Watch: NextPage<Props> = ({ episodeNumber, episodeSelector, episodes, medi
                                                             text: sub.text,
                                                             callback: () => changeSub(sub.url),
                                                             highlightable: true,
-                                                            selected: sub.text == "English" ? true : false,
+                                                            selected: sub.text == "English" || sub.text?.toLowerCase().includes("english") ? true : false,
                                                         };
                                                     } else {
                                                         return {
@@ -950,10 +950,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 text: capitalize(language ?? ""),
                 highlightable: true,
                 url: subtitle.url,
-                selected: subtitle.lang == "en-US" ? true : false,
+                selected: subtitle.lang === "en-US" || subtitle.lang?.toLowerCase().includes("english") ? true : false,
             });
         } catch (e) {
-            //
+            language = subtitle.lang;
+
+            subtitles.push({
+                text: capitalize(language ?? ""),
+                highlightable: true,
+                url: subtitle.url,
+                selected: subtitle.lang === "en-US" || subtitle.lang?.toLowerCase().includes("english") ? true : false,
+            });
         }
     });
 
