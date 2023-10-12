@@ -26,28 +26,48 @@ export default class Zoro extends AnimeProvider {
 
         const $ = load(data);
 
+        const promises: Promise<void>[] = [];
+
         $(".film_list-wrap > div.flw-item").map((i, el) => {
-            const title = $(el).find("div.film-detail h3.film-name a.dynamic-name").attr("title")!.trim().replace(/\\n/g, "");
-            const id = $(el).find("div:nth-child(1) > a").last().attr("href")!;
-            const img = $(el).find("img").attr("data-src")!;
+            const promise = new Promise<void>(async(resolve, reject) => {
+                const title = $(el).find("div.film-detail h3.film-name a.dynamic-name").attr("title")!.trim().replace(/\\n/g, "");
+                const id = $(el).find("div:nth-child(1) > a").last().attr("href")!;
+                const img = $(el).find("img").attr("data-src")!;
 
-            const altTitles: string[] = [];
-            const jpName = $(el).find("div.film-detail h3.film-name a.dynamic-name").attr("data-jname")!.trim().replace(/\\n/g, "");
-            altTitles.push(jpName);
+                const altTitles: string[] = [];
+                const jpName = $(el).find("div.film-detail h3.film-name a.dynamic-name").attr("data-jname")!.trim().replace(/\\n/g, "");
+                altTitles.push(jpName);
 
-            const formatString: string = $(el).find("div.film-detail div.fd-infor span.fdi-item")?.first()?.text().toUpperCase();
-            const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
+                const formatString: string = $(el).find("div.film-detail div.fd-infor span.fdi-item")?.first()?.text().toUpperCase();
+                const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
 
-            results.push({
-                id: id,
-                title: title,
-                altTitles: altTitles,
-                year: 0,
-                format,
-                img: img,
-                providerId: this.id,
+                const req = await (await this.request(`${this.url}${id}`)).text();
+
+                const $$ = load(req);
+                const jpTitle = $$($$("div.anisc-info-wrap div.anisc-info div.item").toArray()[1]).find("span.name").text();
+                const synonyms = $$($$("div.anisc-info-wrap div.anisc-info div.item").toArray()[2]).find("span.name").text()?.split(",").map((value) => value.trim())?.filter((value) => value !== "")?.filter(Boolean);
+                const year = $$($$("div.anisc-info-wrap div.anisc-info div.item").toArray()[4]).find("span.name").text().split(" ")[1];
+
+                jpTitle ? altTitles.push(jpTitle) : null;
+                synonyms ? altTitles.push(...synonyms) : null;
+
+                results.push({
+                    id: id,
+                    title: title,
+                    altTitles: altTitles,
+                    year: year ? Number(year) : 0,
+                    format,
+                    img: img,
+                    providerId: this.id,
+                });
+
+                resolve();
             });
+            
+            promises.push(promise);
         });
+
+        await Promise.all(promises);
 
         return results;
     }
