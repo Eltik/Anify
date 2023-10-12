@@ -28,7 +28,7 @@
     "sanitize-html": "^2.11.0",
     "swiper": "^9.2.4",
     "vidstack": "^0.5.4",
-    "zod": "^3.21.4",
+    "zod": "^3.22.3",
     "zustand": "^4.3.9"
   },
   "devDependencies": {
