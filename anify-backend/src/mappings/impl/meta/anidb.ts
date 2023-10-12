@@ -32,7 +32,7 @@ export default class AniDBMeta extends MetaProvider {
         $("table.search_results tbody tr.g_odd").map((i, el) => {
             promises.push(
                 new Promise(async (resolve, reject) => {
-                    const id = ($(el).find("td.relid a").attr("href") ?? "").split("/anime/")[1];
+                    const id = ($(el).find("td.relid a").attr("href") ?? "").split("/anime/")[1]?.split("?")[0];
                     const req = await (await this.request(`${this.url}/anime/${id}`)).text();
                     const $$ = load(req);
 
