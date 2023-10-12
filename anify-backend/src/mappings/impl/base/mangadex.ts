@@ -247,9 +247,11 @@ export default class ManagDexBase extends BaseProvider {
                     romaji: data.attributes.title["ja-ro"] ?? data.attributes.title["jp-ro"] ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja-ro")?.["ja-ro"] ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp-ro")?.["jp-ro"] ?? null,
                     native: data.attributes.title["jp"] ?? data.attributes.title["ja"] ?? data.attributes.title["ko"] ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "jp")?.jp ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ja")?.ja ?? data.attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "ko")?.ko ?? null,
                 },
-                synonyms: data.attributes.altTitles.map((title: { [key: string]: string }) => {
-                    return Object.values(title)[0];
-                }),
+                synonyms: data.attributes.altTitles
+                    .map((title: { [key: string]: string }) => {
+                        return Object.values(title)[0];
+                    })
+                    .concat(Object.values(data.attributes.title)),
                 description: data.attributes.description.en ?? data.attributes.description.jp ?? data.attributes.description.jp_ro ?? data.attributes.description.ko ?? Object.values(data.attributes.description)[0],
                 countryOfOrigin: data.attributes.originalLanguage?.toUpperCase() ?? null,
                 characters: [],

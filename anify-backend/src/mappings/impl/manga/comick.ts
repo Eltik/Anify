@@ -32,7 +32,7 @@ export default class ComicK extends MangaProvider {
                 title: result.title ?? result.slug,
                 altTitles: result.md_titles ? result.md_titles.map((title) => title.title) : [],
                 img: cover,
-                format: format ?? Format.UNKNOWN,
+                format: Format.UNKNOWN,
                 year: result.year ?? 0,
                 providerId: this.id,
             });

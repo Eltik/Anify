@@ -29,7 +29,7 @@ export default class Zoro extends AnimeProvider {
         const promises: Promise<void>[] = [];
 
         $(".film_list-wrap > div.flw-item").map((i, el) => {
-            const promise = new Promise<void>(async(resolve, reject) => {
+            const promise = new Promise<void>(async (resolve, reject) => {
                 const title = $(el).find("div.film-detail h3.film-name a.dynamic-name").attr("title")!.trim().replace(/\\n/g, "");
                 const id = $(el).find("div:nth-child(1) > a").last().attr("href")!;
                 const img = $(el).find("img").attr("data-src")!;
@@ -45,7 +45,13 @@ export default class Zoro extends AnimeProvider {
 
                 const $$ = load(req);
                 const jpTitle = $$($$("div.anisc-info-wrap div.anisc-info div.item").toArray()[1]).find("span.name").text();
-                const synonyms = $$($$("div.anisc-info-wrap div.anisc-info div.item").toArray()[2]).find("span.name").text()?.split(",").map((value) => value.trim())?.filter((value) => value !== "")?.filter(Boolean);
+                const synonyms = $$($$("div.anisc-info-wrap div.anisc-info div.item").toArray()[2])
+                    .find("span.name")
+                    .text()
+                    ?.split(",")
+                    .map((value) => value.trim())
+                    ?.filter((value) => value !== "")
+                    ?.filter(Boolean);
                 const year = $$($$("div.anisc-info-wrap div.anisc-info div.item").toArray()[4]).find("span.name").text().split(" ")[1];
 
                 jpTitle ? altTitles.push(jpTitle) : null;
@@ -63,7 +69,7 @@ export default class Zoro extends AnimeProvider {
 
                 resolve();
             });
-            
+
             promises.push(promise);
         });
 

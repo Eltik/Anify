@@ -106,23 +106,57 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
             return acc;
         }, []);
 
-    // Search for the media on each provider
-    const promises = suitableProviders.map((provider: any) => {
-        const search = [provider.search(baseData?.title[provider.preferredTitle as "english" | "romaji" | "native"] ?? baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native, baseData?.format, baseData?.year)];
-        return Promise.all(search)
-            .then((results) => {
-                //console.log(colors.gray("Finished searching on ") + colors.blue(provider.id) + colors.gray(".") + colors.gray(" Found ") + colors.blue(results.length + "") + colors.gray(" results."));
-                return results.find((r) => r?.length !== 0) || [];
-            })
-            .catch((err) => {
-                console.log(colors.red("Error fetching from provider ") + colors.blue(provider.id) + colors.red("."));
-                console.error(err);
-                return [];
-            });
-    });
+    async function searchMedia(baseData: AnimeInfo | MangaInfo, suitableProviders: any[]) {
+        // Define a function to search using a specific title or synonym
+        async function searchWith(title: string, provider: any): Promise<Result[]> {
+            return provider
+                .search(title, baseData?.format, baseData?.year)
+                .then((results: Result[]) => {
+                    return results;
+                })
+                .catch(() => {
+                    console.log(colors.red("Error fetching from provider ") + colors.blue(provider.id) + colors.red("."));
+                    return [];
+                });
+        }
+
+        const promises: Promise<Result[]>[] = [];
+
+        suitableProviders.forEach((provider: any) => {
+            promises.push(
+                new Promise(async (resolve, reject) => {
+                    const data = await searchWith(baseData?.title[provider.preferredTitle as "english" | "romaji" | "native"] ?? baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native ?? "", provider);
+                    if (data.length === 0) {
+                        const alternativeTitles = [
+                            baseData?.title.english,
+                            baseData?.title.romaji,
+                            baseData?.title.native,
+                            ...baseData?.synonyms, // Include synonyms
+                        ];
+
+                        for (const title of alternativeTitles) {
+                            if (!title) continue;
+
+                            const alternativeResults = await searchWith(title, provider);
+                            if (alternativeResults.length > 0) {
+                                console.log(colors.gray("Found alternative results for ") + colors.blue(title) + colors.gray(" on ") + colors.blue(provider.id) + colors.gray(".") + colors.gray(" Using alternative title..."));
+                                return resolve(alternativeResults); // Return the first set of results with data
+                            }
+                        }
+
+                        resolve([]);
+                    } else {
+                        return resolve(data);
+                    }
+                }),
+            );
+        });
+
+        return await Promise.all(promises);
+    }
 
     console.log(colors.gray("Fetching from providers for ") + colors.blue(baseData?.id ?? "") + colors.gray("..."));
-    const resultsArray = await Promise.all(promises);
+    const resultsArray = await searchMedia(baseData!, suitableProviders);
     console.log(colors.gray("Finished fetching from providers for ") + colors.blue(baseData?.id ?? "") + colors.gray("."));
 
     const mappings: MappedResult[] = [];
@@ -143,13 +177,13 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
             continue;
         }
 
-        const titles = [baseData?.title.english, baseData?.title.romaji, baseData?.title.native].filter(isString);
+        const titles = [baseData?.title.english, baseData?.title.romaji, baseData?.title.native].concat(baseData?.synonyms ?? []).filter(isString);
         const cleanedTitles = titles.map((x) => clean(x?.toLowerCase().trim() ?? ""));
 
         const bestMatchIndex = findBestMatch2DArray(cleanedTitles, providerTitles);
 
-        if (bestMatchIndex.bestMatch.rating < 0.5) {
-            //console.log(colors.gray("No results found for ") + colors.blue(title) + colors.gray(" on ") + colors.blue(suitableProviders[i].id) + colors.gray(".") + colors.gray(" Best match rating: ") + colors.blue(bestMatchIndex.bestMatch.rating + ""));
+        if (bestMatchIndex.bestMatch.rating < 0.7) {
+            //console.log(colors.gray("Unable to match ") + colors.blue(title) + colors.gray(" for ") + colors.blue(suitableProviders[i].id) + colors.gray(".") + colors.gray(" Best match rating: ") + colors.blue(bestMatchIndex.bestMatch.rating + "") + colors.gray(". ID: ") + colors.blue(providerData[bestMatchIndex.bestMatchIndex].id) + colors.gray(". Title: ") + colors.blue(providerData[bestMatchIndex.bestMatchIndex].title) + colors.gray("."));
             continue;
         }
 

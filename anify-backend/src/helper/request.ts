@@ -69,6 +69,8 @@ export default class Http {
                             ok: false,
                             status: 500,
                             statusText: "Timeout",
+                            text: () => Promise.resolve(""),
+                            json: () => Promise.resolve({ error: "Timeout" }),
                         } as Response);
                     });
 
