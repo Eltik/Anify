@@ -29,7 +29,6 @@ yarn-error.log*
 manami.json
 database.json
 /manga
-**/manga
 bun.lockb
 animeProxies.json
 baseProxies.json
