@@ -126,7 +126,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
             promises.push(
                 new Promise(async (resolve, reject) => {
                     const data = await searchWith(baseData?.title[provider.preferredTitle as "english" | "romaji" | "native"] ?? baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native ?? "", provider);
-                    if (data.length === 0) {
+                    if (data?.length === 0) {
                         const alternativeTitles = [
                             baseData?.title.english,
                             baseData?.title.romaji,
@@ -166,7 +166,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
         const providerData = resultsArray[i];
         const title: string = (baseData?.title[suitableProviders[i].preferredTitle as "english" | "romaji" | "native"] ?? baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native)!;
 
-        const providerTitles = providerData.map((m: Result) => {
+        const providerTitles = providerData?.map((m: Result) => {
             const titles = [m.title, ...(m.altTitles ?? [])];
             return titles.filter(isString);
         });

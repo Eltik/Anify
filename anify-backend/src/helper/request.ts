@@ -63,8 +63,6 @@ export default class Http {
                     }, 10000);
 
                     controller.signal.addEventListener("abort", () => {
-                        console.log(colors.red(`${modifyUrl} aborted.`));
-
                         return resolve({
                             ok: false,
                             status: 500,

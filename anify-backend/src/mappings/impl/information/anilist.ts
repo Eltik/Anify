@@ -57,7 +57,7 @@ export default class AniList extends InformationProvider<Anime | Manga, AnimeInf
         } catch (e) {
             console.log(text);
         }
-        if (!data) throw new Error("No data returned from AniList");
+        if (!data) return undefined;
 
         const artwork: Artwork[] = [];
 
