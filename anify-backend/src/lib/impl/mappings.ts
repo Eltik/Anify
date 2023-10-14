@@ -172,7 +172,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
         });
 
         // If there are no results, skip
-        if (providerTitles.length === 0) {
+        if (!providerTitles || providerTitles?.length === 0) {
             console.log(colors.gray("No results found for ") + colors.blue(title) + colors.gray(" on ") + colors.blue(suitableProviders[i].id) + colors.gray("."));
             continue;
         }
