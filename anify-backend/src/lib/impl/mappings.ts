@@ -109,58 +109,52 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
     async function searchMedia(baseData: AnimeInfo | MangaInfo, suitableProviders: any[]) {
         // Define a function to search using a specific title or synonym
         async function searchWith(title: string, provider: any): Promise<Result[]> {
-            return new Promise(async (resolve, reject) => {
-                const timeout = new Promise<void>((_, reject) => {
-                    setTimeout(() => {
-                        reject(console.error(colors.red("Timeout while fetching from provider ") + colors.blue(provider.id) + colors.red(".")));
-                    }, 120000); // 2 minute timeout
+            try {
+                let timer: NodeJS.Timeout | null = null;
+
+                const timeoutPromise = new Promise<void>((_, reject) => {
+                    timer = setTimeout(() => {
+                        console.log(colors.red(`Timeout while fetching from provider ${colors.blue(provider.id)}. Skipping...`));
+                        reject(null);
+                    }, 15000);
                 });
 
-                const dataPromise = provider.search(title, baseData?.format, baseData?.year);
+                const results = await Promise.race([provider.search(title, baseData?.format, baseData?.year), timeoutPromise]);
 
-                Promise.race([dataPromise, timeout])
-                    .then((results: Result[]) => {
-                        resolve(results);
-                    })
-                    .catch((error) => {
-                        console.log(colors.red("Error fetching from provider ") + colors.blue(provider.id) + colors.red("."));
-                        resolve([]);
-                    });
-            });
+                clearTimeout(timer ? (timer as NodeJS.Timeout) : ({} as NodeJS.Timeout));
+
+                if (!results) {
+                    console.log(colors.red(`Error fetching from provider ${colors.blue(provider.id)}. Skipping...`));
+                    return [];
+                }
+
+                return results;
+            } catch (error) {
+                console.log(colors.red(`Error fetching from provider ${colors.blue(provider.id)}. Skipping...`));
+                return [];
+            }
         }
 
-        const promises: Promise<Result[]>[] = [];
+        const promises: Promise<Result[]>[] = suitableProviders.map(async (provider) => {
+            const titlesToSearch = [
+                baseData?.title[provider.preferredTitle as "english" | "romaji" | "native"],
+                baseData?.title.english,
+                baseData?.title.romaji,
+                baseData?.title.native,
+                ...(baseData?.synonyms || []), // Include synonyms
+            ].filter((title) => title);
 
-        suitableProviders.forEach((provider: any) => {
-            promises.push(
-                new Promise(async (resolve, reject) => {
-                    const data = await searchWith(baseData?.title[provider.preferredTitle as "english" | "romaji" | "native"] ?? baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native ?? "", provider).catch(() => {
-                        return [];
-                    });
-                    if (data?.length === 0) {
-                        const alternativeTitles = [
-                            baseData?.title.english,
-                            baseData?.title.romaji,
-                            baseData?.title.native,
-                            ...baseData?.synonyms, // Include synonyms
-                        ];
+            for (const title of titlesToSearch) {
+                if (!title) continue;
 
-                        for (const title of alternativeTitles) {
-                            if (!title) continue;
+                const results = await searchWith(title, provider);
+                if (results.length > 0) {
+                    console.log(colors.gray(`Found results for ${colors.blue(title)} on ${colors.blue(provider.id)}. Using alternative title...`));
+                    return results;
+                }
+            }
 
-                            const alternativeResults = await searchWith(title, provider);
-                            if (alternativeResults && alternativeResults.length > 0) {
-                                console.log(colors.gray("Found alternative results for ") + colors.blue(title) + colors.gray(" on ") + colors.blue(provider.id) + colors.gray(".") + colors.gray(" Using alternative title..."));
-                                return resolve(alternativeResults); // Return the first set of results with data
-                            }
-                        }
-
-                        resolve([]);
-                    } else {
-                        return resolve(data);
-                    }
-                }),
-            );
+            return [];
         });
 
         return await Promise.all(promises);
