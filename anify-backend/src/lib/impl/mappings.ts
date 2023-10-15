@@ -113,7 +113,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
                 const timeout = new Promise<void>((_, reject) => {
                     setTimeout(() => {
                         reject(console.error(colors.red("Timeout while fetching from provider ") + colors.blue(provider.id) + colors.red(".")));
-                    }, 15000); // 15 seconds timeout
+                    }, 120000); // 2 minute timeout
                 });
 
                 const dataPromise = provider.search(title, baseData?.format, baseData?.year);

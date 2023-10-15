@@ -52,7 +52,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const formats = type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL];
 
-        const seasonData = await loadSeasonal({ type: (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats });
+        const seasonData = await loadSeasonal({ type: (type.toLowerCase() === "novel" ? Type.MANGA : type.toUpperCase()) as Type, formats });
         const data = await seasonal(seasonData?.trending ?? [], seasonData?.popular ?? [], seasonData?.top ?? [], seasonData?.seasonal ?? [], fields);
 
         await redis.set(`seasonal:${type}:${fields.join(",")}`, JSON.stringify(data), "EX", cacheTime);
