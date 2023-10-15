@@ -109,15 +109,24 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
     async function searchMedia(baseData: AnimeInfo | MangaInfo, suitableProviders: any[]) {
         // Define a function to search using a specific title or synonym
         async function searchWith(title: string, provider: any): Promise<Result[]> {
-            return provider
-                .search(title, baseData?.format, baseData?.year)
-                .then((results: Result[]) => {
-                    return results;
-                })
-                .catch(() => {
-                    console.log(colors.red("Error fetching from provider ") + colors.blue(provider.id) + colors.red("."));
-                    return [];
+            return new Promise(async (resolve, reject) => {
+                const timeout = new Promise<void>((_, reject) => {
+                    setTimeout(() => {
+                        reject(console.error(colors.red("Timeout while fetching from provider ") + colors.blue(provider.id) + colors.red(".")));
+                    }, 15000); // 15 seconds timeout
                 });
+
+                const dataPromise = provider.search(title, baseData?.format, baseData?.year);
+
+                Promise.race([dataPromise, timeout])
+                    .then((results: Result[]) => {
+                        resolve(results);
+                    })
+                    .catch((error) => {
+                        console.log(colors.red("Error fetching from provider ") + colors.blue(provider.id) + colors.red("."));
+                        resolve([]);
+                    });
+            });
         }
 
         const promises: Promise<Result[]>[] = [];
@@ -125,7 +134,9 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
         suitableProviders.forEach((provider: any) => {
             promises.push(
                 new Promise(async (resolve, reject) => {
-                    const data = await searchWith(baseData?.title[provider.preferredTitle as "english" | "romaji" | "native"] ?? baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native ?? "", provider);
+                    const data = await searchWith(baseData?.title[provider.preferredTitle as "english" | "romaji" | "native"] ?? baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native ?? "", provider).catch(() => {
+                        return [];
+                    });
                     if (data?.length === 0) {
                         const alternativeTitles = [
                             baseData?.title.english,
@@ -138,7 +149,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
                             if (!title) continue;
 
                             const alternativeResults = await searchWith(title, provider);
-                            if (alternativeResults.length > 0) {
+                            if (alternativeResults && alternativeResults.length > 0) {
                                 console.log(colors.gray("Found alternative results for ") + colors.blue(title) + colors.gray(" on ") + colors.blue(provider.id) + colors.gray(".") + colors.gray(" Using alternative title..."));
                                 return resolve(alternativeResults); // Return the first set of results with data
                             }
