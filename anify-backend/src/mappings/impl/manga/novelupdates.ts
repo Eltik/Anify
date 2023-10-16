@@ -69,6 +69,7 @@ export default class NovelUpdates extends MangaProvider {
                 await this.request(`${this.url}/series/${id}`, {
                     headers: {
                         Referer: this.url,
+                        Origin: this.url,
                     },
                 })
             ).text();
@@ -92,6 +93,7 @@ export default class NovelUpdates extends MangaProvider {
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
                         Cookie: "_ga=;",
+                        Origin: this.url,
                     },
                     body: `action=nd_getchapters&mypostid=${postId}&mypostid2=0`,
                 })

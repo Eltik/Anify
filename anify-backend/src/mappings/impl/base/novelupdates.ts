@@ -140,6 +140,7 @@ export default class NovelUpdatesBase extends BaseProvider {
                 await this.request(`${this.url}/series/${id}`, {
                     headers: {
                         Referer: this.url,
+                        Origin: this.url,
                     },
                 })
             ).text();
