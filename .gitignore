@@ -39,3 +39,4 @@ proxies.json
 /builds
 db.sqlite
 dump.rdb
+package-lock.json
