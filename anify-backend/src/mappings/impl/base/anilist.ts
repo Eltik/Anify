@@ -462,7 +462,7 @@ export default class AniListBase extends BaseProvider {
     }
 
     override getCurrentSeason(): Season {
-        return Season.SUMMER;
+        return Season.FALL;
     }
 
     override async getMedia(id: string): Promise<AnimeInfo | MangaInfo | undefined> {

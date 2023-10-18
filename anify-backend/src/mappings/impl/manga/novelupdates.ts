@@ -103,6 +103,9 @@ export default class NovelUpdates extends MangaProvider {
         this.useGoogleTranslate = true;
 
         const $$ = load(chapterData);
+
+        if (chapterData.includes("not whitelisted by the operator of this proxy") || $$("title").html() === "Just a moment...") return this.fetchChapters(id, retries + 1);
+
         $$("li.sp_li_chp a[data-id]").each((index, el) => {
             const id = $$(el).attr("data-id");
             const title = $$(el).find("span").text();

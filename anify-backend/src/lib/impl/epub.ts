@@ -154,6 +154,11 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
         await Bun.write(`${path}/cover.jpg`, await cover.arrayBuffer());
     }
 
+    const aniListId = manga.mappings.find((x) => x.providerId === "anilist")?.id;
+    const kitsuId = manga.mappings.find((x) => x.providerId === "kitsu")?.id;
+    const malId = manga.mappings.find((x) => x.providerId === "myanimelist")?.id;
+    const novelUpdatesId = manga.mappings.find((x) => x.providerId === "novelupdates")?.id;
+
     content.push({
         title: manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "",
         content: `
@@ -161,6 +166,8 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
             <p>${manga.description ?? ""}</p>
             <br />
             <ul>
+                <li><b>Author:</b> ${manga.author ?? "Unknown"}</li>
+                <li><b>Publisher:</b> ${manga.publisher ?? "Unknown"}</li>
                 <li><b>Total Volumes:</b> ${manga.totalVolumes ?? "N/A"}</li>
                 <li><b>Total Chapters:</b> ${manga.totalChapters ?? "N/A"}</li>
                 <li><b>Year Released:</b> ${manga.year ?? "N/A"}</li>
@@ -179,10 +186,10 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
             <br />
             <h4><b>Links:</b></h4>
             <ul>
-                <li><b>Anilist:</b> <a href="https://anilist.co/manga/${manga.id}">https://anilist.co/manga/${manga.id}</a></li>
-                <li><b>Kitsu:</b> <a href="https://kitsu.io/manga/${manga.id}">https://kitsu.io/manga/${manga.id}</a></li>
-                <li><b>MyAnimeList:</b> <a href="https://myanimelist.net/manga/${manga.id}">https://myanimelist.net/manga/${manga.id}</a></li>
-                <li><b>MangaUpdates:</b> <a href="https://www.mangaupdates.com/series.html?id=${manga.id}">https://www.mangaupdates.com/series.html?id=${manga.id}</a></li>
+                ${aniListId ? `<li><b>AniList:</b> <a href="https://anilist.co/manga/${aniListId}">https://anilist.co/manga/${aniListId}</a></li>` : `<li><b>AniList:</b> <a href="https://anilist.co">No AniList ID found</a></li>`}
+                ${kitsuId ? `<li><b>Kitsu:</b> <a href="https://kitsu.io/manga/${kitsuId}">https://kitsu.io/manga/${kitsuId}</a></li>` : `<li><b>Kitsu:</b> <a href="https://kitsu.io">No Kitsu ID found</a></li>`}
+                ${malId ? `<li><b>MyAnimeList:</b> <a href="https://myanimelist.net/manga/${malId}">https://myanimelist.net/manga/${malId}</a></li>` : `<li><b>MyAnimeList:</b> <a href="https://myanimelist.net">No MyAnimeList ID found</a></li>`}
+                ${novelUpdatesId ? `<li><b>NovelUpdates:</b> <a href="https://www.novelupdates.com/series/${novelUpdatesId}">https://www.novelupdates.com/series/${novelUpdatesId}</a></li>` : `<li><b>NovelUpdates:</b> <a href="https://www.novelupdates.com">No NovelUpdates ID found</a></li>`}
             </ul>
         `,
     });
