@@ -22,7 +22,18 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const cached = await redis.get(`info:${id}`);
+        let fields: string[] = [];
+        const fieldsParam = url.searchParams.get("fields");
+
+        if (fieldsParam && fieldsParam.startsWith("[") && fieldsParam.endsWith("]")) {
+            const fieldsArray = fieldsParam
+                .slice(1, -1)
+                .split(",")
+                .map((field) => field.trim());
+            fields = fieldsArray.filter(Boolean);
+        }
+
+        const cached = await redis.get(`info:${id}:${JSON.stringify(fields)}`);
         if (cached) {
             return new Response(cached, {
                 status: 200,
@@ -30,7 +41,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const data = await get(String(id));
+        const data = await get(String(id), fields);
         if (!data) {
             return new Response(JSON.stringify({ error: "No data found." }), {
                 status: 404,
@@ -38,7 +49,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        await redis.set(`info:${id}`, JSON.stringify(data), "EX", cacheTime);
+        await redis.set(`info:${id}:${JSON.stringify(fields)}`, JSON.stringify(data), "EX", cacheTime);
 
         return new Response(JSON.stringify(data), {
             status: 200,

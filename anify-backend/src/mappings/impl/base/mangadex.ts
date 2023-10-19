@@ -81,8 +81,8 @@ export default class ManagDexBase extends BaseProvider {
                 relations: [],
                 rating: null,
                 type: Type.MANGA,
-                author: manga.relationships.filter((element: any) => element.type === "author").map((element: any) => element.attributes?.name?.en) ?? null,
-                publisher: manga.relationships.filter((element: any) => element.type === "publisher").map((element: any) => element.attributes?.name?.en) ?? null,
+                author: manga.relationships.filter((element: any) => element.type === "author").map((element: any) => element.attributes?.name) ?? null,
+                publisher: manga.relationships.filter((element: any) => element.type === "publisher").map((element: any) => element.attributes?.name) ?? null,
             });
         }
 
@@ -220,8 +220,8 @@ export default class ManagDexBase extends BaseProvider {
                 relations: [],
                 rating: null,
                 type: Type.MANGA,
-                author: manga.relationships.filter((element: any) => element.type === "author").map((element: any) => element.attributes?.name?.en) ?? null,
-                publisher: manga.relationships.filter((element: any) => element.type === "publisher").map((element: any) => element.attributes?.name?.en) ?? null,
+                author: manga.relationships.filter((element: any) => element.type === "author").map((element: any) => element.attributes?.name) ?? null,
+                publisher: manga.relationships.filter((element: any) => element.type === "publisher").map((element: any) => element.attributes?.name) ?? null,
             });
         }
         return results;
@@ -278,8 +278,8 @@ export default class ManagDexBase extends BaseProvider {
                 format,
                 coverImage: `${this.url}/covers/${id}/${data.relationships.find((element: any) => element.type === "cover_art").id}.jpg`,
                 bannerImage: null,
-                author: data.relationships.filter((element: any) => element.type === "author").map((element: any) => element.attributes?.name?.en) ?? null,
-                publisher: data.relationships.filter((element: any) => element.type === "publisher").map((element: any) => element.attributes?.name?.en) ?? null,
+                author: data.relationships.filter((element: any) => element.type === "author").map((element: any) => element.attributes?.name) ?? null,
+                publisher: data.relationships.filter((element: any) => element.type === "publisher").map((element: any) => element.attributes?.name) ?? null,
             };
         } catch (e) {
             return undefined;
@@ -292,7 +292,7 @@ export default class ManagDexBase extends BaseProvider {
         // Format the date as YYYY-MM-DD
         const year = currentDate.getFullYear();
         const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-        const day = String(currentDate.getDate()).padStart(2, "0");
+        const day = String(currentDate.getDate() - 7).padStart(2, "0");
         const createdAtParam = `${year}-${month}-${day}T00:00:00`;
 
         const trending = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true&createdAtSince=${createdAtParam}`)).json().catch(() => {
@@ -357,6 +357,10 @@ export default class ManagDexBase extends BaseProvider {
         };
     }
 
+    override async fetchSchedule(): Promise<{ sunday: MangaInfo[] | AnimeInfo[]; monday: MangaInfo[] | AnimeInfo[]; tuesday: MangaInfo[] | AnimeInfo[]; wednesday: MangaInfo[] | AnimeInfo[]; thursday: MangaInfo[] | AnimeInfo[]; friday: MangaInfo[] | AnimeInfo[]; saturday: MangaInfo[] | AnimeInfo[] } | undefined> {
+        return undefined;
+    }
+
     override async fetchIds(formats: Format[]): Promise<string[] | undefined> {
         const data = await (await fetch("https://raw.githubusercontent.com/ArdaxHz/mangadex-id-map/main/json/manga_map.json")).json();
         /*
@@ -406,8 +410,8 @@ export default class ManagDexBase extends BaseProvider {
             format,
             coverImage: `${this.url}/covers/${manga.id}/${manga.relationships.find((element: any) => element.type === "cover_art").id}.jpg`,
             bannerImage: null,
-            author: manga.relationships.filter((element: any) => element.type === "author").map((element: any) => element.attributes?.name?.en) ?? null,
-            publisher: manga.relationships.filter((element: any) => element.type === "publisher").map((element: any) => element.attributes?.name?.en) ?? null,
+            author: manga.relationships.filter((element: any) => element.type === "author").map((element: any) => element.attributes?.name) ?? null,
+            publisher: manga.relationships.filter((element: any) => element.type === "publisher").map((element: any) => element.attributes?.name) ?? null,
         };
     }
 }

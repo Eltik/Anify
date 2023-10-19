@@ -690,6 +690,205 @@ export default class AniListBase extends BaseProvider {
         };
     }
 
+    override async fetchSchedule(): Promise<{ sunday: AnimeInfo[] | MangaInfo[]; monday: AnimeInfo[] | MangaInfo[]; tuesday: AnimeInfo[] | MangaInfo[]; wednesday: AnimeInfo[] | MangaInfo[]; thursday: AnimeInfo[] | MangaInfo[]; friday: AnimeInfo[] | MangaInfo[]; saturday: AnimeInfo[] | MangaInfo[] } | undefined> {
+        const currentDate = new Date(); // Get the current date
+
+        const fetchData = async (page = 1) => {
+            // Calculate the start date of the week (assuming Monday as the first day of the week)
+            const weekStart = new Date(currentDate);
+            weekStart.setDate(currentDate.getDate() - currentDate.getDay() + 1); // Set to Monday
+
+            // Calculate the end date of the week (assuming Sunday as the last day of the week)
+            const weekEnd = new Date(currentDate);
+            weekEnd.setDate(currentDate.getDate() - currentDate.getDay() + 8); // Set to next Monday
+
+            const aniListArgs = {
+                query: `
+                query(
+                    $weekStart: Int,
+                    $weekEnd: Int,
+                    $page: Int
+                ) {
+                    Page(page: $page) {
+                        pageInfo {
+                            hasNextPage
+                            total
+                        }
+                        airingSchedules(
+                            airingAt_greater: $weekStart airingAt_lesser: $weekEnd
+                        ) {
+                            id
+                            episode
+                            airingAt
+                            media {
+                                ${this.query}
+                            }
+                        }
+                    }
+                }
+                `,
+                variables: {
+                    weekStart: Math.round(weekStart.getTime() / 1000),
+                    weekEnd: Math.round(weekEnd.getTime() / 1000),
+                    page,
+                },
+            };
+
+            const req = await (
+                await this.request("https://graphql.anilist.co", {
+                    body: JSON.stringify(aniListArgs),
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Origin: "https://anilist.co",
+                    },
+                })
+            ).json();
+
+            const schedule: Schedule[] = req?.data.Page.airingSchedules;
+
+            return schedule.map((data) => {
+                if (data.media.type === Type.ANIME) {
+                    return {
+                        id: String(data.id),
+                        title: {
+                            english: data.media.title.english ?? null,
+                            romaji: data.media.title.romaji ?? null,
+                            native: data.media.title.native ?? null,
+                        },
+                        trailer: null,
+                        currentEpisode: data.media.status === MediaStatus.FINISHED || data.media.status === MediaStatus.CANCELLED ? data.media.episodes ?? 0 : 0,
+                        duration: data.media.duration ?? null,
+                        coverImage: data.media.coverImage.extraLarge ?? null,
+                        bannerImage: data.media.bannerImage ?? null,
+                        popularity: Number(data.media.popularity),
+                        synonyms: data.media.synonyms ?? [],
+                        totalEpisodes: data.media.episodes ?? 0,
+                        color: null,
+                        status: data.media.status as MediaStatus,
+                        season: data.media.season as Season,
+                        genres: (data.media.genres as Genres[]) ?? [],
+                        rating: data.media.meanScore ? data.media.meanScore / 10 : null,
+                        description: data.media.description ?? null,
+                        type: data.media.type,
+                        format: data.media.format,
+                        year: data.media.seasonYear ?? data.media.startDate?.year ?? null,
+                        countryOfOrigin: data.media.countryOfOrigin ?? null,
+                        tags: data.media.tags.map((tag) => tag.name),
+                        relations: data.media.relations,
+                        characters: data.media.characters,
+                        artwork: [
+                            {
+                                type: "poster",
+                                img: data.media.coverImage.extraLarge,
+                                providerId: this.id,
+                            },
+                            {
+                                type: "banner",
+                                img: data.media.bannerImage,
+                                providerId: this.id,
+                            },
+                        ],
+                        airingAt: data.airingAt * 1000,
+                        airingEpisode: data.episode,
+                    } as unknown as AnimeInfo;
+                } else {
+                    return {
+                        id: String(data.id),
+                        title: {
+                            english: data.media.title.english ?? null,
+                            romaji: data.media.title.romaji ?? null,
+                            native: data.media.title.native ?? null,
+                        },
+                        coverImage: data.media.coverImage.extraLarge ?? null,
+                        bannerImage: data.media.bannerImage ?? null,
+                        popularity: Number(data.media.popularity),
+                        synonyms: data.media.synonyms ?? [],
+                        totalChapters: data.media.chapters ?? 0,
+                        color: null,
+                        status: data.media.status as MediaStatus,
+                        genres: (data.media.genres as Genres[]) ?? [],
+                        rating: data.media.meanScore ? data.media.meanScore / 10 : null,
+                        description: data.media.description ?? null,
+                        type: data.media.type,
+                        format: data.media.format,
+                        year: data.media.seasonYear ?? data.media.startDate?.year ?? null,
+                        countryOfOrigin: data.media.countryOfOrigin ?? null,
+                        tags: data.media.tags.map((tag) => tag.name),
+                        relations: data.media.relations,
+                        characters: data.media.characters,
+                        artwork: [
+                            {
+                                type: "poster",
+                                img: data.media.coverImage.extraLarge,
+                                providerId: this.id,
+                            },
+                            {
+                                type: "banner",
+                                img: data.media.bannerImage,
+                                providerId: this.id,
+                            },
+                        ],
+                        totalVolumes: data.media.volumes ?? 0,
+                        author: null,
+                        publisher: null,
+                        airingAt: data.airingAt * 1000,
+                        airingEpisode: data.episode,
+                    } as unknown as MangaInfo;
+                }
+            });
+        };
+
+        const pages = [1, 2, 3, 4, 5, 6, 7];
+        const fetchDataPromises = pages.map(fetchData);
+
+        const results = await Promise.all(fetchDataPromises);
+        const schedule = results.flat();
+
+        const formattedResponse = schedule.reduce(
+            (acc: { sunday: AnimeInfo[] | MangaInfo[]; monday: AnimeInfo[] | MangaInfo[]; tuesday: AnimeInfo[] | MangaInfo[]; wednesday: AnimeInfo[] | MangaInfo[]; thursday: AnimeInfo[] | MangaInfo[]; friday: AnimeInfo[] | MangaInfo[]; saturday: AnimeInfo[] | MangaInfo[] }, media: AnimeInfo | MangaInfo) => {
+                const day = new Date((media as any).airingAt).getDay();
+
+                switch (day) {
+                    case 0:
+                        (acc.sunday as (AnimeInfo | MangaInfo)[]).push(media);
+                        break;
+                    case 1:
+                        (acc.monday as (AnimeInfo | MangaInfo)[]).push(media);
+                        break;
+                    case 2:
+                        (acc.tuesday as (AnimeInfo | MangaInfo)[]).push(media);
+                        break;
+                    case 3:
+                        (acc.wednesday as (AnimeInfo | MangaInfo)[]).push(media);
+                        break;
+                    case 4:
+                        (acc.thursday as (AnimeInfo | MangaInfo)[]).push(media);
+                        break;
+                    case 5:
+                        (acc.friday as (AnimeInfo | MangaInfo)[]).push(media);
+                        break;
+                    case 6:
+                        (acc.saturday as (AnimeInfo | MangaInfo)[]).push(media);
+                        break;
+                }
+
+                return acc;
+            },
+            {
+                sunday: [],
+                monday: [],
+                tuesday: [],
+                wednesday: [],
+                thursday: [],
+                friday: [],
+                saturday: [],
+            },
+        );
+
+        return formattedResponse;
+    }
+
     override async fetchIds(formats: Format[]): Promise<string[] | undefined> {
         const ids: string[] = [];
 
@@ -1200,59 +1399,5 @@ interface Schedule {
     id: number;
     episode: number;
     airingAt: number;
-    media: {
-        id: number;
-        idMal: number;
-        title: {
-            romaji: string;
-            native: string;
-            english: string | null;
-        };
-        startDate: {
-            year: number;
-            month: number;
-            day: number;
-        };
-        endDate: {
-            year: number;
-            month: number;
-            day: number;
-        };
-        status: string;
-        season: string | null;
-        format: string;
-        genres: string[];
-        synonyms: string[];
-        duration: number | null;
-        popularity: number;
-        episodes: number;
-        source: string;
-        countryOfOrigin: string;
-        hashtag: string | null;
-        averageScore: number | null;
-        siteUrl: string;
-        description: string | null;
-        bannerImage: string | null;
-        isAdult: boolean;
-        coverImage: {
-            extraLarge: string;
-            color: string;
-        };
-        trailer: string | null;
-        externalLinks: {
-            site: string;
-            url: string;
-        }[];
-        rankings: any[];
-        studios: {
-            nodes: {
-                id: number;
-                name: string;
-                siteUrl: string;
-            }[];
-        };
-        relations: {
-            edges: any[];
-        };
-    };
+    media: Media;
 }

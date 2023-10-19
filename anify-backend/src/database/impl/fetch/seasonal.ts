@@ -104,8 +104,7 @@ export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: Ani
             // Delete fields that don't exist in the fields array
             Object.keys(media).forEach((key) => {
                 if (!fields.includes(key)) {
-                    // @ts-ignore we know key can be used to index media since its from object.keys(media)
-                    delete media[key];
+                    delete (media as { [key: string]: any })[key];
                 }
             });
         });

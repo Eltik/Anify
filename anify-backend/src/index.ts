@@ -2,13 +2,14 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { fetchCorsProxies } from "./proxies/impl/fetchProxies";
-import { MediaStatus } from "./types/enums";
+import { Format, MediaStatus, Type } from "./types/enums";
 import { init } from "./database";
 import emitter, { Events } from "./lib";
 import { get } from "./database/impl/fetch/get";
 import queues from "./worker";
 import { start } from "./server";
 import { startWebsocket } from "./websocket";
+import { baseProviders } from "./mappings";
 
 before().then(async (_) => {
     await start();

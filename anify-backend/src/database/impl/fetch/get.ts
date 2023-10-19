@@ -1,7 +1,7 @@
 import { db } from "../..";
 import { Anime, Db, Manga } from "../../../types/types";
 
-export const get = async (id: string): Promise<Anime | Manga | undefined> => {
+export const get = async (id: string, fields: string[] = []): Promise<Anime | Manga | undefined> => {
     const anime = db.query<Db<Anime>, { $id: string }>(`SELECT * FROM anime WHERE id = $id`).get({ $id: id });
     if (!anime) {
         const data = db.query<Db<Manga>, { $id: string }>(`SELECT * FROM manga WHERE id = $id`).get({ $id: id });
@@ -21,6 +21,15 @@ export const get = async (id: string): Promise<Anime | Manga | undefined> => {
                 artwork: JSON.parse(data.artwork),
                 characters: JSON.parse(data.characters),
             });
+
+            if (fields && fields.length > 0) {
+                // Delete fields that don't exist in the fields array
+                Object.keys(parsedManga).forEach((key) => {
+                    if (!fields.includes(key)) {
+                        delete (parsedManga as { [key: string]: any })[key];
+                    }
+                });
+            }
 
             return parsedManga as unknown as Manga;
         } catch (e) {
@@ -42,6 +51,15 @@ export const get = async (id: string): Promise<Anime | Manga | undefined> => {
                 artwork: JSON.parse(anime.artwork),
                 characters: JSON.parse(anime.characters),
             });
+
+            if (fields && fields.length > 0) {
+                // Delete fields that don't exist in the fields array
+                Object.keys(parsedAnime).forEach((key) => {
+                    if (!fields.includes(key)) {
+                        delete (parsedAnime as { [key: string]: any })[key];
+                    }
+                });
+            }
 
             return parsedAnime as unknown as Anime;
         } catch (e) {

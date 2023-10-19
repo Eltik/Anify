@@ -23,7 +23,7 @@ export default class AniDBMeta extends MetaProvider {
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         const results: Result[] = [];
 
-        const data = await (await this.request(`https://anidb.net/search/fulltext/?adb.search=${encodeURIComponent(query)}&do.search=1&entity.animetb=1&field.titles=1${format && format != Format.UNKNOWN ? `&${this.formatMapping[format?.toUpperCase() as keyof typeof this.formatMapping]}` : ""}`)).text();
+        const data = await (await this.request(`${this.url}/search/fulltext/?adb.search=${encodeURIComponent(query)}&do.search=1&entity.animetb=1&field.titles=1${format && format != Format.UNKNOWN ? `&${this.formatMapping[format?.toUpperCase() as keyof typeof this.formatMapping]}` : ""}`)).text();
 
         const $ = load(data);
 

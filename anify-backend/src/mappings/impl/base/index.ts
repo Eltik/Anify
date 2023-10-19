@@ -33,6 +33,21 @@ export default abstract class BaseProvider {
         return undefined;
     }
 
+    async fetchSchedule(): Promise<
+        | {
+              sunday: AnimeInfo[] | MangaInfo[];
+              monday: AnimeInfo[] | MangaInfo[];
+              tuesday: AnimeInfo[] | MangaInfo[];
+              wednesday: AnimeInfo[] | MangaInfo[];
+              thursday: AnimeInfo[] | MangaInfo[];
+              friday: AnimeInfo[] | MangaInfo[];
+              saturday: AnimeInfo[] | MangaInfo[];
+          }
+        | undefined
+    > {
+        return undefined;
+    }
+
     async fetchIds(formats: Format[]): Promise<string[] | undefined> {
         return undefined;
     }
