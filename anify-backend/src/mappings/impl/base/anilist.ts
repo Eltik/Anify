@@ -745,12 +745,12 @@ export default class AniListBase extends BaseProvider {
                 })
             ).json();
 
-            const schedule: Schedule[] = req?.data.Page.airingSchedules;
+            const schedule: Schedule[] = req?.data?.Page?.airingSchedules ?? [];
 
             return schedule.map((data) => {
                 if (data.media.type === Type.ANIME) {
                     return {
-                        id: String(data.id),
+                        id: String(data.media.id),
                         title: {
                             english: data.media.title.english ?? null,
                             romaji: data.media.title.romaji ?? null,
@@ -794,7 +794,7 @@ export default class AniListBase extends BaseProvider {
                     } as unknown as AnimeInfo;
                 } else {
                     return {
-                        id: String(data.id),
+                        id: String(data.media.id),
                         title: {
                             english: data.media.title.english ?? null,
                             romaji: data.media.title.romaji ?? null,

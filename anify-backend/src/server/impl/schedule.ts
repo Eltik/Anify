@@ -24,7 +24,18 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const cached = await redis.get(`schedule:${type}`);
+        let fields: string[] = [];
+        const fieldsParam = url.searchParams.get("fields");
+
+        if (fieldsParam && fieldsParam.startsWith("[") && fieldsParam.endsWith("]")) {
+            const fieldsArray = fieldsParam
+                .slice(1, -1)
+                .split(",")
+                .map((field) => field.trim());
+            fields = fieldsArray.filter(Boolean);
+        }
+
+        const cached = await redis.get(`schedule:${type}:${JSON.stringify(fields)}`);
         if (cached) {
             return new Response(cached, {
                 status: 200,
@@ -32,9 +43,9 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const data = await loadSchedule({ type });
+        const data = await loadSchedule({ type: type.toUpperCase(), fields });
 
-        await redis.set(`schedule:${type}`, JSON.stringify(data), "EX", cacheTime);
+        await redis.set(`schedule:${type}:${JSON.stringify(fields)}`, JSON.stringify(data), "EX", cacheTime);
 
         return new Response(JSON.stringify(data), {
             status: 200,

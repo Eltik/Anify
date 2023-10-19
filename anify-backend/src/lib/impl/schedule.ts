@@ -4,16 +4,18 @@ import { Anime, AnimeInfo, Manga, MangaInfo } from "../../types/types";
 import { BASE_PROVIDERS } from "../../mappings";
 import queues from "../../worker";
 
-export const loadSchedule = async (data: { type: Type }) => {
+export const loadSchedule = async (data: { type: Type; fields?: string[] }) => {
     const formats = data.type === Type.ANIME ? [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT] : [Format.MANGA, Format.ONE_SHOT];
 
-    const baseData = await BASE_PROVIDERS.map((provider) => {
-        if (provider.formats?.includes(formats[0])) {
-            return provider.fetchSchedule();
-        } else {
-            return null;
-        }
-    }).filter((x) => x !== null)[0];
+    const baseData = await (
+        await BASE_PROVIDERS.map((provider) => {
+            if (provider.formats?.includes(formats[0])) {
+                return provider.fetchSchedule();
+            } else {
+                return null;
+            }
+        }).filter((x) => x !== null)
+    )[0];
 
     const sunday: Anime[] | Manga[] = [];
     const monday: Anime[] | Manga[] = [];
@@ -26,11 +28,16 @@ export const loadSchedule = async (data: { type: Type }) => {
     const promises = [];
 
     const checkMedia = async (media: AnimeInfo | MangaInfo): Promise<Anime | Manga | undefined> => {
-        const existing = await get(media.id);
+        const existing = await get(media.id, data.fields ?? []);
         if (!existing) {
             queues.mappingQueue.add({ id: media.id, type: media.type, formats: [media.format] });
             return undefined;
         }
+
+        Object.assign(existing, {
+            airingAt: (media as any).airingAt,
+            airingEpisode: (media as any).airingEpisode,
+        });
 
         return existing;
     };
