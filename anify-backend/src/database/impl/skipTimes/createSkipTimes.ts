@@ -2,7 +2,7 @@ import { db } from "../..";
 import { SkipTime } from "../../../types/types";
 import { getSkipTimes } from "./getSkipTimes";
 
-export const createSkipTimes = async (data: SkipTime) => {
+export const createSkipTimes = async (data: SkipTime, stringify: boolean = true) => {
     if (await getSkipTimes(data.id)) return null;
 
     const query = `
@@ -17,9 +17,9 @@ export const createSkipTimes = async (data: SkipTime) => {
 
     const params = {
         $id: data.id,
-        $episodes: JSON.stringify(data.episodes),
+        $episodes: stringify ? JSON.stringify(data.episodes) : data.episodes,
     };
 
-    const insert = await db.prepare(query).run(params);
+    const insert = await db.prepare(query).run(params as any);
     return insert;
 };

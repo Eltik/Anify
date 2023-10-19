@@ -38,5 +38,6 @@ metaProxies.json
 proxies.json
 /builds
 db.sqlite
+db.sqlite-journal
 dump.rdb
 package-lock.json

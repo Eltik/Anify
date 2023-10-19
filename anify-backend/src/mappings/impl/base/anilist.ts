@@ -50,7 +50,7 @@ export default class AniListBase extends BaseProvider {
             body: JSON.stringify(aniListArgs),
         });
         const json = await req?.json();
-        const media = json.data.Page.media;
+        const media = json?.data?.Page.media;
 
         if (type === Type.ANIME) {
             return media
@@ -277,7 +277,7 @@ export default class AniListBase extends BaseProvider {
             body: JSON.stringify(aniListArgs),
         });
         const json = await req?.json();
-        const media = json.data.Page.media;
+        const media = json?.data.Page.media;
 
         if (type === Type.ANIME) {
             return media

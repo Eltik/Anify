@@ -4,7 +4,7 @@ import { Type } from "../../../types/enums";
 import { Anime, Manga } from "../../../types/types";
 import { get } from "../fetch/get";
 
-export const create = async (data: Anime | Manga) => {
+export const create = async (data: Anime | Manga, stringify: boolean = true) => {
     if (await get(data.id)) return null;
 
     const query = `
@@ -79,43 +79,43 @@ export const create = async (data: Anime | Manga) => {
         $coverImage: data.coverImage,
         $bannerImage: data.bannerImage,
         $status: data.status,
-        $title: JSON.stringify(data.title),
-        $mappings: JSON.stringify(data.mappings),
-        $synonyms: JSON.stringify(data.synonyms),
+        $title: stringify ? JSON.stringify(data.title) : data.title,
+        $mappings: stringify ? JSON.stringify(data.mappings) : data.mappings,
+        $synonyms: stringify ? JSON.stringify(data.synonyms) : data.synonyms,
         $countryOfOrigin: data.countryOfOrigin,
         $description: data.description,
         $color: data.color,
         $year: data.year,
-        $rating: JSON.stringify(data.rating),
-        $popularity: JSON.stringify(data.popularity),
+        $rating: stringify ? JSON.stringify(data.rating) : data.rating,
+        $popularity: stringify ? JSON.stringify(data.popularity) : data.popularity,
         $type: data.type,
         $format: data.format,
-        $relations: JSON.stringify(data.relations),
-        $genres: JSON.stringify(data.genres),
-        $tags: JSON.stringify(data.tags),
-        $averageRating: averageMetric(data.rating),
-        $averagePopularity: averageMetric(data.popularity),
-        $artwork: JSON.stringify(data.artwork),
-        $characters: JSON.stringify(data.characters),
+        $relations: stringify ? JSON.stringify(data.relations) : data.relations,
+        $genres: stringify ? JSON.stringify(data.genres) : data.genres,
+        $tags: stringify ? JSON.stringify(data.tags) : data.tags,
+        $averageRating: stringify ? averageMetric(data.rating) : data.rating,
+        $averagePopularity: stringify ? averageMetric(data.popularity) : data.popularity,
+        $artwork: stringify ? JSON.stringify(data.artwork) : data.artwork,
+        $characters: stringify ? JSON.stringify(data.characters) : data.characters,
     };
 
     if (data.type === Type.ANIME) {
         Object.assign(params, {
             $trailer: data.trailer,
-            $season: JSON.stringify(data.season),
+            $season: stringify ? JSON.stringify(data.season) : data.season,
             $currentEpisode: data.currentEpisode,
             $duration: data.duration,
             $totalEpisodes: data.totalEpisodes,
-            $episodes: JSON.stringify(data.episodes),
+            $episodes: stringify ? JSON.stringify(data.episodes) : data.episodes,
         });
     } else {
         Object.assign(params, {
             $totalChapters: data.totalChapters,
             $totalVolumes: data.totalVolumes,
-            $chapters: JSON.stringify(data.chapters),
+            $chapters: stringify ? JSON.stringify(data.chapters) : data.chapters,
         });
     }
 
-    const insert = db.prepare(query).run(params);
+    const insert = db.prepare(query).run(params as any);
     return insert;
 };
