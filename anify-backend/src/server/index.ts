@@ -53,7 +53,7 @@ export const start = async () => {
                         "Access-Control-Allow-Origin": "*",
                         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
                         "Access-Control-Max-Age": "2592000",
-                        "Access-Allow-Control-Headers": "*",
+                        "Access-Control-Allow-Headers": "*",
                         "Content-Type": "text/plain",
                     },
                 });
@@ -70,13 +70,13 @@ export const start = async () => {
                 if (requests && requests.requests > rateLimit) {
                     if (requests.requests > rateLimit * 2) console.log(colors.red(`Rate limit significantly exceeded for ${requests.ip}`));
 
-                    return new Response(JSON.stringify({ error: "Too many requests" }), { status: 429, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Allow-Control-Headers": "*" } });
+                    return new Response(JSON.stringify({ error: "Too many requests" }), { status: 429, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" } });
                 }
 
                 return handler(req);
             }
 
-            return new Response(JSON.stringify({ error: "Route not found" }), { status: 404, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Allow-Control-Headers": "*" } });
+            return new Response(JSON.stringify({ error: "Route not found" }), { status: 404, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" } });
         },
     });
 
