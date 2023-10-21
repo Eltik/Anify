@@ -46,7 +46,14 @@ export default class Mangakakalot extends MangaProvider {
 
                     let title: string = url === "https://readmanganato.com" ? $("div.panel-story-info > div.story-info-right > h1").text() : $("div.manga-info-top > ul > li:nth-child(1) > h1").text();
                     let img: string = (url === "https://readmanganato.com" ? $("div.story-info-left > span.info-image > img").attr("src") : $("div.manga-info-top > div > img").attr("src")) ?? "";
-                    const altTitles: string[] = url === "https://readmanganato.com" ? $("div.story-info-right > table > tbody > tr:nth-child(1) > td.table-value > h2").text().split(";") : $("div.manga-info-top > ul > li:nth-child(1) > h2").text().replace("Alternative :", "").split(";");
+                    const altTitles: string[] =
+                        url === "https://readmanganato.com"
+                            ? $("div.story-info-right > table > tbody > tr:nth-child(1) > td.table-value > h2").text().split(";")
+                            : $("div.manga-info-top > ul > li:nth-child(1) > h2")
+                                  .text()
+                                  .replace("Alternative :", "")
+                                  .split(";")
+                                  .map((x) => x.trim());
 
                     results.push({
                         id: id,
