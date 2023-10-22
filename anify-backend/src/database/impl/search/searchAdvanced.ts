@@ -1,10 +1,10 @@
 import { db } from "../..";
-import { Format, Genres, Type } from "../../../types/enums";
+import { Format, Genres, Sort, SortDirection, Type } from "../../../types/enums";
 import { Anime, Db, Manga } from "../../../types/types";
 
 type ReturnType<T> = T extends Type.ANIME ? Anime[] : Manga[];
 
-export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(query: string, type: T, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = [], year = 0, tags: string[] = [], tagsExcluded: string[] = []) => {
+export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(query: string, type: T, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = [], year = 0, tags: string[] = [], tagsExcluded: string[] = [], sort: Sort = Sort.SCORE, sortDirection: SortDirection = SortDirection.ASC) => {
     const skip = page > 0 ? perPage * (page - 1) : 0;
 
     let where = `
@@ -79,7 +79,7 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(query: s
                 `SELECT *
                     FROM ${type === Type.ANIME ? "anime" : "manga"}
                     ${where}
-                ORDER BY title->>'english' ASC
+                ORDER BY ${sort} ${sortDirection}
                 LIMIT $limit OFFSET $offset`,
             )
             .all({ $query: query, $limit: perPage, $offset: skip });

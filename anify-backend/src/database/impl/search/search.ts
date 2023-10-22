@@ -1,10 +1,10 @@
 import { db } from "../..";
-import { Format, Type } from "../../../types/enums";
+import { Format, Sort, SortDirection, Type } from "../../../types/enums";
 import { Anime, Db, Manga } from "../../../types/types";
 
 type ReturnType<T> = T extends Type.ANIME ? Anime[] : Manga[];
 
-export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, type: T, formats: Format[], page: number, perPage: number): Promise<ReturnType<T>> => {
+export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, type: T, formats: Format[], page: number, perPage: number, sort: Sort, sortDirection: SortDirection): Promise<ReturnType<T>> => {
     const skip = page > 0 ? perPage * (page - 1) : 0;
 
     const where = `
@@ -34,7 +34,7 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
             `SELECT *
                 FROM ${type === Type.ANIME ? "anime" : "manga"}
                 ${where}
-            ORDER BY title->>'english' ASC
+            ORDER BY ${sort} ${sortDirection}
             LIMIT $limit OFFSET $offset`,
         )
         .all({ $query: query, $limit: perPage, $offset: skip });

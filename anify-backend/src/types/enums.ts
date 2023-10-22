@@ -3,6 +3,23 @@ export const enum Type {
     MANGA = "MANGA",
 }
 
+export const enum Sort {
+    SCORE = "averageRating",
+    POPULARITY = "averagePopularity",
+    TITLE = "title->>'english'",
+    YEAR = "year",
+    TOTAL_EPISODES = "totalEpisodes",
+    TOTAL_CHAPTERS = "totalChapters",
+    TOTAL_VOLUMES = "totalVolumes",
+}
+
+export const Sorts = [Sort.SCORE, Sort.POPULARITY, Sort.TITLE, Sort.YEAR, Sort.TOTAL_EPISODES, Sort.TOTAL_CHAPTERS, Sort.TOTAL_VOLUMES];
+
+export const enum SortDirection {
+    ASC = "ASC",
+    DESC = "DESC",
+}
+
 export const enum ProviderType {
     ANIME = "ANIME",
     MANGA = "MANGA",

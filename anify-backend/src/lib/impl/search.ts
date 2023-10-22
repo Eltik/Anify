@@ -2,7 +2,7 @@ import emitter, { Events } from "..";
 import { search } from "../../database/impl/search/search";
 import { searchAdvanced } from "../../database/impl/search/searchAdvanced";
 import { BASE_PROVIDERS } from "../../mappings";
-import { Format, Genres, Type } from "../../types/enums";
+import { Format, Genres, Sort, SortDirection, Type } from "../../types/enums";
 
 export const loadSearch = async (data: { query: string; type: Type; formats: Format[]; genres?: Genres[]; genresExcluded?: Genres[]; year?: number; tags?: string[]; tagsExcluded?: string[] }) => {
     if ((Array.isArray(data.genres) && data.genres.length > 0) || (Array.isArray(data.genresExcluded) && data.genresExcluded.length > 0) || data.year || (Array.isArray(data.tags) && data.tags.length > 0) || (Array.isArray(data.tagsExcluded) && data.tagsExcluded.length > 0)) {
@@ -25,7 +25,7 @@ export const loadSearch = async (data: { query: string; type: Type; formats: For
         return result;
     } else {
         // First check if exists in database
-        const existing = await search(data.query, data.type, data.formats, 1, 15);
+        const existing = await search(data.query, data.type, data.formats, 1, 15, Sort.SCORE, SortDirection.ASC);
         if (existing.length > 0) {
             await emitter.emitAsync(Events.COMPLETED_SEARCH_LOAD, existing);
             return existing;
