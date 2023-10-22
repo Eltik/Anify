@@ -1,5 +1,5 @@
 import queues from "../../worker";
-import { Format, Genres, Sort, SortDirection, Sorts, Type } from "../../types/enums";
+import { Format, Formats, Genres, Sort, SortDirection, Sorts, Type } from "../../types/enums";
 import { searchAdvanced } from "../../database/impl/search/searchAdvanced";
 import { cacheTime, redis } from "..";
 
@@ -32,7 +32,7 @@ export const handler = async (req: Request): Promise<Response> => {
         }
 
         const query = decodeURIComponent(body?.query ?? url.searchParams.get("query") ?? "");
-        const formats = body?.formats ?? url.searchParams.get("formats")?.split(",") ?? type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL];
+        const formats = body?.formats ?? url.searchParams.get("formats")?.split(",") ?? (type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL]);
         const genres = body?.genres ?? url.searchParams.get("genres")?.split(",") ?? [];
         const genresExcluded = body?.genresExcluded ?? url.searchParams.get("genresExcluded")?.split(",") ?? [];
         const tags = body?.tags ?? url.searchParams.get("tags")?.split(",") ?? [];
@@ -42,6 +42,13 @@ export const handler = async (req: Request): Promise<Response> => {
         const perPage = Number(body?.perPage ?? url.searchParams.get("perPage") ?? "20");
         const sort = body?.sort ?? url.searchParams.get("sort") ?? Sort.SCORE;
         const sortDirection = body?.sortDirection ?? url.searchParams.get("sortDirection") ?? SortDirection.ASC;
+
+        // Check if formats are valid
+        formats
+            .filter((f: string) => !Formats.includes(f as Format))
+            .forEach((f: string) => {
+                formats.splice(formats.indexOf(f), 1);
+            });
 
         // Check if sort is valid
         if (!Sorts.includes(sort as Sort)) {
