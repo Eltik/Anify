@@ -52,6 +52,8 @@ export default class AniListBase extends BaseProvider {
         const json = await req?.json();
         const media = json?.data?.Page.media;
 
+        if (!media) return undefined;
+
         if (type === Type.ANIME) {
             return media
                 .map((data: Media) => {

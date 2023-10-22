@@ -10,11 +10,11 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
     const formatParams = formats.map((f) => `'${f}'`).join(", ");
     const newResults: ((Anime | Manga) & { updatedAt?: number })[] = [];
 
-    if (type === "ANIME") {
+    if (type === Type.ANIME) {
         const sql = `
             SELECT * FROM "anime"
-            WHERE "format" IN (${formatParams})
-            ORDER BY "latest" DESC
+            WHERE "format" IN (${formatParams}) AND year=${new Date().getFullYear()}
+            ORDER BY episodes->>'latest'->>'updatedAt' DESC
             LIMIT ${perPage}
             OFFSET ${skip};
         `;
@@ -67,7 +67,7 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
         const sql = `
             SELECT * FROM "manga"
             WHERE "format" IN (${formatParams})
-            ORDER BY "latest" DESC
+            ORDER BY chapters->>'latest'->>'updatedAt' DESC
             LIMIT ${perPage}
             OFFSET ${skip};
         `;
