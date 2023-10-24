@@ -5,6 +5,9 @@ import { env } from "process";
 import { Source } from "../types/types";
 import { StreamingServers } from "../types/enums";
 
+/**
+ * @description Extracts source links from the streaming servers. This class is very messy but it works.
+ */
 export default class Extractor {
     private url: string;
     private result: Source;
@@ -14,6 +17,11 @@ export default class Extractor {
         this.result = result;
     }
 
+    /**
+     * @description Extracts source links from the streaming servers.
+     * @param server Streaming server
+     * @returns Promise<Source | undefined>
+     */
     async extract(server: StreamingServers): Promise<Source | undefined> {
         switch (server) {
             case StreamingServers.GogoCDN:

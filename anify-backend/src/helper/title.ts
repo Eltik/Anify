@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Clean and sanitize titles.
+ */
+
 export function clean(title: string) {
     return transformSpecificVariations(
         removeSpecialChars(

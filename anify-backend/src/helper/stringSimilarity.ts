@@ -1,5 +1,9 @@
 import { clean, sanitizeTitle } from "./title";
 
+/**
+ * @fileoverview Used for string similarity comparison. Mainly for mapping purposes. Most of this was taken from the string-similarity package.
+ */
+
 export function similarity(externalTitle: string, title: string, titleArray: string[] = []): { same: boolean; value: number } {
     if (!title) {
         title = "";

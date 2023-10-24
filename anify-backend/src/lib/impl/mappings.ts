@@ -9,6 +9,11 @@ import { findBestMatch2DArray, similarity } from "../../helper/stringSimilarity"
 import { averageMetric, isString } from "../../helper";
 import InformationProvider from "../../mappings/impl/information";
 
+/**
+ * @description Maps media to base providers and fetches info from a variety of websites.
+ * @param data The data to load the mapping for.
+ * @returns Promise<Anime[] | Manga[]>
+ */
 export const loadMapping = async (data: { id: string; type: Type; formats: Format[] }): Promise<Anime[] | Manga[]> => {
     try {
         // First check if exists in database
@@ -26,9 +31,11 @@ export const loadMapping = async (data: { id: string; type: Type; formats: Forma
 
     console.log(colors.gray("Loading mapping for ") + colors.blue(data.id) + colors.gray("..."));
 
-    // Map only one media
-    //const baseData = await baseProviders.anilist.getMedia(data.id);
+    // Map only one media. Others likely don't have correct mappings.
     const baseData = await BASE_PROVIDERS.map((provider) => {
+        // Use only providers that have the format.
+        // Eg. NovelUpdates won't have information on
+        // anime.
         if (provider.formats?.includes(data.formats[0])) {
             return provider.getMedia(data.id);
         } else {
@@ -36,6 +43,7 @@ export const loadMapping = async (data: { id: string; type: Type; formats: Forma
         }
     }).filter((x) => x !== null)[0];
 
+    // Usually if there is no title, the media doesn't exist.
     if (!baseData || ((!baseData.title.english || baseData.title.english?.length === 0) && (!baseData.title.romaji || baseData.title.romaji?.length === 0) && (!baseData.title.native || baseData.title.native?.length === 0))) {
         console.log(colors.red("Media not found. Skipping..."));
 
@@ -48,6 +56,7 @@ export const loadMapping = async (data: { id: string; type: Type; formats: Forma
         return [];
     }
 
+    // Map the data.
     const result = await map(baseData.type, [baseData.format], baseData);
 
     // Only return if the ID matches the one we're looking for
@@ -106,6 +115,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
             return acc;
         }, []);
 
+    // Handles searching for media on providers
     async function searchMedia(baseData: AnimeInfo | MangaInfo, suitableProviders: any[]) {
         // Define a function to search using a specific title or synonym
         async function searchWith(title: string, provider: any): Promise<Result[]> {
@@ -136,6 +146,9 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
         }
 
         const promises: Promise<Result[]>[] = suitableProviders.map(async (provider) => {
+            // This will account for if a result returns a title that is a synonym.
+            // May result in less-accurate mappings, but overall is better since
+            // providers like MangaDex tend to have their official title be a synonym.
             const titlesToSearch = [
                 baseData?.title[provider.preferredTitle as "english" | "romaji" | "native"],
                 baseData?.title.english,
@@ -185,6 +198,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
         const titles = [baseData?.title.english, baseData?.title.romaji, baseData?.title.native].concat(baseData?.synonyms ?? []).filter(isString);
         const cleanedTitles = titles.map((x) => clean(x?.toLowerCase().trim() ?? ""));
 
+        // Find the best match
         const bestMatchIndex = findBestMatch2DArray(cleanedTitles, providerTitles);
 
         if (bestMatchIndex.bestMatch.rating < 0.7) {
@@ -225,6 +239,12 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
     return result;
 };
 
+/**
+ * @description Creates a media object and fetches information from information providers.
+ * @param mappings Mapped results from the map() function
+ * @param type Type of media
+ * @returns Promise<Anime[] | Manga[]>
+ */
 export async function createMedia(mappings: MappedResult[], type: Type): Promise<Anime[] | Manga[]> {
     const results: any[] = [];
 
@@ -376,12 +396,19 @@ export async function createMedia(mappings: MappedResult[], type: Type): Promise
     return results;
 }
 
+/**
+ * @description Fills the media object with all necessary info.
+ * @param media Media object
+ * @param info Media info object
+ * @param provider Information provider
+ * @returns
+ */
 export function fillMediaInfo<T extends Anime | Manga, U extends AnimeInfo | MangaInfo>(media: T, info: U, provider: InformationProvider<T, U>): T {
     try {
         // Fields that need to be cross loaded. For example, rating which contains Kitsu, AniList, and MAL fields.
         const crossLoadFields: (keyof AnimeInfo | MangaInfo)[] = ["popularity", "rating"];
 
-        // TODO: Comment needs to be written here
+        // Special fields that are handled differently than others.
         const specialLoadFields: (keyof AnimeInfo | MangaInfo)[] = ["title"];
 
         for (const ak of Object.keys(info)) {

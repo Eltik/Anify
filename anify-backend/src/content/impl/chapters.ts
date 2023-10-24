@@ -5,7 +5,13 @@ import { INFORMATION_PROVIDERS, mangaProviders } from "../../mappings";
 import { ChapterData, Manga } from "../../types/types";
 import colors from "colors";
 
+/**
+ * @description Fetches chapters and stores them in the database. Updates media data also via information providers.
+ * @param id Media ID.
+ * @returns Promise<ChapterData[]>
+ */
 export const fetchChapters = async (id: string): Promise<ChapterData[]> => {
+    // Fetch media from database
     const media = await get(id);
     if (!media) return [];
 
@@ -13,16 +19,18 @@ export const fetchChapters = async (id: string): Promise<ChapterData[]> => {
     const storedChapters = (media as Manga).chapters.data;
     const chapters: ChapterData[] = [];
 
+    // Fetch chapters from all mappings. Use Promise.all for improved speed.
     const promises: Promise<boolean>[] = mappings.map(async (mapping) => {
         const provider = mangaProviders[mapping.providerId];
-
         if (!provider) return false;
 
         try {
+            // Fetch chapters from provider
             const data = await provider.fetchChapters(String(mapping.id)).catch(() => []);
             if (data && data.length === 0) return true;
 
             data?.map((chapter) => {
+                // Find the stored chapter in the database.
                 const storedChapter = storedChapters.map((provider) => {
                     if (provider.providerId === mapping.providerId) {
                         return provider.chapters.find((c) => c.id === chapter.id);
@@ -30,9 +38,15 @@ export const fetchChapters = async (id: string): Promise<ChapterData[]> => {
                 })[0];
 
                 if (!chapter.updatedAt) chapter.updatedAt = 0;
+
+                // Add the mixdrop link to the provider chapter
+                // since mixdrop links are stored via the database
+                // and not the provider. Eg. the provider won't have
+                // the mixdrop link.
                 if (storedChapter?.mixdrop) chapter.mixdrop = storedChapter.mixdrop;
             });
 
+            // Push chapters to the array
             if (data) {
                 chapters.push({
                     providerId: mapping.providerId,
@@ -47,6 +61,7 @@ export const fetchChapters = async (id: string): Promise<ChapterData[]> => {
 
     await Promise.all(promises);
 
+    // Update the latestChapter for the media if it's not up to date.
     let updatedAt = (media as Manga).chapters.latest.updatedAt;
     let latestChapter = (media as Manga).chapters.latest.latestChapter;
     let latestTitle = (media as Manga).chapters.latest.latestTitle;
@@ -60,11 +75,13 @@ export const fetchChapters = async (id: string): Promise<ChapterData[]> => {
         }
     }
 
-    const totalEpisodes = !(media as Manga).totalChapters || (media as Manga).totalChapters! < latestChapter ? latestChapter : (media as Manga).totalChapters;
+    const totalChapters = !(media as Manga).totalChapters || (media as Manga).totalChapters! < latestChapter ? latestChapter : (media as Manga).totalChapters;
 
+    // Update the media info via information providers
     for (let j = 0; j < INFORMATION_PROVIDERS.length; j++) {
         const provider = INFORMATION_PROVIDERS[j];
-        // Fetch info baesd on the media
+
+        // Fetch info from provider
         const info = await provider.info(media).catch((err) => {
             console.log(colors.red(`Error while fetching info for ${media.id} from ${provider.id}`));
             console.error(err);
@@ -81,7 +98,7 @@ export const fetchChapters = async (id: string): Promise<ChapterData[]> => {
 
     Object.assign(media, {
         currentChapter: ((media as Manga).currentChapter ?? 0) < latestChapter ? latestChapter : (media as Manga).currentChapter,
-        totalEpisodes,
+        totalChapters,
         chapters: {
             latest: {
                 latestChapter,
@@ -93,6 +110,5 @@ export const fetchChapters = async (id: string): Promise<ChapterData[]> => {
     });
 
     await update(media);
-
     return chapters;
 };

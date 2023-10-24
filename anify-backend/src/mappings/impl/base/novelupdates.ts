@@ -11,14 +11,6 @@ export default class NovelUpdatesBase extends BaseProvider {
 
     public needsProxy: boolean = true;
 
-    constructor() {
-        super();
-        if (this.customProxy) {
-            // For checking proxies
-            this.useGoogleTranslate = false;
-        }
-    }
-
     private genreMappings = {
         ACTION: 8,
         ADULT: 280,

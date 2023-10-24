@@ -5,19 +5,26 @@ import { INFORMATION_PROVIDERS, animeProviders } from "../../mappings";
 import { Anime, EpisodeData } from "../../types/types";
 import colors from "colors";
 
+/**
+ * @description Fetches episodes and stores them in the database. Updates media data also via information providers.
+ * @param id Media ID.
+ * @returns Promise<EpisodeData[]>
+ */
 export const fetchEpisodes = async (id: string): Promise<EpisodeData[]> => {
+    // Fetch media from database
     const media = await get(id);
     if (!media) return [];
 
     const mappings = media.mappings;
     const episodes: EpisodeData[] = [];
 
+    // Fetch episodes from all mappings. Use Promise.all for improved speed.
     const promises: Promise<boolean>[] = mappings.map(async (mapping) => {
         const provider = animeProviders[mapping.providerId];
-
         if (!provider) return false;
 
         try {
+            // Fetch episodes from provider
             const data = await provider.fetchEpisodes(String(mapping.id)).catch(() => []);
             if (data && data.length === 0) return true;
 
@@ -25,6 +32,7 @@ export const fetchEpisodes = async (id: string): Promise<EpisodeData[]> => {
                 if (!episode.updatedAt) episode.updatedAt = 0;
             });
 
+            // Push episodes to the array
             if (data) {
                 episodes.push({
                     providerId: mapping.providerId,
@@ -39,6 +47,7 @@ export const fetchEpisodes = async (id: string): Promise<EpisodeData[]> => {
 
     await Promise.all(promises);
 
+    // Update the latestEpisode for the media if it's not up to date.
     let updatedAt = (media as Anime).episodes.latest.updatedAt;
     let latestEpisode = (media as Anime).episodes.latest.latestEpisode;
     let latestTitle = (media as Anime).episodes.latest.latestTitle;
@@ -54,9 +63,11 @@ export const fetchEpisodes = async (id: string): Promise<EpisodeData[]> => {
 
     const totalEpisodes = !(media as Anime).totalEpisodes || (media as Anime).totalEpisodes! < latestEpisode ? latestEpisode : (media as Anime).totalEpisodes;
 
+    // Update the media info via information providers
     for (let j = 0; j < INFORMATION_PROVIDERS.length; j++) {
         const provider = INFORMATION_PROVIDERS[j];
-        // Fetch info baesd on the media
+
+        // Fetch info from provider
         const info = await provider.info(media).catch((err) => {
             console.log(colors.red(`Error while fetching info for ${media.id} from ${provider.id}`));
             console.error(err);
@@ -85,6 +96,5 @@ export const fetchEpisodes = async (id: string): Promise<EpisodeData[]> => {
     });
 
     await update(media);
-
     return episodes;
 };

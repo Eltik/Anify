@@ -182,6 +182,9 @@ async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): P
                     for (const provider of BASE_PROVIDERS) {
                         if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);
                     }
+
+                    // NovelUpdates needs proxies for chapters specifically. This is temporary likely.
+                    validProviders.push(BASE_PROVIDERS.find((provider) => provider.id === "novelupdates") as BaseProvider);
                 } else if (type === "ANIME") {
                     for (const provider of ANIME_PROVIDERS) {
                         if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);
@@ -190,6 +193,9 @@ async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): P
                     for (const provider of MANGA_PROVIDERS) {
                         if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);
                     }
+
+                    // NovelUpdates needs proxies for chapters specifically. This is temporary likely.
+                    validProviders.push(MANGA_PROVIDERS.find((provider) => provider.id === "novelupdates") as MangaProvider);
                 } else if (type === "META") {
                     for (const provider of META_PROVIDERS) {
                         if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);
