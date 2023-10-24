@@ -14,13 +14,14 @@
     "scrape:proxies": "bun run src/scripts/scrapeProxies.ts",
     "build": "bun build ./src/index.ts --outdir ./dist --target node",
     "prettier": "bunx prettier --write .",
-    "lint": "bun run prettier && tsc"
+    "lint": "bun run prettier && bunx tsc"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.2",
     "@types/pdfkit": "^0.12.10",
     "bun-types": "latest",
-    "prettier": "^3.0.3"
+    "prettier": "^3.0.3",
+    "tsc": "^2.0.4"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

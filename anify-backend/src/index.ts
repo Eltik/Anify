@@ -44,7 +44,11 @@ async function before() {
             }
             const existing = await get(String(data.trending[i].id));
             if (!existing) {
-                queues.mappingQueue.add({ id: data.trending[i].id, type: data.trending[i].type, formats: [data.trending[i].format] });
+                queues.mappingQueue.add({
+                    id: data.trending[i].id,
+                    type: data.trending[i].type,
+                    formats: [data.trending[i].format],
+                });
             }
         }
 
@@ -53,7 +57,12 @@ async function before() {
                 continue;
             }
             const existing = await get(String(data.popular[i].id));
-            if (!existing) queues.mappingQueue.add({ id: data.popular[i].id, type: data.popular[i].type, formats: [data.popular[i].format] });
+            if (!existing)
+                queues.mappingQueue.add({
+                    id: data.popular[i].id,
+                    type: data.popular[i].type,
+                    formats: [data.popular[i].format],
+                });
         }
 
         for (let i = 0; i < data.top.length; i++) {
@@ -61,7 +70,12 @@ async function before() {
                 continue;
             }
             const existing = await get(String(data.top[i].id));
-            if (!existing) queues.mappingQueue.add({ id: data.top[i].id, type: data.top[i].type, formats: [data.top[i].format] });
+            if (!existing)
+                queues.mappingQueue.add({
+                    id: data.top[i].id,
+                    type: data.top[i].type,
+                    formats: [data.top[i].format],
+                });
         }
 
         for (let i = 0; i < data.seasonal.length; i++) {
@@ -69,7 +83,12 @@ async function before() {
                 continue;
             }
             const existing = await get(String(data.seasonal[i].id));
-            if (!existing) queues.mappingQueue.add({ id: data.seasonal[i].id, type: data.seasonal[i].type, formats: [data.seasonal[i].format] });
+            if (!existing)
+                queues.mappingQueue.add({
+                    id: data.seasonal[i].id,
+                    type: data.seasonal[i].type,
+                    formats: [data.seasonal[i].format],
+                });
         }
     });
 

@@ -1,20 +1,24 @@
 import colors from "colors";
 import { ANIME_PROVIDERS, BASE_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS } from "../../mappings";
-import { Format, Type } from "../../types/enums";
+import { Format, ProviderType, Type } from "../../types/enums";
 import { ANIME_PROXIES, BASE_PROXIES, MANGA_PROXIES, META_PROXIES } from "..";
+import AnimeProvider from "../../mappings/impl/anime";
+import MangaProvider from "../../mappings/impl/manga";
+import MetaProvider from "../../mappings/impl/meta";
+import BaseProvider from "../../mappings/impl/base";
 
 const toCheck: string[] = [];
 
 export async function checkCorsProxies(): Promise<{
-    base: string[];
-    anime: string[];
-    manga: string[];
-    meta: string[];
+    base: { providerId: string; ip: string }[];
+    anime: { providerId: string; ip: string }[];
+    manga: { providerId: string; ip: string }[];
+    meta: { providerId: string; ip: string }[];
 }> {
-    const baseIps: string[] = [];
-    const animeIps: string[] = [];
-    const mangaIps: string[] = [];
-    const metaIps: string[] = [];
+    const baseIps: { providerId: string; ip: string }[] = [];
+    const animeIps: { providerId: string; ip: string }[] = [];
+    const mangaIps: { providerId: string; ip: string }[] = [];
+    const metaIps: { providerId: string; ip: string }[] = [];
     console.log(colors.yellow("Importing proxies... Please note that reading the proxies file may take a while."));
 
     if (toCheck.length === 0) {
@@ -53,8 +57,11 @@ export async function checkCorsProxies(): Promise<{
         promises.push(
             new Promise(async (resolve, reject) => {
                 const base = await makeRequest(ip, "BASE");
-                if (base) baseIps.push(base) && console.log(colors.green(base.length + " passed!"));
-                else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
+                if (base) {
+                    for (const provider of base) {
+                        baseIps.push({ providerId: provider, ip: `${ip.ip}:${ip.port}` });
+                    }
+                }
 
                 // Write to file
                 Bun.write("./baseProxies.json", JSON.stringify(baseIps, null, 4));
@@ -66,8 +73,12 @@ export async function checkCorsProxies(): Promise<{
         promises.push(
             new Promise(async (resolve, reject) => {
                 const anime = await makeRequest(ip, "ANIME");
-                if (anime) animeIps.push(anime) && console.log(colors.green(anime.length + " passed!"));
-                else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
+                if (anime) {
+                    for (const provider of anime) {
+                        animeIps.push({ providerId: provider, ip: `${ip.ip}:${ip.port}` });
+                    }
+                    console.log(colors.green(anime.length + " anime proxies passed!"));
+                }
 
                 // Write to file
                 Bun.write("./animeProxies.json", JSON.stringify(animeIps, null, 4));
@@ -79,8 +90,12 @@ export async function checkCorsProxies(): Promise<{
         promises.push(
             new Promise(async (resolve, reject) => {
                 const manga = await makeRequest(ip, "MANGA");
-                if (manga) mangaIps.push(manga) && console.log(colors.green(manga.length + " passed!"));
-                else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
+                if (manga) {
+                    for (const provider of manga) {
+                        mangaIps.push({ providerId: provider, ip: `${ip.ip}:${ip.port}` });
+                    }
+                    console.log(colors.green(manga.length + " manga proxies passed!"));
+                }
 
                 // Write to file
                 Bun.write("./mangaProxies.json", JSON.stringify(mangaIps, null, 4));
@@ -92,8 +107,12 @@ export async function checkCorsProxies(): Promise<{
         promises.push(
             new Promise(async (resolve, reject) => {
                 const meta = await makeRequest(ip, "META");
-                if (meta) metaIps.push(meta) && console.log(colors.green(meta.length + " passed!"));
-                else console.log(colors.red(`${ip.ip}:${ip.port} failed.`));
+                if (meta) {
+                    for (const provider of meta) {
+                        metaIps.push({ providerId: provider, ip: `${ip.ip}:${ip.port}` });
+                    }
+                    console.log(colors.green(meta.length + " meta proxies passed!"));
+                }
 
                 // Write to file
                 Bun.write("./metaProxies.json", JSON.stringify(metaIps, null, 4));
@@ -128,7 +147,7 @@ export async function checkCorsProxies(): Promise<{
     };
 }
 
-async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): Promise<string | undefined> {
+async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): Promise<string[] | undefined> {
     console.log(colors.yellow(colors.bold(`Testing ${type}.`)));
     return new Promise(async (resolve, reject) => {
         const controller = new AbortController();
@@ -157,113 +176,62 @@ async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): P
             );
 
             if (response.status === 200 && (await response.text()) === "no") {
-                console.log(colors.green(`http://${ip.ip}:${ip.port} is a CORS proxy.`));
+                const validProviders = [];
 
-                // Check all providers
-                let isOkay = true;
                 if (type === "BASE") {
                     for (const provider of BASE_PROVIDERS) {
-                        if (!provider.needsProxy || provider.useGoogleTranslate) continue;
-                        console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
-
-                        provider.customProxy = `http://${ip.ip}:${ip.port}`;
-
-                        const providerResponse = await provider.search("Mushoku Tensei", provider.formats.includes(Format.TV) ? Type.ANIME : Type.MANGA, provider.formats, 0, 10).catch(() => {
-                            return undefined;
-                        });
-
-                        provider.customProxy = undefined;
-
-                        if (!providerResponse) {
-                            console.log(colors.red(`${provider.id} failed.`));
-                            isOkay = false;
-                            break;
-                        }
+                        if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);
                     }
-
-                    if (isOkay) console.log(colors.yellow("Base providers passed."));
-                    else return resolve(undefined);
-
-                    return resolve(ip.ip + ":" + ip.port);
-                }
-
-                if (type === "ANIME") {
+                } else if (type === "ANIME") {
                     for (const provider of ANIME_PROVIDERS) {
-                        if (!provider.needsProxy || provider.useGoogleTranslate) continue;
-                        console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
-
-                        provider.customProxy = `http://${ip.ip}:${ip.port}`;
-
-                        const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
-                            return undefined;
-                        });
-
-                        provider.customProxy = undefined;
-
-                        if (!providerResponse) {
-                            console.log(colors.red(`${provider.id} failed.`));
-                            isOkay = false;
-                            break;
-                        }
+                        if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);
                     }
-
-                    if (isOkay) console.log(colors.yellow("Anime providers passed."));
-                    else return resolve(undefined);
-
-                    return resolve(ip.ip + ":" + ip.port);
-                }
-
-                if (type === "MANGA") {
+                } else if (type === "MANGA") {
                     for (const provider of MANGA_PROVIDERS) {
-                        if (!provider.needsProxy || provider.useGoogleTranslate) continue;
-                        console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
-
-                        provider.customProxy = `http://${ip.ip}:${ip.port}`;
-
-                        const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
-                            return undefined;
-                        });
-
-                        provider.customProxy = undefined;
-
-                        if (!providerResponse) {
-                            console.log(colors.red(`${provider.id} failed.`));
-                            isOkay = false;
-                            break;
-                        }
+                        if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);
                     }
-
-                    if (isOkay) console.log(colors.yellow("Manga providers passed."));
-                    else return resolve(undefined);
-
-                    return resolve(ip.ip + ":" + ip.port);
-                }
-
-                if (type === "META") {
+                } else if (type === "META") {
                     for (const provider of META_PROVIDERS) {
-                        if (!provider.needsProxy || provider.useGoogleTranslate) continue;
-                        console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
+                        if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);
+                    }
+                } else {
+                    console.log(colors.red("Invalid type provided: ") + type);
+                }
 
-                        provider.customProxy = `http://${ip.ip}:${ip.port}`;
+                if (validProviders.length === 0) {
+                    return resolve(undefined);
+                }
 
-                        const providerResponse = await provider.search("Mushoku Tensei").catch(() => {
+                const data = [];
+
+                for (const provider of validProviders) {
+                    console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
+                    provider.customProxy = `http://${ip.ip}:${ip.port}`;
+
+                    let providerResponse;
+                    if (provider.providerType === ProviderType.ANIME || provider.providerType === ProviderType.MANGA || provider.providerType === ProviderType.META) {
+                        providerResponse = await (provider as AnimeProvider | MangaProvider | MetaProvider).search("Mushoku Tensei", Format.TV).catch(() => {
                             return undefined;
                         });
-
-                        provider.customProxy = undefined;
-
-                        if (!providerResponse) {
-                            console.log(colors.red(`${provider.id} failed.`));
-                            isOkay = false;
-                            break;
-                        }
+                    } else if (provider.providerType === ProviderType.BASE) {
+                        providerResponse = await (provider as BaseProvider).search("Mushoku Tensei", provider.formats.includes(Format.TV) ? Type.ANIME : provider.formats.includes(Format.MANGA) || provider.formats.includes(Format.NOVEL) ? Type.MANGA : Type.ANIME, provider.formats, 0, 10).catch(() => {
+                            return undefined;
+                        });
+                    } else {
+                        providerResponse = undefined;
                     }
 
-                    if (isOkay) console.log(colors.yellow("Meta providers passed."));
-                    else return resolve(undefined);
+                    provider.customProxy = undefined;
 
-                    return resolve(ip.ip + ":" + ip.port);
+                    if (!providerResponse) {
+                        break;
+                    }
+
+                    console.log(colors.green(`${provider.id} passed.`));
+                    data.push(provider.id);
                 }
+
+                return resolve(data);
             } else {
                 return resolve(undefined);
             }

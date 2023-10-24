@@ -1,24 +1,13 @@
 import colors from "colors";
 import { ANIME_PROXIES, BASE_PROXIES, MANGA_PROXIES, META_PROXIES } from "../proxies";
+import { ANIME_PROVIDERS, BASE_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS } from "../mappings";
 
 export default class Http {
-    private static bannedProxies: {
-        base: string[];
-        anime: string[];
-        manga: string[];
-        meta: string[];
-    } = {
-        base: [],
-        anime: [],
-        manga: [],
-        meta: [],
-    };
-
     public static unbannedProxies: {
-        base: string[];
-        anime: string[];
-        manga: string[];
-        meta: string[];
+        base: { providerId: string; ip: string }[];
+        anime: { providerId: string; ip: string }[];
+        manga: { providerId: string; ip: string }[];
+        meta: { providerId: string; ip: string }[];
     } = {
         base: Array.isArray(BASE_PROXIES) ? BASE_PROXIES : [],
         anime: Array.isArray(ANIME_PROXIES) ? ANIME_PROXIES : [],
@@ -26,30 +15,26 @@ export default class Http {
         meta: Array.isArray(META_PROXIES) ? META_PROXIES : [],
     };
 
-    static updateBannedProxies(proxyType: "BASE" | "ANIME" | "MANGA" | "META", proxyUrl: string): void {
-        if (!this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"]) this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"] = proxyType === "BASE" ? (Array.isArray(BASE_PROXIES) ? BASE_PROXIES : []) : proxyType === "ANIME" ? (Array.isArray(ANIME_PROXIES) ? ANIME_PROXIES : []) : proxyType === "MANGA" ? (Array.isArray(MANGA_PROXIES) ? MANGA_PROXIES : []) : proxyType === "META" ? (Array.isArray(META_PROXIES) ? META_PROXIES : []) : [];
+    static getRandomUnbannedProxy(providerId: string): string | undefined {
+        const proxyType = BASE_PROVIDERS.find((provider) => provider.id === providerId) !== undefined ? "BASE" : ANIME_PROVIDERS.find((provider) => provider.id === providerId) !== undefined ? "ANIME" : MANGA_PROVIDERS.find((provider) => provider.id === providerId) !== undefined ? "MANGA" : META_PROVIDERS.find((provider) => provider.id === providerId) !== undefined ? "META" : undefined;
+        if (!proxyType) return undefined;
 
-        /*
-        if (!this.bannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"].includes(proxyUrl)) {
-            this.bannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"].push(proxyUrl);
-            this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"] = (proxyType === "BASE" ? (Array.isArray(BASE_PROXIES) ? BASE_PROXIES : []) : proxyType === "ANIME" ? (Array.isArray(ANIME_PROXIES) ? ANIME_PROXIES : []) : proxyType === "MANGA" ? (Array.isArray(MANGA_PROXIES) ? MANGA_PROXIES : []) : proxyType === "META" ? (Array.isArray(META_PROXIES) ? META_PROXIES : []) : []).filter((proxy) => !this.bannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"].includes(proxy));
+        if (!this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"]) {
+            this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"] = proxyType === "BASE" ? (Array.isArray(BASE_PROXIES) ? BASE_PROXIES : []) : proxyType === "ANIME" ? (Array.isArray(ANIME_PROXIES) ? ANIME_PROXIES : []) : proxyType === "MANGA" ? (Array.isArray(MANGA_PROXIES) ? MANGA_PROXIES : []) : proxyType === "META" ? (Array.isArray(META_PROXIES) ? META_PROXIES : []) : [];
         }
-        */
-    }
-
-    static getRandomUnbannedProxy(proxyType: "BASE" | "ANIME" | "MANGA" | "META"): string | undefined {
-        if (!this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"]) this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"] = proxyType === "BASE" ? (Array.isArray(BASE_PROXIES) ? BASE_PROXIES : []) : proxyType === "ANIME" ? (Array.isArray(ANIME_PROXIES) ? ANIME_PROXIES : []) : proxyType === "MANGA" ? (Array.isArray(MANGA_PROXIES) ? MANGA_PROXIES : []) : proxyType === "META" ? (Array.isArray(META_PROXIES) ? META_PROXIES : []) : [];
 
         if (this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"].length === 0) return undefined;
 
-        return this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"][Math.floor(Math.random() * this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"].length)];
+        const providerProxies = this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"].filter((proxy) => proxy.providerId === providerId);
+
+        return providerProxies[Math.floor(Math.random() * providerProxies.length)].ip;
     }
 
-    static async request(proxyType: "BASE" | "ANIME" | "MANGA" | "META", useGoogleTranslate: boolean, url: string, config: RequestInit = {}, proxyRequest = true, requests = 0, customProxy: string | undefined = undefined): Promise<Response> {
+    static async request(providerId: string, useGoogleTranslate: boolean, url: string, config: RequestInit = {}, proxyRequest = true, requests = 0, customProxy: string | undefined = undefined): Promise<Response> {
         return new Promise(async (resolve, reject) => {
             try {
                 if (proxyRequest) {
-                    const proxyUrl = useGoogleTranslate ? "http://translate.google.com/translate?sl=ja&tl=en&u=" : customProxy || this.getRandomUnbannedProxy(proxyType);
+                    const proxyUrl = useGoogleTranslate ? "http://translate.google.com/translate?sl=ja&tl=en&u=" : customProxy || this.getRandomUnbannedProxy(providerId);
                     if (!proxyUrl) {
                         throw new Error("No proxy available.");
                     }
@@ -58,7 +43,6 @@ export default class Http {
 
                     const controller = new AbortController();
                     const id = setTimeout(() => {
-                        this.updateBannedProxies(proxyType, proxyUrl);
                         controller.abort();
                     }, 10000);
 
@@ -80,7 +64,10 @@ export default class Http {
                                 Origin: "https://anify.tv",
                             },
                         };
-                        const response = await fetch(modifyUrl, { signal: controller.signal, ...config }).catch(
+                        const response = await fetch(modifyUrl, {
+                            signal: controller.signal,
+                            ...config,
+                        }).catch(
                             (err) =>
                                 ({
                                     ok: false,
@@ -90,17 +77,13 @@ export default class Http {
                                 }) as Response,
                         );
 
-                        if (!response.ok) {
-                            this.updateBannedProxies(proxyType, proxyUrl);
-                        }
-
                         if (response.statusText === "Timeout") {
                             if (requests >= 3) {
                                 console.log(colors.red("Request timed out. Retried 3 times. Aborting..."));
                                 return response;
                             }
 
-                            return this.request(proxyType, useGoogleTranslate, url, config, proxyRequest, requests + 1);
+                            return this.request(providerId, useGoogleTranslate, url, config, proxyRequest, requests + 1);
                         }
 
                         clearTimeout(id);

@@ -28,8 +28,26 @@ export const start = async () => {
 
     console.log(colors.gray(`Loaded ${colors.yellow(apiKeys?.length + "")} API keys`));
 
-    const routes: { [key: string]: { path: string; handler: (req: Request) => Promise<Response>; rateLimit: number } } = {};
-    const routeFiles = [await import("./impl/chapters.ts"), await import("./impl/contentData.ts"), await import("./impl/episodes.ts"), await import("./impl/info.ts"), await import("./impl/pages.ts"), await import("./impl/recent.ts"), await import("./impl/relations.ts"), await import("./impl/schedule.ts"), await import("./impl/search.ts"), await import("./impl/searchAdvanced.ts"), await import("./impl/seasonal.ts"), await import("./impl/sources.ts"), await import("./impl/stats.ts"), await import("./impl/mixdrop.ts"), await import("./impl/skipTimes.ts")];
+    const routes: {
+        [key: string]: { path: string; handler: (req: Request) => Promise<Response>; rateLimit: number };
+    } = {};
+    const routeFiles = [
+        await import("./impl/chapters.ts"),
+        await import("./impl/contentData.ts"),
+        await import("./impl/episodes.ts"),
+        await import("./impl/info.ts"),
+        await import("./impl/pages.ts"),
+        await import("./impl/recent.ts"),
+        await import("./impl/relations.ts"),
+        await import("./impl/schedule.ts"),
+        await import("./impl/search.ts"),
+        await import("./impl/searchAdvanced.ts"),
+        await import("./impl/seasonal.ts"),
+        await import("./impl/sources.ts"),
+        await import("./impl/stats.ts"),
+        await import("./impl/mixdrop.ts"),
+        await import("./impl/skipTimes.ts"),
+    ];
 
     for (const file of routeFiles) {
         const routeModule = await file;
@@ -70,13 +88,31 @@ export const start = async () => {
                 if (requests && requests.requests > rateLimit) {
                     if (requests.requests > rateLimit * 2) console.log(colors.red(`Rate limit significantly exceeded for ${requests.ip}`));
 
-                    return new Response(JSON.stringify({ error: "Too many requests" }), { status: 429, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" } });
+                    return new Response(JSON.stringify({ error: "Too many requests" }), {
+                        status: 429,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Access-Control-Allow-Origin": "*",
+                            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                            "Access-Control-Max-Age": "2592000",
+                            "Access-Control-Allow-Headers": "*",
+                        },
+                    });
                 }
 
                 return handler(req);
             }
 
-            return new Response(JSON.stringify({ error: "Route not found" }), { status: 404, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" } });
+            return new Response(JSON.stringify({ error: "Route not found" }), {
+                status: 404,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                    "Access-Control-Max-Age": "2592000",
+                    "Access-Control-Allow-Headers": "*",
+                },
+            });
         },
     });
 

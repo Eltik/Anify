@@ -25,6 +25,6 @@ export default abstract class MetaProvider {
         if (proxyRequest === undefined && !this.needsProxy) proxyRequest = false;
         if (proxyRequest !== undefined && proxyRequest === true && !this.needsProxy) proxyRequest = true;
 
-        return Http.request("META", this.useGoogleTranslate, url, config, proxyRequest, 0, this.customProxy);
+        return Http.request(this.id, this.useGoogleTranslate, url, config, proxyRequest, 0, this.customProxy);
     }
 }

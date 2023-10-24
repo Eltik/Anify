@@ -27,7 +27,9 @@ export const startWebsocket = async () => {
                 const protocol = req.headers.get("client-name") ?? "unknown";
                 if (protocol !== "anify-backend") return new Response("Unauthorized", { status: 401 });
 
-                const success = server.upgrade(req, { data: { clientName: protocol, message: req.body ?? "No message provided." } });
+                const success = server.upgrade(req, {
+                    data: { clientName: protocol, message: req.body ?? "No message provided." },
+                });
                 return success ? undefined : new Response("WebSocket upgrade error", { status: 400 });
             }
 

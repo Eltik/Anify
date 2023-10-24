@@ -11,6 +11,14 @@ export default class NovelUpdatesBase extends BaseProvider {
 
     public needsProxy: boolean = true;
 
+    constructor() {
+        super();
+        if (this.customProxy) {
+            // For checking proxies
+            this.useGoogleTranslate = false;
+        }
+    }
+
     private genreMappings = {
         ACTION: 8,
         ADULT: 280,
@@ -195,7 +203,15 @@ export default class NovelUpdatesBase extends BaseProvider {
         };
     }
 
-    override async fetchSeasonal(): Promise<{ trending: AnimeInfo[] | MangaInfo[]; seasonal: AnimeInfo[] | MangaInfo[]; popular: AnimeInfo[] | MangaInfo[]; top: AnimeInfo[] | MangaInfo[] } | undefined> {
+    override async fetchSeasonal(): Promise<
+        | {
+              trending: AnimeInfo[] | MangaInfo[];
+              seasonal: AnimeInfo[] | MangaInfo[];
+              popular: AnimeInfo[] | MangaInfo[];
+              top: AnimeInfo[] | MangaInfo[];
+          }
+        | undefined
+    > {
         const promises = [this.fetchSeasonalData(`${this.url}/series-ranking/?rank=month&org=496&ge=280,4,281&rl=0`), this.fetchSeasonalData(`${this.url}/series-ranking/?rank=popmonth&org=496&ge=280,4,281&rl=0`), this.fetchSeasonalData(`${this.url}/series-ranking/?rank=popular&org=496&ge=280,4,281&rl=0`), this.fetchSeasonalData(`${this.url}/series-ranking/?rank=sixmonths&org=496&ge=280,4,281&rl=0`)];
 
         const [trending, seasonal, popular, top] = await Promise.all(promises);

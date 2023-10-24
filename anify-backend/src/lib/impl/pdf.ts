@@ -205,7 +205,12 @@ export const createMangaPDF = async (providerId: string, chapter: Chapter, pages
         height = height * scale;
 
         try {
-            doc.addPage({ size: [width, height] }).image(`${parentFolder}/${file}`, 0, 0, { align: "center", valign: "center", width: width, height: height });
+            doc.addPage({ size: [width, height] }).image(`${parentFolder}/${file}`, 0, 0, {
+                align: "center",
+                valign: "center",
+                width: width,
+                height: height,
+            });
         } catch (e) {
             console.log(colors.red("Unable to add page ") + colors.blue(file + "") + colors.red(" to PDF."));
         }

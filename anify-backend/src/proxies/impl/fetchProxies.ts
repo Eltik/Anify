@@ -2,10 +2,10 @@ import colors from "colors";
 import { ANIME_PROXIES, BASE_PROXIES, MANGA_PROXIES, META_PROXIES } from "..";
 
 export async function fetchCorsProxies(): Promise<{
-    base: string[];
-    anime: string[];
-    manga: string[];
-    meta: string[];
+    base: { providerId: string; ip: string }[];
+    anime: { providerId: string; ip: string }[];
+    manga: { providerId: string; ip: string }[];
+    meta: { providerId: string; ip: string }[];
 }> {
     const base = await loadProxies("./baseProxies.json");
     BASE_PROXIES.push(...base);
@@ -29,7 +29,7 @@ export async function fetchCorsProxies(): Promise<{
 
 async function loadProxies(fileName: string) {
     const base = Bun.file(fileName);
-    const proxies: string[] = [];
+    const proxies: { providerId: string; ip: string }[] = [];
 
     if (await base.exists()) {
         const BATCH_SIZE = 100;
@@ -39,15 +39,21 @@ async function loadProxies(fileName: string) {
         let currentIndex = 0;
 
         while (currentIndex < totalProxies) {
-            const proxiesToAdd: string[] = [];
+            const proxiesToAdd: { providerId: string; ip: string }[] = [];
 
             for (let i = 0; i < BATCH_SIZE && currentIndex < totalProxies; i++, currentIndex++) {
-                const proxy = proxyData[currentIndex];
+                const proxy: { providerId: string; ip: string } = proxyData[currentIndex];
 
-                if (!proxy.startsWith("http")) {
-                    proxiesToAdd.push(`http://${proxy}`);
+                if (!proxy.ip.startsWith("http")) {
+                    proxiesToAdd.push({
+                        providerId: proxy.providerId,
+                        ip: `http://${proxy.ip}`,
+                    });
                 } else {
-                    proxiesToAdd.push(proxy);
+                    proxiesToAdd.push({
+                        providerId: proxy.providerId,
+                        ip: proxy.providerId,
+                    });
                 }
             }
 

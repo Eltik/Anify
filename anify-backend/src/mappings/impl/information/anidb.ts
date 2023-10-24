@@ -103,7 +103,13 @@ export default class AniDB extends InformationProvider<Anime | Manga, AnimeInfo 
 
         const $ = load(data);
 
-        const episodeList: { id: string; title: string; number: number; duration: string; airDate: number }[] = [];
+        const episodeList: {
+            id: string;
+            title: string;
+            number: number;
+            duration: string;
+            airDate: number;
+        }[] = [];
 
         $("div.episodes table#eplist tr").map((i, el) => {
             if ($(el).find("td.id a abbr").attr("title") === "Regular Episode") {

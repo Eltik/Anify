@@ -286,7 +286,15 @@ export default class ManagDexBase extends BaseProvider {
         }
     }
 
-    override async fetchSeasonal(): Promise<{ trending: AnimeInfo[] | MangaInfo[]; seasonal: AnimeInfo[] | MangaInfo[]; popular: AnimeInfo[] | MangaInfo[]; top: AnimeInfo[] | MangaInfo[] } | undefined> {
+    override async fetchSeasonal(): Promise<
+        | {
+              trending: AnimeInfo[] | MangaInfo[];
+              seasonal: AnimeInfo[] | MangaInfo[];
+              popular: AnimeInfo[] | MangaInfo[];
+              top: AnimeInfo[] | MangaInfo[];
+          }
+        | undefined
+    > {
         const currentDate = new Date();
 
         // Format the date as YYYY-MM-DD
@@ -357,7 +365,18 @@ export default class ManagDexBase extends BaseProvider {
         };
     }
 
-    override async fetchSchedule(): Promise<{ sunday: MangaInfo[] | AnimeInfo[]; monday: MangaInfo[] | AnimeInfo[]; tuesday: MangaInfo[] | AnimeInfo[]; wednesday: MangaInfo[] | AnimeInfo[]; thursday: MangaInfo[] | AnimeInfo[]; friday: MangaInfo[] | AnimeInfo[]; saturday: MangaInfo[] | AnimeInfo[] } | undefined> {
+    override async fetchSchedule(): Promise<
+        | {
+              sunday: MangaInfo[] | AnimeInfo[];
+              monday: MangaInfo[] | AnimeInfo[];
+              tuesday: MangaInfo[] | AnimeInfo[];
+              wednesday: MangaInfo[] | AnimeInfo[];
+              thursday: MangaInfo[] | AnimeInfo[];
+              friday: MangaInfo[] | AnimeInfo[];
+              saturday: MangaInfo[] | AnimeInfo[];
+          }
+        | undefined
+    > {
         return undefined;
     }
 

@@ -19,7 +19,13 @@ export const handler = async (req: Request): Promise<Response> => {
         if (!id) {
             return new Response(JSON.stringify({ error: "No ID provided." }), {
                 status: 400,
-                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                    "Access-Control-Max-Age": "2592000",
+                    "Access-Control-Allow-Headers": "*",
+                },
             });
         }
 
@@ -27,7 +33,13 @@ export const handler = async (req: Request): Promise<Response> => {
         if (cached) {
             return new Response(cached, {
                 status: 200,
-                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                    "Access-Control-Max-Age": "2592000",
+                    "Access-Control-Allow-Headers": "*",
+                },
             });
         }
 
@@ -41,13 +53,25 @@ export const handler = async (req: Request): Promise<Response> => {
 
         return new Response(JSON.stringify(data), {
             status: 200,
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" },
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Max-Age": "2592000",
+                "Access-Control-Allow-Headers": "*",
+            },
         });
     } catch (e) {
         console.error(e);
         return new Response(JSON.stringify({ error: "An error occurred." }), {
             status: 500,
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" },
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Max-Age": "2592000",
+                "Access-Control-Allow-Headers": "*",
+            },
         });
     }
 };

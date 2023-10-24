@@ -22,12 +22,24 @@ export const handler = async (req: Request): Promise<Response> => {
         if (!type) {
             return new Response(JSON.stringify({ error: "No type provided." }), {
                 status: 400,
-                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                    "Access-Control-Max-Age": "2592000",
+                    "Access-Control-Allow-Headers": "*",
+                },
             });
         } else if (!validTypes.includes(type.toLowerCase())) {
             return new Response(JSON.stringify({ error: "Invalid type provided." }), {
                 status: 400,
-                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                    "Access-Control-Max-Age": "2592000",
+                    "Access-Control-Allow-Headers": "*",
+                },
             });
         }
 
@@ -35,7 +47,13 @@ export const handler = async (req: Request): Promise<Response> => {
         if (!query || query.length === 0) {
             return new Response(JSON.stringify({ error: "No query provided." }), {
                 status: 400,
-                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                    "Access-Control-Max-Age": "2592000",
+                    "Access-Control-Allow-Headers": "*",
+                },
             });
         }
 
@@ -48,13 +66,25 @@ export const handler = async (req: Request): Promise<Response> => {
         if (!Sorts.includes(sort as Sort)) {
             return new Response(JSON.stringify({ error: "Invalid sort provided." }), {
                 status: 400,
-                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                    "Access-Control-Max-Age": "2592000",
+                    "Access-Control-Allow-Headers": "*",
+                },
             });
         }
         if (sortDirection != SortDirection.ASC && sortDirection != SortDirection.DESC) {
             return new Response(JSON.stringify({ error: "Invalid sort direction provided." }), {
                 status: 400,
-                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                    "Access-Control-Max-Age": "2592000",
+                    "Access-Control-Allow-Headers": "*",
+                },
             });
         }
 
@@ -62,7 +92,13 @@ export const handler = async (req: Request): Promise<Response> => {
         if (cached) {
             return new Response(cached, {
                 status: 200,
-                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                    "Access-Control-Max-Age": "2592000",
+                    "Access-Control-Allow-Headers": "*",
+                },
             });
         }
 
@@ -70,20 +106,36 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const data = await search(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats, page, perPage, sort, sortDirection);
         if (data.length === 0) {
-            queues.searchQueue.add({ type: (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, query: query, formats: formats });
+            queues.searchQueue.add({
+                type: (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type,
+                query: query,
+                formats: formats,
+            });
         }
 
         await redis.set(`search:${type}:${query}:${page}:${perPage}:${sort}:${sortDirection}`, JSON.stringify(data), "EX", cacheTime);
 
         return new Response(JSON.stringify(data), {
             status: 200,
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" },
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Max-Age": "2592000",
+                "Access-Control-Allow-Headers": "*",
+            },
         });
     } catch (e) {
         console.error(e);
         return new Response(JSON.stringify({ error: "An error occurred." }), {
             status: 500,
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Max-Age": "2592000", "Access-Control-Allow-Headers": "*" },
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Max-Age": "2592000",
+                "Access-Control-Allow-Headers": "*",
+            },
         });
     }
 };

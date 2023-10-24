@@ -612,7 +612,18 @@ export default class AniListBase extends BaseProvider {
         }
     }
 
-    override async fetchSeasonal(type: Type, formats: Format[]): Promise<{ trending: AnimeInfo[] | MangaInfo[]; seasonal: AnimeInfo[] | MangaInfo[]; popular: AnimeInfo[] | MangaInfo[]; top: AnimeInfo[] | MangaInfo[] } | undefined> {
+    override async fetchSeasonal(
+        type: Type,
+        formats: Format[],
+    ): Promise<
+        | {
+              trending: AnimeInfo[] | MangaInfo[];
+              seasonal: AnimeInfo[] | MangaInfo[];
+              popular: AnimeInfo[] | MangaInfo[];
+              top: AnimeInfo[] | MangaInfo[];
+          }
+        | undefined
+    > {
         const aniListArgs = {
             query: `
             query($season: MediaSeason, $seasonYear: Int, $format: [MediaFormat], $page: Int, $perPage: Int, $type: MediaType) {
@@ -692,7 +703,18 @@ export default class AniListBase extends BaseProvider {
         };
     }
 
-    override async fetchSchedule(): Promise<{ sunday: AnimeInfo[] | MangaInfo[]; monday: AnimeInfo[] | MangaInfo[]; tuesday: AnimeInfo[] | MangaInfo[]; wednesday: AnimeInfo[] | MangaInfo[]; thursday: AnimeInfo[] | MangaInfo[]; friday: AnimeInfo[] | MangaInfo[]; saturday: AnimeInfo[] | MangaInfo[] } | undefined> {
+    override async fetchSchedule(): Promise<
+        | {
+              sunday: AnimeInfo[] | MangaInfo[];
+              monday: AnimeInfo[] | MangaInfo[];
+              tuesday: AnimeInfo[] | MangaInfo[];
+              wednesday: AnimeInfo[] | MangaInfo[];
+              thursday: AnimeInfo[] | MangaInfo[];
+              friday: AnimeInfo[] | MangaInfo[];
+              saturday: AnimeInfo[] | MangaInfo[];
+          }
+        | undefined
+    > {
         const currentDate = new Date(); // Get the current date
 
         const fetchData = async (page = 1) => {
@@ -848,7 +870,18 @@ export default class AniListBase extends BaseProvider {
         const schedule = results.flat();
 
         const formattedResponse = schedule.reduce(
-            (acc: { sunday: AnimeInfo[] | MangaInfo[]; monday: AnimeInfo[] | MangaInfo[]; tuesday: AnimeInfo[] | MangaInfo[]; wednesday: AnimeInfo[] | MangaInfo[]; thursday: AnimeInfo[] | MangaInfo[]; friday: AnimeInfo[] | MangaInfo[]; saturday: AnimeInfo[] | MangaInfo[] }, media: AnimeInfo | MangaInfo) => {
+            (
+                acc: {
+                    sunday: AnimeInfo[] | MangaInfo[];
+                    monday: AnimeInfo[] | MangaInfo[];
+                    tuesday: AnimeInfo[] | MangaInfo[];
+                    wednesday: AnimeInfo[] | MangaInfo[];
+                    thursday: AnimeInfo[] | MangaInfo[];
+                    friday: AnimeInfo[] | MangaInfo[];
+                    saturday: AnimeInfo[] | MangaInfo[];
+                },
+                media: AnimeInfo | MangaInfo,
+            ) => {
                 const day = new Date((media as any).airingAt).getDay();
 
                 switch (day) {

@@ -134,7 +134,18 @@ interface Comic {
     title: string;
     country: string;
     status: number;
-    links: { al: string; ap: string; bw: string; kt: string; mu: string; amz: string; cdj: string; ebj: string; mal: string; raw: string };
+    links: {
+        al: string;
+        ap: string;
+        bw: string;
+        kt: string;
+        mu: string;
+        amz: string;
+        cdj: string;
+        ebj: string;
+        mal: string;
+        raw: string;
+    };
     last_chapter: any;
     chapter_count: number;
     demographic: number;

@@ -29,7 +29,18 @@ export default abstract class BaseProvider {
         return undefined;
     }
 
-    async fetchSeasonal(type: Type, formats: Format[]): Promise<{ trending: AnimeInfo[] | MangaInfo[]; seasonal: AnimeInfo[] | MangaInfo[]; popular: AnimeInfo[] | MangaInfo[]; top: AnimeInfo[] | MangaInfo[] } | undefined> {
+    async fetchSeasonal(
+        type: Type,
+        formats: Format[],
+    ): Promise<
+        | {
+              trending: AnimeInfo[] | MangaInfo[];
+              seasonal: AnimeInfo[] | MangaInfo[];
+              popular: AnimeInfo[] | MangaInfo[];
+              top: AnimeInfo[] | MangaInfo[];
+          }
+        | undefined
+    > {
         return undefined;
     }
 
@@ -58,6 +69,6 @@ export default abstract class BaseProvider {
         if (proxyRequest === undefined && !this.needsProxy) proxyRequest = false;
         if (proxyRequest !== undefined && proxyRequest === true && !this.needsProxy) proxyRequest = true;
 
-        return Http.request("BASE", this.useGoogleTranslate, url, config, proxyRequest, 0, this.customProxy);
+        return Http.request(this.id, this.useGoogleTranslate, url, config, proxyRequest, 0, this.customProxy);
     }
 }
