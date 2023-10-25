@@ -9,7 +9,7 @@ import BaseProvider from "../../mappings/impl/base";
 
 const toCheck: string[] = [];
 
-export async function checkCorsProxies(): Promise<{
+export async function checkCorsProxies(importProxies: boolean = false): Promise<{
     base: { providerId: string; ip: string }[];
     anime: { providerId: string; ip: string }[];
     manga: { providerId: string; ip: string }[];
@@ -20,6 +20,50 @@ export async function checkCorsProxies(): Promise<{
     const mangaIps: { providerId: string; ip: string }[] = [];
     const metaIps: { providerId: string; ip: string }[] = [];
     console.log(colors.yellow("Importing proxies... Please note that reading the proxies file may take a while."));
+
+    if (importProxies) {
+        console.log(colors.yellow("WARNING: Importing current proxies."));
+
+        const baseProxies = Bun.file("./baseProxies.json");
+        if (await baseProxies.exists()) {
+            // Check proxies.json
+            const proxies = await baseProxies.json();
+            for (let i = 0; i < proxies.length; i++) {
+                baseIps.push({ providerId: proxies[i].providerId, ip: proxies[i].ip });
+            }
+            console.log(colors.green(`Finished importing ${colors.yellow(proxies.length + "")} base proxies.`));
+        }
+
+        const animeProxies = Bun.file("./animeProxies.json");
+        if (await animeProxies.exists()) {
+            // Check proxies.json
+            const proxies = await animeProxies.json();
+            for (let i = 0; i < proxies.length; i++) {
+                animeIps.push({ providerId: proxies[i].providerId, ip: proxies[i].ip });
+            }
+            console.log(colors.green(`Finished importing ${colors.yellow(proxies.length + "")} anime proxies.`));
+        }
+
+        const mangaProxies = Bun.file("./mangaProxies.json");
+        if (await mangaProxies.exists()) {
+            // Check proxies.json
+            const proxies = await mangaProxies.json();
+            for (let i = 0; i < proxies.length; i++) {
+                mangaIps.push({ providerId: proxies[i].providerId, ip: proxies[i].ip });
+            }
+            console.log(colors.green(`Finished importing ${colors.yellow(proxies.length + "")} manga proxies.`));
+        }
+
+        const metaProxies = Bun.file("./metaProxies.json");
+        if (await metaProxies.exists()) {
+            // Check proxies.json
+            const proxies = await metaProxies.json();
+            for (let i = 0; i < proxies.length; i++) {
+                metaIps.push({ providerId: proxies[i].providerId, ip: proxies[i].ip });
+            }
+            console.log(colors.green(`Finished importing ${colors.yellow(proxies.length + "")} meta proxies.`));
+        }
+    }
 
     if (toCheck.length === 0) {
         const file = Bun.file("./proxies.json");
@@ -36,11 +80,19 @@ export async function checkCorsProxies(): Promise<{
             console.log(colors.green(`Finished importing ${colors.yellow(toCheck.length + "")} current proxies.`));
         }
     }
+
     console.log(colors.yellow("Checking proxies..."));
     const ips = toCheck
         .map((proxy) => {
             try {
                 const url = new URL(proxy);
+
+                // Check if it exists
+                if (baseIps.find((obj) => obj.ip === `${url.hostname}:${url.port}`)) return { ip: "", port: 8080 };
+                if (animeIps.find((obj) => obj.ip === `${url.hostname}:${url.port}`)) return { ip: "", port: 8080 };
+                if (mangaIps.find((obj) => obj.ip === `${url.hostname}:${url.port}`)) return { ip: "", port: 8080 };
+                if (metaIps.find((obj) => obj.ip === `${url.hostname}:${url.port}`)) return { ip: "", port: 8080 };
+
                 return { ip: url.hostname, port: Number(url.port) };
             } catch (e) {
                 return { ip: "", port: 8080 };
@@ -182,9 +234,6 @@ async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): P
                     for (const provider of BASE_PROVIDERS) {
                         if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);
                     }
-
-                    // NovelUpdates needs proxies for chapters specifically. This is temporary likely.
-                    validProviders.push(BASE_PROVIDERS.find((provider) => provider.id === "novelupdates") as BaseProvider);
                 } else if (type === "ANIME") {
                     for (const provider of ANIME_PROVIDERS) {
                         if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);

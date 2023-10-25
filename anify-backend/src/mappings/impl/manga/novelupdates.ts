@@ -14,6 +14,11 @@ export default class NovelUpdates extends MangaProvider {
     override formats: Format[] = [Format.NOVEL];
 
     override async search(query: string, format?: Format, year?: number, retries = 0): Promise<Result[] | undefined> {
+        if (this.customProxy) {
+            // For proxy testing purposes only.
+            return (await this.fetchChapters(query)) as undefined;
+        }
+
         if (retries >= 5) return undefined;
 
         const results: Result[] = [];

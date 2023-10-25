@@ -25,7 +25,7 @@ export default class NineAnime extends AnimeProvider {
     }
 
     override get headers(): Record<string, string> | undefined {
-        return { Referer: "https://vidstream.pro/", "X-Requested-With": "XMLHttpRequest" };
+        return { Referer: "https://vidplay.site/", "X-Requested-With": "XMLHttpRequest" };
     }
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
@@ -143,9 +143,9 @@ export default class NineAnime extends AnimeProvider {
                 console.error(e);
             }
 
-            const source = (await (await this.request(`${this.resolver}/decrypt?query=${encodeURIComponent(serverSource.result?.url)}&apikey=${this.resolverKey}`)).json()).url.split("/").pop();
+            const source = (await (await this.request(`${this.resolver}/decrypt?query=${encodeURIComponent(serverSource.result?.url)}&apikey=${this.resolverKey}`)).json()).url;
 
-            return await new Extractor(source, result).extract(server ?? StreamingServers.VizCloud);
+            return await new Extractor(source.split("/").pop(), result).extract(server ?? StreamingServers.VizCloud);
         }
 
         const servers = (await this.fetchServers(id, subType))!;

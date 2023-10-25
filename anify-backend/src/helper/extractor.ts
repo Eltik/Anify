@@ -227,7 +227,7 @@ export default class Extractor {
         const proxyKey: string = env.NINEANIME_KEY || `9anime`;
 
         const reqURL = `${proxy}/rawVizcloud?query=${encodeURIComponent(url)}&apikey=${proxyKey}`;
-        const fuToken = await (await fetch("https://vidstream.pro/futoken")).text();
+        const fuToken = await (await fetch("https://vidplay.site/futoken")).text();
 
         const rawSource = await (
             await fetch(reqURL, {
@@ -245,11 +245,14 @@ export default class Extractor {
         const source = await (
             await fetch(rawSource.rawURL, {
                 headers: {
-                    Referer: "https://vidstream.pro",
+                    Referer: "https://vidplay.site/",
                     "X-Requested-With": "XMLHttpRequest",
                 },
             })
         ).json();
+
+        console.log(source);
+        if (!source.result?.tracks) return result;
 
         for (const track of source.result?.tracks ?? []) {
             result.subtitles.push({

@@ -112,7 +112,7 @@ export default class Mangakakalot extends MangaProvider {
                 });
         }
 
-        return chapters;
+        return chapters.reverse();
     }
 
     override async fetchPages(id: string): Promise<string | Page[] | undefined> {

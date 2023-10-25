@@ -26,7 +26,7 @@ export default class Http {
      */
     static getRandomUnbannedProxy(providerId: string): string | undefined {
         // Find the proxy type (base, anime, manga, meta)
-        const proxyType = BASE_PROVIDERS.find((provider) => provider.id === providerId) !== undefined ? "BASE" : ANIME_PROVIDERS.find((provider) => provider.id === providerId) !== undefined ? "ANIME" : MANGA_PROVIDERS.find((provider) => provider.id === providerId) !== undefined ? "MANGA" : META_PROVIDERS.find((provider) => provider.id === providerId) !== undefined ? "META" : undefined;
+        const proxyType = providerId === "novelupdates" ? "MANGA" : BASE_PROVIDERS.find((provider) => provider.id === providerId) !== undefined ? "BASE" : ANIME_PROVIDERS.find((provider) => provider.id === providerId) !== undefined ? "ANIME" : MANGA_PROVIDERS.find((provider) => provider.id === providerId) !== undefined ? "MANGA" : META_PROVIDERS.find((provider) => provider.id === providerId) !== undefined ? "META" : undefined;
         if (!proxyType) return undefined;
 
         // Bun likes to do things where it doesn't initialize the unbannedProxies variable.
@@ -39,7 +39,8 @@ export default class Http {
 
         const providerProxies = this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"].filter((proxy) => proxy.providerId === providerId);
         if (!providerProxies) return undefined;
-        return providerProxies[Math.floor(Math.random() * providerProxies.length)].ip;
+
+        return providerProxies[Math.floor(Math.random() * providerProxies.length)]?.ip ?? undefined;
     }
 
     /**
@@ -61,7 +62,13 @@ export default class Http {
                     // Get the proxy URL.
                     const proxyUrl = useGoogleTranslate ? "http://translate.google.com/translate?sl=ja&tl=en&u=" : customProxy || this.getRandomUnbannedProxy(providerId);
                     if (!proxyUrl) {
-                        throw new Error("No proxy available.");
+                        return resolve({
+                            ok: false,
+                            status: 500,
+                            statusText: "No proxy available.",
+                            text: () => Promise.resolve(""),
+                            json: () => Promise.resolve({ error: "No proxy available." }),
+                        } as Response);
                     }
 
                     // Modify the URL to use the proxy.
