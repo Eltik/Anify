@@ -1,5 +1,5 @@
 export const createResponse = (data: any, status: number = 200, headers: { [key: string]: string } = {}) => {
-    return new Response(JSON.stringify(data), {
+    return new Response(data, {
         status,
         headers: {
             "Content-Type": "application/json",
