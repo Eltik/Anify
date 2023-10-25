@@ -114,41 +114,8 @@ export default class NineAnime extends AnimeProvider {
             headers: this.headers ?? {},
         };
 
-        if (id.startsWith("http")) {
-            const serverUrl = new URL(id);
-
-            const req = await this.request(serverUrl.href, {});
-            if (!req.ok) {
-                return result;
-            }
-            const json = await req.json();
-            if (!json.result) {
-                return result;
-            }
-
-            const serverID = serverUrl.href.split(`${this.url}/ajax/server/`)[1].split("?vrf")[0];
-            const serverVrf = await this.getServerVRF(serverID);
-
-            const serverSource = await (await this.request(`${this.url}/ajax/server/${serverID}?${serverVrf.vrfQuery}=${encodeURIComponent(serverVrf.url)}`)).json();
-
-            try {
-                const skipData = JSON.parse((await this.decodeURL(json.result?.skip_data!)).url);
-                result.intro.start = skipData?.intro?.[0] ?? 0;
-                result.intro.end = skipData?.intro?.[1] ?? 0;
-
-                result.outro.start = skipData?.outro?.[0] ?? 0;
-                result.outro.end = skipData?.outro?.[1] ?? 0;
-            } catch (e) {
-                console.error("9anime skip data error");
-                console.error(e);
-            }
-
-            const source = (await (await this.request(`${this.resolver}/decrypt?query=${encodeURIComponent(serverSource.result?.url)}&apikey=${this.resolverKey}`)).json()).url;
-
-            return await new Extractor(source.split("/").pop(), result).extract(server ?? StreamingServers.VizCloud);
-        }
-
-        const servers = (await this.fetchServers(id, subType))!;
+        const servers = await this.fetchServers(id, subType);
+        if (!servers) return undefined;
 
         let s = servers.find((s) => s.name === server);
 
@@ -175,7 +142,19 @@ export default class NineAnime extends AnimeProvider {
                 break;
         }
 
-        return await this.fetchSources(s.url, subType, server ?? StreamingServers.VizCloud);
+        const serverId = s.url;
+        const vrf = await this.getVRF(serverId);
+
+        this.needsProxy = false;
+
+        const serverData = (await (await this.request(`${this.url}/ajax/server/${serverId}?${vrf.vrfQuery}=${vrf.url}`)).json())?.result.url;
+        const vidplayURL = (await (await this.request(`https://9anime.eltik.net/decrypt?query=${serverData}&apikey=enimax`)).json()).url;
+
+        this.needsProxy = true;
+
+        const payload = vidplayURL.split("/").pop();
+
+        return await new Extractor(payload, result).extract(server ?? StreamingServers.VizCloud);
     }
 
     override async fetchServers(id: string, subType: SubType): Promise<Server[] | undefined> {
@@ -205,22 +184,15 @@ export default class NineAnime extends AnimeProvider {
         const $ = load(data.result);
 
         const servers: Server[] = [];
-        const promises: Promise<boolean>[] = [];
 
         $(".type > ul > li").each((i, el) => {
-            const promise: Promise<boolean> = new Promise(async (resolve, reject) => {
-                const serverId = $(el).attr("data-link-id")!;
-                const vrf = await this.getRawVRF(serverId);
-                servers.push({
-                    name: $(el).text().toLocaleLowerCase(),
-                    url: `${this.url}/ajax/server/${serverId}?${vrf.vrfQuery}=${encodeURIComponent(vrf.url)}`,
-                });
-                resolve(true);
-            });
-            promises.push(promise);
-        });
+            const serverId = $(el).attr("data-link-id")!;
 
-        await Promise.all(promises);
+            servers.push({
+                name: $(el).text().toLowerCase(),
+                url: serverId,
+            });
+        });
         return servers;
     }
 
@@ -274,6 +246,7 @@ export default class NineAnime extends AnimeProvider {
         return await (await this.request(`${this.resolver}/decrypt?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json();
     }
 
+    /*
     // This bypass works. However because it sends requests very quickly in a short amount of time, it causes proxies to get banned very quickly.
     override async request(url: string, options: RequestInit = {}, proxyRequest = true): Promise<Response> {
         if (url.includes(this.resolver ?? "")) {
@@ -364,6 +337,7 @@ export default class NineAnime extends AnimeProvider {
 
         //return Http.request(url, { headers: { Cookie: cookies?.join("; ") ?? "" }, ...options }, proxyRequest, 0, proxy);
     }
+    */
 
     /*
     The waf page evals this:

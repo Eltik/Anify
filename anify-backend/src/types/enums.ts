@@ -136,7 +136,7 @@ export const enum StreamingServers {
     UpCloud = "upcloud",
     VidCloud = "vidcloud",
     StreamTape = "streamtape",
-    VizCloud = "vizcloud",
+    VizCloud = "vidplay",
     MyCloud = "mycloud",
     Filemoon = "filemoon",
     VidStreaming = "vidstreaming",

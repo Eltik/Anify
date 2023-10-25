@@ -226,32 +226,32 @@ export default class Extractor {
         const proxy = env.NINEANIME_RESOLVER || "https://9anime.resolver.net";
         const proxyKey: string = env.NINEANIME_KEY || `9anime`;
 
-        const reqURL = `${proxy}/rawVizcloud?query=${encodeURIComponent(url)}&apikey=${proxyKey}`;
-        const fuToken = await (await fetch("https://vidplay.site/futoken")).text();
+        const futoken = await (await fetch("https://vidplay.site/futoken")).text();
 
-        const rawSource = await (
-            await fetch(reqURL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: new URLSearchParams({
-                    query: url,
-                    futoken: fuToken,
-                }),
-            })
-        ).json();
+        const rawSource = (
+            await (
+                await fetch(`${proxy}/rawVizcloud?query=${encodeURIComponent(url)}&apikey=${proxyKey}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: new URLSearchParams({
+                        query: url,
+                        futoken,
+                    }),
+                })
+            ).json()
+        ).rawURL;
 
         const source = await (
-            await fetch(rawSource.rawURL, {
+            await fetch(rawSource, {
                 headers: {
-                    Referer: "https://vidplay.site/",
-                    "X-Requested-With": "XMLHttpRequest",
+                    referer: "https://vidplay.site/",
+                    "x-requested-with": "XMLHttpRequest",
                 },
             })
         ).json();
 
-        console.log(source);
         if (!source.result?.tracks) return result;
 
         for (const track of source.result?.tracks ?? []) {
