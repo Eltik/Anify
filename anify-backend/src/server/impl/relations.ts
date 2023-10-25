@@ -1,6 +1,7 @@
 import { cacheTime, redis } from "..";
 import { get } from "../../database/impl/fetch/get";
 import { relations } from "../../database/impl/fetch/relations";
+import { createResponse } from "../lib/response";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -17,72 +18,38 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const id = body?.id ?? paths[1] ?? url.searchParams.get("id") ?? null;
         if (!id) {
-            return new Response(JSON.stringify({ error: "No ID provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "No ID provided." }), 400);
         }
 
-        const cached = await redis.get(`relations:${id}`);
+        let fields: string[] = [];
+        const fieldsParam = url.searchParams.get("fields");
+
+        if (fieldsParam && fieldsParam.startsWith("[") && fieldsParam.endsWith("]")) {
+            const fieldsArray = fieldsParam
+                .slice(1, -1)
+                .split(",")
+                .map((field) => field.trim());
+            fields = fieldsArray.filter(Boolean);
+        }
+
+        const cached = await redis.get(`relations:${id}:${JSON.stringify(fields)}`);
         if (cached) {
-            return new Response(cached, {
-                status: 200,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(cached);
         }
 
         const data = await get(String(id));
         if (!data) {
-            return new Response(JSON.stringify({ error: "No data found." }), {
-                status: 404,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "No data found." }), 404);
         }
 
-        const res = await relations(String(id));
+        const res = await relations(String(id), fields);
 
-        await redis.set(`relations:${id}`, JSON.stringify(res), "EX", cacheTime);
+        await redis.set(`relations:${id}:${JSON.stringify(fields)}`, JSON.stringify(res), "EX", cacheTime);
 
-        return new Response(JSON.stringify(res), {
-            status: 200,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify(res));
     } catch (e) {
         console.error(e);
-        return new Response(JSON.stringify({ error: "An error occurred." }), {
-            status: 500,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify({ error: "An error occurred." }), 500);
     }
 };
 

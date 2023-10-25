@@ -38,6 +38,7 @@ export default class Http {
         if (this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"].length === 0) return undefined;
 
         const providerProxies = this.unbannedProxies[proxyType.toLowerCase() as "base" | "anime" | "manga" | "meta"].filter((proxy) => proxy.providerId === providerId);
+        if (!providerProxies) return undefined;
         return providerProxies[Math.floor(Math.random() * providerProxies.length)].ip;
     }
 

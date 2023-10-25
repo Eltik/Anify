@@ -226,29 +226,32 @@ export default class Extractor {
         const proxy = env.NINEANIME_RESOLVER || "https://9anime.resolver.net";
         const proxyKey: string = env.NINEANIME_KEY || `9anime`;
 
-        const lolToken = await (await fetch("https://vidstream.pro/futoken")).text();
+        const reqURL = `${proxy}/rawVizcloud?query=${encodeURIComponent(url)}&apikey=${proxyKey}`;
+        const fuToken = await (await fetch("https://vidstream.pro/futoken")).text();
 
-        const m3u8Req = await fetch(`${proxy}/rawVizcloud?apikey=${proxyKey}`, {
-            method: "POST",
-            body: JSON.stringify({
-                query: url,
-                futoken: lolToken,
-            }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-        const data = await m3u8Req.json();
-
-        const m3u8File = data.rawURL;
-
-        const mainReq = await (
-            await fetch(m3u8File, {
-                headers: { Referer: "https://vidstream.pro/", "X-Requested-With": "XMLHttpRequest" },
+        const rawSource = await (
+            await fetch(reqURL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                    query: url,
+                    futoken: fuToken,
+                }),
             })
         ).json();
 
-        for (const track of mainReq.result?.tracks ?? []) {
+        const source = await (
+            await fetch(rawSource.rawURL, {
+                headers: {
+                    Referer: "https://vidstream.pro",
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+            })
+        ).json();
+
+        for (const track of source.result?.tracks ?? []) {
             result.subtitles.push({
                 url: track.file,
                 lang: track.label ?? track.kind,
@@ -256,7 +259,7 @@ export default class Extractor {
             });
         }
 
-        const file = mainReq.result?.sources[0]?.file;
+        const file = source.result?.sources[0]?.file;
 
         const req = await fetch(file, {
             headers: { Referer: "https://vidstream.pro/", "X-Requested-With": "XMLHttpRequest" },
@@ -278,8 +281,6 @@ export default class Extractor {
             quality: "auto",
             url: file,
         });
-
-        //result.headers = {}; // TEMP doesnt require proxy
 
         return result;
     }

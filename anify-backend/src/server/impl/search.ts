@@ -2,6 +2,7 @@ import queues from "../../worker";
 import { search } from "../../database/impl/search/search";
 import { Format, Sort, SortDirection, Sorts, Type } from "../../types/enums";
 import { cacheTime, redis } from "..";
+import { createResponse } from "../lib/response";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -20,41 +21,14 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const type = body?.type ?? paths[1] ?? url.searchParams.get("type") ?? null;
         if (!type) {
-            return new Response(JSON.stringify({ error: "No type provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "No type provided." }), 400);
         } else if (!validTypes.includes(type.toLowerCase())) {
-            return new Response(JSON.stringify({ error: "Invalid type provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "Invalid type provided." }), 400);
         }
 
         const query = decodeURIComponent(body?.query ?? paths[2] ?? url.searchParams.get("query") ?? "");
         if (!query || query.length === 0) {
-            return new Response(JSON.stringify({ error: "No query provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "No query provided." }), 400);
         }
 
         const page = Number(body?.page ?? paths[3] ?? url.searchParams.get("page") ?? "1");
@@ -64,42 +38,15 @@ export const handler = async (req: Request): Promise<Response> => {
 
         // Check if sort is valid
         if (!Sorts.includes(sort as Sort)) {
-            return new Response(JSON.stringify({ error: "Invalid sort provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "Invalid sort provided." }), 400);
         }
         if (sortDirection != SortDirection.ASC && sortDirection != SortDirection.DESC) {
-            return new Response(JSON.stringify({ error: "Invalid sort direction provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "Invalid sort direction provided." }), 400);
         }
 
         const cached = await redis.get(`search:${type}:${query}:${page}:${perPage}:${sort}:${sortDirection}`);
         if (cached) {
-            return new Response(cached, {
-                status: 200,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(cached);
         }
 
         const formats = type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL];
@@ -115,28 +62,10 @@ export const handler = async (req: Request): Promise<Response> => {
 
         await redis.set(`search:${type}:${query}:${page}:${perPage}:${sort}:${sortDirection}`, JSON.stringify(data), "EX", cacheTime);
 
-        return new Response(JSON.stringify(data), {
-            status: 200,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify(data), 200);
     } catch (e) {
         console.error(e);
-        return new Response(JSON.stringify({ error: "An error occurred." }), {
-            status: 500,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify({ error: "An error occurred." }), 500);
     }
 };
 

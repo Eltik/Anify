@@ -2,6 +2,7 @@ import queues from "../../worker";
 import { Format, Formats, Genres, Sort, SortDirection, Sorts, Type } from "../../types/enums";
 import { searchAdvanced } from "../../database/impl/search/searchAdvanced";
 import { cacheTime, redis } from "..";
+import { createResponse } from "../lib/response";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -20,27 +21,9 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const type = body?.type ?? url.searchParams.get("type") ?? null;
         if (!type) {
-            return new Response(JSON.stringify({ error: "No type provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "No type provided." }), 400);
         } else if (!validTypes.includes(type.toLowerCase())) {
-            return new Response(JSON.stringify({ error: "Invalid type provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "Invalid type provided." }), 400);
         }
 
         const query = decodeURIComponent(body?.query ?? url.searchParams.get("query") ?? "");
@@ -64,42 +47,15 @@ export const handler = async (req: Request): Promise<Response> => {
 
         // Check if sort is valid
         if (!Sorts.includes(sort as Sort)) {
-            return new Response(JSON.stringify({ error: "Invalid sort provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "Invalid sort provided." }), 400);
         }
         if (sortDirection != SortDirection.ASC && sortDirection != SortDirection.DESC) {
-            return new Response(JSON.stringify({ error: "Invalid sort direction provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "Invalid sort direction provided." }), 400);
         }
 
         const cached = await redis.get(`search-advanced:${type}:${query}:${JSON.stringify(formats)}:${genres}:${genresExcluded}:${tags}:${tagsExcluded}:${year}:${page}:${perPage}:${sort}:${sortDirection}`);
         if (cached) {
-            return new Response(cached, {
-                status: 200,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(cached);
         }
 
         const data = await searchAdvanced(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats, page, perPage, genres as Genres[], genresExcluded as Genres[], year, tags, tagsExcluded, sort, sortDirection);
@@ -118,28 +74,10 @@ export const handler = async (req: Request): Promise<Response> => {
 
         await redis.set(`search-advanced:${type}:${query}:${JSON.stringify(formats)}:${genres}:${genresExcluded}:${tags}:${tagsExcluded}:${year}:${page}:${perPage}:${sort}:${sortDirection}`, JSON.stringify(data), "EX", cacheTime);
 
-        return new Response(JSON.stringify(data), {
-            status: 200,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify(data));
     } catch (e) {
         console.error(e);
-        return new Response(JSON.stringify({ error: "An error occurred." }), {
-            status: 500,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify({ error: "An error occurred." }), 500);
     }
 };
 

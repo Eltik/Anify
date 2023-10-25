@@ -1,6 +1,6 @@
 import { cacheTime, redis } from "..";
 import { stats } from "../../database/impl/fetch/stats";
-import { get } from "../../database/impl/fetch/get";
+import { createResponse } from "../lib/response";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -10,56 +10,20 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const cached = await redis.get(`stats`);
         if (cached) {
-            return new Response(cached, {
-                status: 200,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(cached);
         }
 
         const data = await stats();
         if (!data) {
-            return new Response(JSON.stringify({ error: "No data found." }), {
-                status: 404,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "No data found." }), 404);
         }
 
         await redis.set(`stats`, JSON.stringify(data), "EX", cacheTime);
 
-        return new Response(JSON.stringify(data), {
-            status: 200,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify(data));
     } catch (e) {
         console.error(e);
-        return new Response(JSON.stringify({ error: "An error occurred." }), {
-            status: 500,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify({ error: "An error occurred." }), 500);
     }
 };
 

@@ -1,5 +1,6 @@
 import { cacheTime, redis } from "..";
 import { loadSchedule } from "../../lib/impl/schedule";
+import { createResponse } from "../lib/response";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -18,16 +19,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const type = body?.type ?? paths[1] ?? url.searchParams.get("type") ?? "anime";
         if (!validTypes.includes(type.toLowerCase())) {
-            return new Response(JSON.stringify({ error: "Invalid type provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "Invalid type provided." }), 400);
         }
 
         let fields: string[] = [];
@@ -59,28 +51,10 @@ export const handler = async (req: Request): Promise<Response> => {
 
         await redis.set(`schedule:${type}:${JSON.stringify(fields)}`, JSON.stringify(data), "EX", cacheTime);
 
-        return new Response(JSON.stringify(data), {
-            status: 200,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify(data), 200);
     } catch (e) {
         console.error(e);
-        return new Response(JSON.stringify({ error: "An error occurred." }), {
-            status: 500,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify({ error: "An error occurred." }), 500);
     }
 };
 

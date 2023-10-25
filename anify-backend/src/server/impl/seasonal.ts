@@ -43,7 +43,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        let fields = ["id", "title", "coverImage", "bannerImage", "description", "genres"];
+        let fields: string[] = [];
         const fieldsParam = url.searchParams.get("fields");
 
         if (fieldsParam && fieldsParam.startsWith("[") && fieldsParam.endsWith("]")) {

@@ -101,12 +101,14 @@ export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: Ani
         mediaArray.forEach((media) => {
             if (!media) return;
 
-            // Delete fields that don't exist in the fields array
-            Object.keys(media).forEach((key) => {
-                if (!fields.includes(key)) {
-                    delete (media as { [key: string]: any })[key];
-                }
-            });
+            if (fields && fields.length > 0) {
+                // Delete fields that don't exist in the fields array
+                Object.keys(media).forEach((key) => {
+                    if (!fields.includes(key)) {
+                        delete (media as { [key: string]: any })[key];
+                    }
+                });
+            }
         });
     });
 

@@ -2,6 +2,7 @@ import { cacheTime, redis } from "..";
 import content from "../../content";
 import { StreamingServers, SubType } from "../../types/enums";
 import queues from "../../worker";
+import { createResponse } from "../lib/response";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -18,141 +19,50 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const id = body?.id ?? paths[1] ?? url.searchParams.get("id") ?? null;
         if (!id) {
-            return new Response(JSON.stringify({ error: "No ID provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "No ID provided." }), 400);
         }
 
         const episodeNumber = Number(body?.episodeNumber ?? paths[2] ?? url.searchParams.get("episodeNumber") ?? null);
         if (!episodeNumber) {
-            return new Response(JSON.stringify({ error: "No episode number provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "No episode number provided." }), 400);
         }
 
         const providerId = body?.providerId ?? paths[3] ?? url.searchParams.get("providerId") ?? null;
         if (!providerId) {
-            return new Response(JSON.stringify({ error: "No provider ID provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "No provider ID provided." }), 400);
         }
 
         const watchId = decodeURIComponent(body?.watchId ?? paths[4] ?? url.searchParams.get("watchId") ?? "");
         if (!watchId || watchId.length === 0) {
-            return new Response(JSON.stringify({ error: "No watch ID provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "No watch ID provided." }), 400);
         }
 
         const subType = decodeURIComponent(body?.subType ?? paths[5] ?? url.searchParams.get("subType") ?? "");
         if (!subType || subType.length === 0) {
-            return new Response(JSON.stringify({ error: "No sub type provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "No sub type provided." }), 400);
         } else if (!["SUB", "DUB"].includes(subType.toUpperCase())) {
-            return new Response(JSON.stringify({ error: "Sub type is invalid." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "Sub type is invalid." }), 400);
         }
 
         const server = body?.server ?? paths[6] ?? url.searchParams.get("server") ?? undefined ? (decodeURIComponent(body?.server ?? paths[6] ?? url.searchParams.get("server") ?? undefined) as StreamingServers) : undefined;
 
         const cached = await redis.get(`sources:${id}:${episodeNumber}:${providerId}:${watchId}:${subType}:${server}`);
         if (cached) {
-            return new Response(cached, {
-                status: 200,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(cached);
         }
 
         const data = await content.fetchSources(providerId, watchId, subType as SubType, server as StreamingServers);
 
-        if (!data)
-            return new Response(JSON.stringify({ error: "Sources not found." }), {
-                status: 404,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+        if (!data) return createResponse(JSON.stringify({ error: "Sources not found." }), 404);
 
         if (data) queues.skipTimes.add({ id, episode: episodeNumber, toInsert: data });
 
         await redis.set(`sources:${id}:${episodeNumber}:${providerId}:${watchId}:${subType}:${server}`, JSON.stringify(data), "EX", cacheTime);
 
-        return new Response(JSON.stringify(data), {
-            status: 200,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify(data));
     } catch (e) {
         console.error(e);
-        return new Response(JSON.stringify({ error: "An error occurred." }), {
-            status: 500,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify({ error: "An error occurred." }), 500);
     }
 };
 

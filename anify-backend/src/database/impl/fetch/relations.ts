@@ -3,7 +3,7 @@ import { Type } from "../../../types/enums";
 import { Anime, Db, Manga } from "../../../types/types";
 import { get } from "./get";
 
-export const relations = async (id: string): Promise<Anime[] | Manga[] | undefined> => {
+export const relations = async (id: string, fields: string[] = []): Promise<Anime[] | Manga[] | undefined> => {
     const data = await get(id);
     if (!data) return undefined;
 
@@ -41,6 +41,15 @@ export const relations = async (id: string): Promise<Anime[] | Manga[] | undefin
                             relationType: relation.relationType,
                         });
 
+                        if (fields && fields.length > 0) {
+                            // Delete fields that don't exist in the fields array
+                            Object.keys(data).forEach((key) => {
+                                if (!fields.includes(key)) {
+                                    delete (data as { [key: string]: any })[key];
+                                }
+                            });
+                        }
+
                         return data;
                     } else {
                         Object.assign(data, {
@@ -57,6 +66,15 @@ export const relations = async (id: string): Promise<Anime[] | Manga[] | undefin
                             characters: JSON.parse(data.characters),
                             relationType: relation.relationType,
                         });
+
+                        if (fields && fields.length > 0) {
+                            // Delete fields that don't exist in the fields array
+                            Object.keys(data).forEach((key) => {
+                                if (!fields.includes(key)) {
+                                    delete (data as { [key: string]: any })[key];
+                                }
+                            });
+                        }
 
                         return data;
                     }

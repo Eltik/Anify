@@ -8,7 +8,6 @@ export default class AniDB extends InformationProvider<Anime | Manga, AnimeInfo 
     override url = "https://anidb.net";
 
     public needsProxy: boolean = true;
-    public useGoogleTranslate: boolean = false;
 
     override get priorityArea(): MediaInfoKeys[] {
         return [];

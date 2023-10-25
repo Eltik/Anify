@@ -98,7 +98,7 @@ export default class NineAnime extends AnimeProvider {
         return episodes;
     }
 
-    override async fetchSources(id: string, subType: SubType = SubType.SUB, server: StreamingServers = StreamingServers.MyCloud): Promise<Source | undefined> {
+    override async fetchSources(id: string, subType: SubType = SubType.SUB, server: StreamingServers = StreamingServers.VizCloud): Promise<Source | undefined> {
         const result: Source = {
             sources: [],
             subtitles: [],
@@ -127,7 +127,7 @@ export default class NineAnime extends AnimeProvider {
             }
 
             const serverID = serverUrl.href.split(`${this.url}/ajax/server/`)[1].split("?vrf")[0];
-            const serverVrf = await this.getRawVRF(serverID);
+            const serverVrf = await this.getServerVRF(serverID);
 
             const serverSource = await (await this.request(`${this.url}/ajax/server/${serverID}?${serverVrf.vrfQuery}=${encodeURIComponent(serverVrf.url)}`)).json();
 
@@ -139,13 +139,13 @@ export default class NineAnime extends AnimeProvider {
                 result.outro.start = skipData?.outro?.[0] ?? 0;
                 result.outro.end = skipData?.outro?.[1] ?? 0;
             } catch (e) {
-                console.error("9Anime skip data error");
+                console.error("9anime skip data error");
                 console.error(e);
             }
 
             const source = (await (await this.request(`${this.resolver}/decrypt?query=${encodeURIComponent(serverSource.result?.url)}&apikey=${this.resolverKey}`)).json()).url.split("/").pop();
 
-            return await new Extractor(source, result).extract(server ?? StreamingServers.MyCloud);
+            return await new Extractor(source, result).extract(server ?? StreamingServers.VizCloud);
         }
 
         const servers = (await this.fetchServers(id, subType))!;
@@ -175,7 +175,7 @@ export default class NineAnime extends AnimeProvider {
                 break;
         }
 
-        return await this.fetchSources(s.url, subType, server ?? StreamingServers.MyCloud);
+        return await this.fetchSources(s.url, subType, server ?? StreamingServers.VizCloud);
     }
 
     override async fetchServers(id: string, subType: SubType): Promise<Server[] | undefined> {
@@ -192,15 +192,14 @@ export default class NineAnime extends AnimeProvider {
             const $ = load(json.result);
             const sub = $("div.servers div.type").attr("data-type");
 
-            if (sub === "softsub" && subType === SubType.SUB) {
-                data = json;
-            } else if (sub === "sub" && subType === SubType.SUB) {
+            if ((sub === "softsub" || sub === "sub") && subType === SubType.SUB) {
                 data = json;
             } else if (sub === "dub" && subType === SubType.DUB) {
                 data = json;
             } else return [];
         } catch (e) {
-            //
+            console.error(e);
+            return [];
         }
 
         const $ = load(data.result);
@@ -253,6 +252,16 @@ export default class NineAnime extends AnimeProvider {
             };
 
         return await (await this.request(`${this.resolver}/rawVrf?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json();
+    }
+
+    private async getServerVRF(query: string): Promise<VRF> {
+        if (!this.resolver)
+            return {
+                url: query,
+                vrfQuery: "vrf",
+            };
+
+        return await (await this.request(`${this.resolver}/ajax-server?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json();
     }
 
     private async decodeURL(query: string): Promise<VRF> {

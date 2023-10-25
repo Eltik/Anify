@@ -6,6 +6,7 @@ import { env } from "../env";
 import { rateLimitMiddleware } from "./lib/rateLimit.ts";
 import { apiKeyMiddleware } from "./lib/keys.ts";
 import { getKeys } from "../database/impl/keys/key.ts";
+import { createResponse } from "./lib/response.ts";
 
 export const redis: Redis = env.REDIS_URL
     ? new Redis((env.REDIS_URL as string) || "redis://localhost:6379")
@@ -65,16 +66,7 @@ export const start = async () => {
         port: env.PORT,
         async fetch(req: Request) {
             const url = new URL(req.url);
-            if (url.pathname === "/")
-                return new Response("Welcome to Anify API! 🎉 Documentation can be viewed at https://docs.anify.tv. Join our Discord https://anify.tv/discord for more information.", {
-                    headers: {
-                        "Access-Control-Allow-Origin": "*",
-                        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                        "Access-Control-Max-Age": "2592000",
-                        "Access-Control-Allow-Headers": "*",
-                        "Content-Type": "text/plain",
-                    },
-                });
+            if (url.pathname === "/") return createResponse("Welcome to Anify API! 🎉 Documentation can be viewed at https://docs.anify.tv. Join our Discord https://anify.tv/discord for more information.", 200, { "Content-Type": "text/plain" });
 
             const pathName = `/${url.pathname.split("/").slice(1)[0]}`;
 
@@ -88,31 +80,13 @@ export const start = async () => {
                 if (requests && requests.requests > rateLimit) {
                     if (requests.requests > rateLimit * 2) console.log(colors.red(`Rate limit significantly exceeded for ${requests.ip}`));
 
-                    return new Response(JSON.stringify({ error: "Too many requests" }), {
-                        status: 429,
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Access-Control-Allow-Origin": "*",
-                            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                            "Access-Control-Max-Age": "2592000",
-                            "Access-Control-Allow-Headers": "*",
-                        },
-                    });
+                    return createResponse(JSON.stringify({ error: "Too many requests" }), 429);
                 }
 
                 return handler(req);
             }
 
-            return new Response(JSON.stringify({ error: "Route not found" }), {
-                status: 404,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "Route not found" }), 404);
         },
     });
 
