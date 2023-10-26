@@ -147,7 +147,6 @@ export default class NineAnime extends AnimeProvider {
         try {
             this.useGoogleTranslate = false;
             const temp = await (await this.request(`${this.url}/ajax/server/${serverId}?${vrf.vrfQuery}=${vrf.url}`)).text();
-            console.log(temp);
             serverData = JSON.parse(temp)?.result.url;
             this.useGoogleTranslate = true;
         } catch (e) {

@@ -16,6 +16,7 @@ before().then(async (_) => {
     //await start();
     //await startWebsocket();
 
+    /*
     const file = Bun.file("9animeProxies.json");
     const json = await file.json();
 
@@ -29,6 +30,7 @@ before().then(async (_) => {
     }
 
     Bun.write("./animeProxies.json", JSON.stringify(data, null, 4));
+    */
     /*
     const file = Bun.file("9animeProxies.json");
     const json = await file.json();

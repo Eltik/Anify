@@ -4,6 +4,7 @@ import { substringAfter, substringBefore } from ".";
 import { env } from "process";
 import { Source } from "../types/types";
 import { StreamingServers } from "../types/enums";
+import Http from "./request";
 
 /**
  * @description Extracts source links from the streaming servers. This class is very messy but it works.
@@ -231,7 +232,7 @@ export default class Extractor {
         const proxy = env.NINEANIME_RESOLVER || "https://9anime.resolver.net";
         const proxyKey: string = env.NINEANIME_KEY || `9anime`;
 
-        const futoken = await (await fetch("https://vidplay.site/futoken")).text();
+        const futoken = await (await Http.request("9anime", false, "https://vidplay.site/futoken")).text();
 
         const rawSource = (
             await (
