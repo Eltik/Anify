@@ -8,6 +8,9 @@ export enum Events {
     COMPLETED_ENTRY_CREATION = "entry.creation.completed",
     COMPLETED_MANGA_UPLOAD = "manga.upload.completed",
     COMPLETED_NOVEL_UPLOAD = "novel.upload.completed",
+
+    KEY_LIMIT_REACHED = "key.limit.reached",
+    KEY_UPDATE = "key.update",
 }
 
 const emitter = new EventEmitter2({});

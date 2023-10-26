@@ -8,22 +8,22 @@ export const startWebsocket = async () => {
         port: env.PORT ? Number(env.PORT) + 1 : 3000,
         websocket: {
             open(ws) {
-                ws.subscribe("entry");
-                ws.publish("entry", (ws.data as any).clientName);
+                ws.subscribe("data");
+                ws.publish("data", (ws.data as any).clientName);
             },
             message(ws, message) {
-                ws.publish("entry", `${(ws.data as any).clientName}: ${message}`);
+                ws.publish("data", `${(ws.data as any).clientName}: ${message}`);
             },
             close(ws) {
                 const msg = `${(ws.data as any).clientName} has left`;
 
-                ws.unsubscribe("entry");
-                ws.publish("entry", msg);
+                ws.unsubscribe("data");
+                ws.publish("data", msg);
             },
         },
         async fetch(req: Request, server) {
             const url = new URL(req.url);
-            if (url.pathname === "/entry") {
+            if (url.pathname === "/data") {
                 const protocol = req.headers.get("client-name") ?? "unknown";
                 if (protocol !== "anify-backend") return new Response("Unauthorized", { status: 401 });
 
@@ -38,7 +38,15 @@ export const startWebsocket = async () => {
     });
 
     emitter.on(Events.COMPLETED_ENTRY_CREATION, (entry) => {
-        server.publish("entry", JSON.stringify(entry));
+        server.publish("data", JSON.stringify(entry));
+    });
+
+    emitter.on(Events.KEY_LIMIT_REACHED, (key) => {
+        server.publish("data", JSON.stringify(key));
+    });
+
+    emitter.on(Events.KEY_UPDATE, (key) => {
+        server.publish("data", JSON.stringify(key));
     });
 
     console.log(colors.blue(`Websocket is now listening on ${env.PORT + 1}`));
