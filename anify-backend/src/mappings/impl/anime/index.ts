@@ -11,8 +11,10 @@ export default abstract class AnimeProvider {
     public providerType: ProviderType = ProviderType.ANIME;
     public customProxy: string | undefined;
     public preferredTitle: "english" | "romaji" | "native" = "english";
+
     public needsProxy: boolean = false;
     public useGoogleTranslate: boolean = true;
+    public overrideProxy: boolean = false;
 
     async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         return undefined;

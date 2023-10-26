@@ -12,6 +12,7 @@ export default abstract class BaseProvider {
     public customProxy: string | undefined;
     public needsProxy: boolean = false;
     public useGoogleTranslate: boolean = true;
+    public overrideProxy: boolean = false;
 
     async search(query: string, type: Type, formats: Format[], page: number, perPage: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         return undefined;

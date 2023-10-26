@@ -12,6 +12,7 @@ export default abstract class InformationProvider<T extends Anime | Manga, U ext
     public customProxy: string | undefined;
     public needsProxy: boolean = false;
     public useGoogleTranslate: boolean = true;
+    public overrideProxy: boolean = false;
 
     async info(media: T): Promise<U | undefined> {
         return undefined;

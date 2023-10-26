@@ -9,7 +9,10 @@ import BaseProvider from "../../mappings/impl/base";
 
 const toCheck: string[] = [];
 
-export async function checkCorsProxies(importProxies: boolean = false): Promise<{
+export async function checkCorsProxies(
+    importProxies: boolean = false,
+    startIndex: number = 0,
+): Promise<{
     base: { providerId: string; ip: string }[];
     anime: { providerId: string; ip: string }[];
     manga: { providerId: string; ip: string }[];
@@ -100,7 +103,7 @@ export async function checkCorsProxies(importProxies: boolean = false): Promise<
         })
         .filter((obj) => obj.port != 8080);
 
-    for (let i = 0; i < ips.length; i++) {
+    for (let i = startIndex; i < ips.length; i++) {
         const ip = ips[i];
         console.log(colors.green("Iteration ") + (i + 1) + colors.green(" of ") + ips.length + colors.green(".") + colors.gray(" (Timeout: 5 seconds)"));
 
@@ -232,22 +235,19 @@ async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): P
 
                 if (type === "BASE") {
                     for (const provider of BASE_PROVIDERS) {
-                        if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);
+                        if ((provider.needsProxy && !provider.useGoogleTranslate) || provider.overrideProxy) validProviders.push(provider);
                     }
                 } else if (type === "ANIME") {
                     for (const provider of ANIME_PROVIDERS) {
-                        if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);
+                        if ((provider.needsProxy && !provider.useGoogleTranslate) || provider.overrideProxy) validProviders.push(provider);
                     }
                 } else if (type === "MANGA") {
                     for (const provider of MANGA_PROVIDERS) {
-                        if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);
+                        if ((provider.needsProxy && !provider.useGoogleTranslate) || provider.overrideProxy) validProviders.push(provider);
                     }
-
-                    // NovelUpdates needs proxies for chapters specifically. This is temporary likely.
-                    validProviders.push(MANGA_PROVIDERS.find((provider) => provider.id === "novelupdates") as MangaProvider);
                 } else if (type === "META") {
                     for (const provider of META_PROVIDERS) {
-                        if (provider.needsProxy && !provider.useGoogleTranslate) validProviders.push(provider);
+                        if ((provider.needsProxy && !provider.useGoogleTranslate) || provider.overrideProxy) validProviders.push(provider);
                     }
                 } else {
                     console.log(colors.red("Invalid type provided: ") + type);
@@ -262,6 +262,8 @@ async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): P
                 for (const provider of validProviders) {
                     console.log(colors.gray("Testing ") + provider.id + colors.gray("."));
                     provider.customProxy = `http://${ip.ip}:${ip.port}`;
+                    const original = provider.useGoogleTranslate;
+                    provider.useGoogleTranslate = false;
 
                     let providerResponse;
                     if (provider.providerType === ProviderType.ANIME || provider.providerType === ProviderType.MANGA || provider.providerType === ProviderType.META) {
@@ -275,6 +277,8 @@ async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): P
                     } else {
                         providerResponse = undefined;
                     }
+
+                    provider.useGoogleTranslate = original;
 
                     provider.customProxy = undefined;
 

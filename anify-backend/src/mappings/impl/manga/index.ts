@@ -14,6 +14,7 @@ export default abstract class MangaProvider {
     public customProxy: string | undefined;
     public needsProxy: boolean = false;
     public useGoogleTranslate: boolean = true;
+    public overrideProxy: boolean = false;
 
     async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         return undefined;

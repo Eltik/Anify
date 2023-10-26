@@ -10,6 +10,7 @@ export default class NovelUpdates extends MangaProvider {
     override url = "https://www.novelupdates.com";
 
     public needsProxy: boolean = true;
+    public overrideProxy: boolean = true;
 
     override formats: Format[] = [Format.NOVEL];
 

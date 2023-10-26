@@ -10,6 +10,7 @@ export default class NovelUpdatesBase extends BaseProvider {
     override formats: Format[] = [Format.NOVEL];
 
     public needsProxy: boolean = true;
+    public overrideProxy: boolean = true;
 
     private genreMappings = {
         ACTION: 8,

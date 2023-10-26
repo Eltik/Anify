@@ -104,9 +104,9 @@ $ bun run scrape:proxies
 ```
 
 ### Check CORS Proxies
-Checks the `proxies.json` file (see [Scrape CORS Proxies](#scrape-cors-proxies)) and stores working CORS proxies in `goodProxies.json`. Will take a long time to complete.
+Checks the `proxies.json` file (see [Scrape CORS Proxies](#scrape-cors-proxies)) and stores working CORS proxies in `goodProxies.json`. Will take a long time to complete. You may add arguments on whether to import the current proxies you've crawled through and which page to start checking at.
 ```bash
-$ bun run check:proxies
+$ bun run check:proxies ("<import_current_proxies>") ("<page_to_start>")
 ```
 
 ### Export Database

@@ -5,9 +5,6 @@ import { load } from "cheerio";
 import { env } from "../../../env";
 import { Format, Formats, StreamingServers, SubType } from "../../../types/enums";
 import Extractor from "../../../helper/extractor";
-import Http from "../../../helper/request";
-import { isString } from "../../../helper";
-import vm from "node:vm";
 
 export default class NineAnime extends AnimeProvider {
     override rateLimit = 250;
@@ -19,6 +16,7 @@ export default class NineAnime extends AnimeProvider {
     private resolverKey: string | undefined = env.NINEANIME_KEY || `9anime`;
 
     public needsProxy: boolean = true;
+    public overrideProxy: boolean = true;
 
     override get subTypes(): SubType[] {
         return [SubType.SUB, SubType.DUB];
@@ -145,14 +143,21 @@ export default class NineAnime extends AnimeProvider {
         const serverId = s.url;
         const vrf = await this.getVRF(serverId);
 
-        this.needsProxy = false;
+        let serverData;
+        try {
+            this.useGoogleTranslate = false;
+            const temp = await (await this.request(`${this.url}/ajax/server/${serverId}?${vrf.vrfQuery}=${vrf.url}`)).text();
+            console.log(temp);
+            serverData = JSON.parse(temp)?.result.url;
+            this.useGoogleTranslate = true;
+        } catch (e) {
+            console.error(e);
+            this.useGoogleTranslate = true;
+        }
 
-        const serverData = (await (await this.request(`${this.url}/ajax/server/${serverId}?${vrf.vrfQuery}=${vrf.url}`)).json())?.result.url;
-        const vidplayURL = (await (await this.request(`https://9anime.eltik.net/decrypt?query=${serverData}&apikey=enimax`)).json()).url;
+        const vidplayURL = (await this.decodeURL(serverData)).url;
 
-        this.needsProxy = true;
-
-        const payload = vidplayURL.split("/").pop();
+        const payload = vidplayURL.split("/").pop()!;
 
         return await new Extractor(payload, result).extract(server ?? StreamingServers.VizCloud);
     }
@@ -224,16 +229,6 @@ export default class NineAnime extends AnimeProvider {
             };
 
         return await (await this.request(`${this.resolver}/rawVrf?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json();
-    }
-
-    private async getServerVRF(query: string): Promise<VRF> {
-        if (!this.resolver)
-            return {
-                url: query,
-                vrfQuery: "vrf",
-            };
-
-        return await (await this.request(`${this.resolver}/ajax-server?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json();
     }
 
     private async decodeURL(query: string): Promise<VRF> {

@@ -78,7 +78,8 @@ export const start = async () => {
                 const requests = !apiKey ? await rateLimitMiddleware(req, pathName) : null;
 
                 if (requests && requests.requests > rateLimit) {
-                    if (requests.requests > rateLimit * 2) console.log(colors.red(`Rate limit significantly exceeded for ${requests.ip}`));
+                    // Will only log up to 10 times
+                    if (requests.requests > rateLimit * 2 && requests.requests < rateLimit * 2 + 10) console.log(colors.red(`Rate limit significantly exceeded for ${requests.ip} - ${pathName}`));
 
                     return createResponse(JSON.stringify({ error: "Too many requests" }), 429);
                 }

@@ -23,31 +23,36 @@ export default class Extractor {
      * @returns Promise<Source | undefined>
      */
     async extract(server: StreamingServers): Promise<Source | undefined> {
-        switch (server) {
-            case StreamingServers.GogoCDN:
-                return await this.extractGogoCDN(this.url, this.result);
-            case StreamingServers.StreamSB:
-                return await this.extractStreamSB(this.url, this.result);
-            case StreamingServers.VidCloud:
-                return await this.extractVidCloud(this.url, this.result);
-            case StreamingServers.VidStreaming:
-                return await this.extractGogoCDN(this.url, this.result);
-            case StreamingServers.StreamTape:
-                return await this.extractStreamTape(this.url, this.result);
-            case StreamingServers.MyCloud:
-                return await this.extractMyCloud(this.url, this.result);
-            case StreamingServers.Filemoon:
-                return await this.extractFileMoon(this.url, this.result);
-            case StreamingServers.VizCloud:
-                return await this.extractVizCloud(this.url, this.result);
-            case StreamingServers.Kwik:
-                return await this.extractKwik(this.url, this.result);
-            case StreamingServers.AllAnime:
-                return await this.extractAllAnime(this.url, this.result);
-            case StreamingServers.AnimeFlix:
-                return await this.extractAnimeFlix(this.url, this.result);
-            default:
-                return undefined;
+        try {
+            switch (server) {
+                case StreamingServers.GogoCDN:
+                    return await this.extractGogoCDN(this.url, this.result);
+                case StreamingServers.StreamSB:
+                    return await this.extractStreamSB(this.url, this.result);
+                case StreamingServers.VidCloud:
+                    return await this.extractVidCloud(this.url, this.result);
+                case StreamingServers.VidStreaming:
+                    return await this.extractGogoCDN(this.url, this.result);
+                case StreamingServers.StreamTape:
+                    return await this.extractStreamTape(this.url, this.result);
+                case StreamingServers.MyCloud:
+                    return await this.extractMyCloud(this.url, this.result);
+                case StreamingServers.Filemoon:
+                    return await this.extractFileMoon(this.url, this.result);
+                case StreamingServers.VizCloud:
+                    return await this.extractVizCloud(this.url, this.result);
+                case StreamingServers.Kwik:
+                    return await this.extractKwik(this.url, this.result);
+                case StreamingServers.AllAnime:
+                    return await this.extractAllAnime(this.url, this.result);
+                case StreamingServers.AnimeFlix:
+                    return await this.extractAnimeFlix(this.url, this.result);
+                default:
+                    return undefined;
+            }
+        } catch (e) {
+            console.error(e);
+            return undefined;
         }
     }
 
