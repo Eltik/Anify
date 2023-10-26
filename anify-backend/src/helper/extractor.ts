@@ -234,23 +234,30 @@ export default class Extractor {
 
         const futoken = await (await Http.request("9anime", false, "https://vidplay.site/futoken")).text();
 
-        const rawSource = (
-            await (
-                await fetch(`${proxy}/rawVizcloud?query=${encodeURIComponent(url)}&apikey=${proxyKey}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                    body: new URLSearchParams({
-                        query: url,
-                        futoken,
-                    }),
-                })
-            ).json()
-        ).rawURL;
+        const rawSource = await (
+            await fetch(`${proxy}/rawVizcloud?query=${encodeURIComponent(url)}&apikey=${proxyKey}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                    query: url,
+                    futoken,
+                }),
+            })
+        ).json();
+
+        try {
+            new URL(rawSource.rawURL);
+        } catch (e) {
+            console.error("The URL " + rawSource.rawURL + " is invalid.");
+            console.error(rawSource);
+            console.error(futoken);
+            return result;
+        }
 
         const source = await (
-            await fetch(rawSource, {
+            await Http.request("9anime", false, rawSource.rawURL, {
                 headers: {
                     referer: "https://vidplay.site/",
                     "x-requested-with": "XMLHttpRequest",
@@ -413,7 +420,7 @@ export default class Extractor {
             decryptKey = await (await fetch("https://raw.githubusercontent.com/enimax-anime/key/e6/key.txt")).json();
         }
 
-        const encryptedURLTemp = sources.split("");
+        const encryptedURLTemp = sources?.split("");
 
         let key = "";
 

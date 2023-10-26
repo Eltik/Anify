@@ -3,7 +3,7 @@ import colors from "colors";
 import { env } from "../env";
 import { lstatSync, readdirSync } from "fs";
 import { join } from "path";
-import { ApplicationCommand, AutocompleteInteraction, Client, CommandInteraction, ComponentInteraction } from "eris";
+import { ApplicationCommand, AutocompleteInteraction, Client, CommandInteraction, ComponentInteraction, Role } from "eris";
 import { channels } from "../config";
 
 export interface CustomClient extends Client {
@@ -28,6 +28,20 @@ const createSubCommand = (name: string, description: string, command: Applicatio
         })),
     };
 };
+
+client.on("guildMemberAdd", async(member) => {
+    console.log(member);
+    const role = client.guilds.get(env.GUILD_ID ?? "")?.roles.find((x) => x.id === "950964334983520257");
+    console.log(role);
+    if (!role) {
+        return;
+    }
+    member.roles.add(role);
+})
+
+client.on("guildMemberRemove", async(member) => {
+    console.log(colors.gray(`Member ${member.name} has left the server.`));
+})
 
 client.on("ready", async () => {
     console.log(colors.green("Bot is ready!"));
@@ -164,7 +178,12 @@ function connectWebSocket() {
                                 icon_url: data.coverImage ?? "https://anify.tv/favicon.ico",
                                 url: "https://anify.tv",
                             },
-                            url: data.mappings.find((x: any) => x.providerId === "anilist")?.id ? `https://anilist.co/${data.type?.toLowerCase()}/${data.mappings.find((x: any) => x.providerId === "anilist")?.id}` : `https://anify.tv/info/${data.id}`,
+                            url: 
+                                data.mappings.find((x: any) => x.providerId === "anilist")?.id ?
+                                    `https://anilist.co/${data.type?.toLowerCase()}/${data.mappings.find((x: any) => x.providerId === "anilist")?.id}` :
+                                data.mappings.find((x: any) => x.providerId === "mangadex")?.id ?
+                                    `https://mangadex.org/title/${data.mappings.find((x: any) => x.providerId === "mangadex")?.id}` :
+                                `https://anify.tv/info/${data.id}`,
                             fields: [
                                 {
                                     name: data.type === "ANIME" ? "Season" : "Country",
@@ -240,8 +259,7 @@ function connectWebSocket() {
         console.log(colors.red("Error with websocket."));
         console.log(event);
     });
-    
-    client.connect().catch(console.error);
 }
 
+client.connect().catch(console.error);
 connectWebSocket();
