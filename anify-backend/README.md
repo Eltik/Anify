@@ -30,7 +30,7 @@ Now, open the .env file in your favorite text editor and fill in the required va
 - `NINEANIME_RESOLVER` and `NINEANIME_KEY`: 9anime resolver URL and API key (required for 9anime provider to work properly).
 - `REDIS_URL` and `REDIS_CACHE_TIME`: Redis configuration for caching (recommended but not required).
 Optionally, configure Mixdrop-related settings if needed. View the [Configuration](#configuration) section for more information on the `.env` file.
-3.5. **Setup proxies:**
+3b. **Setup proxies:**
 If you don't have any proxies crawled, make sure to run `bun run scrape:proxies`. This will crawl through all CORS proxies and store them in a JSON file.
 4. **Start the server:**
 To start the server in development mode, run:
