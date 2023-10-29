@@ -15,29 +15,20 @@ import { ANIME_PROVIDERS, animeProviders } from "../../mappings";
 before().then(async (_) => {
     //await start();
     //await startWebsocket();
-
+    
     /*
-    const file = Bun.file("9animeProxies.json");
+    const file = Bun.file("animeProxies.json");
     const json = await file.json();
 
-    const data: { providerId: string; ip: string }[] = [];
+    const goodProxies: string[] = [];
 
-    for (const item of json) {
-        data.push({
-            providerId: "9anime",
-            ip: item.split("http://")[1],
-        });
-    }
+    const proxies = [...json.map((data: { providerId: string, ip: string }) => {
+        Object.assign(data, {
+            ip: "http://" + data.ip
+        })
 
-    Bun.write("./animeProxies.json", JSON.stringify(data, null, 4));
-    */
-    /*
-    const file = Bun.file("9animeProxies.json");
-    const json = await file.json();
-
-    const goodProxies: string[] = [...json];
-
-    const proxies = [...BASE_PROXIES].concat([...ANIME_PROXIES]).concat([...MANGA_PROXIES]).concat([...META_PROXIES])
+        return data;
+    })].concat([...BASE_PROXIES]).concat([...ANIME_PROXIES]).concat([...MANGA_PROXIES]).concat([...META_PROXIES])
 
     for (const proxy of proxies) {
         const ip = proxy.ip;
@@ -64,8 +55,22 @@ before().then(async (_) => {
 
         Bun.write("./9animeProxies.json", JSON.stringify(goodProxies, null, 4));
     }
+    console.log("Done")
+    
+    const newFile = Bun.file("9animeProxies.json");
+    const newJson = await newFile.json();
+
+    const data: { providerId: string; ip: string }[] = [];
+
+    for (const item of newJson) {
+        data.push({
+            providerId: "9anime",
+            ip: item.split("http://")[1],
+        });
+    }
+
+    Bun.write("./animeProxies.json", JSON.stringify(data, null, 4));
     */
-    //console.log("Done")
 
     await animeProviders["9anime"].fetchSources("Hj2bC8ou,Hj2bC8kn", SubType.SUB, StreamingServers.VizCloud).then(console.log);
 });

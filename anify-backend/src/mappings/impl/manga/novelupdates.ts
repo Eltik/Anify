@@ -91,7 +91,6 @@ export default class NovelUpdates extends MangaProvider {
         const postId = $("input#mypostid").attr("value");
 
         this.useGoogleTranslate = false;
-
         const chapterData = (
             await (
                 await this.request(`${this.url}/wp-admin/admin-ajax.php`, {
@@ -137,6 +136,8 @@ export default class NovelUpdates extends MangaProvider {
                 redirect: "follow",
             })
         ).text();
+
+        if (data.length === 0 || !data) return undefined;
 
         const article = await extract(data);
         return article?.content;

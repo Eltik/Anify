@@ -247,15 +247,6 @@ export default class Extractor {
             })
         ).json();
 
-        try {
-            new URL(rawSource.rawURL);
-        } catch (e) {
-            console.error("The URL " + rawSource.rawURL + " is invalid.");
-            console.error(rawSource);
-            console.error(futoken);
-            return result;
-        }
-
         const source = await (
             await Http.request("9anime", false, rawSource.rawURL, {
                 headers: {
