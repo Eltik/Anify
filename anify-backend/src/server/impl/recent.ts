@@ -13,9 +13,9 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const body =
             req.method === "POST"
-                ? await req.json().catch(() => {
+                ? ((await req.json().catch(() => {
                       return null;
-                  })
+                  })) as Body)
                 : null;
 
         const type = body?.type ?? paths[1] ?? url.searchParams.get("type") ?? null;
@@ -35,7 +35,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const formats = type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL];
 
-        const data = await recent(type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase(), formats, page, perPage);
+        const data = await recent(type.toUpperCase() === "NOVEL" ? Type.MANGA : (type.toUpperCase() as Type.ANIME), formats, Number(page), Number(perPage));
 
         await redis.set(`recent:${type}:${page}:${perPage}`, JSON.stringify(data), "EX", cacheTime);
 
@@ -50,6 +50,12 @@ const route = {
     path: "/recent",
     handler,
     rateLimit: 60,
+};
+
+type Body = {
+    type: string;
+    page?: number;
+    perPage?: number;
 };
 
 export default route;

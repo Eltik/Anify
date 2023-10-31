@@ -1,17 +1,32 @@
-import { db, dbType, prisma } from "../database";
+import { db, dbType } from "../database";
 import colors from "colors";
 
 const clearData = async () => {
     if (dbType == "postgresql") {
-        const anime = await prisma.anime.count();
-        const manga = await prisma.manga.count();
-        const skipTimes = await prisma.skipTimes.count();
-        const apiKey = await prisma.apiKey.count();
+        const animeCount = `
+            SELECT COUNT(*) FROM "anime"
+        `;
+        const mangaCount = `
+            SELECT COUNT(*) FROM "manga"
+            WHERE "format" IN ('MANGA', 'ONE_SHOT')
+        `;
+        const novelCount = `
+            SELECT COUNT(*) FROM "manga"
+            WHERE "format" IN ('NOVEL')
+        `;
+        const skipTimesCount = `
+            SELECT COUNT(*) FROM "skipTimes"
+            WHERE "outro"->>'end' != '0'
+        `;
+        const apiKeysCount = `
+            SELECT COUNT(*) FROM "apiKey"
+        `;
 
-        await prisma.anime.deleteMany();
-        await prisma.manga.deleteMany();
-        await prisma.skipTimes.deleteMany();
-        await prisma.apiKey.deleteMany();
+        const anime = 0;
+        const manga = 0;
+        const novels = 0;
+        const skipTimes = 0;
+        const apiKey = 0;
 
         console.log(colors.green(`Cleared ${anime} anime, ${manga} manga, ${skipTimes} skip times, and ${apiKey} API keys!`) + "\n");
 

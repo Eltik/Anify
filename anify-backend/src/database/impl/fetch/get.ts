@@ -1,20 +1,9 @@
-import { db, dbType, prisma } from "../..";
+import { db, dbType } from "../..";
 import { Anime, Db, Manga } from "../../../types/types";
 
 export const get = async (id: string, fields: string[] = []): Promise<Anime | Manga | undefined> => {
     if (dbType === "postgresql") {
-        let data: Anime | Manga | undefined = await prisma.anime.findUnique({
-            where: {
-                id: id,
-            }
-        }) as Anime;
-
-        if (!data) {
-            data = await prisma.manga.findUnique({
-                where: { id: id },
-            }) as unknown as Manga;
-        }
-
+        const data: Anime | Manga | undefined = undefined;
         if (!data) return undefined;
 
         try {

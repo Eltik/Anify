@@ -14,9 +14,9 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const body =
             req.method === "POST"
-                ? await req.json().catch(() => {
+                ? ((await req.json().catch(() => {
                       return null;
-                  })
+                  })) as Body)
                 : null;
 
         const type = body?.type ?? paths[1] ?? url.searchParams.get("type") ?? null;
@@ -51,7 +51,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const formats = type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL];
 
-        const data = await search(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats, page, perPage, sort, sortDirection);
+        const data = await search(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats, page, perPage, sort as Sort, sortDirection);
         if (data.length === 0) {
             queues.searchQueue.add({
                 type: (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type,
@@ -73,6 +73,15 @@ const route = {
     path: "/search",
     handler,
     rateLimit: 30,
+};
+
+type Body = {
+    type: string;
+    query: string;
+    page?: number;
+    perPage?: number;
+    sort?: string;
+    sortDirection?: string;
 };
 
 export default route;

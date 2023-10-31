@@ -76,7 +76,7 @@ export default class AniDB extends InformationProvider<Anime | Manga, AnimeInfo 
             coverImage: $("div.info div.image div.container img").attr("src") ?? null,
             bannerImage: null,
             characters,
-            season: ($("div.info tr.season td.value a").text()?.split(" ")[0].toUpperCase().replace(/"/g, "")) as Season,
+            season: $("div.info tr.season td.value a").text()?.split(" ")[0].toUpperCase().replace(/"/g, "") as Season,
             countryOfOrigin: null,
             relations: [],
             rating: Number($("div.info tr.rating td.value a span.value").text() ?? 0),

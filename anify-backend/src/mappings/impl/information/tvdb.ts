@@ -38,7 +38,7 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
         if (!data) return undefined;
 
         if (data.ok) {
-            const info = (await data.json()).data;
+            const info = ((await data.json()) as { data: any }).data;
 
             const img = info.image;
             const aliases = info.aliases;
@@ -163,7 +163,7 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
 
         if (!infoRequest) return undefined;
 
-        const infoSeasons = (await infoRequest.json()).data?.seasons;
+        const infoSeasons = ((await infoRequest.json()) as { data: { seasons: any } }).data?.seasons;
 
         const seasonRequests = infoSeasons.map((season: any) =>
             this.request(`${this.tvdbApiUrl}/seasons/${season.id}/extended`, {
@@ -243,7 +243,7 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
         if (!data) return undefined;
 
         if (data.ok) {
-            return (await data.json()).data.token as string;
+            return ((await data.json()) as { data: { token: string } }).data.token as string;
         }
 
         return undefined;

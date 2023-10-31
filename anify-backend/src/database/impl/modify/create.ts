@@ -1,4 +1,4 @@
-import { db, dbType, prisma } from "../..";
+import { db, dbType } from "../..";
 import { averageMetric } from "../../../helper";
 import { Season, Type } from "../../../types/enums";
 import { Anime, Manga } from "../../../types/types";
@@ -37,39 +37,68 @@ export const create = async (data: Anime | Manga, stringify: boolean = true) => 
                 }
             }
 
-            return await prisma.anime.create({
-                data: {
-                    id: data.id,
-                    slug: data.slug,
-                    coverImage: data.coverImage,
-                    bannerImage: data.bannerImage,
-                    trailer: data.trailer,
-                    status: data.status,
-                    season: data.season ?? Season.UNKNOWN,
-                    title: data.title,
-                    currentEpisode: data.currentEpisode,
-                    mappings: data.mappings,
-                    synonyms: data.synonyms,
-                    countryOfOrigin: data.countryOfOrigin,
-                    description: data.description,
-                    duration: data.duration,
-                    color: data.color,
-                    year: data.year,
-                    rating: data.rating,
-                    popularity: data.popularity,
-                    type: data.type,
-                    format: data.format,
-                    relations: data.relations,
-                    totalEpisodes: data.totalEpisodes,
-                    episodes: data.episodes,
-                    averageRating: averageMetric(data.rating),
-                    averagePopularity: averageMetric(data.popularity),
-                    artwork: data.artwork,
-                    characters: data.characters,
-                    genres: data.genres,
-                    tags: data.tags,
-                },
-            });
+            const query = `
+                INSERT INTO anime (
+                    id,
+                    slug,
+                    coverImage,
+                    bannerImage,
+                    trailer,
+                    status,
+                    season,
+                    title,
+                    currentEpisode,
+                    mappings,
+                    synonyms,
+                    countryOfOrigin,
+                    description,
+                    duration,
+                    color,
+                    year,
+                    rating,
+                    popularity,
+                    type,
+                    format,
+                    relations,
+                    totalEpisodes,
+                    episodes,
+                    averageRating,
+                    averagePopularity,
+                    artwork,
+                    characters,
+                    genres,
+                    tags
+                ) VALUES (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    $5,
+                    $6,
+                    $7,
+                    $8,
+                    $9,
+                    $10,
+                    $11,
+                    $12,
+                    $13,
+                    $14,
+                    $15,
+                    $16,
+                    $17,
+                    $18,
+                    $19,
+                    $20,
+                    $21,
+                    $22,
+                    $23,
+                    $24,
+                    $25,
+                    $26,
+                    $27,
+                    $28
+                )
+            `;
         } else {
             if (!stringify) {
                 try {
@@ -80,38 +109,64 @@ export const create = async (data: Anime | Manga, stringify: boolean = true) => 
                     //
                 }
             }
-            
-            return await prisma.manga.create({
-                data: {
-                    id: data.id,
-                    slug: data.slug,
-                    coverImage: data.coverImage,
-                    bannerImage: data.bannerImage,
-                    status: data.status,
-                    title: data.title,
-                    mappings: data.mappings,
-                    synonyms: data.synonyms,
-                    countryOfOrigin: data.countryOfOrigin,
-                    description: data.description,
-                    color: data.color,
-                    year: data.year,
-                    rating: data.rating,
-                    popularity: data.popularity,
-                    type: data.type,
-                    format: data.format,
-                    relations: data.relations,
-                    totalChapters: data.totalChapters,
-                    totalVolumes: data.totalVolumes,
-                    chapters: data.chapters,
-                    averageRating: averageMetric(data.rating),
-                    averagePopularity: averageMetric(data.popularity),
-                    artwork: data.artwork,
-                    characters: data.characters,
-                    currentChapter: data.currentChapter ?? null,
-                    genres: data.genres,
-                    tags: data.tags,
-                },
-            });
+
+            const query = `
+                INSERT INTO manga (
+                    id,
+                    slug,
+                    coverImage,
+                    bannerImage,
+                    status,
+                    title,
+                    mappings,
+                    synonyms,
+                    countryOfOrigin,
+                    description,
+                    color,
+                    year,
+                    rating,
+                    popularity,
+                    type,
+                    format,
+                    relations,
+                    totalChapters,
+                    totalVolumes,
+                    chapters,
+                    averageRating,
+                    averagePopularity,
+                    artwork,
+                    characters,
+                    genres,
+                    tags
+                ) VALUES (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    $5,
+                    $6,
+                    $7,
+                    $8,
+                    $9,
+                    $10,
+                    $11,
+                    $12,
+                    $13,
+                    $14,
+                    $15,
+                    $16,
+                    $17,
+                    $18,
+                    $19,
+                    $20,
+                    $21,
+                    $22,
+                    $23,
+                    $24,
+                    $25,
+                    $26
+                )
+            `;
         }
     }
 

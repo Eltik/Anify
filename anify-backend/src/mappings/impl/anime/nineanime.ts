@@ -28,7 +28,7 @@ export default class NineAnime extends AnimeProvider {
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         const vrf = await this.getSearchVRF(query);
-        const data = await (await this.request(`${this.url}/ajax/anime/search?keyword=${encodeURIComponent(query)}&${vrf.vrfQuery}=${encodeURIComponent(vrf.url)}`)).json();
+        const data = (await (await this.request(`${this.url}/ajax/anime/search?keyword=${encodeURIComponent(query)}&${vrf.vrfQuery}=${encodeURIComponent(vrf.url)}`)).json()) as { result: { html: string } };
 
         const $ = load(data.result.html);
 
@@ -68,7 +68,7 @@ export default class NineAnime extends AnimeProvider {
 
         const req = await this.request(`${this.url}/ajax/episode/list/${nineId}?${vrf.vrfQuery}=${encodeURIComponent(vrf.url)}`);
 
-        const $$ = load((await req.json()).result);
+        const $$ = load(((await req.json()) as { result: string }).result);
 
         const episodes: Episode[] = [];
 
@@ -170,7 +170,7 @@ export default class NineAnime extends AnimeProvider {
             const vrf = await this.getVRF(newId);
             const url = `${this.url}/ajax/server/list/${newId}?${vrf.vrfQuery}=${encodeURIComponent(vrf.url)}`;
 
-            const json = await (await this.request(url)).json();
+            const json = (await (await this.request(url)).json()) as { result: string };
 
             const $ = load(json.result);
             const sub = $("div.servers div.type").attr("data-type");
@@ -207,7 +207,7 @@ export default class NineAnime extends AnimeProvider {
                 vrfQuery: "vrf",
             };
 
-        return await (await this.request(`${this.resolver}/vrf?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json();
+        return (await (await this.request(`${this.resolver}/vrf?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json()) as VRF;
     }
 
     public async getSearchVRF(query: string): Promise<VRF> {
@@ -217,7 +217,7 @@ export default class NineAnime extends AnimeProvider {
                 vrfQuery: "vrf",
             };
 
-        return await (await this.request(`${this.resolver}/9anime-search?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json();
+        return (await (await this.request(`${this.resolver}/9anime-search?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json()) as VRF;
     }
 
     private async getRawVRF(query: string): Promise<VRF> {
@@ -227,7 +227,7 @@ export default class NineAnime extends AnimeProvider {
                 vrfQuery: "vrf",
             };
 
-        return await (await this.request(`${this.resolver}/rawVrf?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json();
+        return (await (await this.request(`${this.resolver}/rawVrf?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json()) as VRF;
     }
 
     private async decodeURL(query: string): Promise<VRF> {
@@ -237,7 +237,7 @@ export default class NineAnime extends AnimeProvider {
                 vrfQuery: "vrf",
             };
 
-        return await (await this.request(`${this.resolver}/decrypt?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json();
+        return (await (await this.request(`${this.resolver}/decrypt?query=${encodeURIComponent(query)}&apikey=${this.resolverKey}`, {}, false)).json()) as VRF;
     }
 
     /*

@@ -17,8 +17,8 @@ export default class MALMeta extends MetaProvider {
         const results: Result[] = [];
 
         try {
-            const anime = await (await this.request(`${this.api}/anime?q=${encodeURIComponent(query)}&sfw`)).json();
-            const manga = await (await this.request(`${this.api}/manga?q=${encodeURIComponent(query)}&sfw`)).json();
+            const anime = (await (await this.request(`${this.api}/anime?q=${encodeURIComponent(query)}&sfw`)).json()) as { data: any[] };
+            const manga = (await (await this.request(`${this.api}/manga?q=${encodeURIComponent(query)}&sfw`)).json()) as { data: any[] };
 
             for (const data of anime.data) {
                 results.push({

@@ -12,9 +12,9 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const body =
             req.method === "POST"
-                ? await req.json().catch(() => {
+                ? ((await req.json().catch(() => {
                       return null;
-                  })
+                  })) as Body)
                 : null;
 
         const id = body?.id ?? paths[1] ?? url.searchParams.get("id") ?? null;
@@ -71,6 +71,15 @@ const route = {
     path: "/sources",
     handler,
     rateLimit: 60,
+};
+
+type Body = {
+    providerId: string;
+    id: string;
+    episodeNumber: string;
+    watchId: string;
+    subType: string;
+    server?: string;
 };
 
 export default route;

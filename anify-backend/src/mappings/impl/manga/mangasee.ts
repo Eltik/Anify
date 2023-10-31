@@ -131,7 +131,7 @@ export default class MangaSee extends MangaProvider {
                 Referer: this.url,
             },
         });
-        const data: [SearchResult] = await req.json();
+        const data: [SearchResult] = (await req.json()) as [SearchResult];
         return data;
     }
 }

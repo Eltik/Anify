@@ -73,14 +73,14 @@ export default class MangaFire extends MangaProvider {
 
         const mangaId = match ? match[1] : "";
 
-        const data = await (
+        const data = (await (
             await this.request(`${this.url}/ajax/manga/${mangaId}/chapter/en`, {
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
                     Referer: `${this.url}${id}`,
                 },
             })
-        ).json();
+        ).json()) as { status: number; result: string; message: string; messages: string[] };
 
         if (data.status !== 200) {
             return chapters;
@@ -105,14 +105,14 @@ export default class MangaFire extends MangaProvider {
         const match = id.match(/\.([^.]+)$/);
         const mangaId = match?.[1]?.split("/")[0];
 
-        const data = await (
+        const data = (await (
             await this.request(`${this.url}/ajax/read/${mangaId}/chapter/en`, {
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
                     Referer: `${this.url}${id}`,
                 },
             })
-        ).json();
+        ).json()) as { status: number; result: { html: string }; message: string; messages: string[] };
 
         const $ = load(data.result?.html);
 
@@ -129,14 +129,14 @@ export default class MangaFire extends MangaProvider {
             return [];
         }
 
-        const imageData: ImageResponse = await (
+        const imageData: ImageResponse = (await (
             await this.request(`${this.url}/ajax/read/chapter/${chapterId}`, {
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
                     Referer: `${this.url}${id}`,
                 },
             })
-        ).json();
+        ).json()) as ImageResponse;
 
         const images = imageData.result.images.map((image, index) => {
             return {

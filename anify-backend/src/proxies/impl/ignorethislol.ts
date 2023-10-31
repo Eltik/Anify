@@ -15,7 +15,7 @@ import { ANIME_PROVIDERS, animeProviders } from "../../mappings";
 before().then(async (_) => {
     //await start();
     //await startWebsocket();
-    
+
     /*
     const file = Bun.file("animeProxies.json");
     const json = await file.json();

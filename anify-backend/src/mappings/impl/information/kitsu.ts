@@ -26,13 +26,13 @@ export default class Kitsu extends InformationProvider<Anime | Manga, AnimeInfo 
         if (!kitsuId) return undefined;
 
         try {
-            const kitsuResponse: KitsuResponse = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}`)).json();
+            const kitsuResponse: KitsuResponse = (await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}`)).json()) as KitsuResponse;
 
             const attributes = kitsuResponse?.data?.attributes;
 
             if (!attributes) return undefined;
 
-            const kitsuGenre = await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}/genres`)).json();
+            const kitsuGenre = (await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}/genres`)).json()) as { data: { attributes: { name: string } }[] };
             const genres = kitsuGenre?.data;
 
             const artwork: Artwork[] = [];

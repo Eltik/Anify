@@ -1,5 +1,6 @@
 import { cacheTime, redis } from "..";
 import { loadSchedule } from "../../lib/impl/schedule";
+import { Type } from "../../types/enums";
 import { createResponse } from "../lib/response";
 
 export const handler = async (req: Request): Promise<Response> => {
@@ -12,9 +13,9 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const body =
             req.method === "POST"
-                ? await req.json().catch(() => {
+                ? ((await req.json().catch(() => {
                       return null;
-                  })
+                  })) as Body)
                 : null;
 
         const type = body?.type ?? paths[1] ?? url.searchParams.get("type") ?? "anime";
@@ -22,7 +23,7 @@ export const handler = async (req: Request): Promise<Response> => {
             return createResponse(JSON.stringify({ error: "Invalid type provided." }), 400);
         }
 
-        let fields: string[] = [];
+        let fields: string[] = body?.fields ?? [];
         const fieldsParam = url.searchParams.get("fields");
 
         if (fieldsParam && fieldsParam.startsWith("[") && fieldsParam.endsWith("]")) {
@@ -47,7 +48,7 @@ export const handler = async (req: Request): Promise<Response> => {
             });
         }
 
-        const data = await loadSchedule({ type: type.toUpperCase(), fields });
+        const data = await loadSchedule({ type: type.toUpperCase() as Type, fields });
 
         await redis.set(`schedule:${type}:${JSON.stringify(fields)}`, JSON.stringify(data), "EX", cacheTime);
 
@@ -62,6 +63,11 @@ const route = {
     path: "/schedule",
     handler,
     rateLimit: 60,
+};
+
+type Body = {
+    type: string;
+    fields?: string[];
 };
 
 export default route;

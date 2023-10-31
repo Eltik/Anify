@@ -43,12 +43,12 @@ export const loadPDF = async (data: { id: string; providerId: string; chapter: C
 
     console.log(colors.green("Uploading ") + colors.blue(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "") + colors.green(" to Mixdrop..."));
 
-    const result = await (
+    const result = (await (
         await fetch("https://ul.mixdrop.co/api", {
             method: "POST",
-            body: form,
+            body: form as any,
         })
-    ).json();
+    ).json()) as { success: boolean; result?: { fileref: string } };
 
     if (result.success) {
         for (const chap of chapters.data) {
@@ -69,7 +69,7 @@ export const loadPDF = async (data: { id: string; providerId: string; chapter: C
         let threshold = 0;
 
         const interval = setInterval(async () => {
-            const isComplete = await checkRemoteStatus(result.result?.fileref);
+            const isComplete = await checkRemoteStatus(result.result?.fileref ?? "");
             const key = Object.keys(isComplete.result)[0];
 
             if (isComplete.result[key].status === "OK") {
@@ -292,13 +292,13 @@ const checkRemoteStatus = async (mixdrop: string): Promise<UploadStatus> => {
     const mixdropEmail = env.MIXDROP_EMAIL;
     const mixdropKey = env.MIXDROP_KEY;
 
-    const res: UploadStatus = await (await fetch(`https://api.mixdrop.co/fileinfo2?email=${mixdropEmail}&key=${mixdropKey}&ref[]=${mixdrop}`)).json();
+    const res = (await (await fetch(`https://api.mixdrop.co/fileinfo2?email=${mixdropEmail}&key=${mixdropKey}&ref[]=${mixdrop}`)).json()) as UploadStatus;
     return res;
 };
 
 const checkIsDeleted = async (email: string, key: string, fileRef: string): Promise<boolean> => {
     let pages = 1;
-    const initial = await (await fetch(`https://api.mixdrop.co/removed?email=${email}&key=${key}&page=1`)).json();
+    const initial = (await (await fetch(`https://api.mixdrop.co/removed?email=${email}&key=${key}&page=1`)).json()) as { result: { fileref: string }[]; pages: number };
     if (!Array.isArray(initial.result)) return false;
 
     for (const file of initial.result) {
@@ -308,7 +308,7 @@ const checkIsDeleted = async (email: string, key: string, fileRef: string): Prom
     pages = initial.pages;
 
     for (let i = 2; i <= pages; i++) {
-        const initial = await (await fetch(`https://api.mixdrop.co/removed?email=${email}&key=${key}&page=${i}`)).json();
+        const initial = (await (await fetch(`https://api.mixdrop.co/removed?email=${email}&key=${key}&page=${i}`)).json()) as { result: { fileref: string }[]; pages: number };
         for (const file of initial.result) {
             if (file.fileref === fileRef) return true;
         }

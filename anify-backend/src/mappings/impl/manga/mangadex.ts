@@ -29,7 +29,7 @@ export default class MangaDex extends MangaProvider {
             uri.searchParams.append("contentRating[]", "suggestive");
             uri.searchParams.append("includes[]", "cover_art");
 
-            const data = await (await this.request(uri.href)).json();
+            const data = (await (await this.request(uri.href)).json()) as { data: any[] };
 
             mangaList = [...mangaList, ...data.data];
         }
@@ -96,7 +96,7 @@ export default class MangaDex extends MangaProvider {
                 break;
             }
 
-            const data = await request.json();
+            const data = (await request.json()) as { result: string; errors: { id: string; status: string; code: string; title: string; detail: string }[]; data: { [key: string]: { id: string; type: string; attributes: { volume: string; chapter: string; updatedAt: string } } } };
 
             if (!data || !data.result) {
                 run = false;
@@ -154,7 +154,7 @@ export default class MangaDex extends MangaProvider {
             return [];
         }
 
-        const data = await req.json();
+        const data = (await req.json()) as { baseUrl: string; chapter: { hash: string; data: string[] } };
 
         const baseUrl = data.baseUrl;
         const hash = data.chapter.hash;

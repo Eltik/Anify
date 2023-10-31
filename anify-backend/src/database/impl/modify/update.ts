@@ -1,4 +1,4 @@
-import { db, dbType, prisma } from "../..";
+import { db, dbType } from "../..";
 import { averageMetric } from "../../../helper";
 import { Type } from "../../../types/enums";
 import { Anime, Manga } from "../../../types/types";
@@ -9,75 +9,69 @@ export const update = async (data: Anime | Manga) => {
 
     if (dbType == "postgresql") {
         if (data.type === Type.ANIME) {
-            return await prisma.anime.update({
-                where: {
-                    id: data.id,
-                },
-                data: {
-                    slug: data.slug,
-                    coverImage: data.coverImage,
-                    bannerImage: data.bannerImage,
-                    trailer: data.trailer,
-                    status: data.status,
-                    season: data.season,
-                    title: data.title,
-                    currentEpisode: data.currentEpisode,
-                    mappings: data.mappings,
-                    synonyms: data.synonyms,
-                    countryOfOrigin: data.countryOfOrigin,
-                    description: data.description,
-                    duration: data.duration,
-                    color: data.color,
-                    year: data.year,
-                    rating: data.rating,
-                    popularity: data.popularity,
-                    type: data.type,
-                    format: data.format,
-                    relations: data.relations,
-                    totalEpisodes: data.totalEpisodes,
-                    episodes: data.episodes,
-                    averageRating: averageMetric(data.rating),
-                    averagePopularity: averageMetric(data.popularity),
-                    artwork: data.artwork,
-                    characters: data.characters,
-                    genres: data.genres,
-                    tags: data.tags,
-                },
-            });
+            const query = `
+                UPDATE anime SET
+                    slug = $slug,
+                    coverImage = $coverImage,
+                    bannerImage = $bannerImage,
+                    trailer = $trailer,
+                    status = $status,
+                    season = $season,
+                    title = $title,
+                    currentEpisode = $currentEpisode,
+                    mappings = $mappings,
+                    synonyms = $synonyms,
+                    countryOfOrigin = $countryOfOrigin,
+                    description = $description,
+                    duration = $duration,
+                    color = $color,
+                    year = $year,
+                    rating = $rating,
+                    popularity = $popularity,
+                    type = $type,
+                    format = $format,
+                    relations = $relations,
+                    totalEpisodes = $totalEpisodes,
+                    episodes = $episodes,
+                    averageRating = $averageRating,
+                    averagePopularity = $averagePopularity,
+                    artwork = $artwork,
+                    characters = $characters,
+                    genres = $genres,
+                    tags = $tags
+                WHERE id = $id
+            `;
         } else {
-            return await prisma.manga.update({
-                where: {
-                    id: data.id,
-                },
-                data: {
-                    slug: data.slug,
-                    coverImage: data.coverImage,
-                    bannerImage: data.bannerImage,
-                    status: data.status,
-                    title: data.title,
-                    currentChapter: data.currentChapter,
-                    mappings: data.mappings,
-                    synonyms: data.synonyms,
-                    countryOfOrigin: data.countryOfOrigin,
-                    description: data.description,
-                    color: data.color,
-                    year: data.year,
-                    rating: data.rating,
-                    popularity: data.popularity,
-                    type: data.type,
-                    format: data.format,
-                    relations: data.relations,
-                    totalChapters: data.totalChapters,
-                    totalVolumes: data.totalVolumes,
-                    chapters: data.chapters,
-                    averageRating: averageMetric(data.rating),
-                    averagePopularity: averageMetric(data.popularity),
-                    artwork: data.artwork,
-                    characters: data.characters,
-                    genres: data.genres,
-                    tags: data.tags,
-                },
-            });
+            const query = `
+                UPDATE manga SET
+                    slug = $slug,
+                    coverImage = $coverImage,
+                    bannerImage = $bannerImage,
+                    status = $status,
+                    title = $title,
+                    currentChapter = $currentChapter,
+                    mappings = $mappings,
+                    synonyms = $synonyms,
+                    countryOfOrigin = $countryOfOrigin,
+                    description = $description,
+                    color = $color,
+                    year = $year,
+                    rating = $rating,
+                    popularity = $popularity,
+                    type = $type,
+                    format = $format,
+                    relations = $relations,
+                    totalChapters = $totalChapters,
+                    totalVolumes = $totalVolumes,
+                    chapters = $chapters,
+                    averageRating = $averageRating,
+                    averagePopularity = $averagePopularity,
+                    artwork = $artwork,
+                    characters = $characters,
+                    genres = $genres,
+                    tags = $tags
+                WHERE id = $id
+            `;
         }
     }
 

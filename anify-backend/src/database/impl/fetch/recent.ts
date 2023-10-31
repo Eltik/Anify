@@ -1,5 +1,4 @@
-import { Prisma } from "@prisma/client";
-import { db, dbType, prisma } from "../..";
+import { db, dbType } from "../..";
 import { Format, Type } from "../../../types/enums";
 import { Anime, Db, Manga } from "../../../types/types";
 
@@ -11,60 +10,42 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
         let where;
 
         if (type === Type.ANIME) {
-            where = Prisma.sql`
-                ${
-                    formats.length > 0
-                        ? Prisma.sql`WHERE "anime"."format" IN (${Prisma.join(
-                            formats.map((f) => Prisma.raw(`'${f}'`)),
-                            ", "
-                        )})`
-                        : Prisma.empty
-                }
+            where = `
+                ${formats.length > 0 ? `WHERE "anime"."format" IN (${(formats.map((f) => `'${f}'`), ", ")})` : ""}
             `;
         } else {
-            where = Prisma.sql`
-                ${
-                    formats.length > 0
-                        ? Prisma.sql`WHERE "manga"."format" IN (${Prisma.join(
-                            formats.map((f) => Prisma.raw(`'${f}'`)),
-                            ", "
-                        )})`
-                        : Prisma.empty
-                }
+            where = `
+                ${formats.length > 0 ? `WHERE "manga"."format" IN (${(formats.map((f) => `'${f}'`), ", ")})` : ""}
             `;
         }
 
         let [count, results] = [0, []];
         if (type === Type.ANIME) {
-            [count, results] = await prisma.$transaction([
-                prisma.$queryRaw`
-                        SELECT COUNT(*) FROM "anime"
-                        ${where} AND "anime".episodes->'latest'->>'latestEpisode' != '0'
-                    `,
-                prisma.$queryRaw`
-                        SELECT * FROM "anime"
-                        ${where} AND "anime".episodes->'latest'->>'latestEpisode' != '0'
-                        ORDER BY
-                            "anime".episodes->'latest'->>'updatedAt' DESC
-                        LIMIT    ${perPage}
-                        OFFSET   ${skip}
-                    `,
-            ]);
+            const countQuery = `
+                SELECT COUNT(*) FROM "anime"
+                ${where} AND "anime".episodes->'latest'->>'latestEpisode' != '0'
+            `;
+            const query = `
+                SELECT * FROM "anime"
+                ${where} AND "anime".episodes->'latest'->>'latestEpisode' != '0'
+                ORDER BY
+                    "anime".episodes->'latest'->>'updatedAt' DESC
+                LIMIT    ${perPage}
+                OFFSET   ${skip}
+            `;
         } else {
-            [count, results] = await prisma.$transaction([
-                prisma.$queryRaw`
-                        SELECT COUNT(*) FROM "manga"
-                        ${where} AND "manga".chapters->'latest'->>'latestChapter' != '0'
-                    `,
-                prisma.$queryRaw`
-                        SELECT * FROM "manga"
-                        ${where} AND "manga".chapters->'latest'->>'latestChapter' != '0'
-                        ORDER BY
-                            "manga".chapters->'latest'->>'updatedAt' DESC
-                        LIMIT    ${perPage}
-                        OFFSET   ${skip}
-                    `,
-            ]);
+            const countQuery = `
+                SELECT COUNT(*) FROM "manga"
+                ${where} AND "manga".chapters->'latest'->>'latestChapter' != '0'
+            `;
+            const query = `
+                SELECT * FROM "manga"
+                ${where} AND "manga".chapters->'latest'->>'latestChapter' != '0'
+                ORDER BY
+                    "manga".chapters->'latest'->>'updatedAt' DESC
+                LIMIT    ${perPage}
+                OFFSET   ${skip}
+            `;
         }
 
         const total = Number((count as any)[0].count);
@@ -72,7 +53,7 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
 
         const newResults: any[] = [];
         for (const result of results) {
-            if (((result as Anime | Manga).type === Type.ANIME ? (result as Anime).episodes.latest.latestEpisode === 0 : (result as Manga).chapters.latest.latestChapter === 0)) continue;
+            if ((result as Anime | Manga).type === Type.ANIME ? (result as Anime).episodes.latest.latestEpisode === 0 : (result as Manga).chapters.latest.latestChapter === 0) continue;
 
             const updatedAt = ((result as Anime | Manga).type === Type.ANIME ? (result as Anime).episodes : (result as Manga).chapters).latest.updatedAt;
 

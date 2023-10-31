@@ -30,9 +30,9 @@ export default class ComicKInfo extends InformationProvider<Anime | Manga, Anime
         if (!req.ok) return undefined;
 
         const coverReq = await this.request(`${this.api}/comic/${comicKId}/covers`);
-        const covers: Covers = await coverReq.json();
+        const covers: Covers = (await coverReq.json()) as Covers;
 
-        const data: Comic = (await req.json()).comic;
+        const data: Comic = ((await req.json()) as { comic: Comic }).comic;
 
         return {
             id: String(data.slug),

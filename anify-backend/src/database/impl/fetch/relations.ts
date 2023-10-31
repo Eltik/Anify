@@ -1,5 +1,4 @@
-import { Prisma } from "@prisma/client";
-import { db, dbType, prisma } from "../..";
+import { db, dbType } from "../..";
 import { Type } from "../../../types/enums";
 import { Anime, Db, Manga } from "../../../types/types";
 import { get } from "./get";
@@ -14,33 +13,23 @@ export const relations = async (id: string, fields: string[] = []): Promise<Anim
         for (const relation of data.relations) {
             let results: Anime[] | Manga[] = [];
             if (relation.type === Type.ANIME) {
-                let where = Prisma.sql`
+                let where = `
                     WHERE (
                         "anime".mappings @> '[{"providerId": "anilist"}]'
                     )
                     AND (
-                        "anime".mappings @> '[{"id": "${Prisma.raw(relation.id)}"}]'
+                        "anime".mappings @> '[{"id": "${relation.id}"}]'
                     )
                 `;
-
-                results = await prisma.$queryRaw`
-                    SELECT * FROM "anime"
-                    ${where}
-                ` as Anime[] | Manga[];
             } else {
-                let where = Prisma.sql`
+                let where = `
                     WHERE (
                         "anime".mappings @> '[{"providerId": "anilist"}]'
                     )
                     AND (
-                        "anime".mappings @> '[{"id": "${Prisma.raw(relation.id)}"}]'
+                        "anime".mappings @> '[{"id": "${relation.id}"}]'
                     )
                 `;
-
-                results = await prisma.$queryRaw`
-                    SELECT * FROM "anime"
-                    ${where}
-                ` as Anime[] | Manga[];
             }
 
             results
@@ -48,7 +37,7 @@ export const relations = async (id: string, fields: string[] = []): Promise<Anim
                     try {
                         Object.assign(data, {
                             relationType: relation.relationType,
-                        })
+                        });
                         if (fields && fields.length > 0) {
                             // Delete fields that don't exist in the fields array
                             Object.keys(data).forEach((key) => {

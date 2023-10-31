@@ -1,4 +1,4 @@
-import { db, dbType, prisma } from "../..";
+import { db, dbType } from "../..";
 import { Type } from "../../../types/enums";
 import { get } from "../fetch/get";
 
@@ -8,15 +8,15 @@ export const deleteEntry = async (id: string): Promise<void> => {
 
     if (dbType === "postgresql") {
         if (data.type === Type.ANIME) {
-            await prisma.anime.delete({
-                where: {
-                    id: id,
-                }
-            });
+            const query = `
+                DELETE FROM "anime"
+                WHERE id = $id
+            `;
         } else {
-            await prisma.manga.delete({
-                where: { id: id },
-            });
+            const query = `
+                DELETE FROM "manga"
+                WHERE id = $id
+            `;
         }
     }
 

@@ -12,9 +12,9 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const body =
             req.method === "POST"
-                ? await req.json().catch(() => {
+                ? ((await req.json().catch(() => {
                       return null;
-                  })
+                  })) as Body)
                 : null;
 
         const validTypes = ["anime", "manga", "novel"];
@@ -58,12 +58,12 @@ export const handler = async (req: Request): Promise<Response> => {
             return createResponse(cached);
         }
 
-        const data = await searchAdvanced(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats, page, perPage, genres as Genres[], genresExcluded as Genres[], year, tags, tagsExcluded, sort, sortDirection);
+        const data = await searchAdvanced(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats as Format[], page, perPage, genres as Genres[], genresExcluded as Genres[], year, tags, tagsExcluded, sort as Sort, sortDirection);
         if (data.length === 0) {
             queues.searchQueue.add({
                 type: (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type,
                 query: query,
-                formats: formats,
+                formats: formats as Format[],
                 genres: genres as Genres[],
                 genresExcluded: genresExcluded as Genres[],
                 year: year,
@@ -85,6 +85,21 @@ const route = {
     path: "/search-advanced",
     handler,
     rateLimit: 30,
+};
+
+type Body = {
+    type: string;
+    query?: string;
+    formats?: Format[];
+    genres?: Genres[];
+    genresExcluded?: Genres[];
+    tags?: string[];
+    tagsExcluded?: string[];
+    year?: number;
+    page?: number;
+    perPage?: number;
+    sort?: Sort;
+    sortDirection?: SortDirection;
 };
 
 export default route;

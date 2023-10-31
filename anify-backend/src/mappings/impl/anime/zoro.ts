@@ -80,14 +80,14 @@ export default class Zoro extends AnimeProvider {
     override async fetchEpisodes(id: string): Promise<Episode[] | undefined> {
         const episodes: Episode[] = [];
 
-        const data = await (
+        const data = (await (
             await this.request(`${this.url}/ajax/v2/episode/list/${id.split("-").pop()}`, {
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
                     Referer: `${this.url}/watch/${id}`,
                 },
             })
-        ).json();
+        ).json()) as { html: string };
 
         const $ = load(data.html);
 
@@ -142,7 +142,7 @@ export default class Zoro extends AnimeProvider {
             return await new Extractor(serverURL, result).extract(server ?? StreamingServers.VidCloud);
         }
 
-        const data = await (await this.request(`${this.url}/ajax/v2/episode/servers?episodeId=${id.split("?ep=")[1]}`)).json();
+        const data = (await (await this.request(`${this.url}/ajax/v2/episode/servers?episodeId=${id.split("?ep=")[1]}`)).json()) as { html: string };
         const $ = load(data.html);
 
         /**
@@ -180,7 +180,7 @@ export default class Zoro extends AnimeProvider {
                 break;
         }
 
-        const req = await (await this.request(`${this.url}/ajax/v2/episode/sources?id=${serverId}`)).json();
+        const req = (await (await this.request(`${this.url}/ajax/v2/episode/sources?id=${serverId}`)).json()) as { link: string };
         return await this.fetchSources(req.link, subType, server ?? StreamingServers.VidCloud);
     }
 

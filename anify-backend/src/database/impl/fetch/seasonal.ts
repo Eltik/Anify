@@ -1,4 +1,4 @@
-import { db, dbType, prisma } from "../..";
+import { db, dbType } from "../..";
 import { Type } from "../../../types/enums";
 import { Anime, AnimeInfo, Db, Manga, MangaInfo } from "../../../types/types";
 
@@ -12,21 +12,17 @@ export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: Ani
     const fetchMediaByType = async (type: Type, ids: string[]) => {
         if (dbType === "postgresql") {
             if (type === Type.ANIME) {
-                return prisma.anime.findMany({
-                    where: {
-                        id: {
-                            in: ids,
-                        },
-                    },
-                });
+                const query = `
+                    SELECT * FROM "anime"
+                    WHERE id IN (${ids.map((id) => `'${id}'`).join(", ")})
+                    ORDER BY title->>'english' ASC
+                `;
             } else {
-                return prisma.manga.findMany({
-                    where: {
-                        id: {
-                            in: ids,
-                        },
-                    },
-                });
+                const query = `
+                    SELECT * FROM "manga"
+                    WHERE id IN (${ids.map((id) => `'${id}'`).join(", ")})
+                    ORDER BY title->>'english' ASC
+                `;
             }
         }
 

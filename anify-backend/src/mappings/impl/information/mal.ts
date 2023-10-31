@@ -32,7 +32,7 @@ export default class MAL extends InformationProvider<Anime | Manga, AnimeInfo | 
         });
 
         if (!req.ok) return undefined;
-        const jikanResponse = await req.json();
+        const jikanResponse = (await req.json()) as { data: JikanResponse };
 
         const data: JikanResponse = jikanResponse.data;
 

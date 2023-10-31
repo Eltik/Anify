@@ -11,9 +11,9 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const body =
             req.method === "POST"
-                ? await req.json().catch(() => {
+                ? ((await req.json().catch(() => {
                       return null;
-                  })
+                  })) as Body)
                 : null;
 
         const id = body?.id ?? paths[1] ?? url.searchParams.get("id") ?? null;
@@ -21,7 +21,7 @@ export const handler = async (req: Request): Promise<Response> => {
             return createResponse(JSON.stringify({ error: "No ID provided." }), 400);
         }
 
-        let fields: string[] = [];
+        let fields: string[] = body?.fields ?? [];
         const fieldsParam = url.searchParams.get("fields");
 
         if (fieldsParam && fieldsParam.startsWith("[") && fieldsParam.endsWith("]")) {
@@ -57,6 +57,11 @@ const route = {
     path: "/relations",
     handler,
     rateLimit: 60,
+};
+
+type Body = {
+    id: string;
+    fields?: string[];
 };
 
 export default route;

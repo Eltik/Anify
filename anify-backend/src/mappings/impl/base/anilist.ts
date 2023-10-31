@@ -49,13 +49,13 @@ export default class AniListBase extends BaseProvider {
             },
             body: JSON.stringify(aniListArgs),
         });
-        const json = await req?.json();
+        const json = (await req?.json()) as { data: { Page: { media: Media[] } } };
         const media = json?.data?.Page.media;
 
         if (!media) return undefined;
 
         if (type === Type.ANIME) {
-            return media
+            return (media as any)
                 .map((data: Media) => {
                     if (data.isAdult) return undefined;
 
@@ -147,7 +147,7 @@ export default class AniListBase extends BaseProvider {
                 })
                 .filter(Boolean);
         } else {
-            return media
+            return (media as any)
                 .map((data: Media) => {
                     if (data.isAdult) return undefined;
 
@@ -278,11 +278,11 @@ export default class AniListBase extends BaseProvider {
             },
             body: JSON.stringify(aniListArgs),
         });
-        const json = await req?.json();
+        const json = (await req?.json()) as { data: { Page: { media: Media[] } } };
         const media = json?.data.Page.media;
 
         if (type === Type.ANIME) {
-            return media
+            return (media as any)
                 .map((data: Media) => {
                     if (data.isAdult) return undefined;
 
@@ -374,7 +374,7 @@ export default class AniListBase extends BaseProvider {
                 })
                 .filter(Boolean);
         } else {
-            return media
+            return (media as any)
                 .map((data: Media) => {
                     if (data.isAdult) return undefined;
 
@@ -489,7 +489,7 @@ export default class AniListBase extends BaseProvider {
                 variables,
             }),
         });
-        const data: Media = (await req.json()).data?.Media;
+        const data: Media = ((await req.json()) as { data: { Media: Media } }).data?.Media;
         if (!data) return undefined;
 
         if (data.isAdult) return undefined;
@@ -663,7 +663,7 @@ export default class AniListBase extends BaseProvider {
             },
         };
 
-        const req = await (
+        const req = (await (
             await this.request(this.api, {
                 body: JSON.stringify(aniListArgs),
                 method: "POST",
@@ -672,7 +672,7 @@ export default class AniListBase extends BaseProvider {
                     Origin: "https://anilist.co",
                 },
             })
-        ).json();
+        ).json()) as { data: { trending: { media: Media[] }; season: { media: Media[] }; popular: { media: Media[] }; top: { media: Media[] } } };
 
         const data = req?.data;
         if (!data) {
@@ -696,10 +696,10 @@ export default class AniListBase extends BaseProvider {
         });
 
         return {
-            trending,
-            seasonal,
-            popular,
-            top,
+            trending: trending as AnimeInfo[] | MangaInfo[],
+            seasonal: seasonal as AnimeInfo[] | MangaInfo[],
+            popular: popular as AnimeInfo[] | MangaInfo[],
+            top: top as AnimeInfo[] | MangaInfo[],
         };
     }
 
@@ -758,7 +758,7 @@ export default class AniListBase extends BaseProvider {
                 },
             };
 
-            const req = await (
+            const req = (await (
                 await this.request("https://graphql.anilist.co", {
                     body: JSON.stringify(aniListArgs),
                     method: "POST",
@@ -767,7 +767,7 @@ export default class AniListBase extends BaseProvider {
                         Origin: "https://anilist.co",
                     },
                 })
-            ).json();
+            ).json()) as { data: { Page: { pageInfo: { hasNextPage: boolean; total: number }; airingSchedules: { id: number; episode: number; airingAt: number; media: Media }[] } } };
 
             const schedule: Schedule[] = req?.data?.Page?.airingSchedules ?? [];
 
@@ -1118,7 +1118,7 @@ export default class AniListBase extends BaseProvider {
             const currentQuery = `{${batch.join("\n")}}`;
             const result = await this.executeGraphQLQuery(currentQuery);
             if (result) {
-                const data = await result.json();
+                const data = (await result.json()) as { data: any };
                 results.push(...Object.values(data));
             }
         };

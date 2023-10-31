@@ -1,7 +1,25 @@
-import { db } from "../..";
+import { db, dbType } from "../..";
 import { Key } from "../../../types/types";
 
 export const createKey = async (data: Key) => {
+    if (dbType === "postgresql") {
+        const query = `
+            INSERT INTO "apiKey" (
+                id,
+                key,
+                "createdAt",
+                "updatedAt",
+                "requestCount"
+            ) VALUES (
+                $id,
+                $key,
+                $createdAt,
+                $updatedAt,
+                $requestCount
+            )
+        `;
+    }
+
     const query = `INSERT INTO apiKey (
         id,
         key,

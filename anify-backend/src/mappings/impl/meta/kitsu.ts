@@ -16,14 +16,14 @@ export default class KitsuMeta extends MetaProvider {
         const results: Result[] = [];
 
         try {
-            const data = await (
+            const data = (await (
                 await this.request(`${this.kitsuApiUrl}/anime?filter[text]=${encodeURIComponent(query)}`, {
                     headers: {
                         Accept: "application/vnd.api+json",
                         "Content-Type": "application/vnd.api+json",
                     },
                 })
-            ).json();
+            ).json()) as { data: KitsuResult[] };
 
             if (data.data.length > 0) {
                 data.data.forEach((result: KitsuResult) => {
@@ -48,14 +48,14 @@ export default class KitsuMeta extends MetaProvider {
         }
 
         try {
-            const data = await (
+            const data = (await (
                 await this.request(`${this.kitsuApiUrl}/manga?filter[text]=${encodeURIComponent(query)}`, {
                     headers: {
                         Accept: "application/vnd.api+json",
                         "Content-Type": "application/vnd.api+json",
                     },
                 })
-            ).json();
+            ).json()) as { data: KitsuResult[] };
 
             if (data.data.length > 0) {
                 data.data.forEach((result: KitsuResult) => {

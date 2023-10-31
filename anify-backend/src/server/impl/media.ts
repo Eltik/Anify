@@ -10,9 +10,9 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const body =
             req.method === "POST"
-                ? await req.json().catch(() => {
+                ? ((await req.json().catch(() => {
                       return null;
-                  })
+                  })) as Body)
                 : null;
 
         const providerId = body?.providerId ?? paths[1] ?? url.searchParams.get("providerId") ?? null;
@@ -25,7 +25,7 @@ export const handler = async (req: Request): Promise<Response> => {
             return createResponse(JSON.stringify({ error: "No ID provided." }), 400);
         }
 
-        let fields: string[] = [];
+        let fields: string[] = body?.fields ?? [];
         const fieldsParam = url.searchParams.get("fields");
 
         if (fieldsParam && fieldsParam.startsWith("[") && fieldsParam.endsWith("]")) {
@@ -59,6 +59,12 @@ const route = {
     path: "/media",
     handler,
     rateLimit: 75,
+};
+
+type Body = {
+    providerId: string;
+    id: string;
+    fields?: string[];
 };
 
 export default route;

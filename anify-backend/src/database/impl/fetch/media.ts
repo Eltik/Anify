@@ -1,25 +1,22 @@
-import { Prisma } from "@prisma/client";
-import { db, dbType, prisma } from "../..";
+import { db, dbType } from "../..";
 import { Anime, Db, Manga } from "../../../types/types";
 
 export const media = async (providerId: string, id: string, fields: string[] = []): Promise<Anime | Manga | undefined> => {
     if (dbType === "postgresql") {
-        const data = (await (
-            await prisma.$queryRaw(Prisma.sql`
-        SELECT * FROM "anime"
-        WHERE "anime"."mappings" @> '[{"providerId": "${Prisma.raw(providerId)}", "id": "${Prisma.raw(id)}"}]'
-        `)
-        ) as Anime[] | undefined)?.[0];
+        const query = `
+            SELECT * FROM "anime"
+            WHERE "anime"."mappings" @> '[{"providerId": "${providerId}", "id": "${id}"}]'
+        `;
+
+        const data: Anime | Manga | undefined = undefined;
 
         if (!data) {
-            const data = (await (
-                await prisma.$queryRaw(Prisma.sql`
-            SELECT * FROM "manga"
-            WHERE "manga"."mappings" @> '[{"providerId": "${Prisma.raw(providerId)}", "id": "${Prisma.raw(id)}"}]'
-            `)
-            ) as Manga[] | undefined)?.[0];
+            const query = `
+                SELECT * FROM "manga"
+                WHERE "manga"."mappings" @> '[{"providerId": "${providerId}", "id": "${id}"}]'
+            `;
 
-            return data as Anime | Manga;
+            return data as Anime | Manga | undefined;
         } else {
             return data as Anime | Manga;
         }

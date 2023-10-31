@@ -34,7 +34,7 @@ export default class TMDB extends InformationProvider<Anime | Manga, AnimeInfo |
 
         if (data.ok) {
             try {
-                const info = await data.json();
+                const info = (await data.json()) as any;
 
                 if (!info) return undefined;
 
@@ -88,7 +88,7 @@ export default class TMDB extends InformationProvider<Anime | Manga, AnimeInfo |
         const episodes: Episode[] = [];
 
         try {
-            const data = await (await this.request(`${this.api}${tmdbId}?api_key=${this.apiKey}`)).json();
+            const data = (await (await this.request(`${this.api}${tmdbId}?api_key=${this.apiKey}`)).json()) as any;
 
             let seasonId = "";
             let seasonNumber = 0;
@@ -112,7 +112,7 @@ export default class TMDB extends InformationProvider<Anime | Manga, AnimeInfo |
 
             if (seasonId.length === 0) return undefined;
 
-            const seasonData = await (await this.request(`${this.api}${tmdbId}/season/${seasonNumber}?api_key=${this.apiKey}`)).json();
+            const seasonData = (await (await this.request(`${this.api}${tmdbId}/season/${seasonNumber}?api_key=${this.apiKey}`)).json()) as { episodes: any };
 
             for (const episode of seasonData.episodes) {
                 episodes.push({

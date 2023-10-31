@@ -24,7 +24,7 @@ export default class AnimePahe extends AnimeProvider {
         if (!request.ok) {
             return [];
         }
-        const data = await request.json();
+        const data = (await request.json()) as { data: { id: number; title: string; year: number; poster: string; type: string; session: string }[] };
         const results: Result[] = [];
 
         if (!data?.data) {
@@ -57,7 +57,7 @@ export default class AnimePahe extends AnimeProvider {
         const $ = load(req);
 
         const tempId = $("head > meta[property='og:url']").attr("content")!.split("/").pop()!;
-        const { last_page, data } = await (await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=1`)).json();
+        const { last_page, data } = (await (await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=1`)).json()) as { last_page: number; data: { id: number; episode: number; title: string; snapshot: string; filler: number; created_at?: string }[] };
 
         data.map((item: { id: number; episode: number; title: string; snapshot: string; filler: number; created_at?: string }) => {
             const updatedAt = new Date(item.created_at ?? Date.now()).getTime();
@@ -78,7 +78,9 @@ export default class AnimePahe extends AnimeProvider {
         const pageNumbers = Array.from({ length: last_page - 1 }, (_, i) => i + 2);
 
         const promises = pageNumbers.map((pageNumber) => this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=${pageNumber}`).then((res) => res.json()));
-        const results = await Promise.all(promises);
+        const results = (await Promise.all(promises)) as {
+            data: { id: number; episode: number; title: string; snapshot: string; filler: number; created_at?: string }[];
+        }[];
 
         results.forEach((showData) => {
             for (const data of showData.data) {
@@ -116,7 +118,7 @@ export default class AnimePahe extends AnimeProvider {
 
             const $ = load(await req.text());
             const tempId = $("head > meta[property='og:url']").attr("content")!.split("/").pop()!;
-            const { last_page, data } = await (await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=1`)).json();
+            const { last_page, data } = (await (await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=1`)).json()) as { last_page: number; data: { id: number; session: string }[] };
 
             let episodeSession = "";
 
@@ -129,7 +131,7 @@ export default class AnimePahe extends AnimeProvider {
 
             if (episodeSession === "") {
                 for (let i = 1; i < last_page; i++) {
-                    const data = await (await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=${i + 1}`)).json();
+                    const data = (await (await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=${i + 1}`)).json()) as { last_page: number; data: { id: number; session: string }[] }["data"];
 
                     for (let j = 0; j < data.length; j++) {
                         if (String(data[j].id) === episodeId) {

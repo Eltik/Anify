@@ -28,7 +28,7 @@ export default class ManagDexBase extends BaseProvider {
             uri.searchParams.append("contentRating[]", "suggestive");
             uri.searchParams.append("includes[]", "cover_art");
 
-            const data = await (await this.request(uri.href)).json();
+            const data = (await (await this.request(uri.href)).json()) as { data: any[] };
 
             mangaList = [...mangaList, ...data.data];
         }
@@ -98,7 +98,7 @@ export default class ManagDexBase extends BaseProvider {
         const tagList: { name: string; uid: string }[] = [];
 
         if ((Array.isArray(tags) && tags.length > 0) || (Array.isArray(tagsExcluded) && tagsExcluded.length > 0)) {
-            const data = await (await this.request(`${this.api}/manga/tag`)).json();
+            const data = (await (await this.request(`${this.api}/manga/tag`)).json()) as any[];
 
             for (const item of data) {
                 if (item.attributes?.group === "theme") {
@@ -167,7 +167,7 @@ export default class ManagDexBase extends BaseProvider {
                 if (!uri.searchParams.get("includedTagsMode")) uri.searchParams.set("includedTagsMode", "AND");
             }
 
-            const data = await (await this.request(uri.href)).json();
+            const data = (await (await this.request(uri.href)).json()) as { data: any[] };
 
             mangaList = [...mangaList, ...data.data];
         }
@@ -229,8 +229,8 @@ export default class ManagDexBase extends BaseProvider {
 
     override async getMedia(id: string): Promise<AnimeInfo | MangaInfo | undefined> {
         try {
-            const data = (await (await this.request(`${this.api}/manga/${id}`)).json()).data;
-            const covers = await (await this.request(`${this.api}/cover?limit=100&manga[]=${id}`)).json();
+            const data = ((await (await this.request(`${this.api}/manga/${id}`)).json()) as { data: any }).data;
+            const covers = (await (await this.request(`${this.api}/cover?limit=100&manga[]=${id}`)).json()) as { data: any[] };
 
             if (data.attributes.contentRating === "erotica" || data.attributes.contentRating === "pornographic") return undefined;
 
@@ -303,26 +303,26 @@ export default class ManagDexBase extends BaseProvider {
         const day = String(currentDate.getDate() - 7).padStart(2, "0");
         const createdAtParam = `${year}-${month}-${day}T00:00:00`;
 
-        const trending = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true&createdAtSince=${createdAtParam}`)).json().catch(() => {
+        const trending = (await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true&createdAtSince=${createdAtParam}`)).json().catch(() => {
             return {
                 data: [],
             };
-        });
-        const popular = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`)).json().catch(() => {
+        })) as { data: any[] };
+        const popular = (await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`)).json().catch(() => {
             return {
                 data: [],
             };
-        });
-        const top = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[rating]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`)).json().catch(() => {
+        })) as { data: any[] };
+        const top = (await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[rating]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true`)).json().catch(() => {
             return {
                 data: [],
             };
-        });
-        const seasonalReq = await (await this.request(`${this.api}/list/1b9f88f8-9880-464d-9ed9-59b7e36392e2?includes[]=user`)).json().catch(() => {
+        })) as { data: any[] };
+        const seasonalReq = (await (await this.request(`${this.api}/list/1b9f88f8-9880-464d-9ed9-59b7e36392e2?includes[]=user`)).json().catch(() => {
             return {
                 data: [],
             };
-        });
+        })) as { data: any };
 
         const seasonalIDs: string[] = [];
         for (const item of seasonalReq.data.relationships) {
@@ -330,11 +330,11 @@ export default class ManagDexBase extends BaseProvider {
                 seasonalIDs.push(item.id);
             }
         }
-        const seasonal = await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&ids[]=${seasonalIDs.join("&ids[]=")}`)).json().catch(() => {
+        const seasonal = (await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&ids[]=${seasonalIDs.join("&ids[]=")}`)).json().catch(() => {
             return {
                 data: [],
             };
-        });
+        })) as { data: any[] };
 
         const trendingList: MangaInfo[] = [];
         const popularList: MangaInfo[] = [];
@@ -381,7 +381,7 @@ export default class ManagDexBase extends BaseProvider {
     }
 
     override async fetchIds(formats: Format[]): Promise<string[] | undefined> {
-        const data = await (await fetch("https://raw.githubusercontent.com/ArdaxHz/mangadex-id-map/main/json/manga_map.json")).json();
+        const data = (await (await fetch("https://raw.githubusercontent.com/ArdaxHz/mangadex-id-map/main/json/manga_map.json")).json()) as { [key: string]: string };
         /*
         {
             "1": "c0ee660b-f9f2-45c3-8068-5123ff53f84a",

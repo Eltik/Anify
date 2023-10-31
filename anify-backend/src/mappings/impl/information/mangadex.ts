@@ -26,8 +26,8 @@ export default class MangaDexInfo extends InformationProvider<Anime | Manga, Ani
         if (!mangadexId) return undefined;
 
         try {
-            const data = (await (await this.request(`${this.api}/manga/${mangadexId}`)).json()).data;
-            const covers = await (await this.request(`${this.api}/cover?limit=100&manga[]=${mangadexId}`)).json();
+            const data = ((await (await this.request(`${this.api}/manga/${mangadexId}`)).json()) as { data: any }).data;
+            const covers = (await (await this.request(`${this.api}/cover?limit=100&manga[]=${mangadexId}`)).json()) as { data: any[] };
 
             const formatString: string = data.type.toUpperCase();
             const format: Format = formatString === "ADAPTATION" ? Format.MANGA : Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;

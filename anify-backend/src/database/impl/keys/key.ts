@@ -1,7 +1,13 @@
-import { db } from "../..";
+import { db, dbType } from "../..";
 import { Db, Key } from "../../../types/types";
 
 export const getKey = async (id: string): Promise<Key | undefined> => {
+    if (dbType === "postgresql") {
+        const query = `
+            SELECT * FROM "apiKey"
+            WHERE id = $id
+        `;
+    }
     const key = db.query<Db<Key>, { $id: string }>(`SELECT * FROM apiKey WHERE id = $id`).get({ $id: id });
     return key
         ? {

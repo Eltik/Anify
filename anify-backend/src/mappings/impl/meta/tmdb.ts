@@ -17,7 +17,7 @@ export default class TheMovieDB extends MetaProvider {
         const page = 1;
         const searchUrl = `/search/multi?api_key=${this.apiKey}&language=en-US&page=${page}&include_adult=false&query=${encodeURIComponent(query)}`;
 
-        const data = await (await this.request(this.api + searchUrl)).json();
+        const data = (await (await this.request(this.api + searchUrl)).json()) as { results: TMDBResult[] };
 
         if (!data) return undefined;
 

@@ -1,7 +1,17 @@
-import { db } from "../..";
+import { db, dbType } from "../..";
 import { Key } from "../../../types/types";
 
 export const updateKey = async (data: Key) => {
+    if (dbType === "postgresql") {
+        const query = `
+            UPDATE "apiKey" SET
+                key = $key,
+                "createdAt" = $createdAt,
+                "updatedAt" = $updatedAt,
+                "requestCount" = $requestCount
+            WHERE id = $id
+        `;
+    }
     const query = `
         UPDATE apiKey SET
             key = $key,

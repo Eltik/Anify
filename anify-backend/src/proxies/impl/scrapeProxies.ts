@@ -64,11 +64,11 @@ async function search(q: string, cursor: string | null = null): Promise<Root | u
     const auth = "Basic " + Buffer.from(apiID + ":" + apiSecret).toString("base64");
     const headers = { Authorization: auth };
 
-    const data = await (
+    const data = (await (
         await fetch(`https://search.censys.io/api/v2${url}`, {
             headers: headers,
         })
-    ).json();
+    ).json()) as Root;
     return data;
 }
 

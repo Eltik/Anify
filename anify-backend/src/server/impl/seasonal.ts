@@ -2,6 +2,7 @@ import { Format, Type } from "../../types/enums";
 import { loadSeasonal } from "../../lib/impl/seasonal";
 import { seasonal } from "../../database/impl/fetch/seasonal";
 import { cacheTime, redis } from "..";
+import { createResponse } from "../lib/response";
 
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -13,37 +14,19 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const body =
             req.method === "POST"
-                ? await req.json().catch(() => {
+                ? ((await req.json().catch(() => {
                       return null;
-                  })
+                  })) as Body)
                 : null;
 
         const type = body?.type ?? paths[1] ?? url.searchParams.get("type") ?? null;
         if (!type) {
-            return new Response(JSON.stringify({ error: "No type provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "No type provided." }), 400);
         } else if (!validTypes.includes(type.toLowerCase())) {
-            return new Response(JSON.stringify({ error: "Invalid type provided." }), {
-                status: 400,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(JSON.stringify({ error: "Invalid type provided." }), 400);
         }
 
-        let fields: string[] = [];
+        let fields: string[] = body?.fields ?? [];
         const fieldsParam = url.searchParams.get("fields");
 
         if (fieldsParam && fieldsParam.startsWith("[") && fieldsParam.endsWith("]")) {
@@ -56,16 +39,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const cached = await redis.get(`seasonal:${type}:${fields.join(",")}`);
         if (cached) {
-            return new Response(cached, {
-                status: 200,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                    "Access-Control-Max-Age": "2592000",
-                    "Access-Control-Allow-Headers": "*",
-                },
-            });
+            return createResponse(cached);
         }
 
         const formats = type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL];
@@ -78,28 +52,10 @@ export const handler = async (req: Request): Promise<Response> => {
 
         await redis.set(`seasonal:${type}:${fields.join(",")}`, JSON.stringify(data), "EX", cacheTime);
 
-        return new Response(JSON.stringify(data), {
-            status: 200,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify(data));
     } catch (e) {
         console.error(e);
-        return new Response(JSON.stringify({ error: "An error occurred." }), {
-            status: 500,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Max-Age": "2592000",
-                "Access-Control-Allow-Headers": "*",
-            },
-        });
+        return createResponse(JSON.stringify({ error: "An error occurred." }), 500);
     }
 };
 
@@ -107,6 +63,11 @@ const route = {
     path: "/seasonal",
     handler,
     rateLimit: 35,
+};
+
+type Body = {
+    type: string;
+    fields?: string[];
 };
 
 export default route;

@@ -32,7 +32,7 @@ export default class TheTVDB extends MetaProvider {
         });
 
         if (data?.ok) {
-            const searchData: Search[] = (await data.json()).data;
+            const searchData: Search[] = ((await data.json()) as { data: Search[] }).data;
             for (const data of searchData) {
                 if (data.primary_type != TVDBType.SERIES && data.primary_type != TVDBType.MOVIE) continue;
                 if (isSeason) data.year = "0";
@@ -68,7 +68,7 @@ export default class TheTVDB extends MetaProvider {
         if (!data) return undefined;
 
         if (data.ok) {
-            return (await data.json()).data.token as string;
+            return ((await data.json()) as { data: { token: string } }).data.token as string;
         }
 
         return undefined;

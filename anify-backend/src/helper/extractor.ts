@@ -141,15 +141,15 @@ export default class Extractor {
                 "Content-Type": "application/json",
             },
         });
-        const data = await m3u8Req.json();
+        const data = (await m3u8Req.json()) as { rawURL: string };
 
         const m3u8File = data.rawURL;
 
-        const mainReq = await (
+        const mainReq = (await (
             await fetch(m3u8File, {
                 headers: { Referer: "https://vidstream.pro/", "X-Requested-With": "XMLHttpRequest" },
             })
-        ).json();
+        ).json()) as { result: { sources: { file: string }[]; tracks: { file: string; label: string; kind: string }[] } };
 
         for (const track of mainReq.result?.tracks ?? []) {
             result.subtitles.push({
@@ -199,7 +199,7 @@ export default class Extractor {
             }),
         });
 
-        const resolverData = await resolver.json();
+        const resolverData = (await resolver.json()) as { url: string };
 
         result.sources.push({
             url: resolverData.url,
@@ -234,7 +234,7 @@ export default class Extractor {
 
         const futoken = await (await Http.request("9anime", false, "https://vidplay.site/futoken")).text();
 
-        const rawSource = await (
+        const rawSource = (await (
             await fetch(`${proxy}/rawVizcloud?query=${encodeURIComponent(url)}&apikey=${proxyKey}`, {
                 method: "POST",
                 headers: {
@@ -245,16 +245,16 @@ export default class Extractor {
                     futoken,
                 }),
             })
-        ).json();
+        ).json()) as { rawURL: string };
 
-        const source = await (
+        const source = (await (
             await Http.request("9anime", false, rawSource.rawURL, {
                 headers: {
                     referer: "https://vidplay.site/",
                     "x-requested-with": "XMLHttpRequest",
                 },
             })
-        ).json();
+        ).json()) as { result: { sources: { file: string }[]; tracks: { file: string; label: string; kind: string }[] } };
 
         if (!source.result?.tracks) return result;
 
@@ -310,7 +310,7 @@ export default class Extractor {
             },
         });
 
-        const decryptedData = await decryptAjaxData((await encryptedData.json())?.data);
+        const decryptedData = await decryptAjaxData(((await encryptedData.json()) as { data: any })?.data);
         if (!decryptedData.source) throw new Error("No source found. Try a different server.");
 
         if (decryptedData.source[0].file.includes(".m3u8")) {
@@ -400,15 +400,20 @@ export default class Extractor {
 
         const reqData = await request.json();
 
-        const { tracks, intro, outro } = reqData;
-        let { sources } = reqData;
+        const { tracks, intro, outro } = reqData as {
+            tracks: { file: string; label: string; kind: string }[];
+            intro: { start: number; end: number };
+            outro: { start: number; end: number };
+        };
+
+        let { sources } = reqData as { sources: string };
 
         const req = await fetch("https://github.com/enimax-anime/key/blob/e6/key.txt");
 
         const data = await req.text();
         let decryptKey = substringBefore(substringAfter(data, '"blob-code blob-code-inner js-file-line">'), "</td>");
         if (!decryptKey) {
-            decryptKey = await (await fetch("https://raw.githubusercontent.com/enimax-anime/key/e6/key.txt")).json();
+            decryptKey = (await (await fetch("https://raw.githubusercontent.com/enimax-anime/key/e6/key.txt")).json()) as string;
         }
 
         const encryptedURLTemp = sources?.split("");
@@ -418,23 +423,23 @@ export default class Extractor {
         for (const index of decryptKey) {
             for (let i = Number(index[0]); i < Number(index[1]); i++) {
                 key += encryptedURLTemp[i];
-                encryptedURLTemp[i] = null;
+                encryptedURLTemp[i] = "";
             }
         }
 
-        sources = encryptedURLTemp.filter((x: any) => x !== null).join("");
+        sources = encryptedURLTemp.filter((x: any) => x !== "").join("");
 
         try {
             sources = JSON.parse(CryptoJS.AES.decrypt(sources, key).toString(CryptoJS.enc.Utf8));
         } catch {
-            sources = null;
+            sources = "";
         }
 
-        if (!sources) {
+        if (!sources || sources === "") {
             return result;
         }
 
-        for (const source of sources) {
+        for (const source of sources as unknown as { file: string; type: string }[]) {
             if (source.type === "hls") {
                 const data = await (await fetch(source.file)).text();
 
@@ -467,11 +472,11 @@ export default class Extractor {
         }
 
         result.sources.push({
-            url: sources[0].file,
+            url: (sources[0] as unknown as { file: string }).file,
             quality: "auto",
         });
 
-        result.subtitles = tracks?.map((s: any) => ({
+        (result.subtitles as { url: string; lang: string }[]) = tracks?.map((s: any) => ({
             url: s.file,
             lang: s.label ? s.label : "Thumbnails",
         }));
@@ -552,7 +557,7 @@ export default class Extractor {
 
         const iframeUrl = `${allAnimeApiUrl}${url}`;
 
-        const data = await (await fetch(iframeUrl)).json();
+        const data = (await (await fetch(iframeUrl)).json()) as { links: { src: string }[] };
         const link: string = data.links[0].src;
 
         if (!link) return result;

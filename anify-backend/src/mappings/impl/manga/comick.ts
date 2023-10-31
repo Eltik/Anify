@@ -15,7 +15,7 @@ export default class ComicK extends MangaProvider {
     private api = "https://api.comick.fun";
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
-        const data: SearchResult[] = await (await this.request(`${this.api}/v1.0/search?q=${encodeURIComponent(query)}&limit=25&page=1${year ? `&from=${year}&to=${year}` : ""}`)).json();
+        const data: SearchResult[] = (await (await this.request(`${this.api}/v1.0/search?q=${encodeURIComponent(query)}&limit=25&page=1${year ? `&from=${year}&to=${year}` : ""}`)).json()) as SearchResult[];
 
         const results: Result[] = [];
 
@@ -49,7 +49,7 @@ export default class ComicK extends MangaProvider {
             return chapterList;
         }
 
-        const data = await (await this.request(`${this.api}/comic/${comicId}/chapters?lang=en&page=0&limit=1000000`))?.json();
+        const data = (await (await this.request(`${this.api}/comic/${comicId}/chapters?lang=en&page=0&limit=1000000`))?.json()) as { chapters: ComickChapter[] };
 
         const chapters: Chapter[] = [];
 
@@ -89,11 +89,11 @@ export default class ComicK extends MangaProvider {
     }
 
     override async fetchPages(id: string): Promise<Page[] | string | undefined> {
-        const data = await (await this.request(`${this.api}/chapter/${id}`))?.json();
+        const data = (await (await this.request(`${this.api}/chapter/${id}`))?.json()) as { chapter: { md_images: { vol: any; w: number; h: number; b2key: string }[] } };
 
         const pages: Page[] = [];
 
-        data.chapter.md_images.map((image: { vol: any; w: number; h: number; b2key: string }, index: number) => {
+        data.chapter.md_images.map((image, index: number) => {
             pages.push({
                 url: `https://meo.comick.pictures/${image.b2key}?width=${image.w}`,
                 index: index,
@@ -105,7 +105,7 @@ export default class ComicK extends MangaProvider {
     }
 
     private async getComicId(id: string): Promise<string | null> {
-        const json = await (await this.request(`${this.api}${id}`))?.json();
+        const json = (await (await this.request(`${this.api}${id}`))?.json()) as { comic: Comic };
         const data: Comic = json.comic;
         return data ? data.hid : null;
     }

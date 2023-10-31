@@ -38,7 +38,7 @@ export const importData = async () => {
         if (media.season === "AUTUMN") {
             media.season = Season.FALL;
         }
-        if (media.season === "????" || media.season != Season.FALL && media.season != Season.SPRING && media.season != Season.SUMMER && media.season != Season.WINTER) {
+        if (media.season === "????" || (media.season != Season.FALL && media.season != Season.SPRING && media.season != Season.SUMMER && media.season != Season.WINTER)) {
             media.season = Season.UNKNOWN;
         }
 

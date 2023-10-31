@@ -10,14 +10,25 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-    name: Build
+  buildBackend:
+    name: Build Backend
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
     - uses: oven-sh/setup-bun@v1
 
-    - run: bun run install
-    - run: bun run lint
-    - run: bun run build
+    - run: cd anify-backend && bun run install
+    - run: cd anify-backend && bun run lint
+    - run: cd anify-backend && bun run build
+  buildFrontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: oven-sh/setup-bun@v1
+
+    - run: cd anify-frontend && bun run install
+    - run: cd anify-frontend && bun run lint
+    - run: cd anify-frontend && bun run build
