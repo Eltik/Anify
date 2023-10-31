@@ -250,7 +250,15 @@ export async function createMedia(mappings: MappedResult[], type: Type): Promise
 
     for (const mapping of mappings) {
         let hasPushed = false;
-        const providerType: ProviderType | null = animeProviders[mapping.data.providerId]?.providerType ? ProviderType.ANIME : mangaProviders[mapping.data.providerId]?.providerType ? ProviderType.MANGA : metaProviders[mapping.data.providerId]?.providerType ? ProviderType.META : infoProviders[mapping.data.providerId]?.providerType ? ProviderType.INFORMATION : null;
+        const providerType: ProviderType | null = animeProviders[mapping.data.providerId]?.providerType
+            ? ProviderType.ANIME
+            : mangaProviders[mapping.data.providerId]?.providerType
+            ? ProviderType.MANGA
+            : metaProviders[mapping.data.providerId]?.providerType
+            ? ProviderType.META
+            : infoProviders[mapping.data.providerId]?.providerType
+            ? ProviderType.INFORMATION
+            : null;
 
         for (const result of results) {
             if (result.id === mapping.id) {

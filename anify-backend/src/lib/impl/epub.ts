@@ -143,7 +143,8 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
 
     const path = join(import.meta.dir, `../manga/${providerId}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}`.slice(0, -1));
 
-    if (existsSync(`${path}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}.epub`)) return `${path}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}.epub`;
+    if (existsSync(`${path}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}.epub`))
+        return `${path}/${(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "").replace(/[^\w\d .-]/gi, "_").replace(/ /g, "_")}.epub`;
 
     if (!existsSync(path)) {
         mkdirSync(path, { recursive: true });

@@ -33,7 +33,17 @@ export default class KitsuMeta extends MetaProvider {
                     const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
 
                     results.push({
-                        title: result.attributes.titles.en_us || result.attributes.titles.en_jp || result.attributes.titles.ja_jp || result.attributes.titles.en || result.attributes.titles.en_kr || result.attributes.titles.ko_kr || result.attributes.titles.en_cn || result.attributes.titles.zh_cn || result.attributes.canonicalTitle || Object.values(result.attributes.titles).filter(Boolean)[0],
+                        title:
+                            result.attributes.titles.en_us ||
+                            result.attributes.titles.en_jp ||
+                            result.attributes.titles.ja_jp ||
+                            result.attributes.titles.en ||
+                            result.attributes.titles.en_kr ||
+                            result.attributes.titles.ko_kr ||
+                            result.attributes.titles.en_cn ||
+                            result.attributes.titles.zh_cn ||
+                            result.attributes.canonicalTitle ||
+                            Object.values(result.attributes.titles).filter(Boolean)[0],
                         altTitles: altTitles,
                         id: result.id,
                         img: result.attributes.posterImage?.original ?? null,
@@ -65,7 +75,17 @@ export default class KitsuMeta extends MetaProvider {
                     const format: Format = Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
 
                     results.push({
-                        title: result.attributes.titles.en_us || result.attributes.titles.en_jp || result.attributes.titles.ja_jp || result.attributes.titles.en || result.attributes.titles.en_kr || result.attributes.titles.ko_kr || result.attributes.titles.en_cn || result.attributes.titles.zh_cn || result.attributes.canonicalTitle || Object.values(result.attributes.titles).filter(Boolean)[0],
+                        title:
+                            result.attributes.titles.en_us ||
+                            result.attributes.titles.en_jp ||
+                            result.attributes.titles.ja_jp ||
+                            result.attributes.titles.en ||
+                            result.attributes.titles.en_kr ||
+                            result.attributes.titles.ko_kr ||
+                            result.attributes.titles.en_cn ||
+                            result.attributes.titles.zh_cn ||
+                            result.attributes.canonicalTitle ||
+                            Object.values(result.attributes.titles).filter(Boolean)[0],
                         altTitles: altTitles,
                         id: result.id,
                         img: result.attributes.posterImage?.original ?? null,

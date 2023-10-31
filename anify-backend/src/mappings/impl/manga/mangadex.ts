@@ -88,7 +88,9 @@ export default class MangaDex extends MangaProvider {
         const chapterList: Chapter[] = [];
 
         for (let page = 0, run = true; run; page++) {
-            const request = await this.request(`${this.api}/manga/${id}/feed?limit=500&translatedLanguage%5B%5D=en&includes[]=scanlation_group&includes[]=user&order[volume]=desc&order[chapter]=desc&offset=${500 * page}&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic`).catch((err) => {
+            const request = await this.request(
+                `${this.api}/manga/${id}/feed?limit=500&translatedLanguage%5B%5D=en&includes[]=scanlation_group&includes[]=user&order[volume]=desc&order[chapter]=desc&offset=${500 * page}&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic`,
+            ).catch((err) => {
                 return null;
             });
             if (!request) {

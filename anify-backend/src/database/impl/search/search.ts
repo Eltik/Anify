@@ -13,11 +13,11 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
             where = `
                 WHERE
                 (
-                    ${query.length > 0 ? `%${query}%` : `'%'`}        ILIKE ANY("anime".synonyms)
-                    OR  ${query.length > 0 ? `%${query}%` : `'%'`}    % ANY("anime".synonyms)
-                    OR  "anime".title->>'english' ILIKE ${query.length > 0 ? `%${query}%` : `'%'`}
-                    OR  "anime".title->>'romaji'  ILIKE ${query.length > 0 ? `%${query}%` : `'%'`}
-                    OR  "anime".title->>'native'  ILIKE ${query.length > 0 ? `%${query}%` : `'%'`}
+                    ${query.length > 0 ? `'%${query}%'` : `'%'`}        ILIKE ANY("anime".synonyms)
+                    OR  ${query.length > 0 ? `'%${query}%'` : `'%'`}    % ANY("anime".synonyms)
+                    OR  "anime".title->>'english' ILIKE ${query.length > 0 ? `'%${query}%'` : `'%'`}
+                    OR  "anime".title->>'romaji'  ILIKE ${query.length > 0 ? `'%${query}%'` : `'%'`}
+                    OR  "anime".title->>'native'  ILIKE ${query.length > 0 ? `'%${query}%'` : `'%'`}
                 )
                 ${formats.length > 0 ? `AND "anime"."format" IN (${formats.map((f) => `'${f}'`)})` : ""}
                 ${sort && sort === Sort.YEAR ? `AND "anime"."year" IS NOT NULL` : ""}
@@ -28,9 +28,9 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
                 (
                     ${query.length > 0 ? `%${query}%` : `'%'`}        ILIKE ANY("manga".synonyms)
                     OR  ${query.length > 0 ? `%${query}%` : `'%'`}    % ANY("manga".synonyms)
-                    OR  "manga".title->>'english' ILIKE ${query.length > 0 ? `%${query}%` : `'%'`}
-                    OR  "manga".title->>'romaji'  ILIKE ${query.length > 0 ? `%${query}%` : `'%'`}
-                    OR  "manga".title->>'native'  ILIKE ${query.length > 0 ? `%${query}%` : `'%'`}
+                    OR  "manga".title->>'english' ILIKE ${query.length > 0 ? `'%${query}%'` : `'%'`}
+                    OR  "manga".title->>'romaji'  ILIKE ${query.length > 0 ? `'%${query}%'` : `'%'`}
+                    OR  "manga".title->>'native'  ILIKE ${query.length > 0 ? `'%${query}%'` : `'%'`}
                 )
                 ${formats.length > 0 ? `AND "manga"."format" IN (${formats.map((f) => `'${f}'`)})` : ""}
                 ${sort && sort === Sort.YEAR ? `AND "manga"."year" IS NOT NULL` : ""}
@@ -40,25 +40,25 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
         let [count, results] = [0, []];
         if (type === Type.ANIME) {
             const countQuery = `
-                SELECT COUNT(*) FROM "anime"
+                SELECT COUNT(*) FROM anime
                 ${where}
             `;
             const sqlQuery = `
                 SELECT * FROM "anime"
                 ${where}
                 ORDER BY
-                    (CASE WHEN "anime".title->>'english' IS NOT NULL THEN similarity(LOWER("anime".title->>'english'), LOWER(${query.length > 0 ? query : "'%'"})) ELSE 0 END,
-                    + CASE WHEN "anime".title->>'romaji' IS NOT NULL THEN similarity(LOWER("anime".title->>'romaji'), LOWER(${query.length > 0 ? query : "'%'"})) ELSE 0 END,
-                    + CASE WHEN "anime".title->>'native' IS NOT NULL THEN similarity(LOWER("anime".title->>'native'), LOWER(${query.length > 0 ? query : "'%'"})) ELSE 0 END,
-                    + CASE WHEN synonyms IS NOT NULL THEN most_similar(LOWER(${query.length > 0 ? query : "'%'"}), synonyms) ELSE 0 END)
+                    (CASE WHEN "anime".title->>'english' IS NOT NULL THEN similarity(LOWER("anime".title->>'english'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
+                    + CASE WHEN "anime".title->>'romaji' IS NOT NULL THEN similarity(LOWER("anime".title->>'romaji'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
+                    + CASE WHEN "anime".title->>'native' IS NOT NULL THEN similarity(LOWER("anime".title->>'native'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
+                    + CASE WHEN synonyms IS NOT NULL THEN most_similar(LOWER(${query.length > 0 ? `'${query}'` : "'%'"}), synonyms) ELSE 0 END)
                         DESC,
-                    ${sort === Sort.SCORE ? `"anime"."averageRating"` : sort === Sort.POPULARITY ? `"anime"."averagePopularity"` : sort === Sort.TOTAL_EPISODES ? `"anime"."totalEpisodes"` : sort === Sort.YEAR ? `"anime".year` : ""}
-                ${sortDirection === SortDirection.ASC ? "ASC" : "DESC"}
+                        ${sort === Sort.SCORE ? `"anime"."averageRating"` : sort === Sort.POPULARITY ? `"anime"."averagePopularity"` : sort === Sort.TOTAL_EPISODES ? `"anime"."totalEpisodes"` : sort === Sort.YEAR ? `"anime".year` : ""}
+                    ${sortDirection === SortDirection.ASC ? "ASC" : "DESC"}
                 LIMIT    ${perPage}
                 OFFSET   ${skip}
             `;
 
-            [count, results] = (await Promise.all([postgres.query(countQuery), postgres.query(sqlQuery)])) as [any, any];
+            [count, results] = (await Promise.all([(await postgres.query(countQuery)).rows, (await postgres.query(sqlQuery)).rows])) as [any, any];
         } else {
             const countQuery = `
                 SELECT COUNT(*) FROM "manga"

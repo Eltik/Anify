@@ -271,9 +271,11 @@ async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): P
                             return undefined;
                         });
                     } else if (provider.providerType === ProviderType.BASE) {
-                        providerResponse = await (provider as BaseProvider).search("Mushoku Tensei", provider.formats.includes(Format.TV) ? Type.ANIME : provider.formats.includes(Format.MANGA) || provider.formats.includes(Format.NOVEL) ? Type.MANGA : Type.ANIME, provider.formats, 0, 10).catch(() => {
-                            return undefined;
-                        });
+                        providerResponse = await (provider as BaseProvider)
+                            .search("Mushoku Tensei", provider.formats.includes(Format.TV) ? Type.ANIME : provider.formats.includes(Format.MANGA) || provider.formats.includes(Format.NOVEL) ? Type.MANGA : Type.ANIME, provider.formats, 0, 10)
+                            .catch(() => {
+                                return undefined;
+                            });
                     } else {
                         providerResponse = undefined;
                     }

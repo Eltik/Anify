@@ -7,7 +7,7 @@
     "bracketSameLine": false,
     "arrowParens": "always",
     "parser": "typescript",
-    "printWidth": 500,
+    "printWidth": 300,
     "proseWrap": "never",
     "endOfLine": "lf"
 }

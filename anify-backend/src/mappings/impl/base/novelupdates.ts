@@ -92,12 +92,15 @@ export default class NovelUpdatesBase extends BaseProvider {
 
         const excludedGenreNumbers = genresExcluded.map((genre) => this.genreMappings[genre.toUpperCase() as keyof typeof this.genreMappings]).filter((genreNumber) => genreNumber !== undefined);
 
-        const searchData = await this.request(`${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444${genres.length > 0 ? `&gi=${genreNumbers.join(",")}` : ""}&ge=280${genresExcluded.length > 0 ? `,${excludedGenreNumbers.join(",")}` : ""}&sort=sread&order=desc${page ? `&pg=${page}` : ""}`, {
-            method: "GET",
-            headers: {
-                Referer: this.url,
+        const searchData = await this.request(
+            `${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444${genres.length > 0 ? `&gi=${genreNumbers.join(",")}` : ""}&ge=280${genresExcluded.length > 0 ? `,${excludedGenreNumbers.join(",")}` : ""}&sort=sread&order=desc${page ? `&pg=${page}` : ""}`,
+            {
+                method: "GET",
+                headers: {
+                    Referer: this.url,
+                },
             },
-        });
+        );
 
         const data = await searchData.text();
 
@@ -205,7 +208,12 @@ export default class NovelUpdatesBase extends BaseProvider {
           }
         | undefined
     > {
-        const promises = [this.fetchSeasonalData(`${this.url}/series-ranking/?rank=month&org=496&ge=280,4,281&rl=0`), this.fetchSeasonalData(`${this.url}/series-ranking/?rank=popmonth&org=496&ge=280,4,281&rl=0`), this.fetchSeasonalData(`${this.url}/series-ranking/?rank=popular&org=496&ge=280,4,281&rl=0`), this.fetchSeasonalData(`${this.url}/series-ranking/?rank=sixmonths&org=496&ge=280,4,281&rl=0`)];
+        const promises = [
+            this.fetchSeasonalData(`${this.url}/series-ranking/?rank=month&org=496&ge=280,4,281&rl=0`),
+            this.fetchSeasonalData(`${this.url}/series-ranking/?rank=popmonth&org=496&ge=280,4,281&rl=0`),
+            this.fetchSeasonalData(`${this.url}/series-ranking/?rank=popular&org=496&ge=280,4,281&rl=0`),
+            this.fetchSeasonalData(`${this.url}/series-ranking/?rank=sixmonths&org=496&ge=280,4,281&rl=0`),
+        ];
 
         const [trending, seasonal, popular, top] = await Promise.all(promises);
 

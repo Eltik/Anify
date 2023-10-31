@@ -109,7 +109,34 @@ export const update = async (data: Anime | Manga) => {
                         tags = $25
                     WHERE id = $26
                 `,
-                values: [data.slug, data.coverImage, data.bannerImage, data.status, JSON.stringify(data.title), JSON.stringify(data.mappings), data.synonyms, data.countryOfOrigin, data.description, data.color, data.year, JSON.stringify(data.rating), data.popularity, data.type, data.format, data.relations, data.totalChapters, data.totalVolumes, JSON.stringify(data.chapters), data.averageRating, data.averagePopularity, data.artwork, data.characters, data.genres, data.tags, data.id],
+                values: [
+                    data.slug,
+                    data.coverImage,
+                    data.bannerImage,
+                    data.status,
+                    JSON.stringify(data.title),
+                    JSON.stringify(data.mappings),
+                    data.synonyms,
+                    data.countryOfOrigin,
+                    data.description,
+                    data.color,
+                    data.year,
+                    JSON.stringify(data.rating),
+                    data.popularity,
+                    data.type,
+                    data.format,
+                    data.relations,
+                    data.totalChapters,
+                    data.totalVolumes,
+                    JSON.stringify(data.chapters),
+                    data.averageRating,
+                    data.averagePopularity,
+                    data.artwork,
+                    data.characters,
+                    data.genres,
+                    data.tags,
+                    data.id,
+                ],
             };
             const update = await postgres.query(query);
             return update;
