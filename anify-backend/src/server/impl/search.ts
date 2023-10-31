@@ -33,7 +33,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const page = Number(body?.page ?? paths[3] ?? url.searchParams.get("page") ?? "1");
         const perPage = Number(body?.perPage ?? paths[4] ?? url.searchParams.get("perPage") ?? "20");
-        const sort = body?.sort ?? paths[5] ?? url.searchParams.get("sort") ?? Sort.SCORE;
+        const sort = body?.sort ?? paths[5] ?? url.searchParams.get("sort") ?? Sort.POPULARITY;
         const sortDirection = body?.sortDirection ?? paths[5] ?? url.searchParams.get("sortDirection") ?? SortDirection.ASC;
 
         // Check if sort is valid

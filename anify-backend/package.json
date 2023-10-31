@@ -23,7 +23,6 @@
     "@types/pg": "^8.10.7",
     "bun-types": "latest",
     "prettier": "^3.0.3",
-    "prisma": "^5.5.2",
     "tsc": "^2.0.4"
   },
   "peerDependencies": {

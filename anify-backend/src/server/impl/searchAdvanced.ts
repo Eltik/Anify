@@ -35,7 +35,7 @@ export const handler = async (req: Request): Promise<Response> => {
         const year = Number(body?.year ?? url.searchParams.get("year") ?? "0");
         const page = Number(body?.page ?? url.searchParams.get("page") ?? "1");
         const perPage = Number(body?.perPage ?? url.searchParams.get("perPage") ?? "20");
-        const sort = body?.sort ?? url.searchParams.get("sort") ?? Sort.SCORE;
+        const sort = body?.sort ?? url.searchParams.get("sort") ?? Sort.POPULARITY;
         const sortDirection = body?.sortDirection ?? url.searchParams.get("sortDirection") ?? SortDirection.ASC;
 
         // Check if formats are valid

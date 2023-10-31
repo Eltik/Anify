@@ -25,7 +25,7 @@ export const loadSearch = async (data: { query: string; type: Type; formats: For
         return result;
     } else {
         // First check if exists in database
-        const existing = await search(data.query, data.type, data.formats, 1, 15, Sort.SCORE, SortDirection.ASC);
+        const existing = await search(data.query, data.type, data.formats, 1, 15, Sort.POPULARITY, SortDirection.ASC);
         if (existing.length > 0) {
             await emitter.emitAsync(Events.COMPLETED_SEARCH_LOAD, existing);
             return existing;
