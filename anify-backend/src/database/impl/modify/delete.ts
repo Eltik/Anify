@@ -1,4 +1,5 @@
-import { db, dbType } from "../..";
+import { QueryConfig } from "pg";
+import { sqlite, dbType, postgres } from "../..";
 import { Type } from "../../../types/enums";
 import { get } from "../fetch/get";
 
@@ -8,17 +9,29 @@ export const deleteEntry = async (id: string): Promise<void> => {
 
     if (dbType === "postgresql") {
         if (data.type === Type.ANIME) {
-            const query = `
-                DELETE FROM "anime"
-                WHERE id = $id
-            `;
+            const query: QueryConfig = {
+                text: `
+                    DELETE FROM "anime"
+                    WHERE id = $1
+                `,
+                values: [id],
+            };
+
+            await postgres.query(query);
+            return;
         } else {
-            const query = `
-                DELETE FROM "manga"
-                WHERE id = $id
-            `;
+            const query: QueryConfig = {
+                text: `
+                    DELETE FROM "manga"
+                    WHERE id = $1
+                `,
+                values: [id],
+            };
+
+            await postgres.query(query);
+            return;
         }
     }
 
-    await db.query(`DELETE FROM ${data.type.toLowerCase()} WHERE id = $id`).run({ $id: id });
+    await sqlite.query(`DELETE FROM ${data.type.toLowerCase()} WHERE id = $id`).run({ $id: id });
 };

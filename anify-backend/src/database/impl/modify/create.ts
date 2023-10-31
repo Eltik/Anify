@@ -1,6 +1,7 @@
-import { db, dbType } from "../..";
+import { QueryConfig } from "pg";
+import { sqlite, dbType, postgres } from "../..";
 import { averageMetric } from "../../../helper";
-import { Season, Type } from "../../../types/enums";
+import { Type } from "../../../types/enums";
 import { Anime, Manga } from "../../../types/types";
 import { get } from "../fetch/get";
 
@@ -26,6 +27,9 @@ export const create = async (data: Anime | Manga, stringify: boolean = true) => 
                 //
             }
         }
+        if (Number.isNaN(Number.parseInt(String(data.averagePopularity)))) data.averageRating = averageMetric(data.rating);
+        if (Number.isNaN(Number.parseInt(String(data.averagePopularity)))) data.averagePopularity = averageMetric(data.popularity);
+
         if (data.type === Type.ANIME) {
             if (!stringify) {
                 try {
@@ -37,68 +41,105 @@ export const create = async (data: Anime | Manga, stringify: boolean = true) => 
                 }
             }
 
-            const query = `
-                INSERT INTO anime (
-                    id,
-                    slug,
-                    coverImage,
-                    bannerImage,
-                    trailer,
-                    status,
-                    season,
-                    title,
-                    currentEpisode,
-                    mappings,
-                    synonyms,
-                    countryOfOrigin,
-                    description,
-                    duration,
-                    color,
-                    year,
-                    rating,
-                    popularity,
-                    type,
-                    format,
-                    relations,
-                    totalEpisodes,
-                    episodes,
-                    averageRating,
-                    averagePopularity,
-                    artwork,
-                    characters,
-                    genres,
-                    tags
-                ) VALUES (
-                    $1,
-                    $2,
-                    $3,
-                    $4,
-                    $5,
-                    $6,
-                    $7,
-                    $8,
-                    $9,
-                    $10,
-                    $11,
-                    $12,
-                    $13,
-                    $14,
-                    $15,
-                    $16,
-                    $17,
-                    $18,
-                    $19,
-                    $20,
-                    $21,
-                    $22,
-                    $23,
-                    $24,
-                    $25,
-                    $26,
-                    $27,
-                    $28
-                )
-            `;
+            const query: QueryConfig = {
+                text: `
+                    INSERT INTO anime (
+                        id,
+                        slug,
+                        coverImage,
+                        bannerImage,
+                        trailer,
+                        status,
+                        season,
+                        title,
+                        currentEpisode,
+                        mappings,
+                        synonyms,
+                        countryOfOrigin,
+                        description,
+                        duration,
+                        color,
+                        year,
+                        rating,
+                        popularity,
+                        type,
+                        format,
+                        relations,
+                        totalEpisodes,
+                        genres,
+                        tags,
+                        episodes,
+                        averageRating,
+                        averagePopularity,
+                        artwork,
+                        characters
+                    ) VALUES (
+                        $1,
+                        $2,
+                        $3,
+                        $4,
+                        $5,
+                        $6,
+                        $7,
+                        $8,
+                        $9,
+                        $10,
+                        $11,
+                        $12,
+                        $13,
+                        $14,
+                        $15,
+                        $16,
+                        $17,
+                        $18,
+                        $19,
+                        $20,
+                        $21,
+                        $22,
+                        $23,
+                        $24,
+                        $25,
+                        $26,
+                        $27,
+                        $28,
+                        $29
+                    )
+                `,
+                values: [
+                    data.id,
+                    data.slug,
+                    data.coverImage,
+                    data.bannerImage,
+                    data.trailer,
+                    data.status,
+                    data.season,
+                    JSON.stringify(data.title),
+                    data.currentEpisode,
+                    JSON.stringify(data.mappings),
+                    data.synonyms,
+                    data.countryOfOrigin,
+                    data.description,
+                    data.duration,
+                    data.color,
+                    data.year,
+                    JSON.stringify(data.rating),
+                    JSON.stringify(data.popularity),
+                    data.type,
+                    data.format,
+                    data.relations,
+                    data.totalEpisodes,
+                    data.genres,
+                    data.tags,
+                    JSON.stringify(data.episodes),
+                    data.averageRating,
+                    data.averagePopularity,
+                    data.artwork,
+                    data.characters,
+                ],
+            };
+
+            const insert = await postgres.query(query);
+            return insert;
         } else {
             if (!stringify) {
                 try {
@@ -110,63 +151,69 @@ export const create = async (data: Anime | Manga, stringify: boolean = true) => 
                 }
             }
 
-            const query = `
-                INSERT INTO manga (
-                    id,
-                    slug,
-                    coverImage,
-                    bannerImage,
-                    status,
-                    title,
-                    mappings,
-                    synonyms,
-                    countryOfOrigin,
-                    description,
-                    color,
-                    year,
-                    rating,
-                    popularity,
-                    type,
-                    format,
-                    relations,
-                    totalChapters,
-                    totalVolumes,
-                    chapters,
-                    averageRating,
-                    averagePopularity,
-                    artwork,
-                    characters,
-                    genres,
-                    tags
-                ) VALUES (
-                    $1,
-                    $2,
-                    $3,
-                    $4,
-                    $5,
-                    $6,
-                    $7,
-                    $8,
-                    $9,
-                    $10,
-                    $11,
-                    $12,
-                    $13,
-                    $14,
-                    $15,
-                    $16,
-                    $17,
-                    $18,
-                    $19,
-                    $20,
-                    $21,
-                    $22,
-                    $23,
-                    $24,
-                    $25,
-                    $26
-                )
-            `;
+            const query: QueryConfig = {
+                text: `
+                    INSERT INTO manga (
+                        id,
+                        slug,
+                        coverImage,
+                        bannerImage,
+                        status,
+                        title,
+                        mappings,
+                        synonyms,
+                        countryOfOrigin,
+                        description,
+                        color,
+                        year,
+                        rating,
+                        popularity,
+                        type,
+                        format,
+                        relations,
+                        totalChapters,
+                        totalVolumes,
+                        chapters,
+                        averageRating,
+                        averagePopularity,
+                        artwork,
+                        characters,
+                        genres,
+                        tags
+                    ) VALUES (
+                        $1,
+                        $2,
+                        $3,
+                        $4,
+                        $5,
+                        $6,
+                        $7,
+                        $8,
+                        $9,
+                        $10,
+                        $11,
+                        $12,
+                        $13,
+                        $14,
+                        $15,
+                        $16,
+                        $17,
+                        $18,
+                        $19,
+                        $20,
+                        $21,
+                        $22,
+                        $23,
+                        $24,
+                        $25,
+                        $26
+                    )
+                `,
+                values: [data.id, data.slug, data.coverImage, data.bannerImage, data.status, JSON.stringify(data.title), JSON.stringify(data.mappings), data.synonyms, data.countryOfOrigin, data.description, data.color, data.year, JSON.stringify(data.rating), data.popularity, data.type, data.format, data.relations, data.totalChapters, data.totalVolumes, JSON.stringify(data.chapters), data.averageRating, data.averagePopularity, data.artwork, data.characters, data.genres, data.tags],
+            };
+
+            const insert = await postgres.query(query);
+            return insert;
         }
     }
 
@@ -279,6 +326,6 @@ export const create = async (data: Anime | Manga, stringify: boolean = true) => 
         });
     }
 
-    const insert = db.prepare(query).run(params as any);
+    const insert = sqlite.prepare(query).run(params as any);
     return insert;
 };

@@ -9,8 +9,10 @@ import { createSkipTimes } from "../database/impl/skipTimes/createSkipTimes";
 import { getSkipTimes } from "../database/impl/skipTimes/getSkipTimes";
 import { isString } from "../helper";
 import { Season } from "../types/enums";
+import { init } from "../database";
 
 export const importData = async () => {
+    await init();
     const name = process.argv.slice(2)?.toString()?.toLowerCase() && process.argv.slice(2)?.toString()?.toLowerCase().length > 0 ? process.argv.slice(2)?.toString()?.toLowerCase() : "database.json";
 
     const file = Bun.file(name);
@@ -45,6 +47,8 @@ export const importData = async () => {
         try {
             await create(media, false);
 
+            console.log(`Imported anime ${media.slug}!`);
+
             count.anime++;
         } catch (error) {
             console.error(`Failed to import anime ${media.slug}!`);
@@ -66,6 +70,8 @@ export const importData = async () => {
         try {
             await create(media, false);
 
+            console.log(`Imported manga ${media.slug}!`);
+
             count.manga++;
         } catch (error) {
             console.error(`Failed to import manga ${media.slug}!`);
@@ -78,6 +84,8 @@ export const importData = async () => {
 
         try {
             await createSkipTimes(skipTime, false);
+
+            console.log(`Imported skip time ${skipTime.id}!`);
 
             count.skipTimes++;
         } catch (error) {
@@ -92,9 +100,11 @@ export const importData = async () => {
         try {
             await createKey(key);
 
+            console.log(`Imported API key ${key.id}!`);
+
             count.keys++;
         } catch (error) {
-            console.error(`Failed to import skip time ${key.id}!`);
+            console.error(`Failed to import api key ${key.id}!`);
             console.error(error);
         }
     }
@@ -104,4 +114,5 @@ export const importData = async () => {
 
 importData().then(() => {
     console.log("Imported data successfully!");
+    process.exit(0);
 });

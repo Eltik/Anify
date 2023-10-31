@@ -1,23 +1,30 @@
-import { db, dbType } from "../..";
+import { QueryConfig } from "pg";
+import { sqlite, dbType, postgres } from "../..";
 import { Key } from "../../../types/types";
 
 export const createKey = async (data: Key) => {
     if (dbType === "postgresql") {
-        const query = `
-            INSERT INTO "apiKey" (
-                id,
-                key,
-                "createdAt",
-                "updatedAt",
-                "requestCount"
-            ) VALUES (
-                $id,
-                $key,
-                $createdAt,
-                $updatedAt,
-                $requestCount
-            )
-        `;
+        const query: QueryConfig = {
+            text: `
+                INSERT INTO "apiKey" (
+                    id,
+                    key,
+                    "createdAt",
+                    "updatedAt",
+                    "requestCount"
+                ) VALUES (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    $5
+                )
+            `,
+            values: [data.id, data.key, new Date(data.createdAt), new Date(data.updatedAt), data.requestCount],
+        };
+
+        const insert = await postgres.query(query);
+        return insert;
     }
 
     const query = `INSERT INTO apiKey (
@@ -41,6 +48,6 @@ export const createKey = async (data: Key) => {
         $requestCount: data.requestCount,
     };
 
-    const insert = db.prepare(query).run(params);
+    const insert = sqlite.prepare(query).run(params);
     return insert;
 };

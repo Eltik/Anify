@@ -1,4 +1,4 @@
-import { db, dbType } from "../..";
+import { sqlite, dbType, postgres } from "../..";
 import { Format, Sort, SortDirection, Type } from "../../../types/enums";
 import { Anime, Db, Manga } from "../../../types/types";
 
@@ -19,7 +19,7 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
                     OR  "anime".title->>'romaji'  ILIKE ${"%" + query + "%"}
                     OR  "anime".title->>'native'  ILIKE ${"%" + query + "%"}
                 )
-                ${formats.length > 0 ? `AND "anime"."format" IN (${(formats.map((f) => `'${f}'`), ", ")})` : ""}
+                ${formats.length > 0 ? `AND "anime"."format" IN (${formats.map((f) => `'${f}'`)})` : ""}
             `;
         } else {
             where = `
@@ -31,7 +31,7 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
                     OR  "manga".title->>'romaji'  ILIKE ${"%" + query + "%"}
                     OR  "manga".title->>'native'  ILIKE ${"%" + query + "%"}
                 )
-                ${formats.length > 0 ? `AND "manga"."format" IN (${(formats.map((f) => `'${f}'`), ", ")})` : ""}
+                ${formats.length > 0 ? `AND "manga"."format" IN (${formats.map((f) => `'${f}'`)})` : ""}
             `;
         }
 
@@ -53,6 +53,8 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
                 LIMIT    ${perPage}
                 OFFSET   ${skip}
             `;
+
+            [count, results] = (await Promise.all([postgres.query(countQuery), postgres.query(sqlQuery)])) as [any, any];
         } else {
             const countQuery = `
                 SELECT COUNT(*) FROM "manga"
@@ -70,6 +72,8 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
                 LIMIT    ${perPage}
                 OFFSET   ${skip}
             `;
+
+            [count, results] = (await Promise.all([postgres.query(countQuery), postgres.query(sqlQuery)])) as [any, any];
         }
 
         const total = Number((count as any)[0].count ?? 0);
@@ -94,7 +98,7 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
         ${formats?.length > 0 ? `AND "format" IN (${formats.map((f) => `'${f}'`).join(", ")})` : ""}
     `;
 
-    const results = db
+    const results = sqlite
         .query<
             Db<Anime> | Db<Manga>,
             {

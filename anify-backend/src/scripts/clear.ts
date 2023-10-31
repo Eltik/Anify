@@ -1,7 +1,13 @@
-import { db, dbType } from "../database";
+import dotenv from "dotenv";
+dotenv.config();
+
 import colors from "colors";
+import { SkipTime } from "../types/types";
+import { sqlite, dbType, postgres, init } from "../database";
 
 const clearData = async () => {
+    await init();
+
     if (dbType == "postgresql") {
         const animeCount = `
             SELECT COUNT(*) FROM "anime"
@@ -15,37 +21,58 @@ const clearData = async () => {
             WHERE "format" IN ('NOVEL')
         `;
         const skipTimesCount = `
-            SELECT COUNT(*) FROM "skipTimes"
-            WHERE "outro"->>'end' != '0'
+            SELECT * FROM "skipTimes"
         `;
         const apiKeysCount = `
             SELECT COUNT(*) FROM "apiKey"
         `;
 
-        const anime = 0;
-        const manga = 0;
-        const novels = 0;
-        const skipTimes = 0;
-        const apiKey = 0;
+        const anime = await postgres.query<{ count: number }>(animeCount).then((res) => res.rows[0]);
+        const manga = await postgres.query<{ count: number }>(mangaCount).then((res) => res.rows[0]);
+        const novels = await postgres.query<{ count: number }>(novelCount).then((res) => res.rows[0]);
+        let skipTimes = 0;
+        (await postgres.query(skipTimesCount).then((res) => res.rows))?.map((row) => {
+            const episodes = row.episodes;
+            for (let i = 0; i < episodes.length; i++) {
+                if (episodes[i].outro?.end != 0) {
+                    skipTimes++;
+                }
+            }
+        });
+        const apiKeys = await postgres.query<{ count: number }>(apiKeysCount).then((res) => res.rows[0]);
 
-        console.log(colors.green(`Cleared ${anime} anime, ${manga} manga, ${skipTimes} skip times, and ${apiKey} API keys!`) + "\n");
+        await postgres.query(`
+            DELETE FROM "anime"
+        `);
+        await postgres.query(`
+            DELETE FROM "manga"
+        `);
+        await postgres.query(`
+            DELETE FROM "skipTimes"
+        `);
+        await postgres.query(`
+            DELETE FROM "apiKey"
+        `);
+
+        console.log(colors.green(`Cleared ${anime.count} anime, ${manga.count} manga, ${novels.count} novels, ${skipTimes} skip times, and ${apiKeys.count} API keys!`) + "\n");
 
         return;
     }
 
-    const anime = await db.query("SELECT * FROM anime").all();
-    const manga = await db.query("SELECT * FROM manga").all();
-    const skipTimes = await db.query("SELECT * FROM skipTimes").all();
-    const apiKey = await db.query("SELECT * FROM apiKey").all();
+    const anime = await sqlite.query("SELECT * FROM anime").all();
+    const manga = await sqlite.query("SELECT * FROM manga").all();
+    const skipTimes = await sqlite.query("SELECT * FROM skipTimes").all();
+    const apiKey = await sqlite.query("SELECT * FROM apiKey").all();
 
-    await db.query("DELETE FROM anime").run();
-    await db.query("DELETE FROM manga").run();
-    await db.query("DELETE FROM skipTimes").run();
-    await db.query("DELETE FROM apiKey").run();
+    await sqlite.query("DELETE FROM anime").run();
+    await sqlite.query("DELETE FROM manga").run();
+    await sqlite.query("DELETE FROM skipTimes").run();
+    await sqlite.query("DELETE FROM apiKey").run();
 
-    console.log(colors.green(`Cleared ${anime.length} anime, ${manga.length} manga, ${skipTimes.length} skip times, and ${apiKey.length} API keys!`) + "\n");
+    console.log(colors.green(`Cleared ${anime.length} anime, ${manga.length} manga, ${skipTimes.length} skip times, and ${apiKey.length} API keys!`));
 };
 
 clearData().then(() => {
     console.log(colors.green("Done!"));
+    process.exit(0);
 });

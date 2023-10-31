@@ -1,4 +1,4 @@
-import { db, dbType } from "../..";
+import { sqlite, dbType, postgres } from "../..";
 import { Type } from "../../../types/enums";
 import { Anime, Db, Manga } from "../../../types/types";
 import { get } from "./get";
@@ -21,15 +21,33 @@ export const relations = async (id: string, fields: string[] = []): Promise<Anim
                         "anime".mappings @> '[{"id": "${relation.id}"}]'
                     )
                 `;
+
+                results = await postgres
+                    .query<Anime>(
+                        `
+                    SELECT * FROM "anime"
+                    ${where}
+                `,
+                    )
+                    .then((res) => res.rows);
             } else {
                 let where = `
                     WHERE (
-                        "anime".mappings @> '[{"providerId": "anilist"}]'
+                        "manga".mappings @> '[{"providerId": "anilist"}]'
                     )
                     AND (
-                        "anime".mappings @> '[{"id": "${relation.id}"}]'
+                        "manga".mappings @> '[{"id": "${relation.id}"}]'
                     )
                 `;
+
+                results = await postgres
+                    .query<Manga>(
+                        `
+                    SELECT * FROM "manga"
+                    ${where}
+                `,
+                    )
+                    .then((res) => res.rows);
             }
 
             results
@@ -60,7 +78,7 @@ export const relations = async (id: string, fields: string[] = []): Promise<Anim
     }
 
     for (const relation of data.relations) {
-        const results = await db
+        const results = await sqlite
             .query<Db<Anime | Manga>, { $id: string }>(
                 `SELECT * FROM ${relation.type.toLowerCase()}
                     WHERE EXISTS (SELECT * FROM json_each(mappings) WHERE json_extract(value, '$.providerId') = 'anilist')

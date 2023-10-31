@@ -1,4 +1,4 @@
-import { db, dbType } from "../..";
+import { sqlite, dbType, postgres } from "../..";
 import { Format, Type } from "../../../types/enums";
 import { Anime, Db, Manga } from "../../../types/types";
 
@@ -11,11 +11,11 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
 
         if (type === Type.ANIME) {
             where = `
-                ${formats.length > 0 ? `WHERE "anime"."format" IN (${(formats.map((f) => `'${f}'`), ", ")})` : ""}
+                ${formats.length > 0 ? `WHERE "anime"."format" IN (${formats.map((f) => `'${f}'`)})` : ""}
             `;
         } else {
             where = `
-                ${formats.length > 0 ? `WHERE "manga"."format" IN (${(formats.map((f) => `'${f}'`), ", ")})` : ""}
+                ${formats.length > 0 ? `WHERE "manga"."format" IN (${formats.map((f) => `'${f}'`)})` : ""}
             `;
         }
 
@@ -29,10 +29,12 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
                 SELECT * FROM "anime"
                 ${where} AND "anime".episodes->'latest'->>'latestEpisode' != '0'
                 ORDER BY
-                    "anime".episodes->'latest'->>'updatedAt' DESC
+                    to_timestamp(("anime".episodes->'latest'->>'updatedAt')::double precision / 1000) DESC
                 LIMIT    ${perPage}
                 OFFSET   ${skip}
             `;
+
+            [count, results] = await Promise.all([Promise.resolve(postgres.query(countQuery).then((res) => res.rows[0])), Promise.resolve(postgres.query<Db<Anime[] | Manga[]>>(query).then((res) => res.rows)) as any]);
         } else {
             const countQuery = `
                 SELECT COUNT(*) FROM "manga"
@@ -42,13 +44,15 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
                 SELECT * FROM "manga"
                 ${where} AND "manga".chapters->'latest'->>'latestChapter' != '0'
                 ORDER BY
-                    "manga".chapters->'latest'->>'updatedAt' DESC
+                    to_timestamp(("manga".chapters->'latest'->>'updatedAt')::double precision / 1000) DESC
                 LIMIT    ${perPage}
                 OFFSET   ${skip}
             `;
+
+            [count, results] = await Promise.all([Promise.resolve(postgres.query(countQuery).then((res) => res.rows[0])), Promise.resolve(postgres.query<Db<Anime[] | Manga[]>>(query).then((res) => res.rows)) as any]);
         }
 
-        const total = Number((count as any)[0].count);
+        const total = Number((count as any)[0]?.count ?? 0);
         const lastPage = Math.ceil(Number(total) / perPage);
 
         const newResults: any[] = [];
@@ -93,7 +97,7 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
             WHERE "format" IN (${formatParams}) AND episodes->>'latestEpisode' != '0';
         `;
 
-        const [countResults, results] = await Promise.all([Promise.resolve(db.query(countSql).get()), Promise.resolve(db.query<Db<Anime>, []>(sql).all())]);
+        const [countResults, results] = await Promise.all([Promise.resolve(sqlite.query(countSql).get()), Promise.resolve(sqlite.query<Db<Anime>, []>(sql).all())]);
 
         const total = Number(Object.values(countResults ?? {})[0]);
         const lastPage = Math.ceil(Number(total) / perPage);
@@ -146,7 +150,7 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
             WHERE "format" IN (${formatParams}) AND chapters->>'latestChapter' != '0';
         `;
 
-        const [countResults, results] = await Promise.all([Promise.resolve(db.query(countSql).get()), Promise.resolve(db.query<Db<Manga>, []>(sql).all())]);
+        const [countResults, results] = await Promise.all([Promise.resolve(sqlite.query(countSql).get()), Promise.resolve(sqlite.query<Db<Manga>, []>(sql).all())]);
 
         const total = Number(Object.values(countResults ?? {})[0]);
         const lastPage = Math.ceil(Number(total) / perPage);

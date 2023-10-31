@@ -1,5 +1,5 @@
-import { db, dbType } from "../..";
-import { Format } from "../../../types/enums";
+import { sqlite, dbType, postgres } from "../..";
+import { SkipTime } from "../../../types/types";
 
 export const stats = async (): Promise<{ anime: number; manga: number; novels: number; skipTimes: number; apiKeys: number } | undefined> => {
     if (dbType == "postgresql") {
@@ -15,33 +15,40 @@ export const stats = async (): Promise<{ anime: number; manga: number; novels: n
             WHERE "format" IN ('NOVEL')
         `;
         const skipTimesCount = `
-            SELECT COUNT(*) FROM "skipTimes"
-            WHERE "outro"->>'end' != '0'
+            SELECT * FROM "skipTimes"
         `;
         const apiKeysCount = `
             SELECT COUNT(*) FROM "apiKey"
         `;
 
-        const anime = 0;
-        const manga = 0;
-        const novels = 0;
-        const skipTimes = 0;
-        const apiKeys = 0;
+        const anime = await postgres.query<{ count: number }>(animeCount).then((res) => res.rows[0]);
+        const manga = await postgres.query<{ count: number }>(mangaCount).then((res) => res.rows[0]);
+        const novels = await postgres.query<{ count: number }>(novelCount).then((res) => res.rows[0]);
+        let skipTimes = 0;
+        (await postgres.query<SkipTime[]>(skipTimesCount).then((res) => res.rows[0]))?.map((row) => {
+            const episodes = row.episodes;
+            for (let i = 0; i < episodes.length; i++) {
+                if (episodes[i].outro?.end != 0) {
+                    skipTimes++;
+                }
+            }
+        });
+        const apiKeys = await postgres.query<{ count: number }>(apiKeysCount).then((res) => res.rows[0]);
 
         return {
-            anime,
-            manga,
-            novels,
+            anime: anime?.count ?? 0,
+            manga: manga?.count ?? 0,
+            novels: novels?.count ?? 0,
             skipTimes,
-            apiKeys,
+            apiKeys: apiKeys?.count ?? 0,
         };
     }
 
-    const anime = await db.query("SELECT COUNT(*) FROM anime").get();
-    const manga = await db.query(`SELECT COUNT(*) FROM manga WHERE "format" IN ('MANGA', 'ONE_SHOT')`).get();
-    const novels = await db.query(`SELECT COUNT(*) FROM manga WHERE "format" IN ('NOVEL')`).get();
-    const skipTimes = await db.query("SELECT COUNT(*) FROM skipTimes").get();
-    const apiKeys = await db.query("SELECT COUNT(*) FROM apiKey").get();
+    const anime = await sqlite.query("SELECT COUNT(*) FROM anime").get();
+    const manga = await sqlite.query(`SELECT COUNT(*) FROM manga WHERE "format" IN ('MANGA', 'ONE_SHOT')`).get();
+    const novels = await sqlite.query(`SELECT COUNT(*) FROM manga WHERE "format" IN ('NOVEL')`).get();
+    const skipTimes = await sqlite.query("SELECT COUNT(*) FROM skipTimes").get();
+    const apiKeys = await sqlite.query("SELECT COUNT(*) FROM apiKey").get();
 
     return {
         anime: Object.values(anime ?? {})[0],

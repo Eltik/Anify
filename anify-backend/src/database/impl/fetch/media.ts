@@ -1,22 +1,28 @@
-import { db, dbType } from "../..";
+import { QueryConfig } from "pg";
+import { sqlite, dbType, postgres } from "../..";
 import { Anime, Db, Manga } from "../../../types/types";
 
 export const media = async (providerId: string, id: string, fields: string[] = []): Promise<Anime | Manga | undefined> => {
     if (dbType === "postgresql") {
-        const query = `
-            SELECT * FROM "anime"
-            WHERE "anime"."mappings" @> '[{"providerId": "${providerId}", "id": "${id}"}]'
-        `;
+        const query: QueryConfig = {
+            text: `
+                SELECT * FROM "anime"
+                WHERE "anime"."mappings" @> '[{"providerId": "${providerId}", "id": "${id}"}]'
+            `,
+        };
 
-        const data: Anime | Manga | undefined = undefined;
+        const data: Anime | undefined = await postgres.query<Anime>(query).then((res) => res.rows[0]);
 
         if (!data) {
-            const query = `
-                SELECT * FROM "manga"
-                WHERE "manga"."mappings" @> '[{"providerId": "${providerId}", "id": "${id}"}]'
-            `;
+            const query: QueryConfig = {
+                text: `
+                    SELECT * FROM "manga"
+                    WHERE "manga"."mappings" @> '[{"providerId": "${providerId}", "id": "${id}"}]'
+                `,
+            };
 
-            return data as Anime | Manga | undefined;
+            const data: Manga | undefined = await postgres.query<Manga>(query).then((res) => res.rows[0]);
+            return data;
         } else {
             return data as Anime | Manga;
         }
@@ -33,7 +39,7 @@ export const media = async (providerId: string, id: string, fields: string[] = [
         ) > 0
     `;
     const results = await Promise.resolve(
-        db
+        sqlite
             .query<
                 Db<Anime>,
                 {
@@ -59,7 +65,7 @@ export const media = async (providerId: string, id: string, fields: string[] = [
             ) > 0
         `;
         const results = await Promise.resolve(
-            db
+            sqlite
                 .query<
                     Db<Manga>,
                     {

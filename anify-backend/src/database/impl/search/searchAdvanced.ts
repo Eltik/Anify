@@ -1,4 +1,4 @@
-import { db, dbType } from "../..";
+import { sqlite, dbType } from "../..";
 import { Format, Genres, Sort, SortDirection, Type } from "../../../types/enums";
 import { Anime, Db, Manga } from "../../../types/types";
 
@@ -150,7 +150,7 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(query: s
     }
 
     try {
-        const results = db
+        const results = sqlite
             .query<
                 Db<Anime> | Db<Manga>,
                 {

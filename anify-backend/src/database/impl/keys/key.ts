@@ -1,14 +1,21 @@
-import { db, dbType } from "../..";
+import { QueryConfig } from "pg";
+import { sqlite, dbType, postgres } from "../..";
 import { Db, Key } from "../../../types/types";
 
 export const getKey = async (id: string): Promise<Key | undefined> => {
     if (dbType === "postgresql") {
-        const query = `
-            SELECT * FROM "apiKey"
-            WHERE id = $id
-        `;
+        const query: QueryConfig = {
+            text: `
+                SELECT * FROM "apiKey"
+                WHERE id = $1
+            `,
+            values: [id],
+        };
+
+        const key = await postgres.query<Db<Key>>(query).then((res) => res.rows[0]);
+        return key;
     }
-    const key = db.query<Db<Key>, { $id: string }>(`SELECT * FROM apiKey WHERE id = $id`).get({ $id: id });
+    const key = sqlite.query<Db<Key>, { $id: string }>(`SELECT * FROM apiKey WHERE id = $id`).get({ $id: id });
     return key
         ? {
               id: key.id,
@@ -21,6 +28,6 @@ export const getKey = async (id: string): Promise<Key | undefined> => {
 };
 
 export const getKeys = async (): Promise<Key[] | undefined> => {
-    const keys = db.query(`SELECT * FROM apiKey`).all() as Db<Key>[];
+    const keys = sqlite.query(`SELECT * FROM apiKey`).all() as Db<Key>[];
     return keys;
 };

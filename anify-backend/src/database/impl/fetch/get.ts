@@ -1,30 +1,61 @@
-import { db, dbType } from "../..";
+import { QueryConfig } from "pg";
+import { sqlite, dbType, postgres } from "../..";
 import { Anime, Db, Manga } from "../../../types/types";
 
 export const get = async (id: string, fields: string[] = []): Promise<Anime | Manga | undefined> => {
     if (dbType === "postgresql") {
-        const data: Anime | Manga | undefined = undefined;
-        if (!data) return undefined;
+        const query: QueryConfig = {
+            text: `
+                SELECT * FROM anime WHERE id = $1
+            `,
+            values: [id],
+        };
+        const data: Anime | undefined = await postgres.query<Anime>(query).then((res) => res.rows[0]);
+        if (!data) {
+            const query: QueryConfig = {
+                text: `
+                    SELECT * FROM manga WHERE id = $1
+                `,
+                values: [id],
+            };
+            const data: Manga | undefined = await postgres.query<Manga>(query).then((res) => res.rows[0]);
+            if (!data) return undefined;
 
-        try {
-            if (fields && fields.length > 0) {
-                // Delete fields that don't exist in the fields array
-                Object.keys(data).forEach((key) => {
-                    if (!fields.includes(key)) {
-                        delete (data as { [key: string]: any })[key];
-                    }
-                });
+            try {
+                if (fields && fields.length > 0) {
+                    // Delete fields that don't exist in the fields array
+                    Object.keys(data).forEach((key) => {
+                        if (!fields.includes(key)) {
+                            delete (data as { [key: string]: any })[key];
+                        }
+                    });
+                }
+
+                return data as unknown as Anime | Manga;
+            } catch (e) {
+                return undefined;
             }
+        } else {
+            try {
+                if (fields && fields.length > 0) {
+                    // Delete fields that don't exist in the fields array
+                    Object.keys(data).forEach((key) => {
+                        if (!fields.includes(key)) {
+                            delete (data as { [key: string]: any })[key];
+                        }
+                    });
+                }
 
-            return data as unknown as Anime | Manga;
-        } catch (e) {
-            return undefined;
+                return data as unknown as Anime | Manga;
+            } catch (e) {
+                return undefined;
+            }
         }
     }
 
-    const anime = db.query<Db<Anime>, { $id: string }>(`SELECT * FROM anime WHERE id = $id`).get({ $id: id });
-    if (!anime) {
-        const data = db.query<Db<Manga>, { $id: string }>(`SELECT * FROM manga WHERE id = $id`).get({ $id: id });
+    const data = sqlite.query<Db<Anime>, { $id: string }>(`SELECT * FROM anime WHERE id = $id`).get({ $id: id });
+    if (!data) {
+        const data = sqlite.query<Db<Manga>, { $id: string }>(`SELECT * FROM manga WHERE id = $id`).get({ $id: id });
         if (!data) return undefined;
 
         try {
@@ -57,19 +88,19 @@ export const get = async (id: string, fields: string[] = []): Promise<Anime | Ma
         }
     } else {
         try {
-            let parsedAnime = Object.assign(anime, {
-                title: JSON.parse(anime.title),
-                season: anime.season.replace(/"/g, ""),
-                mappings: JSON.parse(anime.mappings),
-                synonyms: JSON.parse(anime.synonyms),
-                rating: JSON.parse(anime.rating),
-                popularity: JSON.parse(anime.popularity),
-                relations: JSON.parse(anime.relations),
-                genres: JSON.parse(anime.genres),
-                tags: JSON.parse(anime.tags),
-                episodes: JSON.parse(anime.episodes),
-                artwork: JSON.parse(anime.artwork),
-                characters: JSON.parse(anime.characters),
+            let parsedAnime = Object.assign(data, {
+                title: JSON.parse(data.title),
+                season: data.season.replace(/"/g, ""),
+                mappings: JSON.parse(data.mappings),
+                synonyms: JSON.parse(data.synonyms),
+                rating: JSON.parse(data.rating),
+                popularity: JSON.parse(data.popularity),
+                relations: JSON.parse(data.relations),
+                genres: JSON.parse(data.genres),
+                tags: JSON.parse(data.tags),
+                episodes: JSON.parse(data.episodes),
+                artwork: JSON.parse(data.artwork),
+                characters: JSON.parse(data.characters),
             });
 
             if (fields && fields.length > 0) {

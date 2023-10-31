@@ -1,4 +1,5 @@
-import { db, dbType } from "../..";
+import { QueryConfig } from "pg";
+import { sqlite, dbType, postgres } from "../..";
 import { averageMetric } from "../../../helper";
 import { Type } from "../../../types/enums";
 import { Anime, Manga } from "../../../types/types";
@@ -9,69 +10,109 @@ export const update = async (data: Anime | Manga) => {
 
     if (dbType == "postgresql") {
         if (data.type === Type.ANIME) {
-            const query = `
-                UPDATE anime SET
-                    slug = $slug,
-                    coverImage = $coverImage,
-                    bannerImage = $bannerImage,
-                    trailer = $trailer,
-                    status = $status,
-                    season = $season,
-                    title = $title,
-                    currentEpisode = $currentEpisode,
-                    mappings = $mappings,
-                    synonyms = $synonyms,
-                    countryOfOrigin = $countryOfOrigin,
-                    description = $description,
-                    duration = $duration,
-                    color = $color,
-                    year = $year,
-                    rating = $rating,
-                    popularity = $popularity,
-                    type = $type,
-                    format = $format,
-                    relations = $relations,
-                    totalEpisodes = $totalEpisodes,
-                    episodes = $episodes,
-                    averageRating = $averageRating,
-                    averagePopularity = $averagePopularity,
-                    artwork = $artwork,
-                    characters = $characters,
-                    genres = $genres,
-                    tags = $tags
-                WHERE id = $id
-            `;
+            const query: QueryConfig = {
+                text: `
+                    UPDATE anime SET
+                        slug = $1,
+                        coverImage = $2,
+                        bannerImage = $3,
+                        trailer = $4,
+                        status = $5,
+                        season = $6,
+                        title = $7,
+                        currentEpisode = $8,
+                        mappings = $9,
+                        synonyms = $10,
+                        countryOfOrigin = $11,
+                        description = $12,
+                        duration = $13,
+                        color = $14,
+                        year = $15,
+                        rating = $16,
+                        popularity = $17,
+                        type = $18,
+                        format = $19,
+                        relations = $20,
+                        totalEpisodes = $21,
+                        episodes = $22,
+                        averageRating = $23,
+                        averagePopularity = $24,
+                        artwork = $25,
+                        characters = $26,
+                        genres = $27,
+                        tags = $28
+                    WHERE id = $29
+                `,
+                values: [
+                    data.slug,
+                    data.coverImage,
+                    data.bannerImage,
+                    data.trailer,
+                    data.status,
+                    data.season,
+                    JSON.stringify(data.title),
+                    data.currentEpisode,
+                    JSON.stringify(data.mappings),
+                    data.synonyms,
+                    data.countryOfOrigin,
+                    data.description,
+                    data.duration,
+                    data.color,
+                    data.year,
+                    JSON.stringify(data.rating),
+                    JSON.stringify(data.popularity),
+                    data.type,
+                    data.format,
+                    data.relations,
+                    data.totalEpisodes,
+                    data.genres,
+                    data.tags,
+                    JSON.stringify(data.episodes),
+                    data.averageRating,
+                    data.averagePopularity,
+                    data.artwork,
+                    data.characters,
+                    data.id,
+                ],
+            };
+
+            const update = await postgres.query(query);
+            return update;
         } else {
-            const query = `
-                UPDATE manga SET
-                    slug = $slug,
-                    coverImage = $coverImage,
-                    bannerImage = $bannerImage,
-                    status = $status,
-                    title = $title,
-                    currentChapter = $currentChapter,
-                    mappings = $mappings,
-                    synonyms = $synonyms,
-                    countryOfOrigin = $countryOfOrigin,
-                    description = $description,
-                    color = $color,
-                    year = $year,
-                    rating = $rating,
-                    popularity = $popularity,
-                    type = $type,
-                    format = $format,
-                    relations = $relations,
-                    totalChapters = $totalChapters,
-                    totalVolumes = $totalVolumes,
-                    chapters = $chapters,
-                    averageRating = $averageRating,
-                    averagePopularity = $averagePopularity,
-                    artwork = $artwork,
-                    characters = $characters,
-                    genres = $genres,
-                    tags = $tags
-                WHERE id = $id
-            `;
+            const query: QueryConfig = {
+                text: `
+                    UPDATE manga SET
+                        slug = $1,
+                        coverImage = $2,
+                        bannerImage = $3,
+                        status = $4,
+                        title = $5,
+                        mappings = $6,
+                        synonyms = $7,
+                        countryOfOrigin = $8,
+                        description = $9,
+                        color = $10,
+                        year = $11,
+                        rating = $12,
+                        popularity = $13,
+                        type = $14,
+                        format = $15,
+                        relations = $16,
+                        totalChapters = $17,
+                        totalVolumes = $18,
+                        chapters = $19,
+                        averageRating = $20,
+                        averagePopularity = $21,
+                        artwork = $22,
+                        characters = $23,
+                        genres = $24,
+                        tags = $25
+                    WHERE id = $26
+                `,
+                values: [data.slug, data.coverImage, data.bannerImage, data.status, JSON.stringify(data.title), JSON.stringify(data.mappings), data.synonyms, data.countryOfOrigin, data.description, data.color, data.year, JSON.stringify(data.rating), data.popularity, data.type, data.format, data.relations, data.totalChapters, data.totalVolumes, JSON.stringify(data.chapters), data.averageRating, data.averagePopularity, data.artwork, data.characters, data.genres, data.tags, data.id],
+            };
+            const update = await postgres.query(query);
+            return update;
         }
     }
 
@@ -156,6 +197,6 @@ export const update = async (data: Anime | Manga) => {
         });
     }
 
-    const update = db.prepare(query).run(params);
+    const update = sqlite.prepare(query).run(params);
     return update;
 };

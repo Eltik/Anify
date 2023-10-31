@@ -1,4 +1,4 @@
-import { db, dbType } from "../..";
+import { sqlite, dbType, postgres } from "../..";
 import { Type } from "../../../types/enums";
 import { Anime, AnimeInfo, Db, Manga, MangaInfo } from "../../../types/types";
 
@@ -17,16 +17,26 @@ export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: Ani
                     WHERE id IN (${ids.map((id) => `'${id}'`).join(", ")})
                     ORDER BY title->>'english' ASC
                 `;
+
+                const data: Anime[] = await postgres.query<Anime>(query).then((res) => res.rows);
+                if (!data) return undefined;
+
+                return data;
             } else {
                 const query = `
                     SELECT * FROM "manga"
                     WHERE id IN (${ids.map((id) => `'${id}'`).join(", ")})
                     ORDER BY title->>'english' ASC
                 `;
+
+                const data: Manga[] = await postgres.query<Manga>(query).then((res) => res.rows);
+                if (!data) return undefined;
+
+                return data;
             }
         }
 
-        return db
+        return sqlite
             .query<Db<Anime> | Db<Manga>, []>(`SELECT * FROM ${type === Type.ANIME ? "anime" : "manga"} WHERE id IN (${ids.map((id) => `'${id}'`).join(", ")}) ORDER BY title->>'english' ASC`)
             .all()
             .map((media) => {
