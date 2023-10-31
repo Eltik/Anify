@@ -44,8 +44,8 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(
             where = `
                 WHERE
                 (
-                    ${query.length > 0 ? `%${query}%` : `'%'`}        ILIKE ANY("manga".synonyms)
-                    OR  ${query.length > 0 ? `%${query}%` : `'%'`}    % ANY("manga".synonyms)
+                    ${query.length > 0 ? `'%${query}%'` : `'%'`}        ILIKE ANY("manga".synonyms)
+                    OR  ${query.length > 0 ? `'%${query}%'` : `'%'`}    % ANY("manga".synonyms)
                     OR  "manga".title->>'english' ILIKE ${query.length > 0 ? `'%${query}%'` : `'%'`}
                     OR  "manga".title->>'romaji'  ILIKE ${query.length > 0 ? `'%${query}%'` : `'%'`}
                     OR  "manga".title->>'native'  ILIKE ${query.length > 0 ? `'%${query}%'` : `'%'`}
@@ -81,7 +81,7 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(
                 OFFSET   ${skip}
             `;
 
-            [count, results] = (await Promise.all([postgres.query(countQuery), postgres.query(sqlQuery)])) as [any, any];
+            [count, results] = (await Promise.all([(await postgres.query(countQuery)).rows, (await postgres.query(sqlQuery)).rows])) as [any, any];
         } else {
             const countQuery = `
                 SELECT COUNT(*) FROM "manga"

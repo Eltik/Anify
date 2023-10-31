@@ -21,7 +21,7 @@ export const updateSkipTimes = async (data: SkipTime) => {
                     episodes = $1
                 WHERE id = $2
             `,
-            values: [data.episodes, data.id],
+            values: [JSON.stringify(data.episodes), data.id],
         };
 
         const update = await postgres.query(query);

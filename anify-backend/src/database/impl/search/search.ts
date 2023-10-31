@@ -26,8 +26,8 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
             where = `
                 WHERE
                 (
-                    ${query.length > 0 ? `%${query}%` : `'%'`}        ILIKE ANY("manga".synonyms)
-                    OR  ${query.length > 0 ? `%${query}%` : `'%'`}    % ANY("manga".synonyms)
+                    ${query.length > 0 ? `'%${query}%'` : `'%'`}        ILIKE ANY("manga".synonyms)
+                    OR  ${query.length > 0 ? `'%${query}%'` : `'%'`}    % ANY("manga".synonyms)
                     OR  "manga".title->>'english' ILIKE ${query.length > 0 ? `'%${query}%'` : `'%'`}
                     OR  "manga".title->>'romaji'  ILIKE ${query.length > 0 ? `'%${query}%'` : `'%'`}
                     OR  "manga".title->>'native'  ILIKE ${query.length > 0 ? `'%${query}%'` : `'%'`}
@@ -68,10 +68,10 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
                 SELECT * FROM "manga"
                 ${where}
                 ORDER BY
-                    (CASE WHEN "manga".title->>'english' IS NOT NULL THEN similarity(LOWER("manga".title->>'english'), LOWER(${query.length > 0 ? query : "'%'"})) ELSE 0 END,
-                    + CASE WHEN "manga".title->>'romaji' IS NOT NULL THEN similarity(LOWER("manga".title->>'romaji'), LOWER(${query.length > 0 ? query : "'%'"})) ELSE 0 END,
-                    + CASE WHEN "manga".title->>'native' IS NOT NULL THEN similarity(LOWER("manga".title->>'native'), LOWER(${query.length > 0 ? query : "'%'"})) ELSE 0 END,
-                    + CASE WHEN synonyms IS NOT NULL THEN most_similar(LOWER(${query.length > 0 ? query : "'%'"}), synonyms) ELSE 0 END)
+                    (CASE WHEN "manga".title->>'english' IS NOT NULL THEN similarity(LOWER("manga".title->>'english'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
+                    + CASE WHEN "manga".title->>'romaji' IS NOT NULL THEN similarity(LOWER("manga".title->>'romaji'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
+                    + CASE WHEN "manga".title->>'native' IS NOT NULL THEN similarity(LOWER("manga".title->>'native'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
+                    + CASE WHEN synonyms IS NOT NULL THEN most_similar(LOWER(${query.length > 0 ? `'${query}'` : "'%'"}), synonyms) ELSE 0 END)
                         DESC,
                     ${sort === Sort.SCORE ? `"manga"."averageRating"` : sort === Sort.POPULARITY ? `"manga"."averagePopularity"` : sort === Sort.TOTAL_CHAPTERS ? `"manga"."totalChapters"` : sort === Sort.TOTAL_VOLUMES ? `"manga"."totalVolumes"` : sort === Sort.YEAR ? `"manga".year` : ""}
                     ${sortDirection === SortDirection.ASC ? "ASC" : "DESC"}

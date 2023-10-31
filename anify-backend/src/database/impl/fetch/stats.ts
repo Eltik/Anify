@@ -25,7 +25,7 @@ export const stats = async (): Promise<{ anime: number; manga: number; novels: n
         const manga = await postgres.query<{ count: number }>(mangaCount).then((res) => res.rows[0]);
         const novels = await postgres.query<{ count: number }>(novelCount).then((res) => res.rows[0]);
         let skipTimes = 0;
-        (await postgres.query<SkipTime[]>(skipTimesCount).then((res) => res.rows[0]))?.map((row) => {
+        (await postgres.query(skipTimesCount).then((res) => res.rows))?.map((row: SkipTime) => {
             const episodes = row.episodes;
             for (let i = 0; i < episodes.length; i++) {
                 if (episodes[i].outro?.end != 0) {
@@ -36,11 +36,11 @@ export const stats = async (): Promise<{ anime: number; manga: number; novels: n
         const apiKeys = await postgres.query<{ count: number }>(apiKeysCount).then((res) => res.rows[0]);
 
         return {
-            anime: anime?.count ?? 0,
-            manga: manga?.count ?? 0,
-            novels: novels?.count ?? 0,
+            anime: Number(anime?.count ?? 0),
+            manga: Number(manga?.count ?? 0),
+            novels: Number(novels?.count ?? 0),
             skipTimes,
-            apiKeys: apiKeys?.count ?? 0,
+            apiKeys: Number(apiKeys?.count ?? 0),
         };
     }
 
