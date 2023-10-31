@@ -1,6 +1,7 @@
 // All environment variables.
 export const env = {
     PORT: Number(process.env.PORT) || 3000,
+    DATABASE_URL: process.env.DATABASE_URL || "",
     NINEANIME_RESOLVER: process.env.NINEANIME_RESOLVER,
     NINEANIME_KEY: process.env.NINEANIME_KEY,
     REDIS_URL: process.env.REDIS_URL,

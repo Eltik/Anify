@@ -1,11 +1,119 @@
-import { db } from "../..";
+import { db, dbType, prisma } from "../..";
 import { averageMetric } from "../../../helper";
-import { Type } from "../../../types/enums";
+import { Season, Type } from "../../../types/enums";
 import { Anime, Manga } from "../../../types/types";
 import { get } from "../fetch/get";
 
 export const create = async (data: Anime | Manga, stringify: boolean = true) => {
     if (await get(data.id)) return null;
+
+    if (dbType == "postgresql") {
+        if (!stringify) {
+            try {
+                Object.assign(data, {
+                    title: JSON.parse((data as any).title),
+                    mappings: JSON.parse((data as any).mappings),
+                    synonyms: JSON.parse((data as any).synonyms),
+                    rating: data.rating ? JSON.parse((data as any).rating) : null,
+                    popularity: data.popularity ? JSON.parse((data as any).popularity) : null,
+                    relations: data.relations ? JSON.parse((data as any).relations) : null,
+                    genres: data.genres ? JSON.parse((data as any).genres) : null,
+                    tags: data.tags ? JSON.parse((data as any).tags) : null,
+                    artwork: data.artwork ? JSON.parse((data as any).artwork) : null,
+                    characters: data.characters ? JSON.parse((data as any).characters) : null,
+                });
+            } catch (e) {
+                //
+            }
+        }
+        if (data.type === Type.ANIME) {
+            if (!stringify) {
+                try {
+                    Object.assign(data, {
+                        episodes: JSON.parse((data as any).episodes),
+                    });
+                } catch (e) {
+                    //
+                }
+            }
+
+            return await prisma.anime.create({
+                data: {
+                    id: data.id,
+                    slug: data.slug,
+                    coverImage: data.coverImage,
+                    bannerImage: data.bannerImage,
+                    trailer: data.trailer,
+                    status: data.status,
+                    season: data.season ?? Season.UNKNOWN,
+                    title: data.title,
+                    currentEpisode: data.currentEpisode,
+                    mappings: data.mappings,
+                    synonyms: data.synonyms,
+                    countryOfOrigin: data.countryOfOrigin,
+                    description: data.description,
+                    duration: data.duration,
+                    color: data.color,
+                    year: data.year,
+                    rating: data.rating,
+                    popularity: data.popularity,
+                    type: data.type,
+                    format: data.format,
+                    relations: data.relations,
+                    totalEpisodes: data.totalEpisodes,
+                    episodes: data.episodes,
+                    averageRating: averageMetric(data.rating),
+                    averagePopularity: averageMetric(data.popularity),
+                    artwork: data.artwork,
+                    characters: data.characters,
+                    genres: data.genres,
+                    tags: data.tags,
+                },
+            });
+        } else {
+            if (!stringify) {
+                try {
+                    Object.assign(data, {
+                        chapters: JSON.parse((data as any).chapters),
+                    });
+                } catch (e) {
+                    //
+                }
+            }
+            
+            return await prisma.manga.create({
+                data: {
+                    id: data.id,
+                    slug: data.slug,
+                    coverImage: data.coverImage,
+                    bannerImage: data.bannerImage,
+                    status: data.status,
+                    title: data.title,
+                    mappings: data.mappings,
+                    synonyms: data.synonyms,
+                    countryOfOrigin: data.countryOfOrigin,
+                    description: data.description,
+                    color: data.color,
+                    year: data.year,
+                    rating: data.rating,
+                    popularity: data.popularity,
+                    type: data.type,
+                    format: data.format,
+                    relations: data.relations,
+                    totalChapters: data.totalChapters,
+                    totalVolumes: data.totalVolumes,
+                    chapters: data.chapters,
+                    averageRating: averageMetric(data.rating),
+                    averagePopularity: averageMetric(data.popularity),
+                    artwork: data.artwork,
+                    characters: data.characters,
+                    currentChapter: data.currentChapter ?? null,
+                    genres: data.genres,
+                    tags: data.tags,
+                },
+            });
+        }
+    }
 
     const query = `
     INSERT INTO ${data.type === "ANIME" ? "anime" : "manga"} (

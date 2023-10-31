@@ -39,6 +39,11 @@ export const loadSearch = async (data: { query: string; type: Type; formats: For
             }
         }).filter((x) => x !== null)[0];
 
+        if (!result) {
+            await emitter.emitAsync(Events.COMPLETED_SEARCH_LOAD, []);
+            return [];
+        }
+
         await emitter.emitAsync(Events.COMPLETED_SEARCH_LOAD, result);
         return result;
     }

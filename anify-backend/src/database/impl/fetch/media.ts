@@ -1,7 +1,30 @@
-import { db } from "../..";
+import { Prisma } from "@prisma/client";
+import { db, dbType, prisma } from "../..";
 import { Anime, Db, Manga } from "../../../types/types";
 
 export const media = async (providerId: string, id: string, fields: string[] = []): Promise<Anime | Manga | undefined> => {
+    if (dbType === "postgresql") {
+        const data = (await (
+            await prisma.$queryRaw(Prisma.sql`
+        SELECT * FROM "anime"
+        WHERE "anime"."mappings" @> '[{"providerId": "${Prisma.raw(providerId)}", "id": "${Prisma.raw(id)}"}]'
+        `)
+        ) as Anime[] | undefined)?.[0];
+
+        if (!data) {
+            const data = (await (
+                await prisma.$queryRaw(Prisma.sql`
+            SELECT * FROM "manga"
+            WHERE "manga"."mappings" @> '[{"providerId": "${Prisma.raw(providerId)}", "id": "${Prisma.raw(id)}"}]'
+            `)
+            ) as Manga[] | undefined)?.[0];
+
+            return data as Anime | Manga;
+        } else {
+            return data as Anime | Manga;
+        }
+    }
+
     const sql = `
         SELECT * FROM anime
         WHERE (

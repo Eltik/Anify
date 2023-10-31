@@ -1,7 +1,38 @@
-import { db } from "../..";
+import { db, dbType, prisma } from "../..";
 import { Anime, Db, Manga } from "../../../types/types";
 
 export const get = async (id: string, fields: string[] = []): Promise<Anime | Manga | undefined> => {
+    if (dbType === "postgresql") {
+        let data: Anime | Manga | undefined = await prisma.anime.findUnique({
+            where: {
+                id: id,
+            }
+        }) as Anime;
+
+        if (!data) {
+            data = await prisma.manga.findUnique({
+                where: { id: id },
+            }) as unknown as Manga;
+        }
+
+        if (!data) return undefined;
+
+        try {
+            if (fields && fields.length > 0) {
+                // Delete fields that don't exist in the fields array
+                Object.keys(data).forEach((key) => {
+                    if (!fields.includes(key)) {
+                        delete (data as { [key: string]: any })[key];
+                    }
+                });
+            }
+
+            return data as unknown as Anime | Manga;
+        } catch (e) {
+            return undefined;
+        }
+    }
+
     const anime = db.query<Db<Anime>, { $id: string }>(`SELECT * FROM anime WHERE id = $id`).get({ $id: id });
     if (!anime) {
         const data = db.query<Db<Manga>, { $id: string }>(`SELECT * FROM manga WHERE id = $id`).get({ $id: id });

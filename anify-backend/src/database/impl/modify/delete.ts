@@ -1,22 +1,24 @@
-import { db } from "../..";
-import { Anime, Db, Manga } from "../../../types/types";
+import { db, dbType, prisma } from "../..";
+import { Type } from "../../../types/enums";
+import { get } from "../fetch/get";
 
 export const deleteEntry = async (id: string): Promise<void> => {
-    const anime = db.query<Db<Anime>, { $id: string }>(`SELECT * FROM anime WHERE id = $id`).get({ $id: id });
-    if (!anime) {
-        const data = db.query<Db<Manga>, { $id: string }>(`SELECT * FROM manga WHERE id = $id`).get({ $id: id });
-        if (!data) return undefined;
+    const data = await get(id);
+    if (!data) return undefined;
 
-        try {
-            db.query(`DELETE FROM manga WHERE id = $id`).run({ $id: id });
-        } catch (e) {
-            return undefined;
-        }
-    } else {
-        try {
-            db.query(`DELETE FROM anime WHERE id = $id`).run({ $id: id });
-        } catch (e) {
-            return undefined;
+    if (dbType === "postgresql") {
+        if (data.type === Type.ANIME) {
+            await prisma.anime.delete({
+                where: {
+                    id: id,
+                }
+            });
+        } else {
+            await prisma.manga.delete({
+                where: { id: id },
+            });
         }
     }
+
+    await db.query(`DELETE FROM ${data.type.toLowerCase()} WHERE id = $id`).run({ $id: id });
 };

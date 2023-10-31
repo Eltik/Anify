@@ -13,6 +13,7 @@
     "check:proxies": "bun run src/scripts/checkProxies.ts",
     "scrape:proxies": "bun run src/scripts/scrapeProxies.ts",
     "build": "bun build ./src/index.ts --outdir ./dist --target node",
+    "build:db": "bun run src/scripts/buildDb.ts",
     "prettier": "bunx prettier --write .",
     "lint": "bun run prettier && bunx tsc"
   },
@@ -21,6 +22,7 @@
     "@types/pdfkit": "^0.12.10",
     "bun-types": "latest",
     "prettier": "^3.0.3",
+    "prisma": "^5.5.2",
     "tsc": "^2.0.4"
   },
   "peerDependencies": {
@@ -28,6 +30,7 @@
   },
   "dependencies": {
     "@extractus/article-extractor": "^8.0.2",
+    "@prisma/client": "^5.5.2",
     "cheerio": "^1.0.0-rc.12",
     "colors": "^1.4.0",
     "crypto-js": "^4.1.1",
@@ -37,6 +40,8 @@
     "image-size": "^1.0.2",
     "ioredis": "^5.3.2",
     "jimp": "^0.22.10",
-    "pdfkit": "^0.13.0"
+    "nexus-plugin-prisma": "^0.35.0",
+    "pdfkit": "^0.13.0",
+    "prisma-json-types-generator": "^3.0.2"
   }
 }

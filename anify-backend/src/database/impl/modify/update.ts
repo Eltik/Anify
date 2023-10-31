@@ -1,4 +1,4 @@
-import { db } from "../..";
+import { db, dbType, prisma } from "../..";
 import { averageMetric } from "../../../helper";
 import { Type } from "../../../types/enums";
 import { Anime, Manga } from "../../../types/types";
@@ -6,6 +6,80 @@ import { get } from "../fetch/get";
 
 export const update = async (data: Anime | Manga) => {
     if (!(await get(data.id))) return null;
+
+    if (dbType == "postgresql") {
+        if (data.type === Type.ANIME) {
+            return await prisma.anime.update({
+                where: {
+                    id: data.id,
+                },
+                data: {
+                    slug: data.slug,
+                    coverImage: data.coverImage,
+                    bannerImage: data.bannerImage,
+                    trailer: data.trailer,
+                    status: data.status,
+                    season: data.season,
+                    title: data.title,
+                    currentEpisode: data.currentEpisode,
+                    mappings: data.mappings,
+                    synonyms: data.synonyms,
+                    countryOfOrigin: data.countryOfOrigin,
+                    description: data.description,
+                    duration: data.duration,
+                    color: data.color,
+                    year: data.year,
+                    rating: data.rating,
+                    popularity: data.popularity,
+                    type: data.type,
+                    format: data.format,
+                    relations: data.relations,
+                    totalEpisodes: data.totalEpisodes,
+                    episodes: data.episodes,
+                    averageRating: averageMetric(data.rating),
+                    averagePopularity: averageMetric(data.popularity),
+                    artwork: data.artwork,
+                    characters: data.characters,
+                    genres: data.genres,
+                    tags: data.tags,
+                },
+            });
+        } else {
+            return await prisma.manga.update({
+                where: {
+                    id: data.id,
+                },
+                data: {
+                    slug: data.slug,
+                    coverImage: data.coverImage,
+                    bannerImage: data.bannerImage,
+                    status: data.status,
+                    title: data.title,
+                    currentChapter: data.currentChapter,
+                    mappings: data.mappings,
+                    synonyms: data.synonyms,
+                    countryOfOrigin: data.countryOfOrigin,
+                    description: data.description,
+                    color: data.color,
+                    year: data.year,
+                    rating: data.rating,
+                    popularity: data.popularity,
+                    type: data.type,
+                    format: data.format,
+                    relations: data.relations,
+                    totalChapters: data.totalChapters,
+                    totalVolumes: data.totalVolumes,
+                    chapters: data.chapters,
+                    averageRating: averageMetric(data.rating),
+                    averagePopularity: averageMetric(data.popularity),
+                    artwork: data.artwork,
+                    characters: data.characters,
+                    genres: data.genres,
+                    tags: data.tags,
+                },
+            });
+        }
+    }
 
     const query = `
     UPDATE ${data.type === "ANIME" ? "anime" : "manga"} SET
@@ -16,7 +90,7 @@ export const update = async (data: Anime | Manga) => {
         status = $status,
         ${data.type === Type.ANIME ? "season = $season," : ""}
         title = $title,
-        ${data.type === Type.ANIME ? "currentEpisode = $currentEpisode," : ""}
+        ${data.type === Type.ANIME ? "currentEpisode = $currentEpisode," : "currentChapter = $currentChapter,"}
         mappings = $mappings,
         synonyms = $synonyms,
         countryOfOrigin = $countryOfOrigin,
@@ -84,6 +158,7 @@ export const update = async (data: Anime | Manga) => {
             $totalChapters: data.totalChapters,
             $totalVolumes: data.totalVolumes,
             $chapters: JSON.stringify(data.chapters),
+            $currentChapter: data.currentChapter,
         });
     }
 

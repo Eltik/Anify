@@ -1,10 +1,168 @@
-import { db } from "../..";
+import { Prisma } from "@prisma/client";
+import { db, dbType, prisma } from "../..";
 import { Format, Genres, Sort, SortDirection, Type } from "../../../types/enums";
 import { Anime, Db, Manga } from "../../../types/types";
 
 type ReturnType<T> = T extends Type.ANIME ? Anime[] : Manga[];
 
 export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(query: string, type: T, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = [], year = 0, tags: string[] = [], tagsExcluded: string[] = [], sort: Sort = Sort.SCORE, sortDirection: SortDirection = SortDirection.ASC) => {
+    if (dbType === "postgresql") {
+        const skip = page > 0 ? perPage * (page - 1) : 0;
+        let where;
+
+        if (type === Type.ANIME) {
+            where = Prisma.sql`
+                WHERE
+                (
+                    ${"%" + query + "%"}        ILIKE ANY("anime".synonyms)
+                    OR  ${"%" + query + "%"}    % ANY("anime".synonyms)
+                    OR  "anime".title->>'english' ILIKE ${"%" + query + "%"}
+                    OR  "anime".title->>'romaji'  ILIKE ${"%" + query + "%"}
+                    OR  "anime".title->>'native'  ILIKE ${"%" + query + "%"}
+                )
+                ${
+                    formats.length > 0
+                        ? Prisma.sql`AND "anime"."format" IN (${Prisma.join(
+                            formats.map((f) => Prisma.raw(`'${f}'`)),
+                            ", "
+                        )})`
+                        : Prisma.empty
+                }
+                ${
+                    genres && genres.length > 0
+                        ? Prisma.sql`AND ARRAY[${Prisma.join(
+                            genres.map((g) => Prisma.raw(`'${g}'`)),
+                            ", "
+                        )}] <@ "anime"."genres"`
+                        : Prisma.empty
+                }
+                ${
+                    genresExcluded.length > 0
+                        ? Prisma.sql`AND NOT ARRAY[${Prisma.join(
+                            genresExcluded.map((g) => Prisma.raw(`'${g}'`)),
+                            ", "
+                        )}] <@ "anime"."genres"`
+                        : Prisma.empty
+                }
+                ${
+                    tags && tags.length > 0
+                        ? Prisma.sql`AND ARRAY[${Prisma.join(
+                            tags.map((g) => Prisma.raw(`'${g}'`)),
+                            ", "
+                        )}] <@ "anime"."tags"`
+                        : Prisma.empty
+                }
+                ${
+                    tagsExcluded.length > 0
+                        ? Prisma.sql`AND NOT ARRAY[${Prisma.join(
+                            tagsExcluded.map((g) => Prisma.raw(`'${g}'`)),
+                            ", "
+                        )}] <@ "anime"."tags"`
+                        : Prisma.empty
+                }
+                ${year > 0 ? Prisma.sql`AND "anime"."year" = ${year}` : Prisma.empty}
+            `;
+        } else {
+            where = Prisma.sql`
+                WHERE
+                (
+                    ${"%" + query + "%"}        ILIKE ANY("manga".synonyms)
+                    OR  ${"%" + query + "%"}    % ANY("manga".synonyms)
+                    OR  "manga".title->>'english' ILIKE ${"%" + query + "%"}
+                    OR  "manga".title->>'romaji'  ILIKE ${"%" + query + "%"}
+                    OR  "manga".title->>'native'  ILIKE ${"%" + query + "%"}
+                )
+                ${
+                    formats.length > 0
+                        ? Prisma.sql`AND "manga"."format" IN (${Prisma.join(
+                            formats.map((f) => Prisma.raw(`'${f}'`)),
+                            ", "
+                        )})`
+                        : Prisma.empty
+                }
+                ${
+                    genres && genres.length > 0
+                        ? Prisma.sql`AND ARRAY[${Prisma.join(
+                            genres.map((g) => Prisma.raw(`'${g}'`)),
+                            ", "
+                        )}] <@ "manga"."genres"`
+                        : Prisma.empty
+                }
+                ${
+                    genresExcluded.length > 0
+                        ? Prisma.sql`AND NOT ARRAY[${Prisma.join(
+                            genresExcluded.map((g) => Prisma.raw(`'${g}'`)),
+                            ", "
+                        )}] <@ "manga"."genres"`
+                        : Prisma.empty
+                }
+                ${
+                    tags && tags.length > 0
+                        ? Prisma.sql`AND ARRAY[${Prisma.join(
+                            tags.map((g) => Prisma.raw(`'${g}'`)),
+                            ", "
+                        )}] <@ "manga"."tags"`
+                        : Prisma.empty
+                }
+                ${
+                    tagsExcluded.length > 0
+                        ? Prisma.sql`AND NOT ARRAY[${Prisma.join(
+                            tagsExcluded.map((g) => Prisma.raw(`'${g}'`)),
+                            ", "
+                        )}] <@ "manga"."tags"`
+                        : Prisma.empty
+                }
+                ${year > 0 ? Prisma.sql`AND "manga"."year" = ${year}` : Prisma.empty}
+            `;
+        }
+
+        let [count, results] = [0, []];
+        if (type === Type.ANIME) {
+            [count, results] = await prisma.$transaction([
+                prisma.$queryRaw`
+                        SELECT COUNT(*) FROM "anime"
+                        ${where}
+                    `,
+                prisma.$queryRaw`
+                        SELECT * FROM "anime"
+                        ${where}
+                        ORDER BY
+                            (CASE WHEN "anime".title->>'english' IS NOT NULL THEN similarity(LOWER("anime".title->>'english'), LOWER(${query})) ELSE 0 END,
+                            + CASE WHEN "anime".title->>'romaji' IS NOT NULL THEN similarity(LOWER("anime".title->>'romaji'), LOWER(${query})) ELSE 0 END,
+                            + CASE WHEN "anime".title->>'native' IS NOT NULL THEN similarity(LOWER("anime".title->>'native'), LOWER(${query})) ELSE 0 END,
+                            + CASE WHEN synonyms IS NOT NULL THEN most_similar(LOWER(${query}), synonyms) ELSE 0 END)
+                                DESC
+                        LIMIT    ${perPage}
+                        OFFSET   ${skip}
+                    `,
+            ]);
+        } else {
+            [count, results] = await prisma.$transaction([
+                prisma.$queryRaw`
+                        SELECT COUNT(*) FROM "manga"
+                        ${where}
+                    `,
+                prisma.$queryRaw`
+                        SELECT * FROM "manga"
+                        ${where}
+                        ORDER BY
+                            (CASE WHEN "manga".title->>'english' IS NOT NULL THEN similarity(LOWER("manga".title->>'english'), LOWER(${query})) ELSE 0 END,
+                            + CASE WHEN "manga".title->>'romaji' IS NOT NULL THEN similarity(LOWER("manga".title->>'romaji'), LOWER(${query})) ELSE 0 END,
+                            + CASE WHEN "manga".title->>'native' IS NOT NULL THEN similarity(LOWER("manga".title->>'native'), LOWER(${query})) ELSE 0 END,
+                            + CASE WHEN synonyms IS NOT NULL THEN most_similar(LOWER(${query}), synonyms) ELSE 0 END)
+                                DESC
+                        LIMIT    ${perPage}
+                        OFFSET   ${skip}
+                    `,
+            ]);
+        }
+
+        const total = Number((count as any)[0].count ?? 0);
+        const lastPage = Math.ceil(Number(total) / perPage);
+
+        return results;
+    }
+
     const skip = page > 0 ? perPage * (page - 1) : 0;
 
     let where = `

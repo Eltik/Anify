@@ -1,11 +1,16 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import { get } from "../database/impl/fetch/get";
 import { createKey } from "../database/impl/keys/createKey";
 import { getKey } from "../database/impl/keys/key";
 import { create } from "../database/impl/modify/create";
 import { createSkipTimes } from "../database/impl/skipTimes/createSkipTimes";
 import { getSkipTimes } from "../database/impl/skipTimes/getSkipTimes";
+import { isString } from "../helper";
+import { Season } from "../types/enums";
 
-const importData = async () => {
+export const importData = async () => {
     const name = process.argv.slice(2)?.toString()?.toLowerCase() && process.argv.slice(2)?.toString()?.toLowerCase().length > 0 ? process.argv.slice(2)?.toString()?.toLowerCase() : "database.json";
 
     const file = Bun.file(name);
@@ -22,9 +27,23 @@ const importData = async () => {
 
     for (const media of data.anime) {
         if (await get(media.id)) continue;
+        if (media.season) media.season = media.season.replace(/"/g, "");
+        if (isString(media.averagePopularity)) {
+            try {
+                media.averagePopularity = JSON.parse(media.averagePopularity);
+            } catch (e) {
+                //
+            }
+        }
+        if (media.season === "AUTUMN") {
+            media.season = Season.FALL;
+        }
+        if (media.season === "????" || media.season != Season.FALL && media.season != Season.SPRING && media.season != Season.SUMMER && media.season != Season.WINTER) {
+            media.season = Season.UNKNOWN;
+        }
 
         try {
-            create(media, false);
+            await create(media, false);
 
             count.anime++;
         } catch (error) {
@@ -36,8 +55,16 @@ const importData = async () => {
     for (const media of data.manga) {
         if (await get(media.id)) continue;
 
+        if (isString(media.averagePopularity)) {
+            try {
+                media.averagePopularity = JSON.parse(media.averagePopularity);
+            } catch (e) {
+                //
+            }
+        }
+
         try {
-            create(media, false);
+            await create(media, false);
 
             count.manga++;
         } catch (error) {
@@ -76,5 +103,5 @@ const importData = async () => {
 };
 
 importData().then(() => {
-    console.log("Exported data successfully!");
+    console.log("Imported data successfully!");
 });
