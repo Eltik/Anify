@@ -11,6 +11,8 @@ export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: Ani
     // Fetch all media based on their types
     const fetchMediaByType = async (type: Type, ids: string[]) => {
         if (dbType === "postgresql") {
+            if (ids.length === 0) return undefined;
+
             if (type === Type.ANIME) {
                 const query = `
                     SELECT * FROM "anime"

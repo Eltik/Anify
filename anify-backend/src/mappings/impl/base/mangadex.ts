@@ -331,12 +331,14 @@ export default class ManagDexBase extends BaseProvider {
           }
         | undefined
     > {
+        // Format the date as YYYY-MM-DD
         const currentDate = new Date();
+        currentDate.setDate(currentDate.getDate() - 7);
 
         // Format the date as YYYY-MM-DD
         const year = currentDate.getFullYear();
         const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-        const day = String(currentDate.getDate() - 7).padStart(2, "0");
+        const day = String(currentDate.getDate()).padStart(2, "0");
         const createdAtParam = `${year}-${month}-${day}T00:00:00`;
 
         const trending = (await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true&createdAtSince=${createdAtParam}`)).json().catch(() => {
@@ -377,19 +379,19 @@ export default class ManagDexBase extends BaseProvider {
         const topList: MangaInfo[] = [];
         const seasonalList: MangaInfo[] = [];
 
-        for (const manga of trending.data) {
+        for (const manga of trending?.data ?? []) {
             trendingList.push(this.returnFilledManga(manga));
         }
 
-        for (const manga of popular.data) {
+        for (const manga of popular?.data ?? []) {
             popularList.push(this.returnFilledManga(manga));
         }
 
-        for (const manga of top.data) {
+        for (const manga of top?.data ?? []) {
             topList.push(this.returnFilledManga(manga));
         }
 
-        for (const manga of seasonal.data) {
+        for (const manga of seasonal?.data ?? []) {
             seasonalList.push(this.returnFilledManga(manga));
         }
 
