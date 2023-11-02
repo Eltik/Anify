@@ -1453,14 +1453,14 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
 export const getServerSideProps = async ({ query }: { query: { id: string } }) => {
     const { id } = query;
 
-    const media = (await (await axios.get(`${env.BACKEND_URL}/info?id=${id}&apikey=${env.API_KEY}`)).data) as Anime | Manga;
-    const relations = (await (await axios.get(`${env.BACKEND_URL}/relations?id=${id}&apikey=${env.API_KEY}`)).data) as Anime | Manga;
+    const media = (await (await axios.get(`${env.BACKEND_URL ?? ""}/info?id=${id}&apikey=${env.API_KEY ?? ""}`)).data) as Anime | Manga;
+    const relations = (await (await axios.get(`${env.BACKEND_URL ?? ""}/relations?id=${id}&apikey=${env.API_KEY ?? ""}`)).data) as Anime | Manga;
 
     const contentType = media.type === Type.ANIME ? "episodes" : "chapters";
-    const content = (await (await axios.get(`${env.BACKEND_URL}/${contentType}?id=${id}&apikey=${env.API_KEY}`)).data) as EpisodeData[] | ChapterData[];
+    const content = (await (await axios.get(`${env.BACKEND_URL ?? ""}/${contentType}?id=${id}&apikey=${env.API_KEY ?? ""}`)).data) as EpisodeData[] | ChapterData[];
 
     if (media.type === Type.ANIME) {
-        const episodeCovers = (await (await axios.get(`${env.BACKEND_URL}/content-metadata?id=${id}&apikey=${env.API_KEY}`)).data) as { providerId: string; data: Episode[] }[];
+        const episodeCovers = (await (await axios.get(`${env.BACKEND_URL ?? ""}/content-metadata?id=${id}&apikey=${env.API_KEY ?? ""}`)).data) as { providerId: string; data: Episode[] }[];
 
         for (let i = 0; i < content.length; i++) {
             const episodes = (content as EpisodeData[])[i]?.episodes ?? [];

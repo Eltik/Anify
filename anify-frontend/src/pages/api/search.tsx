@@ -28,7 +28,7 @@ export default async function handler(request: Request, response: ServerResponse
     const formats: string[] = request.body.formats ?? [];
 
     const data = (await (
-        await fetch(`${env.BACKEND_URL}/search-advanced?apikey=${env.API_KEY}`, {
+        await fetch(`${env.BACKEND_URL ?? ""}/search-advanced?apikey=${env.API_KEY ?? ""}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

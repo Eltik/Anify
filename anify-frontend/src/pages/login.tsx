@@ -196,7 +196,7 @@ const Login: NextPage<Props> = ({ login, user, token, provider, providers, redir
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-    const { AUTH_URL } = env;
+    const AUTH_URL = env.AUTH_URL ?? "";
 
     const handleLogin = async (username: string, password: string) => {
         try {

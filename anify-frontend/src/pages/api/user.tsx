@@ -11,7 +11,7 @@ export default async function handler(request: Request, response: ServerResponse
     }
 
     const data = (await (
-        await fetch(`${env.AUTH_URL}/user`, {
+        await fetch(`${env.AUTH_URL ?? ""}/user`, {
             method: "POST",
             body: JSON.stringify({
                 id: request.body.id,

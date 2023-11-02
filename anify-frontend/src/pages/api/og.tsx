@@ -16,7 +16,7 @@ export const config = {
 };
 
 const getDetails = async (id: string): Promise<Anime | Manga> => {
-    const data: Anime | Manga = await (await fetch(`${env.BACKEND_URL}/info/${id}?apikey=${env.API_KEY}`)).json();
+    const data: Anime | Manga = await (await fetch(`${env.BACKEND_URL ?? ""}/info/${id}?apikey=${env.API_KEY ?? ""}`)).json();
     return data;
 };
 

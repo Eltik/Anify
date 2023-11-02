@@ -31,7 +31,7 @@ export default async function handler(request: Request, response: ServerResponse
 
     try {
         const data = await (
-            await fetch(`${env.AUTH_URL}/${request.body.provider}/update-entry`, {
+            await fetch(`${env.AUTH_URL ?? ""}/${request.body.provider}/update-entry`, {
                 method: "POST",
                 body: JSON.stringify({
                     userId: request.body.userId,
