@@ -26,7 +26,7 @@ export const handler = async (req: Request): Promise<Response> => {
             return createResponse(JSON.stringify({ error: "Invalid type provided." }), 400);
         }
 
-        const query = decodeURIComponent(body?.query ?? url.searchParams.get("query") ?? "");
+        const query = body?.query ?? url.searchParams.get("query") ?? "";
         const formats = body?.formats ?? url.searchParams.get("formats")?.split(",") ?? (type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL]);
         const genres = body?.genres ?? url.searchParams.get("genres")?.split(",") ?? [];
         const genresExcluded = body?.genresExcluded ?? url.searchParams.get("genresExcluded")?.split(",") ?? [];
@@ -35,7 +35,7 @@ export const handler = async (req: Request): Promise<Response> => {
         const year = Number(body?.year ?? url.searchParams.get("year") ?? "0");
         const page = Number(body?.page ?? url.searchParams.get("page") ?? "1");
         const perPage = Number(body?.perPage ?? url.searchParams.get("perPage") ?? "20");
-        const sort = body?.sort ?? url.searchParams.get("sort") ?? Sort.POPULARITY;
+        const sort = body?.sort ?? url.searchParams.get("sort") ?? Sort.TITLE;
         const sortDirection = body?.sortDirection ?? url.searchParams.get("sortDirection") ?? SortDirection.ASC;
 
         // Check if formats are valid

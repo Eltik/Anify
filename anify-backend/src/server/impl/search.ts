@@ -26,14 +26,14 @@ export const handler = async (req: Request): Promise<Response> => {
             return createResponse(JSON.stringify({ error: "Invalid type provided." }), 400);
         }
 
-        const query = decodeURIComponent(body?.query ?? paths[2] ?? url.searchParams.get("query") ?? "");
+        const query = body?.query ?? paths[2] ?? url.searchParams.get("query") ?? "";
         if (!query || query.length === 0) {
             return createResponse(JSON.stringify({ error: "No query provided." }), 400);
         }
 
         const page = Number(body?.page ?? paths[3] ?? url.searchParams.get("page") ?? "1");
         const perPage = Number(body?.perPage ?? paths[4] ?? url.searchParams.get("perPage") ?? "20");
-        const sort = body?.sort ?? paths[5] ?? url.searchParams.get("sort") ?? Sort.POPULARITY;
+        const sort = body?.sort ?? paths[5] ?? url.searchParams.get("sort") ?? Sort.TITLE;
         const sortDirection = body?.sortDirection ?? paths[5] ?? url.searchParams.get("sortDirection") ?? SortDirection.ASC;
 
         // Check if sort is valid
