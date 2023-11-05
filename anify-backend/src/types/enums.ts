@@ -6,11 +6,11 @@ export const enum Type {
 export const enum Sort {
     SCORE = "averageRating",
     POPULARITY = "averagePopularity",
-    TITLE = "title->>'english'",
+    TITLE = "title",
     YEAR = "year",
-    TOTAL_EPISODES = "totalEpisodes",
-    TOTAL_CHAPTERS = "totalChapters",
-    TOTAL_VOLUMES = "totalVolumes",
+    TOTAL_EPISODES = "episodes",
+    TOTAL_CHAPTERS = "chapters",
+    TOTAL_VOLUMES = "volumes",
 }
 
 export const Sorts = [Sort.SCORE, Sort.POPULARITY, Sort.TITLE, Sort.YEAR, Sort.TOTAL_EPISODES, Sort.TOTAL_CHAPTERS, Sort.TOTAL_VOLUMES];

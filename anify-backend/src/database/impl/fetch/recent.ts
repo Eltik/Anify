@@ -4,7 +4,7 @@ import { Anime, Db, Manga } from "../../../types/types";
 
 type ReturnType<T> = T extends "ANIME" ? Anime[] : Manga[];
 
-export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Format[], page: number, perPage: number): Promise<ReturnType<T>> => {
+export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Format[], page: number, perPage: number, fields: string[] = []): Promise<ReturnType<T>> => {
     if (dbType === "postgresql") {
         const skip = page > 0 ? perPage * (page - 1) : 0;
         let where;
@@ -60,6 +60,19 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
             if ((result as Anime | Manga).type === Type.ANIME ? (result as Anime).episodes.latest.latestEpisode === 0 : (result as Manga).chapters.latest.latestChapter === 0) continue;
 
             const updatedAt = ((result as Anime | Manga).type === Type.ANIME ? (result as Anime).episodes : (result as Manga).chapters).latest.updatedAt;
+
+            try {
+                if (fields && fields.length > 0) {
+                    // Delete fields that don't exist in the fields array
+                    Object.keys(result).forEach((key) => {
+                        if (!fields.includes(key)) {
+                            delete (result as { [key: string]: any })[key];
+                        }
+                    });
+                }
+            } catch (e) {
+                //
+            }
 
             newResults.push({
                 ...(result as Anime | Manga),
@@ -131,6 +144,19 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
 
             const updatedAt = anime.episodes.latest.updatedAt;
 
+            try {
+                if (fields && fields.length > 0) {
+                    // Delete fields that don't exist in the fields array
+                    Object.keys(anime).forEach((key) => {
+                        if (!fields.includes(key)) {
+                            delete (anime as { [key: string]: any })[key];
+                        }
+                    });
+                }
+            } catch (e) {
+                //
+            }
+
             newResults.push({
                 ...anime,
                 updatedAt: String(updatedAt).length === 0 ? 0 : new Date(Number(updatedAt)).getTime(),
@@ -182,6 +208,19 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
             if (manga.chapters?.latest?.latestChapter === 0) continue;
 
             const updatedAt = manga.chapters.latest.updatedAt;
+
+            try {
+                if (fields && fields.length > 0) {
+                    // Delete fields that don't exist in the fields array
+                    Object.keys(manga).forEach((key) => {
+                        if (!fields.includes(key)) {
+                            delete (manga as { [key: string]: any })[key];
+                        }
+                    });
+                }
+            } catch (e) {
+                //
+            }
 
             newResults.push({
                 ...manga,

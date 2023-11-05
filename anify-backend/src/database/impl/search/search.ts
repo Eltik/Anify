@@ -46,19 +46,36 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
             const sqlQuery = `
                 SELECT * FROM "anime"
                 ${where}
+                ${query.length > 0 ? `
                 ORDER BY
-                    ${sort === Sort.SCORE ? `CAST("anime"."averageRating" AS NUMERIC)` : sort === Sort.POPULARITY ? `CAST("anime"."averagePopularity" AS NUMERIC)` : sort === Sort.TOTAL_EPISODES ? `CAST("anime"."totalEpisodes" AS NUMERIC)` : sort === Sort.YEAR ? `CAST("anime"."year" AS NUMERIC)` : ""}
-                        ${sortDirection === SortDirection.ASC ? "ASC" : "DESC"},
                     (CASE WHEN "anime".title->>'english' IS NOT NULL THEN similarity(LOWER("anime".title->>'english'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
                     + CASE WHEN "anime".title->>'romaji' IS NOT NULL THEN similarity(LOWER("anime".title->>'romaji'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
                     + CASE WHEN "anime".title->>'native' IS NOT NULL THEN similarity(LOWER("anime".title->>'native'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
                     + CASE WHEN synonyms IS NOT NULL THEN most_similar(LOWER(${query.length > 0 ? `'${query}'` : "'%'"}), synonyms) ELSE 0 END)
                         DESC
+                ` : `
+                ORDER BY
+                    ${sort === Sort.SCORE ? `CAST("anime"."averageRating" AS NUMERIC)` : sort === Sort.POPULARITY ? `CAST("anime"."averagePopularity" AS NUMERIC)` : sort === Sort.TOTAL_EPISODES ? `CAST("anime"."totalEpisodes" AS NUMERIC)` : sort === Sort.YEAR ? `CAST("anime"."year" AS NUMERIC)` : ""}
+                        ${sortDirection === SortDirection.ASC ? "ASC" : "DESC"}
+                `}
                 LIMIT    ${perPage}
                 OFFSET   ${skip}
             `;
 
             [count, results] = (await Promise.all([(await postgres.query(countQuery)).rows, (await postgres.query(sqlQuery)).rows])) as [any, any];
+
+            if (sort === Sort.SCORE) {
+                results = sortDirection === SortDirection.ASC ? results.sort((a: Anime | Manga, b: Anime | Manga) => Number(a.averageRating) - Number(b.averageRating)) : results.sort((a: Anime | Manga, b: Anime | Manga) => Number(b.averageRating) - Number(a.averageRating));
+            }
+            if (sort === Sort.POPULARITY) {
+                results = sortDirection === SortDirection.ASC ? results.sort((a: Anime | Manga, b: Anime | Manga) => Number(a.averagePopularity) - Number(b.averagePopularity)) : results.sort((a: Anime | Manga, b: Anime | Manga) => Number(b.averagePopularity) - Number(a.averagePopularity));
+            }
+            if (sort === Sort.TOTAL_EPISODES) {
+                results = sortDirection === SortDirection.ASC ? results.sort((a: Anime, b: Anime) => Number(a.totalEpisodes) - Number(b.totalEpisodes)) : results.sort((a: Anime, b: Anime) => Number(b.totalEpisodes) - Number(a.totalEpisodes));
+            }
+            if (sort === Sort.YEAR) {
+                results = sortDirection === SortDirection.ASC ? results.sort((a: Anime | Manga, b: Anime | Manga) => Number(a.year) - Number(b.year)) : results.sort((a: Anime | Manga, b: Anime | Manga) => Number(b.year) - Number(a.year));
+            }
         } else {
             const countQuery = `
                 SELECT COUNT(*) FROM "manga"
@@ -67,19 +84,39 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
             const sqlQuery = `
                 SELECT * FROM "manga"
                 ${where}
+                ${query.length > 0 ? `
                 ORDER BY
-                    ${sort === Sort.SCORE ? `CAST("manga"."averageRating" AS NUMERIC)` : sort === Sort.POPULARITY ? `CAST("manga"."averagePopularity" AS NUMERIC)` : sort === Sort.TOTAL_CHAPTERS ? `CAST("manga"."totalChapters" AS NUMERIC)` : sort === Sort.TOTAL_VOLUMES ? `CAST("manga"."totalVolumes" AS NUMERIC)` : sort === Sort.YEAR ? `CAST("manga"."year" AS NUMERIC)` : ""}
-                        ${sortDirection === SortDirection.ASC ? "ASC" : "DESC"},
                     (CASE WHEN "manga".title->>'english' IS NOT NULL THEN similarity(LOWER("manga".title->>'english'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
                     + CASE WHEN "manga".title->>'romaji' IS NOT NULL THEN similarity(LOWER("manga".title->>'romaji'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
                     + CASE WHEN "manga".title->>'native' IS NOT NULL THEN similarity(LOWER("manga".title->>'native'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
                     + CASE WHEN synonyms IS NOT NULL THEN most_similar(LOWER(${query.length > 0 ? `'${query}'` : "'%'"}), synonyms) ELSE 0 END)
                         DESC
+                ` : `
+                ORDER BY
+                    ${sort === Sort.SCORE ? `CAST("manga"."averageRating" AS NUMERIC)` : sort === Sort.POPULARITY ? `CAST("manga"."averagePopularity" AS NUMERIC)` : sort === Sort.TOTAL_CHAPTERS ? `CAST("manga"."totalChapters" AS NUMERIC)` : sort === Sort.TOTAL_VOLUMES ? `CAST("manga"."totalVolumes" AS NUMERIC)` : sort === Sort.YEAR ? `CAST("manga"."year" AS NUMERIC)` : ""}
+                        ${sortDirection === SortDirection.ASC ? "ASC" : "DESC"}
+                `}
                 LIMIT    ${perPage}
                 OFFSET   ${skip}
             `;
 
             [count, results] = (await Promise.all([(await postgres.query(countQuery)).rows, (await postgres.query(sqlQuery)).rows])) as [any, any];
+
+            if (sort === Sort.SCORE) {
+                results = sortDirection === SortDirection.ASC ? results.sort((a: Anime | Manga, b: Anime | Manga) => Number(a.averageRating) - Number(b.averageRating)) : results.sort((a: Anime | Manga, b: Anime | Manga) => Number(b.averageRating) - Number(a.averageRating));
+            }
+            if (sort === Sort.POPULARITY) {
+                results = sortDirection === SortDirection.ASC ? results.sort((a: Anime | Manga, b: Anime | Manga) => Number(a.averagePopularity) - Number(b.averagePopularity)) : results.sort((a: Anime | Manga, b: Anime | Manga) => Number(b.averagePopularity) - Number(a.averagePopularity));
+            }
+            if (sort === Sort.TOTAL_CHAPTERS) {
+                results = sortDirection === SortDirection.ASC ? results.sort((a: Manga, b: Manga) => Number(a.totalChapters) - Number(b.totalChapters)) : results.sort((a: Manga, b: Manga) => Number(b.totalChapters) - Number(a.totalChapters));
+            }
+            if (sort === Sort.TOTAL_VOLUMES) {
+                results = sortDirection === SortDirection.ASC ? results.sort((a: Manga, b: Manga) => Number(a.totalVolumes) - Number(b.totalVolumes)) : results.sort((a: Manga, b: Manga) => Number(b.totalVolumes) - Number(a.totalVolumes));
+            }
+            if (sort === Sort.YEAR) {
+                results = sortDirection === SortDirection.ASC ? results.sort((a: Anime | Manga, b: Anime | Manga) => Number(a.year) - Number(b.year)) : results.sort((a: Anime | Manga, b: Anime | Manga) => Number(b.year) - Number(a.year));
+            }
         }
 
         const total = Number((count as any)[0]?.count ?? 0);
@@ -116,7 +153,7 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
             `SELECT *
                 FROM ${type === Type.ANIME ? "anime" : "manga"}
                 ${where}
-            ORDER BY ${sort} ${sortDirection}
+            ORDER BY ${sort === Sort.POPULARITY ? "averagePopularity" : sort === Sort.SCORE ? "averageRating" : sort === Sort.TITLE ? "title->>'english'" : sort === Sort.TOTAL_CHAPTERS ? "totalChapters" : sort === Sort.TOTAL_EPISODES ? "totalEpisodes" : sort === Sort.TOTAL_VOLUMES ? "totalVolumes" : sort === Sort.YEAR ? "year" : ""} ${sortDirection}
             LIMIT $limit OFFSET $offset`,
         )
         .all({ $query: query, $limit: perPage, $offset: skip });
