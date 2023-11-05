@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@savvywombat/tailwindcss-grid-areas": "^3.0.1",
-    "@t3-oss/env-nextjs": "^0.2.1",
+    "@t3-oss/env-nextjs": "^0.7.0",
     "@vercel/og": "^0.5.4",
     "@vidstack/react": "^0.5.4",
     "arrow-keys-react": "^1.0.6",
@@ -28,7 +28,7 @@
     "sanitize-html": "^2.11.0",
     "swiper": "^9.2.4",
     "vidstack": "^0.5.4",
-    "zod": "^3.22.3",
+    "zod": "^3.21.4",
     "zustand": "^4.3.9"
   },
   "devDependencies": {

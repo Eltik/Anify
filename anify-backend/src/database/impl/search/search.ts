@@ -47,13 +47,13 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
                 SELECT * FROM "anime"
                 ${where}
                 ORDER BY
+                    ${sort === Sort.SCORE ? `CAST("anime"."averageRating" AS NUMERIC)` : sort === Sort.POPULARITY ? `CAST("anime"."averagePopularity" AS NUMERIC)` : sort === Sort.TOTAL_EPISODES ? `CAST("anime"."totalEpisodes" AS NUMERIC)` : sort === Sort.YEAR ? `CAST("anime"."year" AS NUMERIC)` : ""}
+                        ${sortDirection === SortDirection.ASC ? "ASC" : "DESC"},
                     (CASE WHEN "anime".title->>'english' IS NOT NULL THEN similarity(LOWER("anime".title->>'english'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
                     + CASE WHEN "anime".title->>'romaji' IS NOT NULL THEN similarity(LOWER("anime".title->>'romaji'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
                     + CASE WHEN "anime".title->>'native' IS NOT NULL THEN similarity(LOWER("anime".title->>'native'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
                     + CASE WHEN synonyms IS NOT NULL THEN most_similar(LOWER(${query.length > 0 ? `'${query}'` : "'%'"}), synonyms) ELSE 0 END)
-                        DESC,
-                        ${sort === Sort.SCORE ? `"anime"."averageRating"` : sort === Sort.POPULARITY ? `"anime"."averagePopularity"` : sort === Sort.TOTAL_EPISODES ? `"anime"."totalEpisodes"` : sort === Sort.YEAR ? `"anime".year` : ""}
-                    ${sortDirection === SortDirection.ASC ? "ASC" : "DESC"}
+                        DESC
                 LIMIT    ${perPage}
                 OFFSET   ${skip}
             `;
@@ -68,13 +68,13 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(query: string, t
                 SELECT * FROM "manga"
                 ${where}
                 ORDER BY
+                    ${sort === Sort.SCORE ? `CAST("manga"."averageRating" AS NUMERIC)` : sort === Sort.POPULARITY ? `CAST("manga"."averagePopularity" AS NUMERIC)` : sort === Sort.TOTAL_CHAPTERS ? `CAST("manga"."totalChapters" AS NUMERIC)` : sort === Sort.TOTAL_VOLUMES ? `CAST("manga"."totalVolumes" AS NUMERIC)` : sort === Sort.YEAR ? `CAST("manga"."year" AS NUMERIC)` : ""}
+                        ${sortDirection === SortDirection.ASC ? "ASC" : "DESC"},
                     (CASE WHEN "manga".title->>'english' IS NOT NULL THEN similarity(LOWER("manga".title->>'english'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
                     + CASE WHEN "manga".title->>'romaji' IS NOT NULL THEN similarity(LOWER("manga".title->>'romaji'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
                     + CASE WHEN "manga".title->>'native' IS NOT NULL THEN similarity(LOWER("manga".title->>'native'), LOWER(${query.length > 0 ? `'${query}'` : "'%'"})) ELSE 0 END,
                     + CASE WHEN synonyms IS NOT NULL THEN most_similar(LOWER(${query.length > 0 ? `'${query}'` : "'%'"}), synonyms) ELSE 0 END)
-                        DESC,
-                    ${sort === Sort.SCORE ? `"manga"."averageRating"` : sort === Sort.POPULARITY ? `"manga"."averagePopularity"` : sort === Sort.TOTAL_CHAPTERS ? `"manga"."totalChapters"` : sort === Sort.TOTAL_VOLUMES ? `"manga"."totalVolumes"` : sort === Sort.YEAR ? `"manga".year` : ""}
-                    ${sortDirection === SortDirection.ASC ? "ASC" : "DESC"}
+                        DESC
                 LIMIT    ${perPage}
                 OFFSET   ${skip}
             `;

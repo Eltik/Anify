@@ -3,13 +3,6 @@ import { env } from "~/env.mjs";
 import { type Anime, type Manga, type Format, type MediaStatus } from "~/types";
 
 export default async function handler(request: Request, response: ServerResponse) {
-    if (!request.body.query) {
-        response.writeHead(400, { "Content-Type": "application/json" });
-        response.write(JSON.stringify({ message: "Missing query." }));
-        response.end();
-        return;
-    }
-
     if (!request.body.type) {
         response.writeHead(400, { "Content-Type": "application/json" });
         response.write(JSON.stringify({ message: "Missing type (anime/manga)." }));
