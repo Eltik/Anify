@@ -29,7 +29,7 @@ const createSubCommand = (name: string, description: string, command: Applicatio
     };
 };
 
-client.on("guildMemberAdd", async(member) => {
+client.on("guildMemberAdd", async (member) => {
     console.log(member);
     const role = client.guilds.get(env.GUILD_ID ?? "")?.roles.find((x) => x.id === "950964334983520257");
     console.log(role);
@@ -37,11 +37,11 @@ client.on("guildMemberAdd", async(member) => {
         return;
     }
     member.roles.add(role);
-})
+});
 
-client.on("guildMemberRemove", async(member) => {
+client.on("guildMemberRemove", async (member) => {
     console.log(colors.gray(`Member ${member.name} has left the server.`));
-})
+});
 
 client.on("ready", async () => {
     console.log(colors.green("Bot is ready!"));
@@ -151,11 +151,11 @@ function connectWebSocket() {
             "client-name": "anify-backend",
         },
     });
-    
+
     socket.addEventListener("message", (event) => {
         try {
             const data = JSON.parse(String(event.data));
-    
+
             if (data.key) {
                 console.log(data);
                 client.createMessage(channels.logs, {
@@ -178,12 +178,7 @@ function connectWebSocket() {
                                 icon_url: data.coverImage ?? "https://anify.tv/favicon.ico",
                                 url: "https://anify.tv",
                             },
-                            url: 
-                                data.mappings.find((x: any) => x.providerId === "anilist")?.id ?
-                                    `https://anilist.co/${data.type?.toLowerCase()}/${data.mappings.find((x: any) => x.providerId === "anilist")?.id}` :
-                                data.mappings.find((x: any) => x.providerId === "mangadex")?.id ?
-                                    `https://mangadex.org/title/${data.mappings.find((x: any) => x.providerId === "mangadex")?.id}` :
-                                `https://anify.tv/info/${data.id}`,
+                            url: data.mappings.find((x: any) => x.providerId === "anilist")?.id ? `https://anilist.co/${data.type?.toLowerCase()}/${data.mappings.find((x: any) => x.providerId === "anilist")?.id}` : data.mappings.find((x: any) => x.providerId === "mangadex")?.id ? `https://mangadex.org/title/${data.mappings.find((x: any) => x.providerId === "mangadex")?.id}` : `https://anify.tv/info/${data.id}`,
                             fields: [
                                 {
                                     name: data.type === "ANIME" ? "Season" : "Country",
@@ -240,12 +235,12 @@ function connectWebSocket() {
             console.log(e);
         }
     });
-    
+
     socket.addEventListener("open", (event) => {
         console.log(colors.green("Connected to backend websocket."));
         reconnectAttempts = 0;
     });
-    
+
     socket.addEventListener("close", (event) => {
         console.log(colors.red("Disconnected from backend websocket."));
         if (reconnectAttempts < maxReconnectAttempts) {
@@ -254,7 +249,7 @@ function connectWebSocket() {
             console.log(colors.yellow(`Reconnect attempt ${reconnectAttempts}/${maxReconnectAttempts}`));
         }
     });
-    
+
     socket.addEventListener("error", (event) => {
         console.log(colors.red("Error with websocket."));
         console.log(event);
