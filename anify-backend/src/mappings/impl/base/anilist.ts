@@ -236,10 +236,22 @@ export default class AniListBase extends BaseProvider {
         }
     }
 
-    override async searchAdvanced(query: string, type: Type, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = [], year = 0, tags: string[] = [], tagsExcluded: string[] = []): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
+    override async searchAdvanced(
+        query: string,
+        type: Type,
+        formats: Format[],
+        page: number,
+        perPage: number,
+        genres: Genres[] = [],
+        genresExcluded: Genres[] = [],
+        season: Season = Season.UNKNOWN,
+        year = 0,
+        tags: string[] = [],
+        tagsExcluded: string[] = [],
+    ): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         const aniListArgs: { query: string; variables: { [key: string]: any } } = {
             query: `
-            query ($page: Int, $perPage: Int, $search: String, $type: MediaType, $format: [MediaFormat], $genres: [String], $genresExcluded: [String], $tags: [String], $tagsExcluded: [String]) {
+            query ($page: Int, $perPage: Int, $search: String, $type: MediaType, $format: [MediaFormat], $genres: [String], $genresExcluded: [String], $season: MediaSeason, $year: Int, $tags: [String], $tagsExcluded: [String]) {
                 Page(page: $page, perPage: $perPage) {
                     pageInfo {
                         total
@@ -248,11 +260,11 @@ export default class AniListBase extends BaseProvider {
                         hasNextPage
                         perPage
                     }
-                    media(type: $type, format_in: $format, search: $search, genre_in: $genres, genre_not_in: $genresExcluded, tag_in: $tags, tag_not_in: $tagsExcluded) {
+                    media(type: $type, format_in: $format, search: $search, genre_in: $genres, genre_not_in: $genresExcluded, season: $season, seasonYear: $year, tag_in: $tags, tag_not_in: $tagsExcluded) {
                         ${this.query}
                     }
                 }
-            }
+            }              
             `,
             variables: {
                 search: query,
@@ -262,6 +274,8 @@ export default class AniListBase extends BaseProvider {
                 perPage: perPage,
                 genres: genres,
                 genresExclude: genresExcluded,
+                season: season,
+                year: year,
                 tags: tags.length > 0 ? tags : undefined,
                 tagsExclude: tagsExcluded,
             },

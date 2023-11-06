@@ -1,6 +1,6 @@
 import colors from "colors";
 import QueueExecutor from "../../lib/executor";
-import { Format, Genres, Type } from "../../types/enums";
+import { Format, Genres, Season, Type } from "../../types/enums";
 import { loadSearch } from "../../lib/impl/search";
 
 const executor = new QueueExecutor<{
@@ -9,6 +9,7 @@ const executor = new QueueExecutor<{
     formats: Format[];
     genres?: Genres[];
     genresExcluded?: Genres[];
+    season?: Season;
     year?: number;
     tags?: string[];
     tagsExcluded?: string[];

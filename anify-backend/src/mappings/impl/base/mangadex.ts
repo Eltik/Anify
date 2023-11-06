@@ -101,7 +101,19 @@ export default class ManagDexBase extends BaseProvider {
         return results;
     }
 
-    override async searchAdvanced(query: string, type: Type, formats: Format[], page: number, perPage: number, genres?: Genres[], genresExcluded?: Genres[], year?: number, tags?: string[], tagsExcluded?: string[]): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
+    override async searchAdvanced(
+        query: string,
+        type: Type,
+        formats: Format[],
+        page: number,
+        perPage: number,
+        genres?: Genres[],
+        genresExcluded?: Genres[],
+        season: Season = Season.UNKNOWN,
+        year: number = 0,
+        tags: string[] = [],
+        tagsExcluded: string[] = [],
+    ): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         const results: MangaInfo[] = [];
 
         let mangaList: any[] = [];
@@ -341,7 +353,7 @@ export default class ManagDexBase extends BaseProvider {
         const day = String(currentDate.getDay()).padStart(2, "0");
         const createdAtParam = `${year}-${month}-${day}T00:00:00`;
 
-        console.log(createdAtParam)
+        console.log(createdAtParam);
 
         const trending = (await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true&createdAtSince=${createdAtParam}`)).json().catch(() => {
             return {

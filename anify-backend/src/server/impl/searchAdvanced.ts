@@ -1,5 +1,5 @@
 import queues from "../../worker";
-import { Format, Formats, Genres, Sort, SortDirection, Sorts, Type } from "../../types/enums";
+import { Format, Formats, Genres, Season, Sort, SortDirection, Sorts, Type } from "../../types/enums";
 import { searchAdvanced } from "../../database/impl/search/searchAdvanced";
 import { cacheTime, redis } from "..";
 import { createResponse } from "../lib/response";
@@ -32,6 +32,7 @@ export const handler = async (req: Request): Promise<Response> => {
         const genresExcluded = body?.genresExcluded ?? url.searchParams.get("genresExcluded")?.split(",") ?? [];
         const tags = body?.tags ?? url.searchParams.get("tags")?.split(",") ?? [];
         const tagsExcluded = body?.tagsExcluded ?? url.searchParams.get("tagsExcluded")?.split(",") ?? [];
+        const season = body?.season ?? (url.searchParams.get("season") as Season) ?? null;
         const year = Number(body?.year ?? url.searchParams.get("year") ?? "0");
         const page = Number(body?.page ?? url.searchParams.get("page") ?? "1");
         const perPage = Number(body?.perPage ?? url.searchParams.get("perPage") ?? "20");
@@ -53,12 +54,12 @@ export const handler = async (req: Request): Promise<Response> => {
             return createResponse(JSON.stringify({ error: "Invalid sort direction provided." }), 400);
         }
 
-        const cached = await redis.get(`search-advanced:${type}:${query}:${JSON.stringify(formats)}:${genres}:${genresExcluded}:${tags}:${tagsExcluded}:${year}:${page}:${perPage}:${sort}:${sortDirection}`);
+        const cached = await redis.get(`search-advanced:${type}:${query}:${JSON.stringify(formats)}:${genres}:${genresExcluded}:${tags}:${tagsExcluded}:${season}:${year}:${page}:${perPage}:${sort}:${sortDirection}`);
         if (cached) {
             return createResponse(cached);
         }
 
-        const data = await searchAdvanced(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats as Format[], page, perPage, genres as Genres[], genresExcluded as Genres[], year, tags, tagsExcluded, sort as Sort, sortDirection);
+        const data = await searchAdvanced(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats as Format[], page, perPage, genres as Genres[], genresExcluded as Genres[], season, year, tags, tagsExcluded, sort as Sort, sortDirection);
         if (data.length === 0) {
             queues.searchQueue.add({
                 type: (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type,
@@ -66,13 +67,14 @@ export const handler = async (req: Request): Promise<Response> => {
                 formats: formats as Format[],
                 genres: genres as Genres[],
                 genresExcluded: genresExcluded as Genres[],
+                season: season,
                 year: year,
                 tags: tags,
                 tagsExcluded: tagsExcluded,
             });
         }
 
-        await redis.set(`search-advanced:${type}:${query}:${JSON.stringify(formats)}:${genres}:${genresExcluded}:${tags}:${tagsExcluded}:${year}:${page}:${perPage}:${sort}:${sortDirection}`, JSON.stringify(data), "EX", cacheTime);
+        await redis.set(`search-advanced:${type}:${query}:${JSON.stringify(formats)}:${genres}:${genresExcluded}:${tags}:${tagsExcluded}:${season}:${year}:${page}:${perPage}:${sort}:${sortDirection}`, JSON.stringify(data), "EX", cacheTime);
 
         return createResponse(JSON.stringify(data));
     } catch (e) {
@@ -95,6 +97,7 @@ type Body = {
     genresExcluded?: Genres[];
     tags?: string[];
     tagsExcluded?: string[];
+    season?: Season;
     year?: number;
     page?: number;
     perPage?: number;
