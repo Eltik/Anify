@@ -9,6 +9,8 @@ export default class AnimePahe extends AnimeProvider {
     override id = "animepahe";
     override url = "https://animepahe.com";
 
+    public needsProxy: boolean = true;
+
     override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
 
     override get subTypes(): SubType[] {
@@ -114,7 +116,7 @@ export default class AnimePahe extends AnimeProvider {
         try {
             const url = req.url;
             // Need session id to fetch the watch page
-            const sessionId = url.split("/anime/").pop()!;
+            const sessionId = url.split("/anime/").pop()?.split("?")[0]!;
 
             const $ = load(await req.text());
             const tempId = $("head > meta[property='og:url']").attr("content")!.split("/").pop()!;
