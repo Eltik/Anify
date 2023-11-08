@@ -385,13 +385,6 @@ export default class Extractor {
         const host = "https://megacloud.tv";
         const id = url.split("/").pop()?.split("?")[0];
 
-        const options = {
-            headers: {
-                "X-Requested-With": "XMLHttpRequest",
-                Referer: url,
-            },
-        };
-
         const request = await fetch(`${host}/embed-2/ajax/e-1/getSources?id=${id}`, {
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
@@ -408,19 +401,13 @@ export default class Extractor {
 
         let { sources } = reqData as { sources: string };
 
-        const req = await fetch("https://github.com/enimax-anime/key/blob/e6/key.txt");
-
-        const data = await req.text();
-        let decryptKey = substringBefore(substringAfter(data, '"blob-code blob-code-inner js-file-line">'), "</td>");
-        if (!decryptKey) {
-            decryptKey = (await (await fetch("https://raw.githubusercontent.com/enimax-anime/key/e6/key.txt")).json()) as string;
-        }
+        const decryptKey = (await (await fetch("https://zoro.anify.tv/key/6")).json() as { key: string }).key as string;
 
         const encryptedURLTemp = sources?.split("");
 
         let key = "";
 
-        for (const index of decryptKey) {
+        for (const index of JSON.parse(decryptKey)) {
             for (let i = Number(index[0]); i < Number(index[1]); i++) {
                 key += encryptedURLTemp[i];
                 encryptedURLTemp[i] = "";
@@ -431,7 +418,8 @@ export default class Extractor {
 
         try {
             sources = JSON.parse(CryptoJS.AES.decrypt(sources, key).toString(CryptoJS.enc.Utf8));
-        } catch {
+        } catch (e) {
+            console.error(e);
             sources = "";
         }
 
