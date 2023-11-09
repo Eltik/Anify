@@ -254,7 +254,9 @@ export default class Extractor {
                     "x-requested-with": "XMLHttpRequest",
                 },
             })
-        ).json()) as { result: { sources: { file: string }[]; tracks: { file: string; label: string; kind: string }[] } };
+        ).json().catch((err) => {
+            return err;
+        })) as { result: { sources: { file: string }[]; tracks: { file: string; label: string; kind: string }[] } };
 
         if (!source.result?.tracks) return result;
 
