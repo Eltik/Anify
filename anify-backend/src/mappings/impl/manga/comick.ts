@@ -63,6 +63,14 @@ export default class ComicK extends MangaProvider {
                 title += "Ch. " + this.padNum(chapter.chap, 2) + " ";
             }
 
+            if (title.length === 0) {
+                if (!chapter.title) {
+                    title = "Oneshot"
+                } else {
+                    title = chapter.title
+                }
+            }
+
             let canPush = true;
             for (let i = 0; i < chapters.length; i++) {
                 if (chapters[i].title?.trim() === title?.trim()) {

@@ -98,7 +98,7 @@ export default class MangaDex extends MangaProvider {
                 break;
             }
 
-            const data = (await request.json()) as { result: string; errors: { id: string; status: string; code: string; title: string; detail: string }[]; data: { [key: string]: { id: string; type: string; attributes: { volume: string; chapter: string; updatedAt: string } } } };
+            const data = (await request.json()) as { result: string; errors: { id: string; status: string; code: string; title: string; detail: string }[]; data: { [key: string]: { id: string; type: string; attributes: { title: string | null, volume: string; chapter: string; updatedAt: string } } } };
 
             if (!data || !data.result) {
                 run = false;
@@ -121,6 +121,14 @@ export default class MangaDex extends MangaProvider {
                 }
                 if (curChapter.attributes.chapter) {
                     title += "Ch. " + this.padNum(curChapter.attributes.chapter, 2) + " ";
+                }
+                
+                if (title.length === 0) {
+                    if (!curChapter.attributes.title) {
+                        title = "Oneshot"
+                    } else {
+                        title = curChapter.attributes.title;
+                    }
                 }
 
                 let canPush = true;
