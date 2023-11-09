@@ -29,7 +29,7 @@ export const handler = async (req: Request): Promise<Response> => {
             return createResponse(cached);
         }
 
-        const data = await (await fetch(`https://api.mixdrop.co/fileinfo2?email=${env.MIXDROP_EMAIL}&key=${env.MIXDROP_KEY}&ref[]=${id}`)).json();
+        const data = await (await fetch(`https://api.mixdrop.ag/fileinfo2?email=${env.MIXDROP_EMAIL}&key=${env.MIXDROP_KEY}&ref[]=${id}`)).json();
 
         await redis.set(`mixdrop:${id}`, JSON.stringify(data), "EX", cacheTime);
 

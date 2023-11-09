@@ -53,7 +53,7 @@ export const loadEpub = async (data: { id: string; providerId: string; chapters:
     console.log(colors.green("Uploading ") + colors.blue(manga.title.english ?? manga.title.romaji ?? manga.title.native ?? "") + colors.green(" to Mixdrop..."));
 
     const result = (await (
-        await fetch("https://ul.mixdrop.co/api", {
+        await fetch("https://ul.mixdrop.ag/api", {
             method: "POST",
             body: form as any,
         })
@@ -282,13 +282,13 @@ const checkRemoteStatus = async (mixdrop: string): Promise<UploadStatus> => {
     const mixdropEmail = env.MIXDROP_EMAIL;
     const mixdropKey = env.MIXDROP_KEY;
 
-    const res = (await (await fetch(`https://api.mixdrop.co/fileinfo2?email=${mixdropEmail}&key=${mixdropKey}&ref[]=${mixdrop}`)).json()) as UploadStatus;
+    const res = (await (await fetch(`https://api.mixdrop.ag/fileinfo2?email=${mixdropEmail}&key=${mixdropKey}&ref[]=${mixdrop}`)).json()) as UploadStatus;
     return res;
 };
 
 const checkIsDeleted = async (email: string, key: string, fileRef: string): Promise<boolean> => {
     let pages = 1;
-    const initial = (await (await fetch(`https://api.mixdrop.co/removed?email=${email}&key=${key}&page=1`)).json()) as { result: { fileref: string }[]; pages: number };
+    const initial = (await (await fetch(`https://api.mixdrop.ag/removed?email=${email}&key=${key}&page=1`)).json()) as { result: { fileref: string }[]; pages: number };
     if (!Array.isArray(initial.result)) return false;
 
     for (const file of initial.result) {
@@ -298,7 +298,7 @@ const checkIsDeleted = async (email: string, key: string, fileRef: string): Prom
     pages = initial.pages;
 
     for (let i = 2; i <= pages; i++) {
-        const initial = (await (await fetch(`https://api.mixdrop.co/removed?email=${email}&key=${key}&page=${i}`)).json()) as { result: { fileref: string }[]; pages: number };
+        const initial = (await (await fetch(`https://api.mixdrop.ag/removed?email=${email}&key=${key}&page=${i}`)).json()) as { result: { fileref: string }[]; pages: number };
         for (const file of initial.result) {
             if (file.fileref === fileRef) return true;
         }
