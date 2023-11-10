@@ -1,5 +1,5 @@
 import { load } from "cheerio";
-import { extract } from "@extractus/article-extractor";
+import { extract, extractFromHtml } from "@extractus/article-extractor";
 import MangaProvider from ".";
 import { Format } from "../../../types/enums";
 import { Chapter, Page, Result } from "../../../types/types";
@@ -127,19 +127,25 @@ export default class NovelUpdates extends MangaProvider {
     }
 
     override async fetchPages(id: string): Promise<Page[] | string | undefined> {
-        const data = await (
-            await this.request(`${this.url}/extnu/${id}/`, {
-                method: "GET",
-                headers: {
-                    Cookie: "_ga=;",
-                },
-                redirect: "follow",
-            })
-        ).text();
+        const req = await this.request(`${this.url}/extnu/${id}/`, {
+            method: "GET",
+            headers: {
+                Cookie: "_ga=;",
+            },
+            redirect: "follow",
+        })
 
-        if (data.length === 0 || !data) return undefined;
+        if (!req.ok) return undefined;
 
-        const article = await extract(data);
+        const data = await req.text();
+        const $ = load(data);
+        const baseURL = $("base").attr("href")?.replace("http://", "https://") ?? this.url;
+
+        const article = await extract(baseURL, {}, {
+            headers: {
+                Cookie: "_ga=;",
+            }
+        })
         return article?.content;
     }
 }
