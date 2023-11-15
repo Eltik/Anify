@@ -35,9 +35,9 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(
                 )
                 ${formats.length > 0 ? `AND "anime"."format" IN (${formats.map((f) => `'${f}'`)})` : ""}
                 ${genres && genres.length > 0 ? `AND ARRAY[${genres.map((g) => `'${g}'`)}] <@ "anime"."genres"` : ""}
-                ${genresExcluded.length > 0 ? `AND NOT ARRAY[${genresExcluded.map((g) => `'${g}'`)}] <@ "anime"."genres"` : ""}
+                ${genresExcluded.length > 0 ? `AND NOT ARRAY[${genresExcluded.map((g) => `'${g}'`)}] && "anime"."genres"` : ""}
                 ${tags && tags.length > 0 ? `AND ARRAY[${tags.map((g) => `'${g}'`)}] <@ "anime"."tags"` : ""}
-                ${tagsExcluded.length > 0 ? `AND NOT ARRAY[${tagsExcluded.map((g) => `'${g}'`)}] <@ "anime"."tags"` : ""}
+                ${tagsExcluded.length > 0 ? `AND NOT ARRAY[${tagsExcluded.map((g) => `'${g}'`)}] && "anime"."tags"` : ""}
                 ${season && season !== Season.UNKNOWN ? `AND "anime"."season" = '${season}'` : ""}
                 ${year > 0 ? `AND "anime"."year" = ${year}` : ""}
                 ${sort && sort === Sort.YEAR ? `AND "anime"."year" IS NOT NULL` : ""}
@@ -54,9 +54,9 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(
                 )
                 ${formats.length > 0 ? `AND "manga"."format" IN (${formats.map((f) => `'${f}'`)})` : ""}
                 ${genres && genres.length > 0 ? `AND ARRAY[${genres.map((g) => `'${g}'`)}] <@ "manga"."genres"` : ""}
-                ${genresExcluded.length > 0 ? `AND NOT ARRAY[${genresExcluded.map((g) => `'${g}'`)}] <@ "manga"."genres"` : ""}
+                ${genresExcluded.length > 0 ? `AND NOT ARRAY[${genresExcluded.map((g) => `'${g}'`)}] && "manga"."genres"` : ""}
                 ${tags && tags.length > 0 ? `AND ARRAY[${tags.map((g) => `'${g}'`)}] <@ "manga"."tags"` : ""}
-                ${tagsExcluded.length > 0 ? `AND NOT ARRAY[${tagsExcluded.map((g) => `'${g}'`)}] <@ "manga"."tags"` : ""}
+                ${tagsExcluded.length > 0 ? `AND NOT ARRAY[${tagsExcluded.map((g) => `'${g}'`)}] && "manga"."tags"` : ""}
                 ${year > 0 ? `AND "manga"."year" = ${year}` : ""}
                 ${sort && sort === Sort.YEAR ? `AND "manga"."year" IS NOT NULL` : ""}
             `;
