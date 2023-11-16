@@ -344,16 +344,14 @@ export default class ManagDexBase extends BaseProvider {
         | undefined
     > {
         // Format the date as YYYY-MM-DD
-        const currentDate = new Date();
-        currentDate.setDate(currentDate.getDate() - 7);
+        const currentDate = new Date(Date.now());
+        currentDate.setDate(currentDate.getDate() - 3);
 
-        // Format the date as YYYY-MM-DD
         const year = currentDate.getFullYear();
-        const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-        const day = String(currentDate.getDay()).padStart(2, "0");
-        const createdAtParam = `${year}-${month}-${day}T00:00:00`;
+        const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+        const day = currentDate.getDate().toString().padStart(2, '0');
 
-        console.log(createdAtParam);
+        const createdAtParam = `${year}-${month}-${day}T00:00:00`;
 
         const trending = (await (await this.request(`${this.api}/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true&createdAtSince=${createdAtParam}`)).json().catch(() => {
             return {
