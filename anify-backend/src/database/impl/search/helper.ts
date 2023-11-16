@@ -38,51 +38,51 @@ export const generateSearchQueries = (type: "anime" | "manga", where: string, qu
         ${where}
     `;
     const sqlQuery = `
-    WITH ranked_anime AS (
-        SELECT
-            *,
-            ROW_NUMBER() OVER (
-                ORDER BY
-                    ${
-                        query.length > 0
-                            ? `
-                        (CASE WHEN "${type}".title->>'english' IS NOT NULL THEN similarity(LOWER("${type}".title->>'english'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
-                        + CASE WHEN "${type}".title->>'romaji' IS NOT NULL THEN similarity(LOWER("${type}".title->>'romaji'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
-                        + CASE WHEN "${type}".title->>'native' IS NOT NULL THEN similarity(LOWER("${type}".title->>'native'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
-                        + CASE WHEN synonyms IS NOT NULL THEN most_similar(LOWER(${query.length > 0 ? `$1` : "'%'"}), synonyms) ELSE 0 END)
-                    `
-                            : `
-                                ${
-                                    sort === Sort.SCORE
-                                        ? `CAST("${type}"."averageRating" AS NUMERIC)`
-                                        : sort === Sort.POPULARITY
-                                        ? `CAST("${type}"."averagePopularity" AS NUMERIC)`
-                                        : sort === Sort.TOTAL_EPISODES
-                                        ? `CAST("${type}"."totalEpisodes" AS NUMERIC)`
-                                        : sort === Sort.YEAR
-                                        ? `CAST("${type}"."year" AS NUMERIC)`
-                                        : sort === Sort.TOTAL_CHAPTERS
-                                        ? `CAST("${type}"."totalChapters" AS NUMERIC)`
-                                        : sort === Sort.TOTAL_VOLUMES
-                                        ? `CAST("${type}"."totalVolumes" AS NUMERIC)`
-                                        : `
-                                    (CASE WHEN "${type}".title->>'english' IS NOT NULL THEN similarity(LOWER("${type}".title->>'english'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
+        SELECT *
+        FROM (
+            SELECT
+                *,
+                RANK() OVER (
+                    ORDER BY
+                        ${
+                            query.length > 0
+                                ? `(CASE WHEN "${type}".title->>'english' IS NOT NULL THEN similarity(LOWER("${type}".title->>'english'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
                                     + CASE WHEN "${type}".title->>'romaji' IS NOT NULL THEN similarity(LOWER("${type}".title->>'romaji'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
                                     + CASE WHEN "${type}".title->>'native' IS NOT NULL THEN similarity(LOWER("${type}".title->>'native'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
                                     + CASE WHEN synonyms IS NOT NULL THEN most_similar(LOWER(${query.length > 0 ? `$1` : "'%'"}), synonyms) ELSE 0 END)
+                                DESC,
+                                "${type}".id
                                 `
-                                }
+                                : `
+                            ${
+                                sort === Sort.SCORE
+                                    ? `CAST("${type}"."averageRating" AS NUMERIC)`
+                                    : sort === Sort.POPULARITY
+                                    ? `CAST("${type}"."averagePopularity" AS NUMERIC)`
+                                    : sort === Sort.TOTAL_EPISODES
+                                    ? `CAST("${type}"."totalEpisodes" AS NUMERIC)`
+                                    : sort === Sort.YEAR
+                                    ? `CAST("${type}"."year" AS NUMERIC)`
+                                    : sort === Sort.TOTAL_CHAPTERS ?
+                                    `CAST("${type}"."totalChapters" AS NUMERIC)`
+                                    : sort === Sort.TOTAL_VOLUMES ?
+                                    `CAST("${type}"."totalVolumes" AS NUMERIC)`
+                                    : `
+                                (CASE WHEN "${type}".title->>'english' IS NOT NULL THEN similarity(LOWER("${type}".title->>'english'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
+                                + CASE WHEN "${type}".title->>'romaji' IS NOT NULL THEN similarity(LOWER("${type}".title->>'romaji'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
+                                + CASE WHEN "${type}".title->>'native' IS NOT NULL THEN similarity(LOWER("${type}".title->>'native'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
+                                + CASE WHEN synonyms IS NOT NULL THEN most_similar(LOWER(${query.length > 0 ? `$1` : "'%'"}), synonyms) ELSE 0 END)`
+                            }
+                            ${sortDirection === SortDirection.ASC ? "ASC" : "DESC"},
+                            "${type}".id  -- Add the anime ID as a fallback sorting criterion
                             `
-                    }
-                    ${sortDirection === SortDirection.ASC ? "ASC" : "DESC"},
-                "${type}".id
-            ) AS rnk
-        FROM "${type}"
-        ${where}
-    )
-    SELECT * FROM ranked_anime
-    WHERE rnk > ${skip}
-    AND rnk <= ${skip + perPage};
+                        }
+                ) AS rnk
+            FROM "${type}"
+            ${where}
+        ) AS ranked_anime
+        WHERE rnk <= ${(skip + perPage)}
+            AND rnk > ${skip}
     `;
 
     return {
