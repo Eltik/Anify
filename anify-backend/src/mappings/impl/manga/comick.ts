@@ -65,9 +65,9 @@ export default class ComicK extends MangaProvider {
 
             if (title.length === 0) {
                 if (!chapter.title) {
-                    title = "Oneshot"
+                    title = "Oneshot";
                 } else {
-                    title = chapter.title
+                    title = chapter.title;
                 }
             }
 

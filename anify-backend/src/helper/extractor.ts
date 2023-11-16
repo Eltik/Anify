@@ -254,9 +254,11 @@ export default class Extractor {
                     "x-requested-with": "XMLHttpRequest",
                 },
             })
-        ).json().catch((err) => {
-            return err;
-        })) as { result: { sources: { file: string }[]; tracks: { file: string; label: string; kind: string }[] } };
+        )
+            .json()
+            .catch((err) => {
+                return err;
+            })) as { result: { sources: { file: string }[]; tracks: { file: string; label: string; kind: string }[] } };
 
         if (!source.result?.tracks) return result;
 
@@ -403,7 +405,7 @@ export default class Extractor {
 
         let { sources } = reqData as { sources: string };
 
-        const decryptKey = (await (await fetch("https://zoro.anify.tv/key/6")).json() as { key: string }).key as string;
+        const decryptKey = ((await (await fetch("https://zoro.anify.tv/key/6")).json()) as { key: string }).key as string;
 
         const encryptedURLTemp = sources?.split("");
 

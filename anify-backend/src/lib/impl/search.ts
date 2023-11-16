@@ -8,7 +8,7 @@ export const loadSearch = async (data: { query: string; type: Type; formats: For
     if ((Array.isArray(data.genres) && data.genres.length > 0) || (Array.isArray(data.genresExcluded) && data.genresExcluded.length > 0) || data.year || (Array.isArray(data.tags) && data.tags.length > 0) || (Array.isArray(data.tagsExcluded) && data.tagsExcluded.length > 0)) {
         // First check if exists in database
         const existing = await searchAdvanced(data.query, data.type, data.formats, 1, 15, data.genres, data.genresExcluded, data.season, data.year, data.tags, data.tagsExcluded);
-        if (existing.length > 0) {
+        if (existing.results.length > 0) {
             await emitter.emitAsync(Events.COMPLETED_SEARCH_LOAD, existing);
             return existing;
         }
@@ -26,7 +26,7 @@ export const loadSearch = async (data: { query: string; type: Type; formats: For
     } else {
         // First check if exists in database
         const existing = await search(data.query, data.type, data.formats, 1, 15, Sort.POPULARITY, SortDirection.ASC);
-        if (existing.length > 0) {
+        if (existing.results.length > 0) {
             await emitter.emitAsync(Events.COMPLETED_SEARCH_LOAD, existing);
             return existing;
         }

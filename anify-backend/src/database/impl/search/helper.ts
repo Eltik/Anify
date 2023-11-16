@@ -1,5 +1,18 @@
 import { Format, Genres, Season, Sort, SortDirection } from "../../../types/enums";
 
+export const generateSearchWhere = (type: "anime" | "manga", query: string, formats: Format[], sort: Sort) => {
+    return `WHERE
+        (
+            ${query.length > 0 ? `$1` : `'%'`} ILIKE ANY("${type}".synonyms)
+            OR  ${query.length > 0 ? `$1` : `'%'`}    % ANY("${type}".synonyms)
+            OR "${type}".title->>'english' ILIKE ${query.length > 0 ? "$1" : "'%'"}
+            OR "${type}".title->>'romaji' ILIKE ${query.length > 0 ? "$1" : "'%'"}
+            OR "${type}".title->>'native' ILIKE ${query.length > 0 ? "$1" : "'%'"}
+        )
+        ${formats.length > 0 ? `AND "${type}"."format" IN (${formats.map((f) => `'${f}'`)})` : ""}
+        ${sort && sort === Sort.YEAR ? `AND "${type}"."year" IS NOT NULL` : ""}`;
+};
+
 export const generateAdvancedSearchWhere = (type: "anime" | "manga", query: string, formats: Format[], genres: Genres[] = [], genresExcluded: Genres[] = [], season: Season = Season.UNKNOWN, year = 0, tags: string[] = [], tagsExcluded: string[] = [], sort: Sort = Sort.TITLE) => {
     return `WHERE
         (
@@ -19,7 +32,7 @@ export const generateAdvancedSearchWhere = (type: "anime" | "manga", query: stri
         ${sort && sort === Sort.YEAR ? `AND "${type}"."year" IS NOT NULL` : ""}`;
 };
 
-export const generateAdvancedSearchQueries = (type: "anime" | "manga", where: string, query: string, sort: Sort = Sort.TITLE, sortDirection: SortDirection = SortDirection.DESC, perPage: number, skip: number) => {
+export const generateSearchQueries = (type: "anime" | "manga", where: string, query: string, sort: Sort = Sort.TITLE, sortDirection: SortDirection = SortDirection.DESC, perPage: number, skip: number) => {
     const countQuery = `
         SELECT COUNT(*) FROM "${type}"
         ${where}
@@ -48,10 +61,10 @@ export const generateAdvancedSearchQueries = (type: "anime" | "manga", where: st
                                         ? `CAST("${type}"."totalEpisodes" AS NUMERIC)`
                                         : sort === Sort.YEAR
                                         ? `CAST("${type}"."year" AS NUMERIC)`
-                                        : sort === Sort.TOTAL_CHAPTERS ?
-                                        `CAST("${type}"."totalChapters" AS NUMERIC)`
-                                        : sort === Sort.TOTAL_VOLUMES ?
-                                        `CAST("${type}"."totalVolumes" AS NUMERIC)`
+                                        : sort === Sort.TOTAL_CHAPTERS
+                                        ? `CAST("${type}"."totalChapters" AS NUMERIC)`
+                                        : sort === Sort.TOTAL_VOLUMES
+                                        ? `CAST("${type}"."totalVolumes" AS NUMERIC)`
                                         : `
                                     (CASE WHEN "${type}".title->>'english' IS NOT NULL THEN similarity(LOWER("${type}".title->>'english'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
                                     + CASE WHEN "${type}".title->>'romaji' IS NOT NULL THEN similarity(LOWER("${type}".title->>'romaji'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
@@ -75,5 +88,5 @@ export const generateAdvancedSearchQueries = (type: "anime" | "manga", where: st
     return {
         countQuery,
         sqlQuery,
-    }
+    };
 };

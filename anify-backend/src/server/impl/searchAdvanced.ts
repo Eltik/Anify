@@ -60,7 +60,7 @@ export const handler = async (req: Request): Promise<Response> => {
         }
 
         const data = await searchAdvanced(query, (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type, formats as Format[], page, perPage, genres as Genres[], genresExcluded as Genres[], season, year, tags, tagsExcluded, sort as Sort, sortDirection);
-        if (data.length === 0) {
+        if (data.results.length === 0) {
             queues.searchQueue.add({
                 type: (type.toUpperCase() === "NOVEL" ? Type.MANGA : type.toUpperCase()) as Type,
                 query: query,

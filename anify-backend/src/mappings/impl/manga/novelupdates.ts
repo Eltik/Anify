@@ -133,7 +133,7 @@ export default class NovelUpdates extends MangaProvider {
                 Cookie: "_ga=;",
             },
             redirect: "follow",
-        })
+        });
 
         if (!req.ok) return undefined;
 
@@ -141,11 +141,15 @@ export default class NovelUpdates extends MangaProvider {
         const $ = load(data);
         const baseURL = $("base").attr("href")?.replace("http://", "https://") ?? this.url;
 
-        const article = await extract(baseURL, {}, {
-            headers: {
-                Cookie: "_ga=;",
-            }
-        })
+        const article = await extract(
+            baseURL,
+            {},
+            {
+                headers: {
+                    Cookie: "_ga=;",
+                },
+            },
+        );
         return article?.content;
     }
 }

@@ -1,7 +1,7 @@
 import { sqlite, dbType, postgres } from "../..";
 import { Format, Genres, Season, Sort, SortDirection, Type } from "../../../types/enums";
 import { Anime, Db, Manga } from "../../../types/types";
-import { generateAdvancedSearchQueries, generateAdvancedSearchWhere } from "./helper";
+import { generateAdvancedSearchWhere, generateSearchQueries } from "./helper";
 
 type ReturnType<T> = T extends Type.ANIME ? Anime[] : Manga[];
 
@@ -19,13 +19,17 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(
     tagsExcluded: string[] = [],
     sort: Sort = Sort.TITLE,
     sortDirection: SortDirection = SortDirection.DESC,
-) => {
+): Promise<{
+    results: ReturnType<T>;
+    total: number;
+    lastPage: number;
+}> => {
     if (dbType === "postgresql") {
         const skip = page > 0 ? perPage * (page - 1) : 0;
-        
+
         const where = generateAdvancedSearchWhere(type === Type.ANIME ? "anime" : "manga", query, formats, genres, genresExcluded, season, year, tags, tagsExcluded, sort);
 
-        const queries = generateAdvancedSearchQueries(type === Type.ANIME ? "anime" : "manga", where, query, sort, sortDirection, perPage, skip);
+        const queries = generateSearchQueries(type === Type.ANIME ? "anime" : "manga", where, query, sort, sortDirection, perPage, skip);
         let [count, results] = (await Promise.all([(await postgres.query(queries.countQuery, query.length > 0 ? [`%${query}`] : [])).rows, (await postgres.query(queries.sqlQuery, query.length > 0 ? [`%${query}`] : [])).rows])) as [any, any];
 
         if (sort === Sort.SCORE) {
@@ -47,7 +51,11 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(
         const total = Number((count as any)[0]?.count ?? 0);
         const lastPage = Math.ceil(Number(total) / perPage);
 
-        return results;
+        return {
+            results: results as unknown as ReturnType<T>,
+            total: results.length,
+            lastPage,
+        };
     }
 
     const skip = page > 0 ? perPage * (page - 1) : 0;
@@ -185,9 +193,17 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(
             }
         });
 
-        return parsedResults as unknown as ReturnType<T>;
+        return {
+            results: parsedResults as unknown as ReturnType<T>,
+            total: parsedResults.length,
+            lastPage: 1,
+        };
     } catch (e) {
         console.error(e);
-        return [];
+        return {
+            results: [],
+            total: 0,
+            lastPage: -1,
+        };
     }
 };
