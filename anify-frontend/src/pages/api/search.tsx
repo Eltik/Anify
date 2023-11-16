@@ -39,15 +39,19 @@ export default async function handler(request: Request, response: ServerResponse
                 year: 0,
             }),
         })
-    ).json()) as Anime[] | Manga[];
+    ).json()) as {
+        results: Anime[] | Manga[];
+        total: number;
+        lastPage: number;
+    };
 
     const newData = {
-        hits: data,
+        hits: data.results,
         query: request.body.query,
         processingTimeMs: 0,
         limit: perPage,
         offset: page * perPage,
-        estimatedTotalHits: data.length,
+        estimatedTotalHits: data.total,
     };
 
     response.writeHead(200, { "Content-Type": "application/json" });
