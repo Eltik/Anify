@@ -9,7 +9,10 @@ export const generateSearchWhere = (type: "anime" | "manga", query: string, form
             OR "${type}".title->>'romaji' ILIKE ${query.length > 0 ? "$1" : "'%'"}
             OR "${type}".title->>'native' ILIKE ${query.length > 0 ? "$1" : "'%'"}
         )
-        ${formats.length > 0 ? `AND "${type}"."format" IN (${formats.map((f) => `'${f}'`)})` : ""}
+        ${formats.length > 0 ? `AND (
+            "${type}"."format" IN (${formats.map((f) => `'${f}'`).join(',')})
+            OR "${type}"."format" = 'UNKNOWN'
+        )` : ""}
         ${sort && sort === Sort.YEAR ? `AND "${type}"."year" IS NOT NULL` : ""}`;
 };
 
@@ -22,7 +25,10 @@ export const generateAdvancedSearchWhere = (type: "anime" | "manga", query: stri
             OR "${type}".title->>'romaji' ILIKE ${query.length > 0 ? "$1" : "'%'"}
             OR "${type}".title->>'native' ILIKE ${query.length > 0 ? "$1" : "'%'"}
         )
-        ${formats.length > 0 ? `AND "${type}"."format" IN (${formats.map((f) => `'${f}'`)})` : ""}
+        ${formats.length > 0 ? `AND (
+            "${type}"."format" IN (${formats.map((f) => `'${f}'`).join(',')})
+            OR "${type}"."format" = 'UNKNOWN'
+        )` : ""}
         ${genres && genres.length > 0 ? `AND ARRAY[${genres.map((g) => `'${g}'`)}] <@ "${type}"."genres"` : ""}
         ${genresExcluded.length > 0 ? `AND NOT ARRAY[${genresExcluded.map((g) => `'${g}'`)}] && "${type}"."genres"` : ""}
         ${tags && tags.length > 0 ? `AND ARRAY[${tags.map((g) => `'${g}'`)}] <@ "${type}"."tags"` : ""}
