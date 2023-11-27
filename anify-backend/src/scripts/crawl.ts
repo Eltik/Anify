@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { sqlite, init } from "../database";
+import { sqlite, init, dbType, postgres } from "../database";
 import { BASE_PROVIDERS } from "../mappings";
 import { Format, Type } from "../types/enums";
 import { Anime, Manga } from "../types/types";
@@ -33,7 +33,7 @@ export const crawl = async (type: Type, formats: Format[]): Promise<void> => {
     const formatParams = formats.map((f) => `'${f}'`).join(", ");
 
     const idsToRemove: string[] = [];
-    const database = (await sqlite.query(`SELECT id FROM ${type.toLowerCase()} WHERE "format" IN (${formatParams})`).all()) as Anime[] | Manga[];
+    const database = dbType === "sqlite" ? (await sqlite.query(`SELECT id FROM ${type.toLowerCase()} WHERE "format" IN (${formatParams})`).all()) as Anime[] | Manga[] : ((await postgres.query(`SELECT id FROM ${type.toLowerCase()} WHERE "format" IN (${formatParams})`)).rows) as Anime[] | Manga[];
 
     database.forEach((media) => {
         idsToRemove.push(media.id);
