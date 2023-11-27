@@ -29,7 +29,7 @@ export default class AniDBMeta extends MetaProvider {
 
         const promises: Promise<void>[] = [];
 
-        $("table.search_results tbody tr.g_odd").map((i, el) => {
+        $("table.search_results tbody tr").map((i, el) => {
             promises.push(
                 new Promise(async (resolve, reject) => {
                     const id = ($(el).find("td.relid a").attr("href") ?? "").split("/anime/")[1]?.split("?")[0];
@@ -44,8 +44,8 @@ export default class AniDBMeta extends MetaProvider {
                             .text()
                             ?.split(", ")
                             .map((data) => data.trim())
-                            .concat($("div.titles tr.short td.value").text()) ?? [];
-                    const year = Number.isNaN(new Date($$("div.info tr.year td.value span").first()?.text().trim()).getFullYear()) ? 0 : new Date($$("div.info tr.year td.value span").first()?.text().trim()).getFullYear();
+                            .concat($$("div.titles tr.short td.value").text()?.split(", ")) ?? [];
+                    const year = Number.isNaN(new Date($$("div.info tr.year td.value span").first()?.attr("content")?.trim() ?? "").getFullYear()) ? 0 : new Date($$("div.info tr.year td.value span").first()?.attr("content")?.trim() ?? "").getFullYear();
 
                     const altTitles = [english, romaji, native, ...synonyms].filter(Boolean);
 

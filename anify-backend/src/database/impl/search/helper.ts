@@ -11,7 +11,6 @@ export const generateSearchWhere = (type: "anime" | "manga", query: string, form
         )
         ${formats.length > 0 ? `AND (
             "${type}"."format" IN (${formats.map((f) => `'${f}'`).join(',')})
-            OR "${type}"."format" = 'UNKNOWN'
         )` : ""}
         ${sort && sort === Sort.YEAR ? `AND "${type}"."year" IS NOT NULL` : ""}`;
 };
@@ -27,7 +26,6 @@ export const generateAdvancedSearchWhere = (type: "anime" | "manga", query: stri
         )
         ${formats.length > 0 ? `AND (
             "${type}"."format" IN (${formats.map((f) => `'${f}'`).join(',')})
-            OR "${type}"."format" = 'UNKNOWN'
         )` : ""}
         ${genres && genres.length > 0 ? `AND ARRAY[${genres.map((g) => `'${g}'`)}] <@ "${type}"."genres"` : ""}
         ${genresExcluded.length > 0 ? `AND NOT ARRAY[${genresExcluded.map((g) => `'${g}'`)}] && "${type}"."genres"` : ""}

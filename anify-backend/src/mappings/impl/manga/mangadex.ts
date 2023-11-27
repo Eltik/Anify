@@ -54,7 +54,7 @@ export default class MangaDex extends MangaProvider {
             });
 
             const formatString: string = manga.type.toUpperCase();
-            const format: Format = formatString === "ADAPTATION" ? Format.MANGA : Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
+            const format: Format = formatString === "ADAPTATION" ? Format.MANGA : Formats.includes(formatString as Format) ? (formatString as Format) : Format.MANGA;
 
             const title =
                 attributes.altTitles.find((title: { [key: string]: string }) => Object.keys(title)[0] === "en")?.en ??

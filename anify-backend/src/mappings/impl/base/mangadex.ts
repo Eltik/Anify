@@ -449,7 +449,7 @@ export default class ManagDexBase extends BaseProvider {
 
     private returnFilledManga(manga: any): MangaInfo {
         const formatString: string = manga.type.toUpperCase();
-        const format: Format = formatString === "ADAPTATION" ? Format.MANGA : Formats.includes(formatString as Format) ? (formatString as Format) : Format.UNKNOWN;
+        const format: Format = formatString === "ADAPTATION" ? Format.MANGA : Formats.includes(formatString as Format) ? (formatString as Format) : Format.MANGA;
 
         return {
             id: manga.id,
