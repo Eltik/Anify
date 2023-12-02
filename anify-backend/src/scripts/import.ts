@@ -27,6 +27,13 @@ export const importData = async () => {
         keys: 0,
     };
 
+    const failedCount = {
+        anime: 0,
+        manga: 0,
+        skipTimes: 0,
+        keys: 0,
+    }
+
     for (const media of data.anime) {
         if (await get(media.id)) continue;
         if (media.season) media.season = media.season.replace(/"/g, "");
@@ -34,7 +41,7 @@ export const importData = async () => {
             try {
                 media.averagePopularity = JSON.parse(media.averagePopularity);
             } catch (e) {
-                //
+                failedCount.anime++;
             }
         }
         if (media.season === "AUTUMN") {
@@ -63,7 +70,7 @@ export const importData = async () => {
             try {
                 media.averagePopularity = JSON.parse(media.averagePopularity);
             } catch (e) {
-                //
+                failedCount.manga++;
             }
         }
 
@@ -83,7 +90,8 @@ export const importData = async () => {
         if (await getSkipTimes(skipTime.id)) continue;
 
         try {
-            await createSkipTimes(skipTime, false);
+            let stringify = isString(skipTime.episodes);
+            await createSkipTimes(skipTime, !stringify);
 
             console.log(`Imported skip time ${skipTime.id}!`);
 
@@ -91,6 +99,7 @@ export const importData = async () => {
         } catch (error) {
             console.error(`Failed to import skip time ${skipTime.id}!`);
             console.error(error);
+            failedCount.skipTimes++;
         }
     }
 
@@ -106,10 +115,12 @@ export const importData = async () => {
         } catch (error) {
             console.error(`Failed to import api key ${key.id}!`);
             console.error(error);
+            failedCount.keys++;
         }
     }
 
     console.log(`Imported ${count.anime} anime, ${count.manga} manga, ${count.skipTimes} skip times, and ${count.keys} API keys!`);
+    console.log(`Failed to import ${failedCount.anime} anime, ${failedCount.manga} manga, ${failedCount.skipTimes} skip times, and ${failedCount.keys} API keys!`);
 };
 
 importData().then(() => {
