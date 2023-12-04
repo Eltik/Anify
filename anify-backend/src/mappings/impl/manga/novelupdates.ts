@@ -111,16 +111,21 @@ export default class NovelUpdates extends MangaProvider {
 
         if (chapterData.includes("not whitelisted by the operator of this proxy") || $$("title").html() === "Just a moment...") return this.fetchChapters(id, retries + 1);
 
+        const uniqueTitles = new Set<string>();
         $$("li.sp_li_chp a[data-id]").each((index, el) => {
             const id = $$(el).attr("data-id");
             const title = $$(el).find("span").text();
 
-            chapters.push({
-                id: id!,
-                title: title!,
-                number: index + 1,
-                rating: null,
-            });
+            if (!uniqueTitles.has(title)) {
+                uniqueTitles.add(title);
+        
+                chapters.push({
+                    id: id!,
+                    title: title!,
+                    number: index + 1,
+                    rating: null,
+                });
+            }
         });
 
         return chapters.reverse();
