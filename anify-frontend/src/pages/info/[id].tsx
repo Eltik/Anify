@@ -932,45 +932,37 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                             }}
                                             styles={{
                                                 container: (baseStyles) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#333333",
                                                     border: "none",
                                                     borderRadius: "0.25rem",
                                                 }),
                                                 control: (baseStyles) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#333333",
                                                     border: "none",
                                                 }),
                                                 input: (baseStyles) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#333333",
                                                     border: "none",
                                                 }),
                                                 menu: (baseStyles) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#1f1f1f",
                                                     border: "none",
                                                 }),
                                                 menuList: (baseStyles) => ({
-                                                    ...baseStyles,
                                                     width: "100%",
                                                     height: "100%",
                                                 }),
                                                 noOptionsMessage: (baseStyles) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                 }),
                                                 placeholder: (baseStyles) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                 }),
                                                 singleValue: (baseStyles) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                     height: "100%",
                                                     position: "relative",
@@ -978,11 +970,9 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                                     overflow: "initial",
                                                 }),
                                                 valueContainer: (baseStyles) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                 }),
                                                 option: (baseStyles) => ({
-                                                    ...baseStyles,
                                                     backgroundColor: "#1f1f1f",
                                                     color: "white",
                                                     transition: "0.1s all",
@@ -998,11 +988,9 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                                     height: "100%",
                                                 }),
                                                 indicatorSeparator: (baseStyles) => ({
-                                                    ...baseStyles,
                                                     display: "none",
                                                 }),
                                                 dropdownIndicator: (baseStyles) => ({
-                                                    ...baseStyles,
                                                     backgroundColor: "rgb(var(--blue-300));",
                                                     color: "white",
                                                     transition: "0.1s all",
@@ -1205,7 +1193,6 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                             className="z-50"
                                             styles={{
                                                 container: (baseStyles, state) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#141414",
                                                     border: "none",
@@ -1213,40 +1200,33 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                                     zIndex: "50",
                                                 }),
                                                 control: (baseStyles, state) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#141414",
                                                     border: "none",
                                                 }),
                                                 input: (baseStyles, state) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#141414",
                                                     border: "none",
                                                 }),
                                                 menu: (baseStyles, state) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#333333",
                                                     border: "none",
                                                     zIndex: "50",
                                                 }),
                                                 menuList: (baseStyles, state) => ({
-                                                    ...baseStyles,
                                                     width: "100%",
                                                     height: "100%",
                                                     zIndex: "50",
                                                 }),
                                                 noOptionsMessage: (baseStyles, state) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                 }),
                                                 placeholder: (baseStyles, state) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                 }),
                                                 singleValue: (baseStyles, state) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                     height: "100%",
                                                     position: "relative",
@@ -1255,11 +1235,9 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                                     zIndex: "50",
                                                 }),
                                                 valueContainer: (baseStyles, state) => ({
-                                                    ...baseStyles,
                                                     color: "white",
                                                 }),
                                                 option: (baseStyles, state) => ({
-                                                    ...baseStyles,
                                                     backgroundColor: "#333333",
                                                     color: "white",
                                                     zIndex: "50",
@@ -1276,11 +1254,9 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                                     height: "100%",
                                                 }),
                                                 indicatorSeparator: (baseStyles, state) => ({
-                                                    ...baseStyles,
                                                     display: "none",
                                                 }),
                                                 dropdownIndicator: (baseStyles, state) => ({
-                                                    ...baseStyles,
                                                     backgroundColor: "none",
                                                     color: "white",
                                                     transition: "0.1s all",
