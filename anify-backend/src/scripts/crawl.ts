@@ -33,7 +33,7 @@ export const crawl = async (type: Type, formats: Format[]): Promise<void> => {
     const formatParams = formats.map((f) => `'${f}'`).join(", ");
 
     const idsToRemove: string[] = [];
-    const database = dbType === "sqlite" ? (await sqlite.query(`SELECT id FROM ${type.toLowerCase()} WHERE "format" IN (${formatParams})`).all()) as Anime[] | Manga[] : ((await postgres.query(`SELECT id FROM ${type.toLowerCase()} WHERE "format" IN (${formatParams})`)).rows) as Anime[] | Manga[];
+    const database = dbType === "sqlite" ? ((await sqlite.query(`SELECT id FROM ${type.toLowerCase()} WHERE "format" IN (${formatParams})`).all()) as Anime[] | Manga[]) : ((await postgres.query(`SELECT id FROM ${type.toLowerCase()} WHERE "format" IN (${formatParams})`)).rows as Anime[] | Manga[]);
 
     database.forEach((media) => {
         idsToRemove.push(media.id);

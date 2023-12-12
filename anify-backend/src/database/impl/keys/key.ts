@@ -28,6 +28,16 @@ export const getKey = async (id: string): Promise<Key | undefined> => {
 };
 
 export const getKeys = async (): Promise<Key[] | undefined> => {
-    const keys = sqlite.query(`SELECT * FROM apiKey`).all() as Db<Key>[];
-    return keys;
+    if (dbType === "postgresql") {
+        const query: QueryConfig = {
+            text: `
+                SELECT * FROM "apiKey"
+            `,
+        };
+        const keys = await postgres.query<Db<Key>>(query).then((res) => res.rows);
+        return keys;
+    } else {
+        const keys = sqlite.query(`SELECT * FROM apiKey`).all() as Db<Key>[];
+        return keys;
+    }
 };

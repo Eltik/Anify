@@ -32,7 +32,7 @@ export const importData = async () => {
         manga: 0,
         skipTimes: 0,
         keys: 0,
-    }
+    };
 
     for (const media of data.anime) {
         if (await get(media.id)) continue;

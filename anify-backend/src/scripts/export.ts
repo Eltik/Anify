@@ -21,19 +21,19 @@ const exportData = async () => {
             let allRows: any[] = [];
 
             console.log(colors.yellow(`Exporting ${tableName}...`) + colors.gray(` (batch size: ${batchSize})`));
-    
+
             while (true) {
                 const query = `SELECT * FROM ${tableName} LIMIT ${batchSize} OFFSET ${offset}`;
                 const rows = (await postgres.query(query)).rows;
-    
+
                 if (rows.length === 0) {
                     break;
                 }
-    
+
                 allRows = allRows.concat(rows);
                 offset += batchSize;
             }
-    
+
             console.log(colors.green(`Exported ${tableName} successfully!`) + colors.gray(` (${allRows.length} rows)`));
             return allRows;
         };
@@ -64,7 +64,7 @@ const exportData = async () => {
         writer.write('"manga": [');
 
         console.log("Writing manga...");
-        
+
         for (let i = 0; i < manga.length; i++) {
             writer.write(JSON.stringify(manga[i], null, 4));
             if (i !== manga.length - 1) {
@@ -78,7 +78,7 @@ const exportData = async () => {
         writer.write('"skipTimes": [');
 
         console.log("Writing skipTimes...");
-        
+
         for (let i = 0; i < skipTimes.length; i++) {
             writer.write(JSON.stringify(skipTimes[i], null, 4));
             if (i !== skipTimes.length - 1) {
@@ -92,7 +92,7 @@ const exportData = async () => {
         writer.write('"apiKey": [');
 
         console.log("Writing apiKey...");
-        
+
         for (let i = 0; i < apiKey.length; i++) {
             writer.write(JSON.stringify(apiKey[i], null, 4));
             if (i !== apiKey.length - 1) {

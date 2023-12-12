@@ -118,7 +118,7 @@ export default class NovelUpdates extends MangaProvider {
 
             if (!uniqueTitles.has(title)) {
                 uniqueTitles.add(title);
-        
+
                 chapters.push({
                     id: id!,
                     title: title!,

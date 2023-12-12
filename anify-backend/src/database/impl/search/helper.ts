@@ -9,9 +9,13 @@ export const generateSearchWhere = (type: "anime" | "manga", query: string, form
             OR "${type}".title->>'romaji' ILIKE ${query.length > 0 ? "$1" : "'%'"}
             OR "${type}".title->>'native' ILIKE ${query.length > 0 ? "$1" : "'%'"}
         )
-        ${formats.length > 0 ? `AND (
-            "${type}"."format" IN (${formats.map((f) => `'${f}'`).join(',')})
-        )` : ""}
+        ${
+            formats.length > 0
+                ? `AND (
+            "${type}"."format" IN (${formats.map((f) => `'${f}'`).join(",")})
+        )`
+                : ""
+        }
         ${sort && sort === Sort.YEAR ? `AND "${type}"."year" IS NOT NULL` : ""}`;
 };
 
@@ -24,9 +28,13 @@ export const generateAdvancedSearchWhere = (type: "anime" | "manga", query: stri
             OR "${type}".title->>'romaji' ILIKE ${query.length > 0 ? "$1" : "'%'"}
             OR "${type}".title->>'native' ILIKE ${query.length > 0 ? "$1" : "'%'"}
         )
-        ${formats.length > 0 ? `AND (
-            "${type}"."format" IN (${formats.map((f) => `'${f}'`).join(',')})
-        )` : ""}
+        ${
+            formats.length > 0
+                ? `AND (
+            "${type}"."format" IN (${formats.map((f) => `'${f}'`).join(",")})
+        )`
+                : ""
+        }
         ${genres && genres.length > 0 ? `AND ARRAY[${genres.map((g) => `'${g}'`)}] <@ "${type}"."genres"` : ""}
         ${genresExcluded.length > 0 ? `AND NOT ARRAY[${genresExcluded.map((g) => `'${g}'`)}] && "${type}"."genres"` : ""}
         ${tags && tags.length > 0 ? `AND ARRAY[${tags.map((g) => `'${g}'`)}] <@ "${type}"."tags"` : ""}
@@ -67,10 +75,10 @@ export const generateSearchQueries = (type: "anime" | "manga", where: string, qu
                                     ? `CAST("${type}"."totalEpisodes" AS NUMERIC)`
                                     : sort === Sort.YEAR
                                     ? `CAST("${type}"."year" AS NUMERIC)`
-                                    : sort === Sort.TOTAL_CHAPTERS ?
-                                    `CAST("${type}"."totalChapters" AS NUMERIC)`
-                                    : sort === Sort.TOTAL_VOLUMES ?
-                                    `CAST("${type}"."totalVolumes" AS NUMERIC)`
+                                    : sort === Sort.TOTAL_CHAPTERS
+                                    ? `CAST("${type}"."totalChapters" AS NUMERIC)`
+                                    : sort === Sort.TOTAL_VOLUMES
+                                    ? `CAST("${type}"."totalVolumes" AS NUMERIC)`
                                     : `
                                 (CASE WHEN "${type}".title->>'english' IS NOT NULL THEN similarity(LOWER("${type}".title->>'english'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
                                 + CASE WHEN "${type}".title->>'romaji' IS NOT NULL THEN similarity(LOWER("${type}".title->>'romaji'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
@@ -85,7 +93,7 @@ export const generateSearchQueries = (type: "anime" | "manga", where: string, qu
             FROM "${type}"
             ${where}
         ) AS ranked_anime
-        WHERE rnk <= ${(skip + perPage)}
+        WHERE rnk <= ${skip + perPage}
             AND rnk > ${skip}
     `;
 
