@@ -22,7 +22,7 @@ export const env = createEnv({
         AUTH_URL: process.env.AUTH_URL || "http://localhost:3660",
         M3U8_PROXY: process.env.M3U8_PROXY || "https://proxy.m3u8.proxy",
         IMAGE_PROXY: process.env.IMAGE_PROXY || "https://api.consumet.org/utils/image-proxy",
-        API_KEY: process.env.API_KEY || "",
+        API_KEY: process.env.API_KEY || "myapikey",
         NODE_ENV: process.env.NODE_ENV,
         NEXT_PUBLIC_IMAGE_PROXY: process.env.IMAGE_PROXY || "https://api.consumet.org/utils/image-proxy",
     },

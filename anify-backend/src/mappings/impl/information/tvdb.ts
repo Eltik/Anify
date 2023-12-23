@@ -94,16 +94,16 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
                     const type = artworkIds.backgrounds.includes(art.type)
                         ? "banner"
                         : artworkIds.banner.includes(art.type)
-                        ? "top_banner"
-                        : artworkIds.clearLogo.includes(art.type)
-                        ? "clear_logo"
-                        : artworkIds.poster.includes(art.type)
-                        ? "poster"
-                        : artworkIds.icon.includes(art.type)
-                        ? "icon"
-                        : artworkIds.clearArt.includes(art.type)
-                        ? "clear_art"
-                        : null;
+                          ? "top_banner"
+                          : artworkIds.clearLogo.includes(art.type)
+                            ? "clear_logo"
+                            : artworkIds.poster.includes(art.type)
+                              ? "poster"
+                              : artworkIds.icon.includes(art.type)
+                                ? "icon"
+                                : artworkIds.clearArt.includes(art.type)
+                                  ? "clear_art"
+                                  : null;
                     if (!type) return;
                     return {
                         type: type,

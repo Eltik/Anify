@@ -30,14 +30,14 @@ export default class Http {
             providerId === "novelupdates"
                 ? "MANGA"
                 : BASE_PROVIDERS.find((provider) => provider.id === providerId) !== undefined
-                ? "BASE"
-                : ANIME_PROVIDERS.find((provider) => provider.id === providerId) !== undefined
-                ? "ANIME"
-                : MANGA_PROVIDERS.find((provider) => provider.id === providerId) !== undefined
-                ? "MANGA"
-                : META_PROVIDERS.find((provider) => provider.id === providerId) !== undefined
-                ? "META"
-                : undefined;
+                  ? "BASE"
+                  : ANIME_PROVIDERS.find((provider) => provider.id === providerId) !== undefined
+                    ? "ANIME"
+                    : MANGA_PROVIDERS.find((provider) => provider.id === providerId) !== undefined
+                      ? "MANGA"
+                      : META_PROVIDERS.find((provider) => provider.id === providerId) !== undefined
+                        ? "META"
+                        : undefined;
         if (!proxyType) return undefined;
 
         // Bun likes to do things where it doesn't initialize the unbannedProxies variable.
@@ -48,18 +48,18 @@ export default class Http {
                         ? BASE_PROXIES
                         : []
                     : proxyType === "ANIME"
-                    ? Array.isArray(ANIME_PROXIES)
-                        ? ANIME_PROXIES
-                        : []
-                    : proxyType === "MANGA"
-                    ? Array.isArray(MANGA_PROXIES)
-                        ? MANGA_PROXIES
-                        : []
-                    : proxyType === "META"
-                    ? Array.isArray(META_PROXIES)
-                        ? META_PROXIES
-                        : []
-                    : [];
+                      ? Array.isArray(ANIME_PROXIES)
+                          ? ANIME_PROXIES
+                          : []
+                      : proxyType === "MANGA"
+                        ? Array.isArray(MANGA_PROXIES)
+                            ? MANGA_PROXIES
+                            : []
+                        : proxyType === "META"
+                          ? Array.isArray(META_PROXIES)
+                              ? META_PROXIES
+                              : []
+                          : [];
         }
 
         // If there are no proxies, return undefined.
