@@ -37,6 +37,7 @@ export const start = async () => {
         await import("./impl/chapters.ts"),
         await import("./impl/contentData.ts"),
         await import("./impl/episodes.ts"),
+        await import("./impl/map.ts"),
         await import("./impl/media.ts"),
         await import("./impl/info.ts"),
         await import("./impl/pages.ts"),
