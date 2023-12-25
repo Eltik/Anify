@@ -42,6 +42,9 @@ export async function scrapeCorsProxies(): Promise<void> {
                 break;
             }
         } while (cursor !== null && cursor !== "" && currentRequest < maxRequests);
+        console.log(colors.green("Finished scraping CORS proxies."));
+        await Bun.write("./proxies.json", JSON.stringify(hits, null, 4));
+        await checkCorsProxies();
     } catch (error) {
         // Handle the error if necessary
         console.error(error);

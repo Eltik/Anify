@@ -28,30 +28,30 @@ export default class MALMeta extends MetaProvider {
                         data.type?.toLowerCase() === "tv"
                             ? Format.TV
                             : data.type?.toLowerCase() === "movie"
-                              ? Format.MOVIE
-                              : data.type?.toLowerCase() === "ova"
-                                ? Format.OVA
-                                : data.type?.toLowerCase() === "special"
-                                  ? Format.SPECIAL
-                                  : data.type?.toLowerCase() === "ona"
-                                    ? Format.ONA
-                                    : data.type?.toLowerCase() === "music"
-                                      ? Format.MUSIC
-                                      : data.type?.toLowerCase() === "manga"
-                                        ? Format.MANGA
-                                        : data.type?.toLowerCase() === "novel"
-                                          ? Format.NOVEL
-                                          : data.type?.toLowerCase() === "lightnovel"
-                                            ? Format.NOVEL
-                                            : data.type?.toLowerCase() === "oneshot"
-                                              ? Format.ONE_SHOT
-                                              : data.type?.toLowerCase() === "doujin"
-                                                ? Format.MANGA
-                                                : data.type?.toLowerCase() === "manhwa"
-                                                  ? Format.MANGA
-                                                  : data.type?.toLowerCase() === "manhua"
-                                                    ? Format.MANGA
-                                                    : Format.UNKNOWN,
+                            ? Format.MOVIE
+                            : data.type?.toLowerCase() === "ova"
+                            ? Format.OVA
+                            : data.type?.toLowerCase() === "special"
+                            ? Format.SPECIAL
+                            : data.type?.toLowerCase() === "ona"
+                            ? Format.ONA
+                            : data.type?.toLowerCase() === "music"
+                            ? Format.MUSIC
+                            : data.type?.toLowerCase() === "manga"
+                            ? Format.MANGA
+                            : data.type?.toLowerCase() === "novel"
+                            ? Format.NOVEL
+                            : data.type?.toLowerCase() === "lightnovel"
+                            ? Format.NOVEL
+                            : data.type?.toLowerCase() === "oneshot"
+                            ? Format.ONE_SHOT
+                            : data.type?.toLowerCase() === "doujin"
+                            ? Format.MANGA
+                            : data.type?.toLowerCase() === "manhwa"
+                            ? Format.MANGA
+                            : data.type?.toLowerCase() === "manhua"
+                            ? Format.MANGA
+                            : Format.UNKNOWN,
                     img: data.images?.jpg?.large_image_url ?? data.images?.jpg?.image_url ?? data.images?.jpg?.small_image_url ?? null,
                     providerId: this.id,
                     title: data.title ?? data.title_english ?? data.title_japanese ?? "",
@@ -67,30 +67,30 @@ export default class MALMeta extends MetaProvider {
                         data.type?.toLowerCase() === "tv"
                             ? Format.TV
                             : data.type?.toLowerCase() === "movie"
-                              ? Format.MOVIE
-                              : data.type?.toLowerCase() === "ova"
-                                ? Format.OVA
-                                : data.type?.toLowerCase() === "special"
-                                  ? Format.SPECIAL
-                                  : data.type?.toLowerCase() === "ona"
-                                    ? Format.ONA
-                                    : data.type?.toLowerCase() === "music"
-                                      ? Format.MUSIC
-                                      : data.type?.toLowerCase() === "manga"
-                                        ? Format.MANGA
-                                        : data.type?.toLowerCase() === "novel"
-                                          ? Format.NOVEL
-                                          : data.type?.toLowerCase() === "lightnovel"
-                                            ? Format.NOVEL
-                                            : data.type?.toLowerCase() === "oneshot"
-                                              ? Format.ONE_SHOT
-                                              : data.type?.toLowerCase() === "doujin"
-                                                ? Format.MANGA
-                                                : data.type?.toLowerCase() === "manhwa"
-                                                  ? Format.MANGA
-                                                  : data.type?.toLowerCase() === "manhua"
-                                                    ? Format.MANGA
-                                                    : Format.UNKNOWN,
+                            ? Format.MOVIE
+                            : data.type?.toLowerCase() === "ova"
+                            ? Format.OVA
+                            : data.type?.toLowerCase() === "special"
+                            ? Format.SPECIAL
+                            : data.type?.toLowerCase() === "ona"
+                            ? Format.ONA
+                            : data.type?.toLowerCase() === "music"
+                            ? Format.MUSIC
+                            : data.type?.toLowerCase() === "manga"
+                            ? Format.MANGA
+                            : data.type?.toLowerCase() === "novel"
+                            ? Format.NOVEL
+                            : data.type?.toLowerCase() === "lightnovel"
+                            ? Format.NOVEL
+                            : data.type?.toLowerCase() === "oneshot"
+                            ? Format.ONE_SHOT
+                            : data.type?.toLowerCase() === "doujin"
+                            ? Format.MANGA
+                            : data.type?.toLowerCase() === "manhwa"
+                            ? Format.MANGA
+                            : data.type?.toLowerCase() === "manhua"
+                            ? Format.MANGA
+                            : Format.UNKNOWN,
                     img: data.images?.jpg?.large_image_url ?? data.images?.jpg?.image_url ?? data.images?.jpg?.small_image_url ?? null,
                     providerId: this.id,
                     title: data.title ?? data.title_english ?? data.title_japanese ?? "",

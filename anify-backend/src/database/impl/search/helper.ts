@@ -70,16 +70,16 @@ export const generateSearchQueries = (type: "anime" | "manga", where: string, qu
                                 sort === Sort.SCORE
                                     ? `CAST("${type}"."averageRating" AS NUMERIC)`
                                     : sort === Sort.POPULARITY
-                                      ? `CAST("${type}"."averagePopularity" AS NUMERIC)`
-                                      : sort === Sort.TOTAL_EPISODES
-                                        ? `CAST("${type}"."totalEpisodes" AS NUMERIC)`
-                                        : sort === Sort.YEAR
-                                          ? `CAST("${type}"."year" AS NUMERIC)`
-                                          : sort === Sort.TOTAL_CHAPTERS
-                                            ? `CAST("${type}"."totalChapters" AS NUMERIC)`
-                                            : sort === Sort.TOTAL_VOLUMES
-                                              ? `CAST("${type}"."totalVolumes" AS NUMERIC)`
-                                              : `
+                                    ? `CAST("${type}"."averagePopularity" AS NUMERIC)`
+                                    : sort === Sort.TOTAL_EPISODES
+                                    ? `CAST("${type}"."totalEpisodes" AS NUMERIC)`
+                                    : sort === Sort.YEAR
+                                    ? `CAST("${type}"."year" AS NUMERIC)`
+                                    : sort === Sort.TOTAL_CHAPTERS
+                                    ? `CAST("${type}"."totalChapters" AS NUMERIC)`
+                                    : sort === Sort.TOTAL_VOLUMES
+                                    ? `CAST("${type}"."totalVolumes" AS NUMERIC)`
+                                    : `
                                 (CASE WHEN "${type}".title->>'english' IS NOT NULL THEN similarity(LOWER("${type}".title->>'english'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
                                 + CASE WHEN "${type}".title->>'romaji' IS NOT NULL THEN similarity(LOWER("${type}".title->>'romaji'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,
                                 + CASE WHEN "${type}".title->>'native' IS NOT NULL THEN similarity(LOWER("${type}".title->>'native'), LOWER(${query.length > 0 ? `$1` : "'%'"})) ELSE 0 END,

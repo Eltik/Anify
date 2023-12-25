@@ -83,18 +83,18 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(
                 sort === Sort.POPULARITY
                     ? "averagePopularity"
                     : sort === Sort.SCORE
-                      ? "averageRating"
-                      : sort === Sort.TITLE
-                        ? "title->>'english'"
-                        : sort === Sort.TOTAL_CHAPTERS
-                          ? "totalChapters"
-                          : sort === Sort.TOTAL_EPISODES
-                            ? "totalEpisodes"
-                            : sort === Sort.TOTAL_VOLUMES
-                              ? "totalVolumes"
-                              : sort === Sort.YEAR
-                                ? "year"
-                                : ""
+                    ? "averageRating"
+                    : sort === Sort.TITLE
+                    ? "title->>'english'"
+                    : sort === Sort.TOTAL_CHAPTERS
+                    ? "totalChapters"
+                    : sort === Sort.TOTAL_EPISODES
+                    ? "totalEpisodes"
+                    : sort === Sort.TOTAL_VOLUMES
+                    ? "totalVolumes"
+                    : sort === Sort.YEAR
+                    ? "year"
+                    : ""
             } ${sortDirection}
             LIMIT $limit OFFSET $offset`,
         )

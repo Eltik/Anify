@@ -64,10 +64,10 @@ export default class MAL extends InformationProvider<Anime | Manga, AnimeInfo | 
                 ? (data.status as string).toLowerCase() === "not yet aired"
                     ? MediaStatus.NOT_YET_RELEASED
                     : (data.status as string).toLowerCase() === "currently airing"
-                      ? MediaStatus.RELEASING
-                      : (data.status as string).toLowerCase() === "finished airing"
-                        ? MediaStatus.FINISHED
-                        : null
+                    ? MediaStatus.RELEASING
+                    : (data.status as string).toLowerCase() === "finished airing"
+                    ? MediaStatus.FINISHED
+                    : null
                 : null,
             popularity: data.popularity,
             synonyms: data.title_synonyms?.filter((s) => s?.length) ?? [],

@@ -100,10 +100,10 @@ crawl(
     type === "anime"
         ? [Format.TV, Format.TV_SHORT, Format.MOVIE, Format.OVA, Format.ONA, Format.SPECIAL, Format.MUSIC]
         : type === "manga"
-          ? [Format.MANGA, Format.ONE_SHOT]
-          : type === "novel"
-            ? [Format.NOVEL]
-            : [Format.TV, Format.TV_SHORT, Format.MOVIE, Format.OVA, Format.ONA, Format.SPECIAL, Format.MUSIC],
+        ? [Format.MANGA, Format.ONE_SHOT]
+        : type === "novel"
+        ? [Format.NOVEL]
+        : [Format.TV, Format.TV_SHORT, Format.MOVIE, Format.OVA, Format.ONA, Format.SPECIAL, Format.MUSIC],
 ).then((data) => {
     // Hang infinitely
     console.log(data);
