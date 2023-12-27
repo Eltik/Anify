@@ -4,7 +4,7 @@ import { Anime, AnimeInfo, Manga, MangaInfo, MediaInfoKeys } from "../../../type
 
 export default class ComicKInfo extends InformationProvider<Anime | Manga, AnimeInfo | MangaInfo> {
     override id = "comick";
-    override url = "https://comick.app";
+    override url = "https://comick.cc";
 
     private api = "https://api.comick.fun";
 

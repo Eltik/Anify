@@ -8,7 +8,7 @@ import Extractor from "../../../helper/extractor";
 
 import { webcrack } from "webcrack";
 import { Deobfuscator } from "deobfuscator";
-import { readFile, writeFile } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import { assert } from "node:console";
 import colors from "colors";
 
@@ -452,6 +452,7 @@ export class NineAnimeHandler {
     }
 
     public mCloudWorker(content: string, futoken: string, keys: string[], isSearch: boolean) {
+        console.log(content);
         return `https://vidplay.site/${this.modifyURL(futoken, btoa(this._rc4(keys[1], this._rc4(keys[0], content))))}${isSearch ? `?${isSearch}` : ""}`;
     }
 
@@ -460,7 +461,8 @@ export class NineAnimeHandler {
             a = [k];
 
         for (var i = 0; i < encodedURL.length; i++) {
-            a.push(k.charCodeAt(i % k.length) + encodedURL.charCodeAt(i));
+            //a.push(k.charCodeAt(i % k.length) + encodedURL.charCodeAt(i));
+            a.push(String(k.charCodeAt(i % k.length) + encodedURL.charCodeAt(i)));
         }
         return `mediainfo/${a.join(",")}`;
     }

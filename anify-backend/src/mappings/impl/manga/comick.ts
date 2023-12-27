@@ -5,13 +5,13 @@ import { Chapter, Page, Result } from "../../../types/types";
 export default class ComicK extends MangaProvider {
     override rateLimit = 250;
     override id = "comick";
-    override url = "https://comick.app";
+    override url = "https://comick.cc";
 
     public needsProxy: boolean = true;
 
     override formats: Format[] = [Format.MANGA, Format.ONE_SHOT];
 
-    // Docs: https://upload.comick.app/docs/static/index.html
+    // Docs: https://upload.comick.cc/docs/static/index.html
     private api = "https://api.comick.fun";
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {

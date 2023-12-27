@@ -66,6 +66,8 @@ export async function checkCorsProxies(
             }
             console.log(colors.green(`Finished importing ${colors.yellow(proxies.length + "")} meta proxies.`));
         }
+
+        console.log("=========================================");
     }
 
     if (toCheck.length === 0) {
@@ -80,7 +82,7 @@ export async function checkCorsProxies(
                 const url = `http://${ip}:${port}`;
                 toCheck.push(url);
             }
-            console.log(colors.green(`Finished importing ${colors.yellow(toCheck.length + "")} current proxies.`));
+            console.log(colors.green(`Finished importing ${colors.yellow(toCheck.length + "")} proxies from the proxies list file.`));
         }
     }
 

@@ -4,6 +4,7 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
+    "postinstall": "cd node_modules/isolated-vm && node-gyp clean && node-gyp rebuild --release -j 4",
     "start": "bun run dist/index.js",
     "dev": "bun src/index.ts",
     "crawl": "bun run src/scripts/crawl.ts",

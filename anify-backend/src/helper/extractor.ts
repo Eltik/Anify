@@ -5,7 +5,6 @@ import { env } from "process";
 import { Source } from "../types/types";
 import { StreamingServers } from "../types/enums";
 import Http from "./request";
-import { NineAnimeHandler } from "../mappings/impl/anime/nineanime";
 
 /**
  * @description Extracts source links from the streaming servers. This class is very messy but it works.
@@ -235,15 +234,31 @@ export default class Extractor {
 
         const futoken = await (await Http.request("9anime", false, "https://vidplay.site/futoken")).text();
 
-        const nineAnimeHandler = new NineAnimeHandler();
-        const keys = await nineAnimeHandler.fetchKeys();
-        const uri = nineAnimeHandler.mCloudWorker(url, futoken, keys, false);
+        const rawSource = (await (
+            await fetch(`${proxy}/rawVizcloud?query=${encodeURIComponent(url)}&apikey=${proxyKey}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                    query: url,
+                    futoken,
+                }),
+            })
+        ).json()) as { rawURL: string };
 
-        console.log(uri);
-
-        const source = (await (await fetch(uri)).json()) as any;
-
-        console.log(source);
+        const source = (await (
+            await Http.request("9anime", false, rawSource.rawURL, {
+                headers: {
+                    referer: "https://vidplay.site/",
+                    "x-requested-with": "XMLHttpRequest",
+                },
+            })
+        )
+            .json()
+            .catch((err) => {
+                return err;
+            })) as { result: { sources: { file: string }[]; tracks: { file: string; label: string; kind: string }[] } };
 
         if (!source.result?.tracks) return result;
 
