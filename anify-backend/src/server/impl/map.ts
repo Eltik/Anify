@@ -19,7 +19,7 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const id = body?.id ?? paths[1] ?? url.searchParams.get("id") ?? null;
         const type = body?.type ?? paths[2] ?? url.searchParams.get("type") ?? null;
-        const formats = body?.formats ?? url.searchParams.get("formats")?.split(",") ?? (type.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL]);
+        const formats = body?.formats ?? url.searchParams.get("formats")?.split(",") ?? (type?.toLowerCase() === "anime" ? [Format.MOVIE, Format.TV, Format.TV_SHORT, Format.OVA, Format.ONA, Format.OVA] : type?.toLowerCase() === "manga" ? [Format.MANGA, Format.ONE_SHOT] : [Format.NOVEL]);
 
         formats
             .filter((f: string) => !Formats.includes(f as Format))
