@@ -11,3 +11,6 @@ Dockerfile.*
 .eslintrc
 *.html
 *.css
+.env.example
+.gitignore
+bun.lockb
