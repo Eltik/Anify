@@ -17,7 +17,7 @@ export default {
             response.config.message({
                 title: "Current Config",
                 data: `\`\`\`${JSON.stringify(config, null, 4)}\`\`\``,
-            })
+            }),
         );
     },
 };

@@ -7,7 +7,7 @@ import { copyFileSync, createWriteStream, existsSync, mkdirSync } from "fs";
 const execPromise = promisify(exec);
 
 const customPromisify = (
-    localCommand: string
+    localCommand: string,
 ): {
     promise: Promise<number>;
     child: ChildProcess;

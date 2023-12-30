@@ -54,7 +54,7 @@ export default {
             response.config.message({
                 title: "Logs for " + name,
                 data: data[0].data ?? "",
-            })
+            }),
         );
     },
 };

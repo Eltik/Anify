@@ -13,3 +13,6 @@ Dockerfile.*
 .env.example
 .gitignore
 bun.lockb
+tsconfig.tsbuildinfo
+.DS_Store
+.prettierignore

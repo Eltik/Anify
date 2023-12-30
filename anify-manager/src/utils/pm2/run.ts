@@ -40,7 +40,7 @@ const run = async (folderName: string): Promise<BuildDetail[]> => {
                     }
 
                     resolve();
-                }
+                },
             );
         });
     }

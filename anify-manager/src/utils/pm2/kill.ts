@@ -24,7 +24,7 @@ const kill = async (names: string | number | (string | number)[]): Promise<IResp
                     }
                 });
             });
-        })
+        }),
     );
 };
 

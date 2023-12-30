@@ -31,7 +31,7 @@ const logs = async (names: string | number | (string | number)[]): Promise<IResp
                     resolve({ error: "Log file not found. Path: " + logPath, data: name as string });
                 }
             });
-        })
+        }),
     );
 };
 
