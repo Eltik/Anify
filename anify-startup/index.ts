@@ -17,15 +17,7 @@ const backendConfig = {
     max_memory_restart: "1G"
 };
 
-const authenticationConfig = {
-    name: "anify-auth",
-    script: "cd ../anify-auth && bun start",
-    autorestart: true,
-    watch: false,
-    max_memory_restart: "1G"
-};
-
-const configs = [frontendConfig, backendConfig, authenticationConfig];
+const configs = [frontendConfig, backendConfig];
 
 async function readEnv(process: Process): Promise<string | undefined> {
     const env = Bun.file(`../${process}/.env`);
@@ -70,6 +62,7 @@ async function start() {
     })));
 
     console.log(colors.green("Started services!"));
+    console.log(colors.white("Press Ctrl+C to stop services."));
 }
 
 export async function remove(process: Process) {
@@ -94,7 +87,7 @@ start();
 
 process.on("beforeExit", async () => {
     console.log(colors.red("Stopping services..."));
-    await Promise.all([remove(Process.FRONTEND), remove(Process.BACKEND), remove(Process.AUTH)]).catch((err) => {
+    await Promise.all([remove(Process.FRONTEND), remove(Process.BACKEND)]).catch((err) => {
         console.error(colors.red("Error: "), err);
     });
 });
@@ -105,7 +98,7 @@ process.on("unhandledRejection", (err) => {
 
 process.on("SIGINT", async () => {
     console.log(colors.red("Stopping services..."));
-    await Promise.all([remove(Process.FRONTEND), remove(Process.BACKEND), remove(Process.AUTH)]).catch((err) => {
+    await Promise.all([remove(Process.FRONTEND), remove(Process.BACKEND)]).catch((err) => {
         console.error(colors.red("Error: "), err);
     });
     process.exit();
@@ -113,6 +106,5 @@ process.on("SIGINT", async () => {
 
 export const enum Process {
     FRONTEND = "anify-frontend",
-    BACKEND = "anify-backend",
-    AUTH = "anify-auth",
+    BACKEND = "anify-backend"
 }
