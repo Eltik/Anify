@@ -8,9 +8,9 @@ Robust anime, manga, and light novel web-app.
 git clone https://github.com/Eltik/Anify.git
 ```
 2. Run `bun i`. This will install the `node_modules` dependencies for all sub-repos.
-3. Run `bun run build` to build all directories.
+3. Run `bun run lint` and `bun run build` to build all directories.
 4. View each directory's `README.MD` file for additional installation/requirements.
-5. Run `bun start` to startup all services using pm2. If you wish to individually startup a specific service, you can `cd` into a directory and run `bun start`.
+5. Run `bun start` to startup all services using pm2 via the `/anify-startup` directory. If you wish to individually startup a specific service, you can `cd` into a directory and run `bun start` or `bun dev`.
 
 ## How it Works
 Anify's core components are the backend and frontend. Using custom mappings without the use of external API's such as [Simkl](https://simkl.com) and [MALSync](https://malsync.moe), the backend maps all types of Japanese media and gathers information before storing the mappings in a database. For creating a full-stack website, the frontend then requests data on the server-side to fetch episodes/chapters and sources/pages from the backend allowing for a smooth and secure experience watching anime and reading manga/light novels. Additionally, there is an authentication server for tracking your favorite shows and series on a preferred website.

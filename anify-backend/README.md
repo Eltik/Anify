@@ -145,6 +145,55 @@ Lints and typechecks the `/src` directory using eslint.
 $ bun run eslint
 ```
 
+## Additional Use-Cases
+The following will be a basic run-down on how the backend works/certain use-cases.
+
+### How Mapping Works
+The core aspect of the backend server is the mapping. If you are curious on how mapping works, you can view [this file](https://github.com/Eltik/Anify/blob/main/anify-backend/src/lib/impl/mappings.ts). Essentially, upon requesting to map a specific media ID from one of the [base providers](https://github.com/Eltik/Anify/tree/main/anify-backend/src/mappings/impl/base), a request will be sent to fetch meta information about the media. Then, requests will be sent via each [mapping provider](https://github.com/Eltik/Anify/tree/main/anify-backend/src/mappings/impl) where the `type` and `format` match. For example, [MangaDex](https://github.com/Eltik/Anify/blob/main/anify-backend/src/mappings/impl/manga/mangadex.ts) is both a [manga](https://github.com/Eltik/Anify/tree/main/anify-backend/src/mappings/impl/manga) and [information](https://github.com/Eltik/Anify/tree/main/anify-backend/src/mappings/impl/information) provider, so requests will be sent through both files if the requested media is of type `MANGA` and has the format `MANGA` or `ONE_SHOT`. Upon mapping and receiving requests from all relevant providers, an advanced string algorithm will be run to find the best result returned based on the metadata from the base provider. For example:
+```js
+// Base Provider Information:
+MANGADEX: ["Solo Leveling", "Only I Level up", "俺だけレベルアップな件", "Ore Dake Level Up na Ken"]
+
+// Manga Provider Results
+MANGASEE123: ["One Piece", "Only I Level up", "Mushoku Tensei", "Uchida-san wa Zettai ni Gyaru Janai!"]
+COMICK: ["Shiryoku Kensa", "I’m the Max-Level Newbie", "Ore Dake Level Up na Ken"]
+```
+Based on the results returned, all results that don't match the title similarity within a certain threshold (ex. 0.87 similarity) will be filtered out, and the best result will be considered a correct "mapping." If that doesn't make sense, don't worry; Anify's mappings have gone through many, many recodes, with the help of quite a few other developers to get the best results possible.
+
+### When Mappings are Created
+Generally, all mappings are initially created via crawling. You can refer to [crawl script](https://github.com/Eltik/Anify/blob/main/anify-backend/src/scripts/crawl.ts) to see how it works, but all it does is fetch IDs from the [base providers](https://github.com/Eltik/Anify/tree/main/anify-backend/src/mappings/impl/base) based on the `type` and `formats` given. Then, looping through all of the IDs, starts mapping all relevant IDs and stores them in the database. Additionally, when requesting seasonal data, all not-found IDs are then mapped. You can see this in [index.ts](https://github.com/Eltik/Anify/blob/main/anify-backend/src/index.ts) file where upon the `seasonal` event being fired, all not-found IDs are mapped:
+```typescript
+emitter.on(Events.COMPLETED_SEASONAL_LOAD, async (data) => {
+    for (let i = 0; i < (data.trending ?? []).length; i++) {
+        //...
+        const existing = await get(String(data.trending[i].id)); // Fetched from the database
+        // If not found...
+        if (!existing) {
+            // Add to the mapping queue to be mapped
+            queues.mappingQueue.add({
+                //...
+            });
+        }
+        //...
+    }
+    //...
+});
+```
+Finally, mappings are also created via the [/search](https://github.com/Eltik/Anify/blob/main/anify-backend/src/server/impl/search.ts) and [/search-advanced](https://github.com/Eltik/Anify/blob/main/anify-backend/src/server/impl/searchAdvanced.ts) route. If no results are found when searching for a media, then the backend will start mapping once more:
+```typescript
+const data = await search(
+    //...
+);
+if (data.results.length === 0) {
+    queues.searchQueue.add({
+        //...
+    });
+}
+```
+
+### Uploading/Downloading Manga/Novels
+The backend server uses [Mixdrop](https://mixdrop.ag) to allow for uploading and downloading manga and novels. The system is relatively scuffed and can be significantly optimized, but if you're interested you can refer to the [pdf.ts](https://github.com/Eltik/Anify/blob/main/anify-backend/src/lib/impl/pdf.ts) and [epub.ts](https://github.com/Eltik/Anify/blob/main/anify-backend/src/lib/impl/epub.ts) files for more information. This section may or may not be updated in the future due to the current state of manga/novel pdfs/epubs.
+
 ## Contributing
 Contributions to Anify Backend are welcome. You can submit bug reports, feature requests, or even open pull requests. If you have any questions, feel free to join our [Discord](https://anify.tv/discord).
 

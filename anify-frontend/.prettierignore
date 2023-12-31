@@ -14,3 +14,4 @@ Dockerfile.*
 .env.example
 .gitignore
 bun.lockb
+.prettierignore
