@@ -56,7 +56,7 @@ export const handler = async (req: Request): Promise<Response> => {
         data?.subtitles?.forEach((sub) => {
             if(sub.lang != "Thumbnails"){
                 if(sub.url.endsWith(".vtt"))
-                    sub.url = "https:/api.anify.tv/subtitles/" + encodeUrl(sub.url)+".vtt";
+                    sub.url = env.API_URL+"/subtitles/" + encodeUrl(sub.url)+".vtt";
             }
         });
         if (!data) return createResponse(JSON.stringify({ error: "Sources not found." }), 404);
