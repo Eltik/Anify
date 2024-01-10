@@ -1,4 +1,4 @@
-import { cacheTime, redis } from "..";
+import { redis } from "..";
 import { env } from "../../env";
 import { createResponse } from "../lib/response";
 import crypto from "crypto";
