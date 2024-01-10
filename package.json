@@ -1,12 +1,15 @@
 {
-    "name": "anify",
-    "version": "1.0.0",
-    "description": "The best Japanese media web application.",
-    "private": true,
-    "scripts": {
-        "start": "cd anify-startup && bun start",
-        "install": "cd anify-startup && bun install && cd ../anify-frontend && bun install && cd ../anify-backend && bun install",
-        "lint": "cd anify-startup && tsc && cd ../anify-frontend && bun run lint && cd ../anify-backend && bun run lint",
-        "build": "cd anify-startup && bun run build && cd ../anify-backend && bun run build && cd ../anify-frontend && bun run build"
-    }
+  "name": "anify",
+  "version": "1.0.0",
+  "description": "The best Japanese media web application.",
+  "private": true,
+  "scripts": {
+    "start": "cd anify-startup && bun start",
+    "install": "cd anify-startup && bun install && cd ../anify-frontend && bun install && cd ../anify-backend && bun install",
+    "lint": "cd anify-startup && tsc && cd ../anify-frontend && bun run lint && cd ../anify-backend && bun run lint",
+    "build": "cd anify-startup && bun run build && cd ../anify-backend && bun run build && cd ../anify-frontend && bun run build"
+  },
+  "dependencies": {
+    "@plussub/srt-vtt-parser": "^1.1.1"
+  }
 }
