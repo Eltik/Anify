@@ -2,7 +2,7 @@ import { redis } from "..";
 import { env } from "../../env";
 import { createResponse } from "../lib/response";
 import crypto from "crypto";
-import {parse} from "@plussub/srt-vtt-parser";
+import { parse } from "@plussub/srt-vtt-parser";
 import { ParsedResult } from "@plussub/srt-vtt-parser/dist/src/types";
 export const handler = async (req: Request): Promise<Response> => {
     try {
@@ -10,21 +10,25 @@ export const handler = async (req: Request): Promise<Response> => {
         const paths = url.pathname.split("/");
         paths.shift();
         console.log(paths);
-        let encryptedUrl = paths[1] ??null;
-        
+        let encryptedUrl = paths[1] ?? null;
+
         if (!encryptedUrl) {
             return createResponse(JSON.stringify({ error: "No url provided." }), 400);
         }
-        if(!encryptedUrl.endsWith(".vtt")){
+        if (!encryptedUrl.endsWith(".vtt")) {
             return createResponse(JSON.stringify({ error: "Invalid url provided." }), 400);
         }
-        encryptedUrl = encryptedUrl.replace(".vtt","");
+        encryptedUrl = encryptedUrl.replace(".vtt", "");
         const decodedUrl = decodeUrl(encryptedUrl);
         const cached = await redis.get(`subtitles:${decodedUrl}`);
         if (cached) {
             return new Response(cached, {
                 headers: {
                     "Content-Type": "text/vtt",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                    "Access-Control-Max-Age": "2592000",
+                    "Access-Control-Allow-Headers": "*",
                 },
             });
         }
@@ -32,18 +36,22 @@ export const handler = async (req: Request): Promise<Response> => {
             return createResponse(JSON.stringify({ error: "Invalid url provided." }), 400);
         }
         const reqeust = await fetch(decodedUrl);
-        if (!reqeust.ok || reqeust.headers.get("content-type") != "text/vtt") {
+        if (!reqeust.ok||!decodedUrl.endsWith(".vtt")) {
             return new Response(null, {
                 status: 302,
                 headers: {
                     Location: decodedUrl,
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                    "Access-Control-Max-Age": "2592000",
+                    "Access-Control-Allow-Headers": "*",
                 },
             });
         }
         let vttData = await reqeust.text();
         var parsed = parse(vttData);
-        const textToInject = env.TEXT_TO_INJECT+"\n";
-        const distanceToNextInjectedText = 1000*env.DISTANCE_FROM_INJECTED_TEXT_SECONDS;
+        const textToInject = env.TEXT_TO_INJECT + "\n";
+        const distanceToNextInjectedText = 1000 * env.DISTANCE_FROM_INJECTED_TEXT_SECONDS;
         var nextModifyTimeMs = 0;
         var hasSetFirstEntry = false;
         parsed.entries.forEach((entry) => {
@@ -51,21 +59,24 @@ export const handler = async (req: Request): Promise<Response> => {
                 entry.text = textToInject + entry.text;
                 nextModifyTimeMs = entry.to + distanceToNextInjectedText;
                 hasSetFirstEntry = true;
-              }
+            }
 
-                if (entry.to > nextModifyTimeMs) {
-                    entry.text = textToInject + entry.text;
-                    nextModifyTimeMs = entry.to + distanceToNextInjectedText;
-                }
+            if (entry.to > nextModifyTimeMs) {
+                entry.text = textToInject + entry.text;
+                nextModifyTimeMs = entry.to + distanceToNextInjectedText;
+            }
         });
         vttData = buildWebVTT(parsed);
-        await redis.set(`subtitles:${decodedUrl}`,vttData, "EX", env.SUBTITLES_CACHE_TIME);
+        await redis.set(`subtitles:${decodedUrl}`, vttData, "EX", env.SUBTITLES_CACHE_TIME);
         return new Response(vttData, {
             headers: {
                 "Content-Type": "text/vtt",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Max-Age": "2592000",
+                "Access-Control-Allow-Headers": "*",
             },
         });
-
     } catch (e) {
         console.error(e);
         return createResponse(JSON.stringify({ error: "An error occurred." }), 500);
@@ -90,26 +101,26 @@ function decodeUrl(url: string) {
         return null;
     }
 }
-function buildWebVTT(parsedResult:ParsedResult) {
+function buildWebVTT(parsedResult: ParsedResult) {
     let webVTTContent = "WEBVTT\n\n";
-  
+
     for (const entry of parsedResult.entries) {
-      const startTime = formatTime(entry.from);
-      const endTime = formatTime(entry.to);
-  
-      webVTTContent += `${startTime} --> ${endTime}\n${entry.text}\n\n`;
+        const startTime = formatTime(entry.from);
+        const endTime = formatTime(entry.to);
+
+        webVTTContent += `${startTime} --> ${endTime}\n${entry.text}\n\n`;
     }
-  
+
     return webVTTContent;
-  }
-  function formatTime(milliseconds: number) {
+}
+function formatTime(milliseconds: number) {
     const date = new Date(0);
     date.setUTCMilliseconds(milliseconds);
-  
+
     const hours = date.getUTCHours().toString().padStart(2, "0");
     const minutes = date.getUTCMinutes().toString().padStart(2, "0");
     const seconds = date.getUTCSeconds().toString().padStart(2, "0");
     const millisecondsStr = date.getUTCMilliseconds().toString().padStart(3, "0");
-  
+
     return `${hours}:${minutes}:${seconds}.${millisecondsStr}`;
-  }
+}
