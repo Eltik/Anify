@@ -53,12 +53,13 @@ export const handler = async (req: Request): Promise<Response> => {
         }
 
         const data = await content.fetchSources(providerId, watchId, subType as SubType, server as StreamingServers);
-        data?.subtitles?.forEach((sub) => {
-            if(sub.lang != "Thumbnails"){
-                if(sub.url.endsWith(".vtt"))
+        if(env.USE_SUBTITLE_SPOOFING){
+            data?.subtitles?.forEach((sub) => {
+                if(sub.lang != "Thumbnails"&&sub.url.endsWith(".vtt"))
                     sub.url = env.API_URL+"/subtitles/" + encodeUrl(sub.url)+".vtt";
-            }
-        });
+            });
+        }
+        
         if (!data) return createResponse(JSON.stringify({ error: "Sources not found." }), 404);
 
         if (data) queues.skipTimes.add({ id, episode: episodeNumber, toInsert: data });
