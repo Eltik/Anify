@@ -2,6 +2,7 @@ import { cacheTime, redis } from "..";
 import content from "../../content";
 import { env } from "../../env";
 import { StreamingServers, SubType } from "../../types/enums";
+import { Source } from "../../types/types";
 import queues from "../../worker";
 import { createResponse } from "../lib/response";
 import crypto from "crypto";
@@ -49,6 +50,13 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const cached = await redis.get(`sources:${id}:${episodeNumber}:${providerId}:${watchId}:${subType}:${server}`);
         if (cached) {
+            const cachedData = JSON.parse(cached) as Source;
+            if(env.USE_SUBTITLE_SPOOFING){
+                cachedData?.subtitles?.forEach((sub) => {
+                    if(sub.lang != "Thumbnails"&&sub.url.endsWith(".vtt")&&!sub.url.startsWith(env.API_URL))
+                        sub.url = env.API_URL+"/subtitles/" + encodeUrl(sub.url)+".vtt";
+                });
+            }
             return createResponse(cached);
         }
 
@@ -72,7 +80,6 @@ export const handler = async (req: Request): Promise<Response> => {
         return createResponse(JSON.stringify({ error: "An error occurred." }), 500);
     }
 };
-
 const route = {
     method: "GET",
     path: "/sources",
