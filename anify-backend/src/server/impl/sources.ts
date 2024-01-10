@@ -55,7 +55,8 @@ export const handler = async (req: Request): Promise<Response> => {
         const data = await content.fetchSources(providerId, watchId, subType as SubType, server as StreamingServers);
         data?.subtitles?.forEach((sub) => {
             if(sub.lang != "Thumbnails"){
-                sub.url = "https:/api.anify.tv/subtitles/" + encodeUrl(sub.url)+".vtt";
+                if(sub.url.endsWith(".vtt"))
+                    sub.url = "https:/api.anify.tv/subtitles/" + encodeUrl(sub.url)+".vtt";
             }
         });
         if (!data) return createResponse(JSON.stringify({ error: "Sources not found." }), 404);
