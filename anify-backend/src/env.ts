@@ -16,4 +16,6 @@ export const env = {
     TEXT_TO_INJECT: process.env.TEXT_TO_INJECT??"Provided by anify.tv",
     DISTANCE_FROM_INJECTED_TEXT_SECONDS: Number(process.env.DISTANCE_FROM_INJECTED_TEXT)??120,
     SUBTITLES_CACHE_TIME: Number(process.env.SUBTITLES_CACHE_TIME)??60*60*12,
+    API_URL: process.env.API_URL??"https://api.anify.tv",
+    USE_SUBTITLE_SPOOFING: process.env.USE_SUBTITLE_SPOOFING === "true" || false,
 };

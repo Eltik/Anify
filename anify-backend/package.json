@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@extractus/article-extractor": "^8.0.2",
+    "@plussub/srt-vtt-parser": "^1.1.1",
     "cheerio": "^1.0.0-rc.12",
     "colors": "^1.4.0",
     "crypto-js": "^4.1.1",

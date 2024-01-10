@@ -35,6 +35,7 @@ export const start = async () => {
     } = {};
     const routeFiles = [
         await import("./impl/chapters.ts"),
+        await import("./impl/subtitles.ts"),
         await import("./impl/contentData.ts"),
         await import("./impl/episodes.ts"),
         await import("./impl/map.ts"),
