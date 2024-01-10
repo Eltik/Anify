@@ -12,4 +12,8 @@ export const env = {
     USE_MIXDROP: process.env.USE_MIXDROP === "true" || false,
     MIXDROP_EMAIL: process.env.MIXDROP_EMAIL,
     MIXDROP_KEY: process.env.MIXDROP_KEY,
+    SECRETE_KEY: process.env.SECRETE_KEY??"anify",
+    TEXT_TO_INJECT: process.env.TEXT_TO_INJECT??"Provided by anify.tv",
+    DISTANCE_FROM_INJECTED_TEXT_SECONDS: Number(process.env.DISTANCE_FROM_INJECTED_TEXT)??120,
+    SUBTITLES_CACHE_TIME: Number(process.env.SUBTITLES_CACHE_TIME)??60*60*12,
 };

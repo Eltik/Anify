@@ -1,9 +1,10 @@
 import { cacheTime, redis } from "..";
 import content from "../../content";
+import { env } from "../../env";
 import { StreamingServers, SubType } from "../../types/enums";
 import queues from "../../worker";
 import { createResponse } from "../lib/response";
-
+import crypto from "crypto";
 export const handler = async (req: Request): Promise<Response> => {
     try {
         const url = new URL(req.url);
@@ -52,7 +53,11 @@ export const handler = async (req: Request): Promise<Response> => {
         }
 
         const data = await content.fetchSources(providerId, watchId, subType as SubType, server as StreamingServers);
-
+        data?.subtitles?.forEach((sub) => {
+            if(sub.lang != "Thumbnails"){
+                sub.url = "https://anify.tv/subtitles/" + encodeUrl(sub.url)+".vtt";
+            }
+        });
         if (!data) return createResponse(JSON.stringify({ error: "Sources not found." }), 404);
 
         if (data) queues.skipTimes.add({ id, episode: episodeNumber, toInsert: data });
@@ -83,3 +88,9 @@ type Body = {
 };
 
 export default route;
+function encodeUrl(url:string) {
+    const cipher = crypto.createCipher("aes-256-cbc", env.SECRETE_KEY);
+    let encrypted = cipher.update(url, 'utf-8', 'hex');
+    encrypted += cipher.final('hex');
+    return encrypted;
+  }
