@@ -51,23 +51,21 @@ export const handler = async (req: Request): Promise<Response> => {
         const cached = await redis.get(`sources:${id}:${episodeNumber}:${providerId}:${watchId}:${subType}:${server}`);
         if (cached) {
             const cachedData = JSON.parse(cached) as Source;
-            if(env.USE_SUBTITLE_SPOOFING){
+            if (env.USE_SUBTITLE_SPOOFING) {
                 cachedData?.subtitles?.forEach((sub) => {
-                    if(sub.lang != "Thumbnails"&&sub.url.endsWith(".vtt")&&!sub.url.startsWith(env.API_URL))
-                        sub.url = env.API_URL+"/subtitles/" + encodeUrl(sub.url)+".vtt";
+                    if (sub.lang != "Thumbnails" && sub.url.endsWith(".vtt") && !sub.url.startsWith(env.API_URL)) sub.url = env.API_URL + "/subtitles/" + encodeUrl(sub.url) + ".vtt";
                 });
             }
             return createResponse(cached);
         }
 
         const data = await content.fetchSources(providerId, watchId, subType as SubType, server as StreamingServers);
-        if(env.USE_SUBTITLE_SPOOFING){
+        if (env.USE_SUBTITLE_SPOOFING) {
             data?.subtitles?.forEach((sub) => {
-                if(sub.lang != "Thumbnails"&&sub.url.endsWith(".vtt"))
-                    sub.url = env.API_URL+"/subtitles/" + encodeUrl(sub.url)+".vtt";
+                if (sub.lang != "Thumbnails" && sub.url.endsWith(".vtt")) sub.url = env.API_URL + "/subtitles/" + encodeUrl(sub.url) + ".vtt";
             });
         }
-        
+
         if (!data) return createResponse(JSON.stringify({ error: "Sources not found." }), 404);
 
         if (data) queues.skipTimes.add({ id, episode: episodeNumber, toInsert: data });
@@ -97,9 +95,10 @@ type Body = {
 };
 
 export default route;
-function encodeUrl(url:string) {
-    const cipher = crypto.createCipher("aes-256-cbc", env.SECRETE_KEY);
-    let encrypted = cipher.update(url, 'utf-8', 'hex');
-    encrypted += cipher.final('hex');
+
+function encodeUrl(url: string) {
+    const cipher = crypto.createCipher("aes-256-cbc", env.SECRET_KEY);
+    let encrypted = cipher.update(url, "utf-8", "hex");
+    encrypted += cipher.final("hex");
     return encrypted;
-  }
+}

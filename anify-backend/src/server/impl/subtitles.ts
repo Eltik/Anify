@@ -3,14 +3,15 @@ import { createResponse } from "../lib/response";
 import crypto from "crypto";
 import { parse } from "@plussub/srt-vtt-parser";
 import { ParsedResult } from "@plussub/srt-vtt-parser/dist/src/types";
-const subtitleCache = new NodeCache({ stdTTL: env.SUBTITLES_CACHE_TIME });
 import NodeCache from "node-cache";
+
+const subtitleCache = new NodeCache({ stdTTL: env.SUBTITLES_CACHE_TIME });
 export const handler = async (req: Request): Promise<Response> => {
     try {
         const url = new URL(req.url);
         const paths = url.pathname.split("/");
         paths.shift();
-        console.log(paths);
+
         let encryptedUrl = paths[1] ?? null;
 
         if (!encryptedUrl) {
@@ -19,8 +20,10 @@ export const handler = async (req: Request): Promise<Response> => {
         if (!encryptedUrl.endsWith(".vtt")) {
             return createResponse(JSON.stringify({ error: "Invalid url provided." }), 400);
         }
+
         encryptedUrl = encryptedUrl.replace(".vtt", "");
         const decodedUrl = decodeUrl(encryptedUrl);
+
         if (!decodedUrl) {
             return createResponse(JSON.stringify({ error: "Invalid url provided." }), 400);
         }
@@ -36,6 +39,7 @@ export const handler = async (req: Request): Promise<Response> => {
                 },
             });
         }
+
         const reqeust = await fetch(decodedUrl);
         if (!reqeust.ok || !decodedUrl.endsWith(".vtt")) {
             return new Response(null, {
@@ -49,6 +53,7 @@ export const handler = async (req: Request): Promise<Response> => {
                 },
             });
         }
+
         let vttData = await reqeust.text();
         var parsed = parse(vttData);
         const textToInject = env.TEXT_TO_INJECT + "\n";
@@ -92,9 +97,10 @@ const route = {
 };
 
 export default route;
+
 function decodeUrl(url: string) {
     try {
-        const decipher = crypto.createDecipher("aes-256-cbc", env.SECRETE_KEY);
+        const decipher = crypto.createDecipher("aes-256-cbc", env.SECRET_KEY);
         let decrypted = decipher.update(url, "hex", "utf-8");
         decrypted += decipher.final("utf-8");
         return decrypted;
@@ -102,6 +108,7 @@ function decodeUrl(url: string) {
         return null;
     }
 }
+
 function buildWebVTT(parsedResult: ParsedResult) {
     let webVTTContent = "WEBVTT\n\n";
 
@@ -114,6 +121,7 @@ function buildWebVTT(parsedResult: ParsedResult) {
 
     return webVTTContent;
 }
+
 function formatTime(milliseconds: number) {
     const date = new Date(0);
     date.setUTCMilliseconds(milliseconds);
