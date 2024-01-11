@@ -1,11 +1,11 @@
 // All environment variables.
 export const env = {
-    PORT: Number(process.env.PORT) ?? 3000,
+    PORT: Number(process.env.PORT ?? 3000) ,
     DATABASE_URL: process.env.DATABASE_URL ?? "",
     NINEANIME_RESOLVER: process.env.NINEANIME_RESOLVER,
     NINEANIME_KEY: process.env.NINEANIME_KEY,
     REDIS_URL: process.env.REDIS_URL,
-    REDIS_CACHE_TIME: Number(process.env.REDIS_CACHE_TIME) ?? 60 * 60 * 24 * 7,
+    REDIS_CACHE_TIME: Number(process.env.REDIS_CACHE_TIME?? 60 * 60 * 24 * 7),
     CENSYS_ID: process.env.CENSYS_ID,
     CENSYS_SECRET: process.env.CENSYS_SECRET,
     SIMKL_CLIENT_ID: process.env.SIMKL_CLIENT_ID,
@@ -14,8 +14,8 @@ export const env = {
     MIXDROP_KEY: process.env.MIXDROP_KEY,
     SECRETE_KEY: process.env.SECRETE_KEY??"anify",
     TEXT_TO_INJECT: process.env.TEXT_TO_INJECT??"Provided by anify.tv",
-    DISTANCE_FROM_INJECTED_TEXT_SECONDS: Number(process.env.DISTANCE_FROM_INJECTED_TEXT)??120,
-    SUBTITLES_CACHE_TIME: Number(process.env.SUBTITLES_CACHE_TIME)??60*60*12,
+    DISTANCE_FROM_INJECTED_TEXT_SECONDS: Number(process.env.DISTANCE_FROM_INJECTED_TEXT??300),
+    SUBTITLES_CACHE_TIME: Number(process.env.SUBTITLES_CACHE_TIME??60*60*12),
     API_URL: process.env.API_URL??"https://api.anify.tv",
     USE_SUBTITLE_SPOOFING: process.env.USE_SUBTITLE_SPOOFING === "true" || false,
 };
