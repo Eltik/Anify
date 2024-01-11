@@ -12,10 +12,12 @@ export const env = {
     USE_MIXDROP: process.env.USE_MIXDROP === "true" || false,
     MIXDROP_EMAIL: process.env.MIXDROP_EMAIL,
     MIXDROP_KEY: process.env.MIXDROP_KEY,
-    SECRET_KEY: process.env.SECRET_KEY ?? "anify",
+    SECRET_KEY: process.env.SECRET_KEY ?? "anifydobesupercoolbrodudeawesome",// MUST BE 32 CHARACTERS
     TEXT_TO_INJECT: process.env.TEXT_TO_INJECT ?? "Provided by anify.tv",
     DISTANCE_FROM_INJECTED_TEXT_SECONDS: Number(process.env.DISTANCE_FROM_INJECTED_TEXT ?? 300),
+    DURATION_FOR_INJECTED_TEXT_SECONDS: Number(process.env.DISTANCE_FROM_INJECTED_TEXT ?? 5),
     SUBTITLES_CACHE_TIME: Number(process.env.SUBTITLES_CACHE_TIME ?? 60 * 60 * 12),
     API_URL: process.env.API_URL ?? "https://api.anify.tv",
     USE_SUBTITLE_SPOOFING: process.env.USE_SUBTITLE_SPOOFING === "true" || false,
+    USE_INLINE_SUBTITLE_SPOOFING: process.env.USE_INLINE_SUBTITLE_SPOOFING === "true" || false,
 };
