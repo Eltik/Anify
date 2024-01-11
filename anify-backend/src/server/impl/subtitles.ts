@@ -4,6 +4,7 @@ import crypto from "crypto";
 import { parse } from "@plussub/srt-vtt-parser";
 import { Entry, ParsedResult } from "@plussub/srt-vtt-parser/dist/src/types";
 import NodeCache from "node-cache";
+import { AES } from "../lib/Aes";
 
 const subtitleCache = new NodeCache({ stdTTL: env.SUBTITLES_CACHE_TIME });
 export const handler = async (req: Request): Promise<Response> => {
@@ -22,7 +23,7 @@ export const handler = async (req: Request): Promise<Response> => {
         }
 
         encryptedUrl = encryptedUrl.replace(".vtt", "");
-        const decodedUrl = decodeUrl(encryptedUrl);
+        const decodedUrl = AES.Decrypt(encryptedUrl, env.SECRET_KEY);
 
         if (!decodedUrl) {
             return createResponse(JSON.stringify({ error: "Invalid url provided." }), 400);

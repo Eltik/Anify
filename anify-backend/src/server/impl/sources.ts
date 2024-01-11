@@ -4,6 +4,7 @@ import { env } from "../../env";
 import { StreamingServers, SubType } from "../../types/enums";
 import { Source } from "../../types/types";
 import queues from "../../worker";
+import { AES } from "../lib/Aes";
 import { createResponse } from "../lib/response";
 import crypto from "crypto";
 export const handler = async (req: Request): Promise<Response> => {
@@ -53,7 +54,7 @@ export const handler = async (req: Request): Promise<Response> => {
             const cachedData = JSON.parse(cached) as Source;
             if (env.USE_SUBTITLE_SPOOFING) {
                 cachedData?.subtitles?.forEach((sub) => {
-                    if (sub.lang != "Thumbnails" && sub.url.endsWith(".vtt") && !sub.url.startsWith(env.API_URL)) sub.url = env.API_URL + "/subtitles/" + encodeUrl(sub.url) + ".vtt";
+                    if (sub.lang != "Thumbnails" && sub.url.endsWith(".vtt") && !sub.url.startsWith(env.API_URL)) sub.url = env.API_URL + "/subtitles/" + AES.Encrypt(sub.url,env.SECRET_KEY) + ".vtt";
                 });
             }
             return createResponse(cached);
@@ -62,7 +63,7 @@ export const handler = async (req: Request): Promise<Response> => {
         const data = await content.fetchSources(providerId, watchId, subType as SubType, server as StreamingServers);
         if (env.USE_SUBTITLE_SPOOFING) {
             data?.subtitles?.forEach((sub) => {
-                if (sub.lang != "Thumbnails" && sub.url.endsWith(".vtt")) sub.url = env.API_URL + "/subtitles/" + encodeUrl(sub.url) + ".vtt";
+                if (sub.lang != "Thumbnails" && sub.url.endsWith(".vtt")) sub.url = env.API_URL + "/subtitles/" + AES.Encrypt(sub.url,env.SECRET_KEY) + ".vtt";
             });
         }
 
@@ -95,10 +96,3 @@ type Body = {
 };
 
 export default route;
-
-function encodeUrl(url: string) {
-    const cipher = crypto.createCipher("aes-256-cbc", env.SECRET_KEY);
-    let encrypted = cipher.update(url, "utf-8", "hex");
-    encrypted += cipher.final("hex");
-    return encrypted;
-}
