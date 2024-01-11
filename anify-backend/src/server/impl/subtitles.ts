@@ -1,9 +1,10 @@
-import { redis } from "..";
 import { env } from "../../env";
 import { createResponse } from "../lib/response";
 import crypto from "crypto";
 import { parse } from "@plussub/srt-vtt-parser";
 import { ParsedResult } from "@plussub/srt-vtt-parser/dist/src/types";
+const subtitleCache = new NodeCache({ stdTTL: env.SUBTITLES_CACHE_TIME });
+import NodeCache from "node-cache";
 export const handler = async (req: Request): Promise<Response> => {
     try {
         const url = new URL(req.url);
@@ -20,7 +21,10 @@ export const handler = async (req: Request): Promise<Response> => {
         }
         encryptedUrl = encryptedUrl.replace(".vtt", "");
         const decodedUrl = decodeUrl(encryptedUrl);
-        const cached = await redis.get(`subtitles:${decodedUrl}`);
+        if (!decodedUrl) {
+            return createResponse(JSON.stringify({ error: "Invalid url provided." }), 400);
+        }
+        const cached = subtitleCache.get<string>(decodedUrl);
         if (cached) {
             return new Response(cached, {
                 headers: {
@@ -32,11 +36,8 @@ export const handler = async (req: Request): Promise<Response> => {
                 },
             });
         }
-        if (!decodedUrl) {
-            return createResponse(JSON.stringify({ error: "Invalid url provided." }), 400);
-        }
         const reqeust = await fetch(decodedUrl);
-        if (!reqeust.ok||!decodedUrl.endsWith(".vtt")) {
+        if (!reqeust.ok || !decodedUrl.endsWith(".vtt")) {
             return new Response(null, {
                 status: 302,
                 headers: {
@@ -67,7 +68,7 @@ export const handler = async (req: Request): Promise<Response> => {
             }
         });
         vttData = buildWebVTT(parsed);
-        await redis.set(`subtitles:${decodedUrl}`, vttData, "EX", env.SUBTITLES_CACHE_TIME);
+        subtitleCache.set(decodedUrl, vttData);
         return new Response(vttData, {
             headers: {
                 "Content-Type": "text/vtt",
