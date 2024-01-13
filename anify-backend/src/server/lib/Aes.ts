@@ -10,12 +10,12 @@ export class AES
         cipherText = Buffer.concat([cipherText, cipher.final()]);
         const combinedData = Buffer.concat([iv, cipherText]);
         const combinedString = combinedData.toString("base64");
-        return combinedString;
+        return encodeURIComponent(combinedString);
     }
 
     static Decrypt(combinedString:string, keyString:string)
     {
-        const combinedData = Buffer.from(combinedString, "base64");
+        const combinedData = Buffer.from(decodeURIComponent(combinedString), "base64");
         const iv = Buffer.alloc(IV_SIZE);
         const cipherText = Buffer.alloc(combinedData.length - iv.length);
         combinedData.copy(iv, 0, 0, iv.length);
