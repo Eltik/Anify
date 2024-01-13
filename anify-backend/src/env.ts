@@ -18,7 +18,7 @@ export const env = {
     DURATION_FOR_INJECTED_TEXT_SECONDS: Number(process.env.DISTANCE_FROM_INJECTED_TEXT ?? 5),
     SUBTITLES_CACHE_TIME: Number(process.env.SUBTITLES_CACHE_TIME ?? 60 * 60 * 12),
     API_URL: process.env.API_URL ?? "https://api.anify.tv",
-    VIDEO_PROXY_URL: process.env.API_URL ?? "https://anify.anistreme.live",
+    VIDEO_PROXY_URL: process.env.VIDEO_PROXY_URL ?? "https://anify.anistreme.live",
     USE_SUBTITLE_SPOOFING: process.env.USE_SUBTITLE_SPOOFING === "true" || false,
     DISABLE_INTRO_VIDEO_SPOOFING: process.env.DISABLE_INTRO_VIDEO_SPOOFING === "true" || false,
     USE_INLINE_SUBTITLE_SPOOFING: process.env.USE_INLINE_SUBTITLE_SPOOFING === "true" || false,
