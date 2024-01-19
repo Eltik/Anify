@@ -12,7 +12,10 @@ export const redis: Redis = env.REDIS_URL
     ? new Redis((env.REDIS_URL as string) || "redis://localhost:6379")
     : ({
           get: async () => null,
+          del: async () => void 0,
           set: (): Promise<"OK"> => Promise.resolve("OK"),
+          sadd: (): Promise<number> => Promise.resolve(0),
+          sismember: (): Promise<number> => Promise.resolve(0),
           on: () => Redis.prototype,
           keys: async () => [],
           connect: async () => void 0,
