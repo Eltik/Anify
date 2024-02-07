@@ -1,6 +1,7 @@
 import { cacheTime, redis } from "..";
 import content from "../../content";
 import { env } from "../../env";
+import { isBanned } from "../../helper/banned";
 import { StreamingServers, SubType } from "../../types/enums";
 import { Source } from "../../types/types";
 import queues from "../../worker";
@@ -68,6 +69,9 @@ export const handler = async (req: Request): Promise<Response> => {
 
             return createResponse(cached);
         }
+
+        const banned = await isBanned(id);
+        if (banned) return createResponse(JSON.stringify({ error: "This item is banned." }), 403);
 
         const data = await content.fetchSources(providerId, watchId, subType as SubType, server as StreamingServers);
         if (env.USE_SUBTITLE_SPOOFING) {

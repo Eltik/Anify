@@ -1,5 +1,6 @@
 import { cacheTime, redis } from "..";
 import content from "../../content";
+import { isBanned } from "../../helper/banned";
 import queues from "../../worker";
 import { createResponse } from "../lib/response";
 
@@ -25,6 +26,9 @@ export const handler = async (req: Request): Promise<Response> => {
         if (cached) {
             return createResponse(cached);
         }
+
+        const banned = await isBanned(id);
+        if (banned) return createResponse(JSON.stringify({ error: "This item is banned." }), 403);
 
         const data = await content.fetchChapters(String(id));
 
