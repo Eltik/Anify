@@ -1,9 +1,7 @@
 import crypto from "crypto";
 const IV_SIZE = 16;
-export class AES
-{
-    static Encrypt(plainText:string, keyString:string)
-    {
+export class AES {
+    static Encrypt(plainText: string, keyString: string) {
         const iv = crypto.randomBytes(IV_SIZE);
         const cipher = crypto.createCipheriv("aes-256-cbc", keyString, iv);
         let cipherText = cipher.update(Buffer.from(plainText, "utf8"));
@@ -13,8 +11,7 @@ export class AES
         return encodeURIComponent(combinedString);
     }
 
-    static Decrypt(combinedString:string, keyString:string)
-    {
+    static Decrypt(combinedString: string, keyString: string) {
         const combinedData = Buffer.from(decodeURIComponent(combinedString), "base64");
         const iv = Buffer.alloc(IV_SIZE);
         const cipherText = Buffer.alloc(combinedData.length - iv.length);

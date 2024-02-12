@@ -171,3 +171,4 @@ dist
 /manga
 db.sqlite
 keys.json
+bannedIds.json
