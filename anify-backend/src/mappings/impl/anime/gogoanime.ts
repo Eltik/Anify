@@ -67,7 +67,7 @@ export default class GogoAnime extends AnimeProvider {
         const movieId = $("#movie_id").attr("value");
         const alias = $("#alias_anime").attr("value");
 
-        const req = await (await this.request(`https://ajax.gogo-load.com/ajax/load-list-episode?ep_start=${epStart}&ep_end=${epEnd}&id=${movieId}&default_ep=${0}&alias=${alias}`)).text();
+        const req = await (await this.request(`https://ajax.gogocdn.net/ajax/load-list-episode?ep_start=${epStart}&ep_end=${epEnd}&id=${movieId}&default_ep=${0}&alias=${alias}`)).text();
 
         const $$ = load(req);
 
