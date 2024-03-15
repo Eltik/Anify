@@ -90,7 +90,7 @@ export const importData = async () => {
         if (await getSkipTimes(skipTime.id)) continue;
 
         try {
-            let stringify = isString(skipTime.episodes);
+            const stringify = isString(skipTime.episodes);
             await createSkipTimes(skipTime, !stringify);
 
             console.log(`Imported skip time ${skipTime.id}!`);

@@ -1,6 +1,6 @@
 import Http from "../../../helper/request";
 import { Format, Genres, ProviderType, Season, Type } from "../../../types/enums";
-import { Anime, AnimeInfo, MangaInfo } from "../../../types/types";
+import { AnimeInfo, MangaInfo } from "../../../types/types";
 
 export default abstract class BaseProvider {
     abstract id: string;
@@ -14,10 +14,12 @@ export default abstract class BaseProvider {
     public useGoogleTranslate: boolean = true;
     public overrideProxy: boolean = false;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async search(query: string, type: Type, formats: Format[], page: number, perPage: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         return undefined;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async searchAdvanced(query: string, type: Type, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = [], season: Season = Season.UNKNOWN, year = 0, tags: string[] = [], tagsExcluded: string[] = []): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         return undefined;
     }
@@ -26,12 +28,15 @@ export default abstract class BaseProvider {
         return Season.SUMMER;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async getMedia(id: string): Promise<AnimeInfo | MangaInfo | undefined> {
         return undefined;
     }
 
     async fetchSeasonal(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         type: Type,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         formats: Format[],
     ): Promise<
         | {
@@ -60,6 +65,7 @@ export default abstract class BaseProvider {
         return undefined;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async fetchIds(formats: Format[]): Promise<string[] | undefined> {
         return undefined;
     }

@@ -5,7 +5,7 @@ import { Format, Formats, StreamingServers, SubType } from "../../../types/enums
 import { Episode, Result, Source } from "../../../types/types";
 
 /**
- * @description BROKEN. Needs a DDoS Guard bypass
+ * @description: For some reason, proxy scraping doesn't work with AnimePahe. I got it working with some proxies stolen from baseProxies.json, but obviously those aren't tested with AnimePahe specifically. TLDR, someone please fix proxy scraping for AnimePahe then it should work. 3/15/2024
  */
 
 export default class AnimePahe extends AnimeProvider {
@@ -14,6 +14,7 @@ export default class AnimePahe extends AnimeProvider {
     override url = "https://animepahe.com";
 
     public needsProxy: boolean = true;
+    public useGoogleTranslate: boolean = false;
 
     override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
 
@@ -22,19 +23,15 @@ export default class AnimePahe extends AnimeProvider {
     }
 
     override get headers(): Record<string, string> | undefined {
-        return { Referer: "https://kwik.cx" };
+        return { Referer: "https://kwik.si" };
     }
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
-        const request = await this.request(
-            `${this.url}/api?m=search&q=${encodeURIComponent(query)}`,
-            {
-                headers: {
-                    Cookie: "d1=;d2=;",
-                },
+    override async search(query: string): Promise<Result[] | undefined> {
+        const request = await this.request(`${this.url}/api?m=search&q=${encodeURIComponent(query)}`, {
+            headers: {
+                Cookie: "__ddg1_=;__ddg2_=;",
             },
-            false,
-        );
+        });
 
         if (!request.ok) {
             return [];
@@ -67,12 +64,29 @@ export default class AnimePahe extends AnimeProvider {
     override async fetchEpisodes(id: string): Promise<Episode[] | undefined> {
         const episodes: Episode[] = [];
 
-        const req = await (await this.request(`${this.url}${id.includes("-") ? `/anime/${id}` : `/a/${id}`}`)).text();
+        const req = await (
+            await this.request(
+                `${this.url}${id.includes("-") ? `/anime/${id}` : `/a/${id}`}`,
+                {
+                    headers: {
+                        Cookie: "__ddg1_=;__ddg2_=;",
+                    },
+                },
+                false,
+            )
+        ).text();
 
         const $ = load(req);
 
         const tempId = $("head > meta[property='og:url']").attr("content")!.split("/").pop()!;
-        const { last_page, data } = (await (await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=1`)).json()) as { last_page: number; data: { id: number; episode: number; title: string; snapshot: string; filler: number; created_at?: string }[] };
+
+        const { last_page, data } = (await (
+            await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=1`, {
+                headers: {
+                    Cookie: "__ddg1_=;__ddg2_=;",
+                },
+            })
+        ).json()) as { last_page: number; data: { id: number; episode: number; title: string; snapshot: string; filler: number; created_at?: string }[] };
 
         data.map((item: { id: number; episode: number; title: string; snapshot: string; filler: number; created_at?: string }) => {
             const updatedAt = new Date(item.created_at ?? Date.now()).getTime();
@@ -92,7 +106,13 @@ export default class AnimePahe extends AnimeProvider {
 
         const pageNumbers = Array.from({ length: last_page - 1 }, (_, i) => i + 2);
 
-        const promises = pageNumbers.map((pageNumber) => this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=${pageNumber}`).then((res) => res.json()));
+        const promises = pageNumbers.map((pageNumber) =>
+            this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=${pageNumber}`, {
+                headers: {
+                    Cookie: "__ddg1_=;__ddg2_=;",
+                },
+            }).then((res) => res.json()),
+        );
         const results = (await Promise.all(promises)) as {
             data: { id: number; episode: number; title: string; snapshot: string; filler: number; created_at?: string }[];
         }[];
@@ -120,20 +140,38 @@ export default class AnimePahe extends AnimeProvider {
         return episodes;
     }
 
-    override async fetchSources(id: string, subType: SubType = SubType.SUB, server: StreamingServers = StreamingServers.Kwik): Promise<Source | undefined> {
+    override async fetchSources(id: string, subType?: SubType, server: StreamingServers = StreamingServers.Kwik): Promise<Source | undefined> {
         const animeId = id.split("-").pop()!;
         const episodeId = id.split("-")[0];
 
-        const req = await this.request(`${this.url}${animeId.includes("-") ? `/anime/${animeId}` : `/a/${animeId}`}`);
+        const req = await this.request(
+            `${this.url}${animeId.includes("-") ? `/anime/${animeId}` : `/a/${animeId}`}`,
+            {
+                headers: {
+                    Cookie: "__ddg1_=;__ddg2_=;",
+                },
+            },
+            false,
+        );
 
         try {
             const url = req.url;
             // Need session id to fetch the watch page
-            const sessionId = url.split("/anime/").pop()?.split("?")[0]!;
+            const sessionId = url.split("/anime/").pop()?.split("?")[0] ?? "";
 
             const $ = load(await req.text());
             const tempId = $("head > meta[property='og:url']").attr("content")!.split("/").pop()!;
-            const { last_page, data } = (await (await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=1`)).json()) as { last_page: number; data: { id: number; session: string }[] };
+            const { last_page, data } = (await (
+                await this.request(
+                    `${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=1`,
+                    {
+                        headers: {
+                            Cookie: "__ddg1_=;__ddg2_=;",
+                        },
+                    },
+                    false,
+                )
+            ).json()) as { last_page: number; data: { id: number; session: string }[] };
 
             let episodeSession = "";
 
@@ -146,7 +184,13 @@ export default class AnimePahe extends AnimeProvider {
 
             if (episodeSession === "") {
                 for (let i = 1; i < last_page; i++) {
-                    const data = (await (await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=${i + 1}`)).json()) as { last_page: number; data: { id: number; session: string }[] }["data"];
+                    const data = (await (
+                        await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=${i + 1}`, {
+                            headers: {
+                                Cookie: "__ddg1_=;__ddg2_=;",
+                            },
+                        })
+                    ).json()) as { last_page: number; data: { id: number; session: string }[] }["data"];
 
                     for (let j = 0; j < data.length; j++) {
                         if (String(data[j].id) === episodeId) {
@@ -161,9 +205,19 @@ export default class AnimePahe extends AnimeProvider {
 
             if (episodeSession === "") return undefined;
 
-            const watchReq = await (await this.request(`${this.url}/play/${sessionId}/${episodeSession}`)).text();
+            const watchReq = await (
+                await this.request(
+                    `${this.url}/play/${sessionId}/${episodeSession}`,
+                    {
+                        headers: {
+                            Cookie: "__ddg1_=;__ddg2_=;",
+                        },
+                    },
+                    false,
+                )
+            ).text();
 
-            const regex = /https:\/\/kwik\.cx\/e\/\w+/g;
+            const regex = /https:\/\/kwik\.si\/e\/\w+/g;
             const matches = watchReq.match(regex);
 
             if (matches === null) return undefined;

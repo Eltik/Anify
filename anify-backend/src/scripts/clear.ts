@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import colors from "colors";
-import { SkipTime } from "../types/types";
 import { sqlite, dbType, postgres, init } from "../database";
 
 const clearData = async () => {

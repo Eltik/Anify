@@ -59,7 +59,7 @@ export const get = async (id: string, fields: string[] = []): Promise<Anime | Ma
         if (!data) return undefined;
 
         try {
-            let parsedManga = Object.assign(data, {
+            const parsedManga = Object.assign(data, {
                 title: JSON.parse(data.title),
                 mappings: JSON.parse(data.mappings),
                 synonyms: JSON.parse(data.synonyms),
@@ -88,7 +88,7 @@ export const get = async (id: string, fields: string[] = []): Promise<Anime | Ma
         }
     } else {
         try {
-            let parsedAnime = Object.assign(data, {
+            const parsedAnime = Object.assign(data, {
                 title: JSON.parse(data.title),
                 season: data.season.replace(/"/g, ""),
                 mappings: JSON.parse(data.mappings),

@@ -16,7 +16,7 @@ export default class AniListMeta extends MetaProvider {
 
     private api = "https://graphql.anilist.co";
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string, format?: Format): Promise<Result[] | undefined> {
         const results: Result[] = [];
 
         const aniListArgs = {

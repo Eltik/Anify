@@ -1,6 +1,6 @@
 import InformationProvider from ".";
 import { Format, Season } from "../../../types/enums";
-import { Anime, AnimeInfo, Chapter, Character, Episode, Manga, MangaInfo, MediaInfoKeys } from "../../../types/types";
+import { Anime, AnimeInfo, Chapter, Episode, Manga, MangaInfo, MediaInfoKeys } from "../../../types/types";
 
 export default class TMDB extends InformationProvider<Anime | Manga, AnimeInfo | MangaInfo> {
     override id = "tmdb";

@@ -23,7 +23,7 @@ export default class GogoAnime extends AnimeProvider {
         return undefined;
     }
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string): Promise<Result[] | undefined> {
         const request = await this.request(`${this.url}/search.html?keyword=${encodeURIComponent(query)}`);
         if (!request.ok) {
             return [];
@@ -75,7 +75,7 @@ export default class GogoAnime extends AnimeProvider {
 
         $$("#episode_related > li").each((i, el) => {
             episodes?.push({
-                id: $(el).find("a").attr("href")?.trim()!,
+                id: $(el).find("a").attr("href")?.trim() ?? "",
                 number: parseFloat($(el).find(`div.name`).text().replace("EP ", "")),
                 title: $(el).find(`div.name`).text(),
                 isFiller: false,
@@ -107,7 +107,7 @@ export default class GogoAnime extends AnimeProvider {
 
         if (id.startsWith("http")) {
             const serverURL = id;
-            const download = `https://gogohd.net/download${new URL(serverURL).search}`;
+            //const download = `https://gogohd.net/download${new URL(serverURL).search}`;
 
             return await new Extractor(serverURL, result).extract(server ?? StreamingServers.GogoCDN);
         }

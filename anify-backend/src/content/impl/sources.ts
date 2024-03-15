@@ -19,7 +19,7 @@ export const fetchSources = async (providerId: string, watchId: string, subType:
 
     try {
         // Fetch sources from provider
-        const data = await provider.fetchSources(watchId, subType, server).catch((err) => {
+        const data = await provider.fetchSources(watchId, subType, server).catch(() => {
             return null;
         });
 

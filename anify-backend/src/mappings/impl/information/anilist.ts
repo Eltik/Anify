@@ -1,5 +1,5 @@
 import InformationProvider from ".";
-import { Format, Genres, MediaStatus, Season, Type } from "../../../types/enums";
+import { Genres, MediaStatus, Season } from "../../../types/enums";
 import { Anime, AnimeInfo, Artwork, Character, Manga, MangaInfo, MediaInfoKeys, Relations } from "../../../types/types";
 
 export default class AniList extends InformationProvider<Anime | Manga, AnimeInfo | MangaInfo> {
@@ -276,6 +276,7 @@ export default class AniList extends InformationProvider<Anime | Manga, AnimeInf
     `;
 }
 
+/*
 interface Media {
     id: number;
     idMal: number;
@@ -424,3 +425,4 @@ interface RelationsNode {
         };
     };
 }
+*/

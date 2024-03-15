@@ -49,11 +49,12 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
                 OFFSET   ${skip}
             `;
 
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             [count, results] = await Promise.all([Promise.resolve(postgres.query(countQuery).then((res) => res.rows[0])), Promise.resolve(postgres.query<Db<Anime[] | Manga[]>>(query).then((res) => res.rows)) as any]);
         }
 
-        const total = Number((count as any)[0]?.count ?? 0);
-        const lastPage = Math.ceil(Number(total) / perPage);
+        //const total = Number((count as any)[0]?.count ?? 0);
+        //const lastPage = Math.ceil(Number(total) / perPage);
 
         const newResults: any[] = [];
         for (const result of results) {
@@ -110,10 +111,11 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
             WHERE "format" IN (${formatParams}) AND episodes->>'latestEpisode' != '0';
         `;
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [countResults, results] = await Promise.all([Promise.resolve(sqlite.query(countSql).get()), Promise.resolve(sqlite.query<Db<Anime>, []>(sql).all())]);
 
-        const total = Number(Object.values(countResults ?? {})[0]);
-        const lastPage = Math.ceil(Number(total) / perPage);
+        //const total = Number(Object.values(countResults ?? {})[0]);
+        //const lastPage = Math.ceil(Number(total) / perPage);
         const parsedAnime: Anime[] = [];
 
         for (const anime of results) {
@@ -176,10 +178,11 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
             WHERE "format" IN (${formatParams}) AND chapters->>'latestChapter' != '0';
         `;
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [countResults, results] = await Promise.all([Promise.resolve(sqlite.query(countSql).get()), Promise.resolve(sqlite.query<Db<Manga>, []>(sql).all())]);
 
-        const total = Number(Object.values(countResults ?? {})[0]);
-        const lastPage = Math.ceil(Number(total) / perPage);
+        //const total = Number(Object.values(countResults ?? {})[0]);
+        //const lastPage = Math.ceil(Number(total) / perPage);
         const parsedManga: Manga[] = [];
 
         for (const manga of results) {

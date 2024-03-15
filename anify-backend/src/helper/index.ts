@@ -38,7 +38,7 @@ export const averageMetric = (object: any) => {
         validCount = 0;
     if (!object) return 0;
 
-    for (const [_, v] of Object.entries(object)) {
+    for (const [, v] of Object.entries(object)) {
         if (v && typeof v === "number") {
             average += v;
             validCount++;

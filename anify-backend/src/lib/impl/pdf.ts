@@ -140,7 +140,7 @@ export const createMangaPDF = async (providerId: string, chapter: Chapter, pages
 
     const promises: any[] = [];
     for (let i = 0; i < pages.length; i++) {
-        const request = new Promise(async (resolve, reject) => {
+        const request = new Promise(async (resolve) => {
             const link = pages[i].url;
             const page = pages[i].index;
 
@@ -188,7 +188,7 @@ export const createMangaPDF = async (providerId: string, chapter: Chapter, pages
     for (let i = 0; i < files.length; i++) {
         const file = files[i][0];
 
-        const result = await getImageSize(`${parentFolder}/${file}`).catch((e) => {
+        const result = await getImageSize(`${parentFolder}/${file}`).catch(() => {
             return null;
         });
         if (!result) {

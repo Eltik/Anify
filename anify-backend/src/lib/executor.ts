@@ -102,7 +102,7 @@ export default class QueueExecutor<T> {
                     this.running = true;
                     if (this.executorFunc)
                         this.executorFunc(true as any, undefined)
-                            .then((_) => {
+                            .then(() => {
                                 if (this.callbackFunc) this.callbackFunc(true as any);
                                 this.running = false;
                             })
@@ -115,7 +115,7 @@ export default class QueueExecutor<T> {
                 if (this.isSelfRunning) {
                     if (this.executorFunc)
                         this.executorFunc(undefined as T, undefined)
-                            .then((_) => {
+                            .then(() => {
                                 if (this.callbackFunc) this.callbackFunc(undefined as T);
                                 this.running = false;
                             })
@@ -132,7 +132,7 @@ export default class QueueExecutor<T> {
                         this.running = true;
                         if (this.executorFunc)
                             this.executorFunc(value, meta)
-                                .then((_) => {
+                                .then(() => {
                                     if (this.callbackFunc) this.callbackFunc(value);
                                     this.running = false;
                                 })

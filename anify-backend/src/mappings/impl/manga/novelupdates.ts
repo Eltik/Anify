@@ -1,5 +1,5 @@
 import { load } from "cheerio";
-import { extract, extractFromHtml } from "@extractus/article-extractor";
+import { extract } from "@extractus/article-extractor";
 import MangaProvider from ".";
 import { Format } from "../../../types/enums";
 import { Chapter, Page, Result } from "../../../types/types";

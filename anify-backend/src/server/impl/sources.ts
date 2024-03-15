@@ -7,7 +7,7 @@ import { Source } from "../../types/types";
 import queues from "../../worker";
 import { AES } from "../lib/Aes";
 import { createResponse } from "../lib/response";
-import crypto from "crypto";
+
 export const handler = async (req: Request): Promise<Response> => {
     try {
         const url = new URL(req.url);
@@ -60,7 +60,7 @@ export const handler = async (req: Request): Promise<Response> => {
             }
             if (cachedData?.subtitles?.length == 0) {
                 if (!env.DISABLE_INTRO_VIDEO_SPOOFING) {
-                    var headers = encodeURIComponent(JSON.stringify(cachedData?.headers ?? {}));
+                    const headers = encodeURIComponent(JSON.stringify(cachedData?.headers ?? {}));
                     cachedData?.sources?.forEach((source) => {
                         if (source.url.endsWith(".m3u8") && !source.url.startsWith(env.VIDEO_PROXY_URL)) source.url = env.VIDEO_PROXY_URL + "/video/" + encrypt(source.url) + "/" + headers + "/.m3u8";
                     });
@@ -81,7 +81,7 @@ export const handler = async (req: Request): Promise<Response> => {
         }
         if (data?.subtitles?.length == 0) {
             if (!env.DISABLE_INTRO_VIDEO_SPOOFING) {
-                var headers = encodeURIComponent(JSON.stringify(data?.headers ?? {}));
+                const headers = encodeURIComponent(JSON.stringify(data?.headers ?? {}));
 
                 data?.sources?.forEach((source) => {
                     if (source.url.endsWith(".m3u8")) source.url = env.VIDEO_PROXY_URL + "/video/" + encrypt(source.url) + "/" + headers + "/.m3u8";

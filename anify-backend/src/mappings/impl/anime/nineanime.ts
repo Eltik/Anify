@@ -30,7 +30,7 @@ export default class NineAnime extends AnimeProvider {
         return { Referer: "https://vidplay.site/", "X-Requested-With": "XMLHttpRequest" };
     }
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string): Promise<Result[] | undefined> {
         const vrf = await this.getSearchVRF(query);
         const data = (await (await this.request(`${this.url}/ajax/anime/search?keyword=${encodeURIComponent(query)}&${vrf.vrfQuery}=${encodeURIComponent(vrf.url)}`)).json()) as { result: { html: string } };
 
@@ -84,7 +84,7 @@ export default class NineAnime extends AnimeProvider {
             const episode: Episode = {
                 //id: ids[0], <- if i only want sub
                 id: $$(el).find("a").attr("data-ids")!,
-                number: parseInt($$(el).find("a").attr("data-num")?.toString()!),
+                number: parseInt($$(el).find("a").attr("data-num")?.toString() ?? "0"),
                 title: $$(el).find("span").text()?.length > 0 ? $$(el).find("span").text() : "Episode " + $$(el).find("a").attr("data-num"),
                 isFiller: $$(el).find("a").hasClass("filler"),
                 img: null,

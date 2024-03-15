@@ -1,6 +1,6 @@
 import { load } from "cheerio";
 import MetaProvider from ".";
-import { Format, Type } from "../../../types/enums";
+import { Format } from "../../../types/enums";
 import { Result } from "../../../types/types";
 
 export default class AniDBMeta extends MetaProvider {
@@ -20,7 +20,7 @@ export default class AniDBMeta extends MetaProvider {
         SPECIAL: "type.tvspecial=1",
     };
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string, format?: Format): Promise<Result[] | undefined> {
         const results: Result[] = [];
 
         const data = await (await this.request(`${this.url}/search/fulltext/?adb.search=${encodeURIComponent(query)}&do.search=1&entity.animetb=1&field.titles=1${format && format != Format.UNKNOWN ? `&${this.formatMapping[format?.toUpperCase() as keyof typeof this.formatMapping]}` : ""}`)).text();
@@ -31,7 +31,7 @@ export default class AniDBMeta extends MetaProvider {
 
         $("table.search_results tbody tr").map((i, el) => {
             promises.push(
-                new Promise(async (resolve, reject) => {
+                new Promise(async (resolve) => {
                     const id = ($(el).find("td.relid a").attr("href") ?? "").split("/anime/")[1]?.split("?")[0];
                     const req = await (await this.request(`${this.url}/anime/${id}`)).text();
                     const $$ = load(req);

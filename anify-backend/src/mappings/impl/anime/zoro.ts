@@ -19,7 +19,7 @@ export default class Zoro extends AnimeProvider {
         return undefined;
     }
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string): Promise<Result[] | undefined> {
         const data = await (await this.request(`${this.url}/search?keyword=${encodeURIComponent(query)}`)).text();
         const results: Result[] = [];
 
@@ -28,7 +28,7 @@ export default class Zoro extends AnimeProvider {
         const promises: Promise<void>[] = [];
 
         $(".film_list-wrap > div.flw-item").map((i, el) => {
-            const promise = new Promise<void>(async (resolve, reject) => {
+            const promise = new Promise<void>(async (resolve) => {
                 const title = $(el).find("div.film-detail h3.film-name a.dynamic-name").attr("title")!.trim().replace(/\\n/g, "");
                 const id = $(el).find("div:nth-child(1) > a").last().attr("href")!;
                 const img = $(el).find("img").attr("data-src")!;
@@ -185,9 +185,11 @@ export default class Zoro extends AnimeProvider {
     }
 
     private retrieveServerId($: any, index: number, subOrDub: SubType) {
-        return $(`div.ps_-block.ps_-block-sub.servers-${subOrDub} > div.ps__-list > div`)
-            .map((i: any, el: any) => ($(el).attr("data-server-id") === `${index}` ? $(el) : null))
-            .get()[0]
-            ?.attr("data-id")!;
+        return (
+            $(`div.ps_-block.ps_-block-sub.servers-${subOrDub} > div.ps__-list > div`)
+                .map((i: any, el: any) => ($(el).attr("data-server-id") === `${index}` ? $(el) : null))
+                .get()[0]
+                ?.attr("data-id") ?? ""
+        );
     }
 }

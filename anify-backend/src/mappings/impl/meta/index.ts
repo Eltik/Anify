@@ -16,6 +16,7 @@ export default abstract class MetaProvider {
     public useGoogleTranslate: boolean = true;
     public overrideProxy: boolean = false;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         return undefined;
     }

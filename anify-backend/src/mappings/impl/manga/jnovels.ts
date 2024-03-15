@@ -11,7 +11,7 @@ export default class JNovels extends MangaProvider {
 
     override formats: Format[] = [Format.NOVEL];
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string): Promise<Result[] | undefined> {
         const lightNovels = await (await this.request(`${this.url}/11light-1novel27-pdf/`)).text();
         const novelResults = await this.handleSearchResults(query, lightNovels);
 
@@ -30,7 +30,7 @@ export default class JNovels extends MangaProvider {
 
         const resultsPromises: Promise<Result>[] = elements.map(async (el) => {
             const item = $(el);
-            const id = item.find("a").attr("href")?.split(this.url)[1]!;
+            const id = item.find("a").attr("href")?.split(this.url)[1] ?? "";
             const title = item.find("a").text()?.trim() ?? "";
 
             // If contains style attribute skip

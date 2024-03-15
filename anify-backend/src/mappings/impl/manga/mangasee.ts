@@ -3,7 +3,6 @@ import MangaProvider from ".";
 import { stringSearch } from "../../../helper/title";
 import { Format } from "../../../types/enums";
 import { Chapter, Page, Result } from "../../../types/types";
-import { isString } from "../../../helper";
 
 export default class MangaSee extends MangaProvider {
     override rateLimit = 250;
@@ -12,14 +11,16 @@ export default class MangaSee extends MangaProvider {
 
     override formats: Format[] = [Format.MANGA, Format.ONE_SHOT];
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string): Promise<Result[] | undefined> {
         const list = await this.getMangaList();
         const results: Result[] = [];
 
+        /*
         const providerTitles = list.map((m) => {
             const titles = [m.s, ...(m.a ?? [])];
             return titles.filter(isString);
         });
+        */
 
         for (let i = 0; i < list.length; i++) {
             if (

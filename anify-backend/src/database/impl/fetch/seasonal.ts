@@ -44,7 +44,7 @@ export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: Ani
             .map((media) => {
                 if (media.type === Type.ANIME) {
                     try {
-                        let parsedAnime = Object.assign(media, {
+                        const parsedAnime = Object.assign(media, {
                             title: JSON.parse(media.title),
                             season: media.season.replace(/"/g, ""),
                             mappings: JSON.parse(media.mappings),
@@ -64,7 +64,7 @@ export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: Ani
                     }
                 } else {
                     try {
-                        let parsedManga = Object.assign(media, {
+                        const parsedManga = Object.assign(media, {
                             title: JSON.parse(media.title),
                             mappings: JSON.parse(media.mappings),
                             synonyms: JSON.parse(media.synonyms),

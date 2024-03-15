@@ -150,7 +150,7 @@ export default class MangaFire extends MangaProvider {
         const descrambledImages = await Promise.all(
             images.map(async (image) => {
                 if (image.isScrambled) {
-                    const descrambled = await this.descrambleImage(image.url, image.scrambledKey, image.index);
+                    const descrambled = await this.descrambleImage(image.url, image.scrambledKey);
                     image.url = descrambled;
                 }
                 return {
@@ -164,7 +164,7 @@ export default class MangaFire extends MangaProvider {
         return descrambledImages;
     }
 
-    private async descrambleImage(url: string, key: number, index: number): Promise<string> {
+    private async descrambleImage(url: string, key: number): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const s = key;
             try {

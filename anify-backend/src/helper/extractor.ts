@@ -1,10 +1,10 @@
 import CryptoJS from "crypto-js";
 import { load } from "cheerio";
-import { substringAfter, substringBefore } from ".";
 import { env } from "process";
 import { Source } from "../types/types";
 import { StreamingServers } from "../types/enums";
 import Http from "./request";
+import { animeProviders } from "../mappings";
 
 /**
  * @description Extracts source links from the streaming servers. This class is very messy but it works.
@@ -382,7 +382,7 @@ export default class Extractor {
     }
 
     public async extractStreamSB(url: string, result: Source): Promise<Source> {
-        throw new Error("Method not implemented yet.");
+        throw new Error(`Method not implemented yet for ${url} and ${result}.`);
     }
 
     public async extractVidCloud(url: string, result: Source): Promise<Source> {
@@ -477,7 +477,7 @@ export default class Extractor {
     }
 
     public async extractKwik(url: string, result: Source): Promise<Source> {
-        const host = "https://animepahe.com"; // Subject to change maybe.
+        const host = animeProviders.animepahe.url; // Subject to change maybe.
         const req = await fetch(url, { headers: { Referer: host } });
         const match = load(await req.text())
             .html()
@@ -491,6 +491,7 @@ export default class Extractor {
         arr = arr.slice(arr.length - 5, -1);
         arr.unshift(l);
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [p, a, c, k, e, d] = arr.map((x) => x.split(".sp")[0]);
 
         const formatted = format(p, a, c, k, e, {});
@@ -537,11 +538,11 @@ export default class Extractor {
     }
 
     public async extractStreamTape(url: string, result: Source): Promise<Source> {
-        throw new Error("Method not implemented yet.");
+        throw new Error(`Method not implemented yet for ${url} and ${result}.`);
     }
 
     public async extractFPlayer(url: string, result: Source): Promise<Source> {
-        throw new Error("Method not implemented yet.");
+        throw new Error(`Method not implemented yet for ${url} and ${result}.`);
     }
 
     public async extractAllAnime(url: string, result: Source): Promise<Source> {

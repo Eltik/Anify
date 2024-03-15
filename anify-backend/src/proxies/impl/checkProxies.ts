@@ -112,7 +112,7 @@ export async function checkCorsProxies(
         const promises = [];
 
         promises.push(
-            new Promise(async (resolve, reject) => {
+            new Promise(async (resolve) => {
                 const base = await makeRequest(ip, "BASE");
                 if (base) {
                     for (const provider of base) {
@@ -128,7 +128,7 @@ export async function checkCorsProxies(
         );
 
         promises.push(
-            new Promise(async (resolve, reject) => {
+            new Promise(async (resolve) => {
                 const anime = await makeRequest(ip, "ANIME");
                 if (anime) {
                     for (const provider of anime) {
@@ -145,7 +145,7 @@ export async function checkCorsProxies(
         );
 
         promises.push(
-            new Promise(async (resolve, reject) => {
+            new Promise(async (resolve) => {
                 const manga = await makeRequest(ip, "MANGA");
                 if (manga) {
                     for (const provider of manga) {
@@ -162,7 +162,7 @@ export async function checkCorsProxies(
         );
 
         promises.push(
-            new Promise(async (resolve, reject) => {
+            new Promise(async (resolve) => {
                 const meta = await makeRequest(ip, "META");
                 if (meta) {
                     for (const provider of meta) {
@@ -206,7 +206,7 @@ export async function checkCorsProxies(
 
 async function makeRequest(ip: IP, type: "BASE" | "ANIME" | "MANGA" | "META"): Promise<string[] | undefined> {
     console.log(colors.yellow(colors.bold(`Testing ${type}.`)));
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
         const controller = new AbortController();
 
         console.log(colors.gray("Checking ") + `${ip.ip}:${ip.port}` + colors.gray("."));

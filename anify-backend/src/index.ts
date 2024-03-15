@@ -10,7 +10,7 @@ import queues from "./worker";
 import { start } from "./server";
 import { startWebsocket } from "./websocket";
 
-before().then(async (_) => {
+before().then(async () => {
     await start();
     await startWebsocket();
 });

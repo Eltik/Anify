@@ -16,10 +16,12 @@ export default abstract class AnimeProvider {
     public useGoogleTranslate: boolean = true;
     public overrideProxy: boolean = false;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         return undefined;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async fetchEpisodes(id: string): Promise<Episode[] | undefined> {
         return undefined;
     }
@@ -28,10 +30,12 @@ export default abstract class AnimeProvider {
         return undefined;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async fetchSources(id: string, subType: SubType = SubType.SUB, server: StreamingServers): Promise<Source | undefined> {
         return undefined;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async fetchServers(id: string, subType: SubType = SubType.SUB): Promise<Server[] | undefined> {
         return undefined;
     }

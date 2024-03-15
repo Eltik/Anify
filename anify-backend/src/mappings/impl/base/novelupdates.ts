@@ -1,6 +1,6 @@
 import { load } from "cheerio";
 import BaseProvider from ".";
-import { Format, Genres, MediaStatus, Season, Type } from "../../../types/enums";
+import { Format, Genres, MediaStatus, Type } from "../../../types/enums";
 import { AnimeInfo, MangaInfo } from "../../../types/types";
 
 export default class NovelUpdatesBase extends BaseProvider {
@@ -50,7 +50,7 @@ export default class NovelUpdatesBase extends BaseProvider {
         YURI: 922,
     };
 
-    override async search(query: string, type: Type, formats: Format[], page: number, perPage: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
+    override async search(query: string, type: Type, formats: Format[], page: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         const results: MangaInfo[] = [];
 
         const searchData = await this.request(`${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444&ge=280&sort=sread&order=desc${page ? `&pg=${page}` : ""}`, {
@@ -85,19 +85,7 @@ export default class NovelUpdatesBase extends BaseProvider {
         return results;
     }
 
-    override async searchAdvanced(
-        query: string,
-        type: Type,
-        formats: Format[],
-        page: number,
-        perPage: number,
-        genres: Genres[] = [],
-        genresExcluded: Genres[] = [],
-        season: Season = Season.UNKNOWN,
-        year = 0,
-        tags: string[] = [],
-        tagsExcluded: string[] = [],
-    ): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
+    override async searchAdvanced(query: string, type: Type, formats: Format[], page: number, perPage: number, genres: Genres[] = [], genresExcluded: Genres[] = []): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         const results: MangaInfo[] = [];
 
         const genreNumbers = genres.map((genre) => this.genreMappings[genre.toUpperCase() as keyof typeof this.genreMappings]).filter((genreNumber) => genreNumber !== undefined);

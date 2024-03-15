@@ -1,5 +1,4 @@
 import BaseProvider from ".";
-import { wait } from "../../../helper";
 import { Format, Formats, Genres, MediaStatus, Season, Type } from "../../../types/enums";
 import { AnimeInfo, MangaInfo } from "../../../types/types";
 
@@ -101,19 +100,7 @@ export default class ManagDexBase extends BaseProvider {
         return results;
     }
 
-    override async searchAdvanced(
-        query: string,
-        type: Type,
-        formats: Format[],
-        page: number,
-        perPage: number,
-        genres?: Genres[],
-        genresExcluded?: Genres[],
-        season: Season = Season.UNKNOWN,
-        year: number = 0,
-        tags: string[] = [],
-        tagsExcluded: string[] = [],
-    ): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
+    override async searchAdvanced(query: string, type: Type, formats: Format[], page: number, perPage: number, genres?: Genres[], genresExcluded?: Genres[], season?: Season, year: number = 0, tags: string[] = [], tagsExcluded: string[] = []): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         const results: MangaInfo[] = [];
 
         let mangaList: any[] = [];
@@ -430,7 +417,7 @@ export default class ManagDexBase extends BaseProvider {
         return undefined;
     }
 
-    override async fetchIds(formats: Format[]): Promise<string[] | undefined> {
+    override async fetchIds(): Promise<string[] | undefined> {
         const data = (await (await fetch("https://raw.githubusercontent.com/ArdaxHz/mangadex-id-map/main/json/manga_map.json")).json()) as { [key: string]: string };
         /*
         {

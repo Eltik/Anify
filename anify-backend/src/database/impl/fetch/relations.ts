@@ -13,7 +13,7 @@ export const relations = async (id: string, fields: string[] = []): Promise<Anim
         for (const relation of data.relations) {
             let results: Anime[] | Manga[] = [];
             if (relation.type === Type.ANIME) {
-                let where = `
+                const where = `
                     WHERE (
                         "anime".mappings @> '[{"providerId": "anilist"}]'
                     )
@@ -31,7 +31,7 @@ export const relations = async (id: string, fields: string[] = []): Promise<Anim
                     )
                     .then((res) => res.rows);
             } else {
-                let where = `
+                const where = `
                     WHERE (
                         "manga".mappings @> '[{"providerId": "anilist"}]'
                     )
