@@ -7,7 +7,7 @@ import { Episode, Result, Source } from "../../../types/types";
 export default class Zoro extends AnimeProvider {
     override rateLimit = 250;
     override id = "zoro";
-    override url = "http://aniwatch.to";
+    override url = "https://hianime.to";
 
     override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
 
