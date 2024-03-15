@@ -271,17 +271,17 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
                 },
             };
 
-            const data = (await (
-                await axios(userOptions.uri, {
-                    data: JSON.stringify(userOptions.data),
-                    method: userOptions.method,
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                    },
-                })
-            ).data) as {
+            const request = await axios(userOptions.uri, {
+                data: JSON.stringify(userOptions.data),
+                method: userOptions.method,
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+            });
+
+            const data = request.data as {
                 data: {
                     Viewer: {
                         id: number;
@@ -299,7 +299,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
                 method: "GET",
             };
 
-            const data = (await (
+            const data = (
                 await axios(userOptions.uri, {
                     method: userOptions.method,
                     headers: {
@@ -308,7 +308,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
                         Accept: "application/json",
                     },
                 })
-            ).data) as {
+            ).data as unknown as {
                 id: number;
                 name: string;
                 gender: string;
