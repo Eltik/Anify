@@ -4,6 +4,10 @@ import Extractor from "../../../helper/extractor";
 import { Format, Formats, StreamingServers, SubType } from "../../../types/enums";
 import { Episode, Result, Source } from "../../../types/types";
 
+/**
+ * @description BROKEN. Needs a DDoS Guard bypass
+ */
+
 export default class AnimePahe extends AnimeProvider {
     override rateLimit = 250;
     override id = "animepahe";
@@ -22,7 +26,16 @@ export default class AnimePahe extends AnimeProvider {
     }
 
     override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
-        const request = await this.request(`${this.url}/api?m=search&q=${encodeURIComponent(query)}`);
+        const request = await this.request(
+            `${this.url}/api?m=search&q=${encodeURIComponent(query)}`,
+            {
+                headers: {
+                    Cookie: "d1=;d2=;",
+                },
+            },
+            false,
+        );
+
         if (!request.ok) {
             return [];
         }

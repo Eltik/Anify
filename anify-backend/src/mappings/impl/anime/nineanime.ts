@@ -6,6 +6,10 @@ import { env } from "../../../env";
 import { Format, Formats, StreamingServers, SubType } from "../../../types/enums";
 import Extractor from "../../../helper/extractor";
 
+/**
+ * @description DEPRECATED
+ */
+
 export default class NineAnime extends AnimeProvider {
     override rateLimit = 250;
     override id = "9anime";
