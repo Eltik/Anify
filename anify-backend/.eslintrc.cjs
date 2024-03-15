@@ -12,7 +12,7 @@ const config = {
     rules: {
         "@typescript-eslint/no-explicit-any": "off",
     },
-    ignorePatterns: ["dist/*"],
+    ignorePatterns: ["dist/*", "node_modules/*", ".DS_Store"],
 };
 
 module.exports = config;
