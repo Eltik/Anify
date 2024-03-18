@@ -4,12 +4,7 @@ import { env } from "../env";
 
 export const dbType: "sqlite" | "postgresql" = env.DATABASE_URL.startsWith("postgres") ? "postgresql" : "sqlite";
 export const sqlite = new Database("db.sqlite");
-export const postgres = new Client({
-    user: env.DATABASE_URL.split("://")[1].split(":")[0],
-    password: env.DATABASE_URL.split(":")[2].split("@")[0],
-    host: env.DATABASE_URL.split("@")[1].split(":")[0],
-    port: Number(env.DATABASE_URL.split(":")[3].split("/")[0]),
-});
+export const postgres = new Client(env.DATABASE_URL);
 
 export const init = async () => {
     if (dbType === "postgresql") {
