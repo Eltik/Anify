@@ -28,6 +28,7 @@ import Mangakakalot from "./impl/manga/mangakakalot";
 import MangaPill from "./impl/manga/mangapill";
 import MangaSee from "./impl/manga/mangasee";
 import NovelUpdates from "./impl/manga/novelupdates";
+import NovelHall from "./impl/manga/novelhall";
 import MetaProvider from "./impl/meta";
 import AniDBMeta from "./impl/meta/anidb";
 import AniListMeta from "./impl/meta/anilist";
@@ -45,7 +46,7 @@ const animeProviders: Record<string, AnimeProvider> = ANIME_PROVIDERS.reduce(
     {} as Record<string, AnimeProvider>,
 );
 
-const MANGA_PROVIDERS: MangaProvider[] = [new ComicK(), new MangaDex(), new MangaSee(), new MangaFire(), new Mangakakalot(), new MangaPill(), new JNovels(), new NovelUpdates(), new FirstKissNovel()];
+const MANGA_PROVIDERS: MangaProvider[] = [new ComicK(), new MangaDex(), new MangaSee(), new MangaFire(), new Mangakakalot(), new MangaPill(), new JNovels(), new NovelUpdates(), new FirstKissNovel(), new NovelHall()];
 const mangaProviders: Record<string, MangaProvider> = MANGA_PROVIDERS.reduce(
     (acc, provider) => {
         acc[provider.id] = provider;
