@@ -5,7 +5,7 @@ import { Chapter, Page, Result } from "../../../types/types";
 
 export default class FirstKissNovel extends MangaProvider {
     override rateLimit = 1000;
-    override id = "firstkissnovel";
+    override id = "1stkissnovel";
     override url = "https://1stkissnovel.org";
 
     public needsProxy: boolean = false;
