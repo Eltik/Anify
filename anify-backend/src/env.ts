@@ -4,6 +4,7 @@ export const env = {
     DATABASE_URL: process.env.DATABASE_URL ?? "",
     NINEANIME_RESOLVER: process.env.NINEANIME_RESOLVER,
     NINEANIME_KEY: process.env.NINEANIME_KEY,
+    ZORO_EXTRACTOR: process.env.ZORO_EXTRACTOR,
     REDIS_URL: process.env.REDIS_URL,
     REDIS_CACHE_TIME: Number(process.env.REDIS_CACHE_TIME ?? 60 * 60 * 24 * 7),
     CENSYS_ID: process.env.CENSYS_ID,

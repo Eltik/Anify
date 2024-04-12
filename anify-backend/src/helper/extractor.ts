@@ -1,10 +1,10 @@
 import CryptoJS from "crypto-js";
 import { load } from "cheerio";
-import { env } from "process";
 import { Source } from "../types/types";
 import { StreamingServers } from "../types/enums";
 import Http from "./request";
 import { animeProviders } from "../mappings";
+import { env } from "../env";
 
 /**
  * @description Extracts source links from the streaming servers. This class is very messy but it works.
@@ -405,7 +405,7 @@ export default class Extractor {
 
         let { sources } = reqData as { sources: string };
 
-        const decryptKey = ((await (await fetch("https://zoro.anify.tv/key/6")).json()) as { key: string }).key as string;
+        const decryptKey = ((await (await fetch(env.ZORO_EXTRACTOR ? `${env.ZORO_EXTRACTOR}/key/6` : "https://zoro.anify.tv/key/6")).json()) as { key: string }).key as string;
 
         const encryptedURLTemp = sources?.split("");
 
