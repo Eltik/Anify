@@ -3,6 +3,7 @@ import { ImageResponse } from "@vercel/og";
 import Image from "next/image";
 import sanitizer from "sanitize-html";
 import { env } from "~/env.mjs";
+import { parseFormat } from "~/helper";
 import { type Anime, type Manga } from "~/types";
 
 export const textSanitizer = (textWithHTML: string) => {
@@ -99,7 +100,7 @@ export default async function handler(req: { url: string }) {
                             }}
                         >
                             {capitalize(status ?? "")}
-                            {year}
+                            {" - " + String(year)}
                         </h4>
                         <h4
                             className="animeTitle"
@@ -122,7 +123,7 @@ export default async function handler(req: { url: string }) {
                                 marginTop: 0,
                             }}
                         >
-                            {data.status && data.format ? `${capitalize(data.status as string)} · ${capitalize(data.format as string)}` : capitalize(data.format as string)}
+                            {data.status && data.format ? `${capitalize(data.status as string)} · ${parseFormat(data.format)}` : parseFormat(data.format)}
                         </h4>
                         <div
                             className="ratingWrapper"

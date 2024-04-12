@@ -427,7 +427,7 @@ export default class Extractor {
             sources = "";
         }
 
-        if (!sources || sources === "") {
+        if (!sources || sources.length === 0) {
             return result;
         }
 

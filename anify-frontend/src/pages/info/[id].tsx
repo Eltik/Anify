@@ -316,13 +316,13 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                 <meta property="og:url" content={"https://anify.tv/info/" + media.id} />
                 <meta property="og:title" content={media.title.english ?? media.title.romaji ?? media.title.native ?? ""} />
                 <meta property="og:description" content={media.description ?? ""} />
-                <meta property="og:image" content={"https://anify.tv/api/info?id=" + media.id} />
+                <meta property="og:image" content={"https://anify.tv/api/og?id=" + media.id} />
 
                 <meta property="twitter:card" content="summary_large_image" />
                 <meta property="twitter:url" content={"https://anify.tv/info/" + media.id} />
                 <meta property="twitter:title" content={media.title.english ?? media.title.romaji ?? media.title.native ?? ""} />
                 <meta property="twitter:description" content={media.description ?? ""} />
-                <meta property="twitter:image" content={"https://anify.tv/api/info?id=" + media.id} />
+                <meta property="twitter:image" content={"https://anify.tv/api/og?id=" + media.id} />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <Sidebar active={media.type === Type.ANIME ? "anime" : media.format === Format.NOVEL ? "novel" : "manga"} />
@@ -932,37 +932,45 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                             }}
                                             styles={{
                                                 container: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#333333",
                                                     border: "none",
                                                     borderRadius: "0.25rem",
                                                 }),
                                                 control: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#333333",
                                                     border: "none",
                                                 }),
                                                 input: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#333333",
                                                     border: "none",
                                                 }),
                                                 menu: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#1f1f1f",
                                                     border: "none",
                                                 }),
                                                 menuList: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     width: "100%",
                                                     height: "100%",
                                                 }),
                                                 noOptionsMessage: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                 }),
                                                 placeholder: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                 }),
                                                 singleValue: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                     height: "100%",
                                                     position: "relative",
@@ -970,9 +978,11 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                                     overflow: "initial",
                                                 }),
                                                 valueContainer: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                 }),
                                                 option: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     backgroundColor: "#1f1f1f",
                                                     color: "white",
                                                     transition: "0.1s all",
@@ -988,9 +998,11 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                                     height: "100%",
                                                 }),
                                                 indicatorSeparator: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     display: "none",
                                                 }),
                                                 dropdownIndicator: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     backgroundColor: "rgb(var(--blue-300));",
                                                     color: "white",
                                                     transition: "0.1s all",
@@ -1192,41 +1204,49 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                             }}
                                             className="z-50"
                                             styles={{
-                                                container: (baseStyles, state) => ({
+                                                container: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#141414",
                                                     border: "none",
                                                     borderRadius: "0.25rem",
                                                     zIndex: "50",
                                                 }),
-                                                control: (baseStyles, state) => ({
+                                                control: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#141414",
                                                     border: "none",
                                                 }),
-                                                input: (baseStyles, state) => ({
+                                                input: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#141414",
                                                     border: "none",
                                                 }),
-                                                menu: (baseStyles, state) => ({
+                                                menu: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                     backgroundColor: "#333333",
                                                     border: "none",
                                                     zIndex: "50",
                                                 }),
-                                                menuList: (baseStyles, state) => ({
+                                                menuList: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     width: "100%",
                                                     height: "100%",
                                                     zIndex: "50",
                                                 }),
-                                                noOptionsMessage: (baseStyles, state) => ({
+                                                noOptionsMessage: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                 }),
-                                                placeholder: (baseStyles, state) => ({
+                                                placeholder: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                 }),
-                                                singleValue: (baseStyles, state) => ({
+                                                singleValue: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                     height: "100%",
                                                     position: "relative",
@@ -1234,10 +1254,12 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                                     overflow: "initial",
                                                     zIndex: "50",
                                                 }),
-                                                valueContainer: (baseStyles, state) => ({
+                                                valueContainer: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     color: "white",
                                                 }),
-                                                option: (baseStyles, state) => ({
+                                                option: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     backgroundColor: "#333333",
                                                     color: "white",
                                                     zIndex: "50",
@@ -1253,10 +1275,12 @@ const Info: NextPage<Props> = ({ media, relations, content }) => {
                                                     lineHeight: "1.25rem",
                                                     height: "100%",
                                                 }),
-                                                indicatorSeparator: (baseStyles, state) => ({
+                                                indicatorSeparator: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     display: "none",
                                                 }),
-                                                dropdownIndicator: (baseStyles, state) => ({
+                                                dropdownIndicator: (baseStyles) => ({
+                                                    ...baseStyles,
                                                     backgroundColor: "none",
                                                     color: "white",
                                                     transition: "0.1s all",

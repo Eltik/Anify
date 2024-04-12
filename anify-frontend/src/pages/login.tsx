@@ -116,6 +116,7 @@ const Login: NextPage<Props> = ({ login, user, token, provider, providers, redir
                         <div className="mx-auto bg-background-light/30 px-5 py-5 text-center lg:max-w-[90%]">
                             <h1 className="text-3xl font-bold text-white">Providers</h1>
                             <br />
+                            <p className="text-white">NOTE: Logging in doesn&apos;t work at the moment.</p>
                             <div className="flex flex-row flex-wrap items-center justify-center gap-5">
                                 {providers?.map((p, index) => (
                                     <div key={index} className="flex flex-col items-center justify-center">
