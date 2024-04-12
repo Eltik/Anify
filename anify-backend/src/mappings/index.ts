@@ -19,6 +19,7 @@ import NovelUpdatesInfo from "./impl/information/novelupdates";
 import TMDB from "./impl/information/tmdb";
 import TVDB from "./impl/information/tvdb";
 import MangaProvider from "./impl/manga";
+import FirstKissNovel from "./impl/manga/1stkissnovel";
 import ComicK from "./impl/manga/comick";
 import JNovels from "./impl/manga/jnovels";
 import MangaDex from "./impl/manga/mangadex";
@@ -44,7 +45,7 @@ const animeProviders: Record<string, AnimeProvider> = ANIME_PROVIDERS.reduce(
     {} as Record<string, AnimeProvider>,
 );
 
-const MANGA_PROVIDERS: MangaProvider[] = [new ComicK(), new MangaDex(), new MangaSee(), new MangaFire(), new Mangakakalot(), new MangaPill(), new JNovels(), new NovelUpdates()];
+const MANGA_PROVIDERS: MangaProvider[] = [new ComicK(), new MangaDex(), new MangaSee(), new MangaFire(), new Mangakakalot(), new MangaPill(), new JNovels(), new NovelUpdates(), new FirstKissNovel()];
 const mangaProviders: Record<string, MangaProvider> = MANGA_PROVIDERS.reduce(
     (acc, provider) => {
         acc[provider.id] = provider;
