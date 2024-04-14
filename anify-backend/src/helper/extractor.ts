@@ -386,6 +386,32 @@ export default class Extractor {
     }
 
     public async extractVidCloud(url: string, result: Source): Promise<Source> {
+        const extractKey = async (): Promise<[number, number][] | null> => {
+            const script = await (await fetch(`${host}/js/player/a/prod/e1-player.min.js`)).text();
+
+            const startOfSwitch = script.lastIndexOf("switch");
+            const endOfCases = script.indexOf("partKeyStartPosition");
+            const switchBody = script.slice(startOfSwitch, endOfCases);
+
+            const nums: [number, number][] = [];
+            const matches = switchBody.matchAll(/:[a-zA-Z0-9]+=([a-zA-Z0-9]+),[a-zA-Z0-9]+=([a-zA-Z0-9]+);/g);
+            for (const match of matches) {
+                const innerNumbers: number[] = [];
+                for (const varMatch of [match[1], match[2]]) {
+                    const regex = new RegExp(`${varMatch}=0x([a-zA-Z0-9]+)`, "g");
+                    const varMatches = [...script.matchAll(regex)];
+                    const lastMatch = varMatches[varMatches.length - 1];
+                    if (!lastMatch) return null;
+                    const number = parseInt(lastMatch[1], 16);
+                    innerNumbers.push(number);
+                }
+
+                nums.push([innerNumbers[0], innerNumbers[1]]);
+            }
+
+            return nums;
+        };
+
         const host = "https://megacloud.tv";
         const id = url.split("/").pop()?.split("?")[0];
 
@@ -405,23 +431,26 @@ export default class Extractor {
 
         let { sources } = reqData as { sources: string };
 
-        const decryptKey = ((await (await fetch(env.ZORO_EXTRACTOR ? `${env.ZORO_EXTRACTOR}/key/6` : "https://zoro.anify.tv/key/6")).json()) as { key: string }).key as string;
+        //const decryptKey = ((await (await fetch(env.ZORO_EXTRACTOR ? `${env.ZORO_EXTRACTOR}/key/6` : "https://zoro.anify.tv/key/6")).json()) as { key: string }).key as string;
+        const key = await extractKey();
 
-        const encryptedURLTemp = sources?.split("");
+        if (key != null) {
+            let extractedKey = "";
+            let strippedSources = sources;
+            let totalledOffset = 0;
+            key.forEach(([a, b]) => {
+                const start = a + totalledOffset;
+                const end = start + b;
+                extractedKey += sources.slice(start, end);
+                strippedSources = strippedSources.replace(sources.substring(start, end), "");
+                totalledOffset += b;
+            });
 
-        let key = "";
-
-        for (const index of JSON.parse(decryptKey)) {
-            for (let i = Number(index[0]); i < Number(index[1]); i++) {
-                key += encryptedURLTemp[i];
-                encryptedURLTemp[i] = "";
-            }
+            sources = CryptoJS.AES.decrypt(strippedSources, extractedKey).toString(CryptoJS.enc.Utf8);
         }
 
-        sources = encryptedURLTemp.filter((x: any) => x !== "").join("");
-
         try {
-            sources = JSON.parse(CryptoJS.AES.decrypt(sources, key).toString(CryptoJS.enc.Utf8));
+            sources = JSON.parse(sources);
         } catch (e) {
             console.error(e);
             sources = "";

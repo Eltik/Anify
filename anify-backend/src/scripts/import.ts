@@ -127,7 +127,10 @@ export const importData = async () => {
         }
     }
 
-    console.log(colors.green(`Successfully imported ${count.anime} anime, ${count.manga} manga, ${count.skipTimes} skip times, and ${count.keys} API keys!`) + colors.red(` Failed to import ${failedCount.anime} anime, ${failedCount.manga} manga, ${failedCount.skipTimes} skip times, and ${failedCount.keys} API keys!`));
+    console.log(
+        colors.green(`Successfully imported ${count.anime} anime, ${count.manga} manga, ${count.skipTimes} skip times, and ${count.keys} API keys!`) +
+            colors.red(` Failed to import ${failedCount.anime} anime, ${failedCount.manga} manga, ${failedCount.skipTimes} skip times, and ${failedCount.keys} API keys!`),
+    );
 };
 
 importData().then(() => {
