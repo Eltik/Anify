@@ -3,6 +3,7 @@ import { extract } from "@extractus/article-extractor";
 import MangaProvider from ".";
 import { Format } from "../../../types/enums";
 import { Chapter, Page, Result } from "../../../types/types";
+import { env } from "../../../env";
 
 export default class NovelUpdates extends MangaProvider {
     override rateLimit = 1000;
@@ -61,6 +62,8 @@ export default class NovelUpdates extends MangaProvider {
 
     override async fetchChapters(id: string, retries = 0): Promise<Chapter[] | undefined> {
         if (retries >= 5) return undefined;
+
+        await this.login();
 
         const chapters: Chapter[] = [];
 
@@ -156,5 +159,59 @@ export default class NovelUpdates extends MangaProvider {
             },
         );
         return article?.content;
+    }
+
+    private async login(): Promise<void> {
+        const username = env.NOVELUPDATES_LOGIN?.split(":")[0];
+        const password = env.NOVELUPDATES_LOGIN?.split(":")[1];
+
+        const cf = new CF(true);
+        /*
+        const data = await cf.request({
+            url: `${this.url}/login/`,
+            options: {
+                method: "POST",
+                body: `log=${username}&pwd=${encodeURIComponent(password ?? "")}&_wp_original_http_referer=&wp-submit=Log+In&instance=&action=login`,
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    Referer: `${this.url}/login/`,
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.88 Safari/537.36"
+                },
+                redirect: false
+            }
+        }).catch(console.error)
+        */
+        const test = await cf.cookie("https://www.novelupdates.com/login/", {
+            method: "POST",
+            body: `log=${username}&pwd=${encodeURIComponent(password ?? "")}&_wp_original_http_referer=&wp-submit=Log+In&instance=&action=login`,
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Referer: `${this.url}/login/`,
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.88 Safari/537.36"
+            }
+        }).catch(console.error)
+        console.log(test)
+
+        /*
+        const data = await (await fetch(`${this.url}/login/`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    Referer: `${this.url}/login/`,
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.88 Safari/537.36",
+                    Cookie: "_ga=;",
+                },
+                body: `log=${username}&pwd=${encodeURIComponent(password ?? "")}&_wp_original_http_referer=&wp-submit=Log+In&instance=&action=login`,
+                redirect: "error",
+                verbose: true
+            }
+        ));
+        */
+
+        console.log(data.text())
+        console.log(data)
+        
+        //Bun.write("test.html", await data.text());
     }
 }
