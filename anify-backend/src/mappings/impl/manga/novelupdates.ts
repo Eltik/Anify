@@ -15,6 +15,44 @@ export default class NovelUpdates extends MangaProvider {
 
     override formats: Format[] = [Format.NOVEL];
 
+    private genreMappings = {
+        ACTION: 8,
+        ADULT: 280,
+        ADVENTURE: 13,
+        COMEDY: 17,
+        DRAMA: 9,
+        ECCHI: 292,
+        FANTASY: 5,
+        GENDER_BENDER: 168,
+        HAREM: 3,
+        HISTORICAL: 330,
+        HORROR: 343,
+        JOSEI: 324,
+        MARTIAL_ARTS: 14,
+        MATURE: 4,
+        MECHA: 10,
+        MYSTERY: 245,
+        PSYCHOLOGICAL: 486,
+        ROMANCE: 15,
+        SCHOOL_LIFE: 6,
+        SCI_FI: 11,
+        SEINEN: 18,
+        SHOUJO: 157,
+        SHOUJO_AI: 851,
+        SHOUNEN: 12,
+        SHOUNEN_AI: 1692,
+        SLICE_OF_LIFE: 7,
+        SMUT: 281,
+        SPORTS: 1357,
+        SUPERNATURAL: 16,
+        TRAGEDY: 132,
+        WUXIA: 479,
+        XIANXIA: 480,
+        XUANHUAN: 3954,
+        YAOI: 560,
+        YURI: 922,
+    };
+
     override async search(query: string, format?: Format, year?: number, retries = 0): Promise<Result[] | undefined> {
         if (this.customProxy) {
             // For proxy testing purposes only.
@@ -25,7 +63,7 @@ export default class NovelUpdates extends MangaProvider {
 
         const results: Result[] = [];
 
-        const searchData = await this.request(`${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444&ge=280&sort=sread&order=desc`, {
+        const searchData = await this.request(`${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444&ge=${this.genreMappings.ADULT}&sort=sread&order=desc`, {
             method: "GET",
             headers: {
                 Referer: this.url,

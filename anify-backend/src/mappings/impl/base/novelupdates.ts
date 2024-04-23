@@ -53,7 +53,7 @@ export default class NovelUpdatesBase extends BaseProvider {
     override async search(query: string, type: Type, formats: Format[], page: number): Promise<AnimeInfo[] | MangaInfo[] | undefined> {
         const results: MangaInfo[] = [];
 
-        const searchData = await this.request(`${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444&ge=280&sort=sread&order=desc${page ? `&pg=${page}` : ""}`, {
+        const searchData = await this.request(`${this.url}/series-finder/?sf=1&sh=${encodeURIComponent(query)}&nt=2443,26874,2444&ge=${this.genreMappings.ADULT}&sort=sread&order=desc${page ? `&pg=${page}` : ""}`, {
             method: "GET",
             headers: {
                 Referer: this.url,
