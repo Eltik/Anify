@@ -185,15 +185,47 @@ export default class NovelUpdates extends MangaProvider {
         const $ = load(data);
         const baseURL = $("base").attr("href")?.replace("http://", "https://") ?? this.url;
 
-        const article = await extract(
-            baseURL,
-            {},
-            {
-                headers: {
-                    Cookie: "_ga=;",
+        return await this.extractChapter(baseURL);
+    }
+
+    /**
+     * @description Chapter extractor specific to certain TL sites. Uses article-extractor for general sites.
+     * @param url string
+     * @returns Promise<string | undefined>
+     */
+    private async extractChapter(url: string): Promise<string | undefined> {
+        if (url.includes("storyseedling") && url.includes("rss")) {
+            const $ = load(await (await this.request(url)).text());
+            const forwardTimer = $("div[@click=\"$dispatch('tools')\"] > div").attr("x-data");
+
+            const data = await this.request(forwardTimer?.split("forwardTimer('")[1].split("')")[0] ?? "");
+
+            const $$ = load(await data.text());
+            return $$("div[@click=\"$dispatch('tools')\"]").html() ?? "";
+        } else if (url.includes("travistranslations")) {
+            if (url.includes("rss")) {
+                const $ = load(await (await this.request(url)).text());
+                const forwardTimer = $("div.reader-content > div.my-2").attr("x-data");
+
+                const data = await this.request(forwardTimer?.split("forwardTimer('")[1].split("')")[0] ?? "");
+
+                const $$ = load(await data.text());
+                return $$("div.reader-content").html() ?? "";
+            } else {
+                const $ = load(await (await this.request(url)).text());
+                return $("div.reader-content").html() ?? "";
+            }
+        } else {
+            const article = await extract(
+                url,
+                {},
+                {
+                    headers: {
+                        Cookie: "_ga=;",
+                    },
                 },
-            },
-        );
-        return article?.content;
+            );
+            return article?.content;
+        }
     }
 }
