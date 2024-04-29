@@ -215,6 +215,12 @@ export default class NovelUpdates extends MangaProvider {
                 const $ = load(await (await this.request(url)).text());
                 return $("div.reader-content").html() ?? "";
             }
+        } else if (url.includes("plebianfinetranslation")) {
+            const $ = load(await (await this.request(url)).text());
+            return $("div.entry-content").html() ?? "";
+        } else if (url.includes("zetrotranslation")) {
+            const $ = load(await (await this.request(url)).text());
+            return $("div.entry-content_wrap").html() ?? "";
         } else {
             const article = await extract(
                 url,
