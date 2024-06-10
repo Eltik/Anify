@@ -116,6 +116,7 @@ const Login: NextPage<Props> = ({ login, user, token, provider, providers, redir
                         <div className="mx-auto bg-background-light/30 px-5 py-5 text-center lg:max-w-[90%]">
                             <h1 className="text-3xl font-bold text-white">Providers</h1>
                             <br />
+                            <p className="text-white">NOTE: Logging in doesn&apos;t work at the moment.</p>
                             <div className="flex flex-row flex-wrap items-center justify-center gap-5">
                                 {providers?.map((p, index) => (
                                     <div key={index} className="flex flex-col items-center justify-center">
@@ -271,17 +272,17 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
                 },
             };
 
-            const data = (await (
-                await axios(userOptions.uri, {
-                    data: JSON.stringify(userOptions.data),
-                    method: userOptions.method,
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                    },
-                })
-            ).data) as {
+            const request = await axios(userOptions.uri, {
+                data: JSON.stringify(userOptions.data),
+                method: userOptions.method,
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+            });
+
+            const data = request.data as {
                 data: {
                     Viewer: {
                         id: number;
@@ -299,7 +300,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
                 method: "GET",
             };
 
-            const data = (await (
+            const data = (
                 await axios(userOptions.uri, {
                     method: userOptions.method,
                     headers: {
@@ -308,7 +309,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
                         Accept: "application/json",
                     },
                 })
-            ).data) as {
+            ).data as unknown as {
                 id: number;
                 name: string;
                 gender: string;

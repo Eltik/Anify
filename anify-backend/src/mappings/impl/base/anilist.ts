@@ -977,7 +977,7 @@ export default class AniListBase extends BaseProvider {
                 ),
             );
 
-            const results: any[] = await this.batchRequest(queries, 5).catch((err) => {
+            const results: any[] = await this.batchRequest(queries, 5).catch(() => {
                 return [];
             });
 
@@ -1047,7 +1047,7 @@ export default class AniListBase extends BaseProvider {
                 ),
             );
 
-            const results: any[] = await this.batchRequest(queries, 5).catch((err) => {
+            const results: any[] = await this.batchRequest(queries, 5).catch(() => {
                 return [];
             });
 

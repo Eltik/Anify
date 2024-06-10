@@ -11,7 +11,7 @@ export default class TheMovieDB extends MetaProvider {
     private api = "https://api.themoviedb.org/3";
     private apiKey = "5201b54eb0968700e693a30576d7d4dc";
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string): Promise<Result[] | undefined> {
         const results: Result[] = [];
 
         const page = 1;

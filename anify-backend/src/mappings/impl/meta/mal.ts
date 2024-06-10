@@ -13,7 +13,7 @@ export default class MALMeta extends MetaProvider {
     override rateLimit = 500;
     override formats: Format[] = [Format.TV, Format.MOVIE, Format.ONA, Format.SPECIAL, Format.TV_SHORT, Format.OVA, Format.MANGA, Format.ONE_SHOT, Format.NOVEL];
 
-    override async search(query: string, format?: Format | undefined, year?: number | undefined): Promise<Result[] | undefined> {
+    override async search(query: string): Promise<Result[] | undefined> {
         const results: Result[] = [];
 
         try {

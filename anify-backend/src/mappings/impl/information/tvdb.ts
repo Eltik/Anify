@@ -40,7 +40,7 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
         if (data.ok) {
             const info = ((await data.json()) as { data: any }).data;
 
-            const img = info.image;
+            //const img = info.image;
             const aliases = info.aliases;
             const firstAired = new Date(info.firstAired);
 
@@ -87,7 +87,7 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
 
             const trailers = info.trailers;
 
-            const airsDays = info.airsDays; // Helpful
+            //const airsDays = info.airsDays; // Helpful
 
             const artworkData = artwork
                 .map((art) => {

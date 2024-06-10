@@ -10,7 +10,7 @@ export default class MangaPill extends MangaProvider {
 
     override formats: Format[] = [Format.MANGA, Format.ONE_SHOT];
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string): Promise<Result[] | undefined> {
         const results: Result[] = [];
 
         const data = await (await this.request(`${this.url}/search?q=${encodeURIComponent(query)}`)).text();
@@ -18,7 +18,7 @@ export default class MangaPill extends MangaProvider {
 
         $("div.container div.my-3.justify-end > div").map((i, el) => {
             results.push({
-                id: $(el).find("a").attr("href")?.split("/manga/")[1]!,
+                id: $(el).find("a").attr("href")?.split("/manga/")[1] ?? "",
                 title: $(el).find("div > a > div.mt-3").text().trim(),
                 altTitles: $(el).find("div > a > div.text-xs.text-secondary").text().trim() ? [$(el).find("div > a > div.text-xs.text-secondary").text().trim()] : [],
                 img: $(el).find("a img").attr("data-src") ?? "",
@@ -39,7 +39,7 @@ export default class MangaPill extends MangaProvider {
 
         $("div.container div.border-border div#chapters div.grid-cols-1 a").map((i, el) => {
             chapters.push({
-                id: $(el).attr("href")?.split("/chapters/")[1]!,
+                id: $(el).attr("href")?.split("/chapters/")[1] ?? "",
                 title: $(el).text().trim(),
                 number: Number.isNaN(Number($(el).text().split("Chapter ")[1])) ? i : Number($(el).text().split("Chapter ")[1]),
                 rating: null,

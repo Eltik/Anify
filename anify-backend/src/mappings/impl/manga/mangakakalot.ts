@@ -10,7 +10,7 @@ export default class Mangakakalot extends MangaProvider {
 
     override formats: Format[] = [Format.MANGA, Format.ONE_SHOT];
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string, format?: Format): Promise<Result[] | undefined> {
         const temp = await (
             await this.request(`${this.url}/home_json_search`, {
                 method: "POST",
@@ -37,15 +37,15 @@ export default class Mangakakalot extends MangaProvider {
             const result = data[i];
 
             promises.push(
-                new Promise(async (resolve, reject) => {
+                new Promise(async (resolve) => {
                     const id = result.story_link.startsWith(this.url) ? result.story_link.split(this.url)[1].slice(1) : result.story_link.split("/")[3];
                     const url = id.includes("manga/") ? this.url : "https://readmanganato.com";
 
                     const data = await (await this.request(`${url}/${id}`)).text();
                     const $ = load(data);
 
-                    let title: string = url === "https://readmanganato.com" ? $("div.panel-story-info > div.story-info-right > h1").text() : $("div.manga-info-top > ul > li:nth-child(1) > h1").text();
-                    let img: string = (url === "https://readmanganato.com" ? $("div.story-info-left > span.info-image > img").attr("src") : $("div.manga-info-top > div > img").attr("src")) ?? "";
+                    const title: string = url === "https://readmanganato.com" ? $("div.panel-story-info > div.story-info-right > h1").text() : $("div.manga-info-top > ul > li:nth-child(1) > h1").text();
+                    const img: string = (url === "https://readmanganato.com" ? $("div.story-info-left > span.info-image > img").attr("src") : $("div.manga-info-top > div > img").attr("src")) ?? "";
                     const altTitles: string[] =
                         url === "https://readmanganato.com"
                             ? $("div.story-info-right > table > tbody > tr:nth-child(1) > td.table-value > h2").text().split(";")
@@ -87,7 +87,7 @@ export default class Mangakakalot extends MangaProvider {
                 .reverse()
                 .map((el, i) => {
                     chapters.push({
-                        id: $(el).find("span > a").attr("href")?.split("chapter/")[1]!,
+                        id: $(el).find("span > a").attr("href")?.split("chapter/")[1] ?? "",
                         title: $(el).find("span > a").text(),
                         number: i + 1,
                         rating: null,
@@ -103,7 +103,7 @@ export default class Mangakakalot extends MangaProvider {
                 .reverse()
                 .map((el, i) => {
                     chapters.push({
-                        id: $(el).find("a").attr("href")?.split(".com/")[1]! + "$$READMANGANATO",
+                        id: ($(el).find("a").attr("href")?.split(".com/")[1] ?? "") + "$$READMANGANATO",
                         title: $(el).find("a").text(),
                         number: i + 1,
                         rating: null,

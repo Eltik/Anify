@@ -1,5 +1,4 @@
 import MangaProvider from ".";
-import { wait } from "../../../helper";
 import { Format, Formats } from "../../../types/enums";
 import { Chapter, Page, Result } from "../../../types/types";
 
@@ -14,7 +13,7 @@ export default class MangaDex extends MangaProvider {
 
     private api = "https://api.mangadex.org";
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string): Promise<Result[] | undefined> {
         const results: Result[] = [];
 
         let mangaList: any[] = [];
@@ -90,7 +89,7 @@ export default class MangaDex extends MangaProvider {
         for (let page = 0, run = true; run; page++) {
             const request = await this.request(
                 `${this.api}/manga/${id}/feed?limit=500&translatedLanguage%5B%5D=en&includes[]=scanlation_group&includes[]=user&order[volume]=desc&order[chapter]=desc&offset=${500 * page}&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic`,
-            ).catch((err) => {
+            ).catch(() => {
                 return null;
             });
             if (!request) {
@@ -160,7 +159,7 @@ export default class MangaDex extends MangaProvider {
     }
 
     override async fetchPages(id: string): Promise<Page[] | string | undefined> {
-        const req = await this.request(`${this.api}/at-home/server/${id}`).catch((err) => {
+        const req = await this.request(`${this.api}/at-home/server/${id}`).catch(() => {
             return null;
         });
 

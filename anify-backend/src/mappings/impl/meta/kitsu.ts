@@ -12,7 +12,7 @@ export default class KitsuMeta extends MetaProvider {
 
     private kitsuApiUrl = "https://kitsu.io/api/edge";
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string): Promise<Result[] | undefined> {
         const results: Result[] = [];
 
         try {

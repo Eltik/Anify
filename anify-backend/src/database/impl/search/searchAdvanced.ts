@@ -30,6 +30,8 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(
         const where = generateAdvancedSearchWhere(type === Type.ANIME ? "anime" : "manga", query, formats, genres, genresExcluded, season, year, tags, tagsExcluded, sort);
 
         const queries = generateSearchQueries(type === Type.ANIME ? "anime" : "manga", where, query, sort, sortDirection, perPage, skip);
+
+        // eslint-disable-next-line prefer-const
         let [count, results] = (await Promise.all([(await postgres.query(queries.countQuery, query.length > 0 ? [`%${query}`] : [])).rows, (await postgres.query(queries.sqlQuery, query.length > 0 ? [`%${query}`] : [])).rows])) as [any, any];
 
         if (sort === Sort.SCORE) {
@@ -152,7 +154,7 @@ export const searchAdvanced = async <T extends Type.ANIME | Type.MANGA>(
                 LIMIT $limit OFFSET $offset`,
             )
             .all({ $query: query, $limit: perPage, $offset: skip });
-        let parsedResults = results.map((data) => {
+        const parsedResults = results.map((data) => {
             try {
                 if (data.type === Type.ANIME) {
                     Object.assign(data, {

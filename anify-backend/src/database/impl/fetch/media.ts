@@ -81,7 +81,7 @@ export const media = async (providerId: string, id: string, fields: string[] = [
         const data = results[0];
 
         try {
-            let parsedManga = Object.assign(data, {
+            const parsedManga = Object.assign(data, {
                 title: JSON.parse(data.title),
                 mappings: JSON.parse(data.mappings),
                 synonyms: JSON.parse(data.synonyms),
@@ -113,7 +113,7 @@ export const media = async (providerId: string, id: string, fields: string[] = [
     const data = results[0];
 
     try {
-        let parsedAnime = Object.assign(data, {
+        const parsedAnime = Object.assign(data, {
             title: JSON.parse(data.title),
             season: data.season.replace(/"/g, ""),
             mappings: JSON.parse(data.mappings),

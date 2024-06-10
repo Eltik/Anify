@@ -9,6 +9,8 @@ export default class GogoAnime extends AnimeProvider {
     override id = "gogoanime";
     override url = "https://anitaku.to";
 
+    private ajaxURL = "https://ajax.gogocdn.net";
+
     override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
 
     public preferredTitle: "english" | "romaji" | "native" = "romaji";
@@ -21,7 +23,7 @@ export default class GogoAnime extends AnimeProvider {
         return undefined;
     }
 
-    override async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
+    override async search(query: string): Promise<Result[] | undefined> {
         const request = await this.request(`${this.url}/search.html?keyword=${encodeURIComponent(query)}`);
         if (!request.ok) {
             return [];
@@ -67,13 +69,13 @@ export default class GogoAnime extends AnimeProvider {
         const movieId = $("#movie_id").attr("value");
         const alias = $("#alias_anime").attr("value");
 
-        const req = await (await this.request(`https://ajax.gogo-load.com/ajax/load-list-episode?ep_start=${epStart}&ep_end=${epEnd}&id=${movieId}&default_ep=${0}&alias=${alias}`)).text();
+        const req = await (await this.request(`${this.ajaxURL}/ajax/load-list-episode?ep_start=${epStart}&ep_end=${epEnd}&id=${movieId}&default_ep=${0}&alias=${alias}`)).text();
 
         const $$ = load(req);
 
         $$("#episode_related > li").each((i, el) => {
             episodes?.push({
-                id: $(el).find("a").attr("href")?.trim()!,
+                id: $(el).find("a").attr("href")?.trim() ?? "",
                 number: parseFloat($(el).find(`div.name`).text().replace("EP ", "")),
                 title: $(el).find(`div.name`).text(),
                 isFiller: false,
@@ -105,7 +107,7 @@ export default class GogoAnime extends AnimeProvider {
 
         if (id.startsWith("http")) {
             const serverURL = id;
-            const download = `https://gogohd.net/download${new URL(serverURL).search}`;
+            //const download = `https://gogohd.net/download${new URL(serverURL).search}`;
 
             return await new Extractor(serverURL, result).extract(server ?? StreamingServers.GogoCDN);
         }

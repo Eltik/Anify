@@ -3,7 +3,7 @@ import { get } from "../../database/impl/fetch/get";
 import emitter, { Events } from "..";
 import { Anime, AnimeInfo, Manga, MangaInfo, Result } from "../../types/types";
 import { Format, MediaStatus, ProviderType, Season, Type } from "../../types/enums";
-import { ANIME_PROVIDERS, BASE_PROVIDERS, INFORMATION_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS, animeProviders, baseProviders, infoProviders, mangaProviders, metaProviders } from "../../mappings";
+import { ANIME_PROVIDERS, BASE_PROVIDERS, INFORMATION_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS, animeProviders, infoProviders, mangaProviders, metaProviders } from "../../mappings";
 import { clean, slugify } from "../../helper/title";
 import { findBestMatch2DArray, similarity } from "../../helper/stringSimilarity";
 import { averageMetric, isString } from "../../helper";
@@ -235,7 +235,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
     // Create the media object
     const result = await createMedia(mappings, type);
 
-    console.log(colors.yellow("Finished fetching from providers.") + colors.blue(" - ") + colors.yellow(baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native!));
+    console.log(colors.yellow("Finished fetching from providers.") + colors.blue(" - ") + colors.yellow(baseData?.title.english ?? baseData?.title.romaji ?? baseData?.title.native ?? ""));
     return result;
 };
 

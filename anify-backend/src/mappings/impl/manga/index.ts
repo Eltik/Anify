@@ -16,10 +16,12 @@ export default abstract class MangaProvider {
     public useGoogleTranslate: boolean = true;
     public overrideProxy: boolean = false;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async search(query: string, format?: Format, year?: number): Promise<Result[] | undefined> {
         return undefined;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async fetchChapters(id: string): Promise<Chapter[] | undefined> {
         return undefined;
     }
@@ -28,6 +30,7 @@ export default abstract class MangaProvider {
         return undefined;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async fetchPages(id: string): Promise<Page[] | string | undefined> {
         return undefined;
     }

@@ -1,78 +1,46 @@
+/**
+ * @description This is literally just an example lol of how to download a novel using Anify.
+ * You simply input the ID of the novel you want to download and it will download the novel as a PDF
+ * after running the script. This is just for fun and honestly a backup just for me if I ever want to
+ * download a novel. You can do the same thing for manga here; just change the type to Type.MANGA and
+ * the providerId to the manga provider you want to use along with the createNovelPDF function to
+ * createMangaPDF.
+ */
+
 import dotenv from "dotenv";
 dotenv.config();
 
-import { fetchCorsProxies } from "./fetchProxies";
-import { MediaStatus, StreamingServers, SubType } from "../../types/enums";
-import { init } from "../../database";
-import emitter, { Events } from "../../lib";
-import { get } from "../../database/impl/fetch/get";
-import queues from "../../worker";
-import { start } from "../../server";
-import { startWebsocket } from "../../websocket";
-import { ANIME_PROXIES, BASE_PROXIES, MANGA_PROXIES, META_PROXIES } from "..";
-import { ANIME_PROVIDERS, animeProviders } from "../../mappings";
+import { fetchCorsProxies } from "../proxies/impl/fetchProxies";
+import { Format, MediaStatus, Type } from "../types/enums";
+import { init } from "../database";
+import emitter, { Events } from "../lib";
+import { get } from "../database/impl/fetch/get";
+import queues from "../worker";
+import { mangaProviders } from "../mappings";
+import { createNovelPDF } from "../lib/impl/epub";
+import { Manga } from "../types/types";
 
-before().then(async (_) => {
-    //await start();
-    //await startWebsocket();
+before().then(async () => {
+    const id = "";
+    const providerId = "novelupdates";
+    const type = Type.MANGA;
+    const formats = [Format.NOVEL];
 
-    /*
-    const file = Bun.file("animeProxies.json");
-    const json = await file.json();
-
-    const goodProxies: string[] = [];
-
-    const proxies = [...json.map((data: { providerId: string, ip: string }) => {
-        Object.assign(data, {
-            ip: "http://" + data.ip
-        })
-
-        return data;
-    })].concat([...BASE_PROXIES]).concat([...ANIME_PROXIES]).concat([...MANGA_PROXIES]).concat([...META_PROXIES])
-
-    for (const proxy of proxies) {
-        const ip = proxy.ip;
-        if (goodProxies.includes(ip)) continue;
-
-        const provider = animeProviders["9anime"];
-        const original = provider.useGoogleTranslate;
-        provider.useGoogleTranslate = false;
-
-        provider.customProxy = ip;
-        try {
-            const test = await animeProviders["9anime"].search("Mushoku Tensei").catch(null);
-    
-            if (test) {
-                console.log(ip);
-                goodProxies.push(ip);
-            }
-        } catch (e) {
-            console.log(ip + " doesnt work.")
-        }
-
-        provider.customProxy = undefined;
-        provider.useGoogleTranslate = original;
-
-        Bun.write("./9animeProxies.json", JSON.stringify(goodProxies, null, 4));
-    }
-    console.log("Done")
-    
-    const newFile = Bun.file("9animeProxies.json");
-    const newJson = await newFile.json();
-
-    const data: { providerId: string; ip: string }[] = [];
-
-    for (const item of newJson) {
-        data.push({
-            providerId: "9anime",
-            ip: item.split("http://")[1],
-        });
+    const media = await get(id);
+    if (!media) {
+        queues.mappingQueue.add({ id, type, formats });
+        return console.log("Added to mapping queue");
     }
 
-    Bun.write("./animeProxies.json", JSON.stringify(data, null, 4));
-    */
+    const chapters = await mangaProviders[providerId].fetchChapters(id);
+    if (!chapters || chapters.length === 0) {
+        return console.log("No chapters found :( Bruh");
+    }
 
-    await animeProviders["9anime"].fetchSources("Hj2bC8ou,Hj2bC8kn", SubType.SUB, StreamingServers.VizCloud).then(console.log);
+    console.log(`Fetched ${chapters.length} chapters for ${id}. Creating PDF...`);
+
+    await createNovelPDF(media as Manga, providerId, chapters);
+    console.log("Created novel PDF");
 });
 
 async function before() {
@@ -98,7 +66,7 @@ async function before() {
     });
 
     emitter.on(Events.COMPLETED_SEASONAL_LOAD, async (data) => {
-        for (let i = 0; i < data.trending.length; i++) {
+        for (let i = 0; i < (data.trending ?? []).length; i++) {
             if (data.trending[i].status === MediaStatus.NOT_YET_RELEASED) {
                 continue;
             }
@@ -112,7 +80,7 @@ async function before() {
             }
         }
 
-        for (let i = 0; i < data.popular.length; i++) {
+        for (let i = 0; i < (data.popular ?? []).length; i++) {
             if (data.popular[i].status === MediaStatus.NOT_YET_RELEASED) {
                 continue;
             }
@@ -125,7 +93,7 @@ async function before() {
                 });
         }
 
-        for (let i = 0; i < data.top.length; i++) {
+        for (let i = 0; i < (data.top ?? []).length; i++) {
             if (data.top[i].status === MediaStatus.NOT_YET_RELEASED) {
                 continue;
             }
@@ -138,7 +106,7 @@ async function before() {
                 });
         }
 
-        for (let i = 0; i < data.seasonal.length; i++) {
+        for (let i = 0; i < (data.seasonal ?? []).length; i++) {
             if (data.seasonal[i].status === MediaStatus.NOT_YET_RELEASED) {
                 continue;
             }

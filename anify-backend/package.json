@@ -15,13 +15,16 @@
     "build": "bun build ./src/index.ts --outdir ./dist --target node",
     "build:db": "bun run src/scripts/buildDb.ts",
     "prettier": "bunx prettier --write .",
-    "lint": "bun run prettier && bunx tsc"
+    "eslint": "bunx eslint --fix .",
+    "lint": "bun run prettier && bun run eslint"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.2",
     "@types/pdfkit": "^0.12.10",
     "@types/pg": "^8.10.7",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
     "bun-types": "latest",
+    "eslint": "^8.56.0",
     "prettier": "^3.0.3",
     "tsc": "^2.0.4"
   },

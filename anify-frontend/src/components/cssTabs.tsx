@@ -68,7 +68,7 @@ function CSSTabs({ tabs, selectedTabIndex, setSelectedTab }: Props) {
                 {tabs.map((item, i) => {
                     return (
                         <Link href={item.href} key={i} className={"flex w-[75%] items-center justify-center text-white md:mt-0 md:h-12 md:w-12"}>
-                            <button className={`text-md relative z-20 flex h-8 w-full cursor-pointer select-none items-center justify-center rounded-md bg-transparent px-4 py-6 text-sm transition-colors md:w-auto ${hoveredTabIndex === i || selectedTabIndex === i ? "bg-main-primary/20 text-main-primary" : ""} border-t-4 md:border-l-4 md:border-t-0 ${selectedTabIndex === i ? "border-main-primary" : "border-transparent"}`} ref={(el) => (buttonRefs[i] = el)} onPointerEnter={(e) => onEnterTab(e, i)} onFocus={(e) => onEnterTab(e, i)} onClick={() => onSelectTab(i)}>
+                            <button className={`text-md relative z-20 flex h-8 w-full cursor-pointer select-none items-center justify-center rounded-md bg-transparent px-4 py-6 text-sm transition-colors md:w-auto ${hoveredTabIndex === i || selectedTabIndex === i ? "bg-main-primary/20 text-main-primary" : ""} border-t-4 md:border-l-4 md:border-t-0 ${selectedTabIndex === i ? "border-main-primary" : "border-transparent"}`} ref={(el) => (buttonRefs[i] = el)} onPointerEnter={(e) => onEnterTab(e, i)} onFocus={(e) => onEnterTab(e, i)} onClick={() => onSelectTab(i)}> {/* eslint-disable-line */}
                                 {item.svg ?? item.label}
                             </button>
                         </Link>

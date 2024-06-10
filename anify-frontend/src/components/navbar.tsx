@@ -335,37 +335,45 @@ function Navbar({ active }: { active: "home" | "anime" | "manga" | "novel" }) {
                                         }}
                                         styles={{
                                             container: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                                 backgroundColor: "#333333",
                                                 border: "none",
                                                 borderRadius: "0.25rem",
                                             }),
                                             control: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                                 backgroundColor: "#333333",
                                                 border: "none",
                                             }),
                                             input: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                                 backgroundColor: "#333333",
                                                 border: "none",
                                             }),
                                             menu: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                                 backgroundColor: "#1f1f1f",
                                                 border: "none",
                                             }),
                                             menuList: (baseStyles) => ({
+                                                ...baseStyles,
                                                 width: "100%",
                                                 height: "100%",
                                             }),
                                             noOptionsMessage: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                             }),
                                             placeholder: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                             }),
                                             singleValue: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                                 height: "100%",
                                                 position: "relative",
@@ -373,9 +381,11 @@ function Navbar({ active }: { active: "home" | "anime" | "manga" | "novel" }) {
                                                 overflow: "initial",
                                             }),
                                             valueContainer: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                             }),
                                             option: (baseStyles) => ({
+                                                ...baseStyles,
                                                 backgroundColor: "#1f1f1f",
                                                 color: "white",
                                                 transition: "0.1s all",
@@ -391,9 +401,11 @@ function Navbar({ active }: { active: "home" | "anime" | "manga" | "novel" }) {
                                                 height: "100%",
                                             }),
                                             indicatorSeparator: (baseStyles) => ({
+                                                ...baseStyles,
                                                 display: "none",
                                             }),
                                             dropdownIndicator: (baseStyles) => ({
+                                                ...baseStyles,
                                                 backgroundColor: "rgb(var(--blue-300));",
                                                 color: "white",
                                                 transition: "0.1s all",
@@ -424,37 +436,45 @@ function Navbar({ active }: { active: "home" | "anime" | "manga" | "novel" }) {
                                         }}
                                         styles={{
                                             container: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                                 backgroundColor: "#333333",
                                                 border: "none",
                                                 borderRadius: "0.25rem",
                                             }),
                                             control: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                                 backgroundColor: "#333333",
                                                 border: "none",
                                             }),
                                             input: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                                 backgroundColor: "#333333",
                                                 border: "none",
                                             }),
                                             menu: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                                 backgroundColor: "#1f1f1f",
                                                 border: "none",
                                             }),
                                             menuList: (baseStyles) => ({
+                                                ...baseStyles,
                                                 width: "100%",
                                                 height: "100%",
                                             }),
                                             noOptionsMessage: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                             }),
                                             placeholder: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                             }),
                                             singleValue: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                                 height: "100%",
                                                 position: "relative",
@@ -462,9 +482,11 @@ function Navbar({ active }: { active: "home" | "anime" | "manga" | "novel" }) {
                                                 overflow: "initial",
                                             }),
                                             valueContainer: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                             }),
                                             option: (baseStyles) => ({
+                                                ...baseStyles,
                                                 backgroundColor: "#1f1f1f",
                                                 color: "white",
                                                 transition: "0.1s all",
@@ -480,9 +502,11 @@ function Navbar({ active }: { active: "home" | "anime" | "manga" | "novel" }) {
                                                 height: "100%",
                                             }),
                                             indicatorSeparator: (baseStyles) => ({
+                                                ...baseStyles,
                                                 display: "none",
                                             }),
                                             dropdownIndicator: (baseStyles) => ({
+                                                ...baseStyles,
                                                 backgroundColor: "rgb(var(--blue-300));",
                                                 color: "white",
                                                 transition: "0.1s all",
@@ -494,6 +518,7 @@ function Navbar({ active }: { active: "home" | "anime" | "manga" | "novel" }) {
                                                 },
                                             }),
                                             multiValue: (baseStyles) => ({
+                                                ...baseStyles,
                                                 backgroundColor: "#1f1f1f",
                                                 color: "white",
                                                 transition: "0.2s all",
@@ -509,9 +534,11 @@ function Navbar({ active }: { active: "home" | "anime" | "manga" | "novel" }) {
                                                 height: "100%",
                                             }),
                                             multiValueLabel: (baseStyles) => ({
+                                                ...baseStyles,
                                                 color: "white",
                                             }),
                                             multiValueRemove: (baseStyles) => ({
+                                                ...baseStyles,
                                                 transition: "0.2s all",
                                             }),
                                         }}

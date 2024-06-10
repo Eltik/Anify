@@ -82,7 +82,7 @@ export const start = async () => {
             await rateLimitApiKeyMiddleware(req);
 
             if (routes[pathName]) {
-                const { path, handler, rateLimit } = routes[pathName];
+                const { handler, rateLimit } = routes[pathName];
                 const requests = !apiKey ? await rateLimitMiddleware(req, pathName) : null;
 
                 if (requests && requests.requests > rateLimit) {

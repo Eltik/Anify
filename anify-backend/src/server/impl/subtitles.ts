@@ -1,6 +1,5 @@
 import { env } from "../../env";
 import { createResponse } from "../lib/response";
-import crypto from "crypto";
 import { parse } from "@plussub/srt-vtt-parser";
 import { Entry, ParsedResult } from "@plussub/srt-vtt-parser/dist/src/types";
 import NodeCache from "node-cache";
@@ -83,6 +82,7 @@ const route = {
 
 export default route;
 
+/*
 function decodeUrl(url: string) {
     try {
         const decipher = crypto.createDecipher("aes-256-cbc", env.SECRET_KEY);
@@ -93,6 +93,7 @@ function decodeUrl(url: string) {
         return null;
     }
 }
+*/
 
 function buildWebVTT(parsedResult: ParsedResult) {
     let webVTTContent = "WEBVTT\n\n";
@@ -119,11 +120,11 @@ function formatTime(milliseconds: number) {
     return `${hours}:${minutes}:${seconds}.${millisecondsStr}`;
 }
 function parseVttInline(vttData: string): string {
-    var parsed = parse(vttData);
+    const parsed = parse(vttData);
     const textToInject = env.TEXT_TO_INJECT + "\n";
     const distanceToNextInjectedText = 1000 * env.DISTANCE_FROM_INJECTED_TEXT_SECONDS;
-    var nextModifyTimeMs = 0;
-    var hasSetFirstEntry = false;
+    let nextModifyTimeMs = 0;
+    let hasSetFirstEntry = false;
     parsed.entries.forEach((entry) => {
         if (!hasSetFirstEntry) {
             entry.text = textToInject + entry.text;
@@ -140,14 +141,14 @@ function parseVttInline(vttData: string): string {
 }
 
 function parseVtt(vttData: string): string {
-    var parsed = parse(vttData);
+    const parsed = parse(vttData);
 
     const timeBetweenAds = 1000 * env.DISTANCE_FROM_INJECTED_TEXT_SECONDS; //eg 5 minutes
     const displayDuration = 1000 * env.DURATION_FOR_INJECTED_TEXT_SECONDS; //eg 5 seconds
 
     const lastEntry = parsed.entries[parsed.entries.length - 1];
     const firstStartTime = 0;
-    let lastEndTime = lastEntry.to;
+    const lastEndTime = lastEntry.to;
     const totalDuration = lastEndTime - firstStartTime;
 
     const numberOfAds = Math.floor(totalDuration / timeBetweenAds);

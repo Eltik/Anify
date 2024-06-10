@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import colors from "colors";
 import { get } from "../database/impl/fetch/get";
 import { createKey } from "../database/impl/keys/createKey";
 import { getKey } from "../database/impl/keys/key";
@@ -15,10 +16,13 @@ export const importData = async () => {
     await init();
     const name = process.argv.slice(2)?.toString()?.toLowerCase() && process.argv.slice(2)?.toString()?.toLowerCase().length > 0 ? process.argv.slice(2)?.toString()?.toLowerCase() : "database.json";
 
+    console.log(colors.gray(`Importing data from ${name}...`));
+
     const file = Bun.file(name);
     if (!(await file.exists())) throw new Error("File does not exist! You can run bun run import <file> to import data from a specific file path.");
 
     const data = await file.json();
+    console.log(colors.green("Successfully parsed data! Importing..."));
 
     const count = {
         anime: 0,
@@ -34,6 +38,7 @@ export const importData = async () => {
         keys: 0,
     };
 
+    console.log(colors.gray("Importing anime data..."));
     for (const media of data.anime) {
         if (await get(media.id)) continue;
         if (media.season) media.season = media.season.replace(/"/g, "");
@@ -63,6 +68,7 @@ export const importData = async () => {
         }
     }
 
+    console.log(colors.gray("Importing manga data..."));
     for (const media of data.manga) {
         if (await get(media.id)) continue;
 
@@ -86,11 +92,12 @@ export const importData = async () => {
         }
     }
 
+    console.log(colors.gray("Importing skip time data..."));
     for (const skipTime of data.skipTimes) {
         if (await getSkipTimes(skipTime.id)) continue;
 
         try {
-            let stringify = isString(skipTime.episodes);
+            const stringify = isString(skipTime.episodes);
             await createSkipTimes(skipTime, !stringify);
 
             console.log(`Imported skip time ${skipTime.id}!`);
@@ -103,6 +110,7 @@ export const importData = async () => {
         }
     }
 
+    console.log(colors.gray("Importing API key data..."));
     for (const key of data.apiKey) {
         if (await getKey(key.id)) continue;
 
@@ -119,8 +127,10 @@ export const importData = async () => {
         }
     }
 
-    console.log(`Imported ${count.anime} anime, ${count.manga} manga, ${count.skipTimes} skip times, and ${count.keys} API keys!`);
-    console.log(`Failed to import ${failedCount.anime} anime, ${failedCount.manga} manga, ${failedCount.skipTimes} skip times, and ${failedCount.keys} API keys!`);
+    console.log(
+        colors.green(`Successfully imported ${count.anime} anime, ${count.manga} manga, ${count.skipTimes} skip times, and ${count.keys} API keys!`) +
+            colors.red(` Failed to import ${failedCount.anime} anime, ${failedCount.manga} manga, ${failedCount.skipTimes} skip times, and ${failedCount.keys} API keys!`),
+    );
 };
 
 importData().then(() => {

@@ -83,7 +83,7 @@ export default class Http {
      * @returns Promise<Response>
      */
     static async request(providerId: string, useGoogleTranslate: boolean, url: string, config: RequestInit = {}, proxyRequest = true, requests = 0, customProxy: string | undefined = undefined): Promise<Response> {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve) => {
             try {
                 // If proxyRequest is true, use a proxy.
                 if (proxyRequest) {

@@ -1,5 +1,5 @@
 import Http from "../../../helper/request";
-import { Format, ProviderType, Type } from "../../../types/enums";
+import { ProviderType } from "../../../types/enums";
 import { Anime, AnimeInfo, Chapter, Episode, Manga, MangaInfo, MediaInfoKeys } from "../../../types/types";
 
 export default abstract class InformationProvider<T extends Anime | Manga, U extends AnimeInfo | MangaInfo> {
@@ -14,10 +14,12 @@ export default abstract class InformationProvider<T extends Anime | Manga, U ext
     public useGoogleTranslate: boolean = true;
     public overrideProxy: boolean = false;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async info(media: T): Promise<U | undefined> {
         return undefined;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async fetchContentData(media: T): Promise<Episode[] | Chapter[] | undefined> {
         return undefined;
     }
