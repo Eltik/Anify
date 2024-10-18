@@ -8,67 +8,53 @@ export default class Mangakakalot extends MangaProvider {
     override id = "mangakakalot";
     override url = "https://mangakakalot.com";
 
+    private secondURL = "https://chapmanganato.com";
+
     override formats: Format[] = [Format.MANGA, Format.ONE_SHOT];
 
     override async search(query: string, format?: Format): Promise<Result[] | undefined> {
-        const temp = await (
-            await this.request(`${this.url}/home_json_search`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: `searchword=${query}&searchstyle=1`,
-            })
-        ).text();
-
-        let data: SearchResult[] = [];
-
-        try {
-            data = JSON.parse(temp);
-        } catch (e) {
-            data = JSON.parse(temp.split("</div>")[1]);
-        }
-
         const results: Result[] = [];
+
+        const data = await (await this.request(`${this.url}/search/story/${query.replace(/ /g, "_")}`)).text();
+        const $ = load(data);
 
         const promises: Promise<void>[] = [];
 
-        for (let i = 0; i < data.length; i++) {
-            const result = data[i];
+        $("div.daily-update > div > div").map((i, el) => {
+            const id = $(el).find("div h3 a").attr("href")?.split("/")[3];
+            const title = $(el).find("div h3 a").text();
+            const img = $(el).find("a img").attr("src");
 
-            promises.push(
-                new Promise(async (resolve) => {
-                    const id = result.story_link.startsWith(this.url) ? result.story_link.split(this.url)[1].slice(1) : result.story_link.split("/")[3];
-                    const url = id.includes("manga/") ? this.url : "https://readmanganato.com";
+            const promise = new Promise<void>(async (resolve) => {
+                const url = id?.includes("read") ? this.url : this.secondURL;
+                const data = await (await this.request(`${url}/${id}`)).text();
 
-                    const data = await (await this.request(`${url}/${id}`)).text();
-                    const $ = load(data);
+                const $$ = load(data);
 
-                    const title: string = url === "https://readmanganato.com" ? $("div.panel-story-info > div.story-info-right > h1").text() : $("div.manga-info-top > ul > li:nth-child(1) > h1").text();
-                    const img: string = (url === "https://readmanganato.com" ? $("div.story-info-left > span.info-image > img").attr("src") : $("div.manga-info-top > div > img").attr("src")) ?? "";
-                    const altTitles: string[] =
-                        url === "https://readmanganato.com"
-                            ? $("div.story-info-right > table > tbody > tr:nth-child(1) > td.table-value > h2").text().split(";")
-                            : $("div.manga-info-top > ul > li:nth-child(1) > h2")
-                                  .text()
-                                  .replace("Alternative :", "")
-                                  .split(";")
-                                  .map((x) => x.trim());
+                const altTitles: string[] =
+                    url === this.secondURL
+                        ? $$("div.story-info-right > table > tbody > tr:nth-child(1) > td.table-value > h2").text().split(";")
+                        : $$("div.manga-info-top > ul > li:nth-child(1) > h2")
+                              .text()
+                              .replace("Alternative :", "")
+                              .split(";")
+                              .map((x) => x.trim());
 
-                    results.push({
-                        id: id,
-                        title: title,
-                        altTitles,
-                        img,
-                        format: format ?? Format.UNKNOWN,
-                        year: 0,
-                        providerId: this.id,
-                    });
+                results.push({
+                    id: id ?? "",
+                    altTitles,
+                    format: format ?? Format.UNKNOWN,
+                    img: img ?? "",
+                    providerId: this.id,
+                    title,
+                    year: 0,
+                });
 
-                    resolve();
-                }),
-            );
-        }
+                resolve();
+            });
+
+            promises.push(promise);
+        });
 
         await Promise.all(promises);
 
@@ -95,7 +81,7 @@ export default class Mangakakalot extends MangaProvider {
                     });
                 });
         } else {
-            const data = await (await this.request(`https://readmanganato.com/${id}`)).text();
+            const data = await (await this.request(`${this.secondURL}/${id}`)).text();
             const $ = load(data);
 
             $("div.container-main-left > div.panel-story-chapter-list > ul > li")
@@ -103,7 +89,7 @@ export default class Mangakakalot extends MangaProvider {
                 .reverse()
                 .map((el, i) => {
                     chapters.push({
-                        id: ($(el).find("a").attr("href")?.split(".com/")[1] ?? "") + "$$READMANGANATO",
+                        id: `${id}/${$(el).find("a").attr("href")?.split(`${id}/`)[1] ?? ""}`,
                         title: $(el).find("a").text(),
                         number: i + 1,
                         rating: null,
@@ -116,7 +102,7 @@ export default class Mangakakalot extends MangaProvider {
     }
 
     override async fetchPages(id: string): Promise<string | Page[] | undefined> {
-        const url = !id.includes("$$READMANGANATO") ? `${this.url}/chapter/${id}` : `https://readmanganato.com/${id.replace("$$READMANGANATO", "")}`;
+        const url = !id.includes("manga") ? `${this.url}/chapter/${id}` : `${this.secondURL}/${id}`;
         const data = await (await this.request(url)).text();
 
         const $ = load(data);
@@ -133,14 +119,13 @@ export default class Mangakakalot extends MangaProvider {
 
         return pages;
     }
-}
 
-interface SearchResult {
-    id: string;
-    name: string;
-    nameunsigned: string;
-    lastchapter: string;
-    image: string;
-    author: string;
-    story_link: string;
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei");
+        if (!searchData || searchData!.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

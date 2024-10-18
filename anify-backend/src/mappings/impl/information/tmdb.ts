@@ -70,7 +70,7 @@ export default class TMDB extends InformationProvider<Anime | Manga, AnimeInfo |
                     totalVolumes: null,
                     type: media.type,
                 } as AnimeInfo;
-            } catch (e) {
+            } catch {
                 return undefined;
             }
         }
@@ -129,8 +129,17 @@ export default class TMDB extends InformationProvider<Anime | Manga, AnimeInfo |
             }
 
             return episodes;
-        } catch (e) {
+        } catch {
             return undefined;
+        }
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const request = await this.request(this.url);
+        if (request.ok) {
+            return true;
+        } else {
+            return false;
         }
     }
 }

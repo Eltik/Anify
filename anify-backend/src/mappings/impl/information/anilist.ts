@@ -54,7 +54,7 @@ export default class AniList extends InformationProvider<Anime | Manga, AnimeInf
         let data: any = undefined;
         try {
             data = JSON.parse(text).data.Media;
-        } catch (e) {
+        } catch {
             console.log(text);
         }
         if (!data) return undefined;
@@ -147,6 +147,15 @@ export default class AniList extends InformationProvider<Anime | Manga, AnimeInf
             artwork,
             characters,
         };
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const request = await this.request(this.api);
+        if (request.ok) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public query = `

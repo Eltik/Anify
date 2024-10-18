@@ -105,7 +105,7 @@ export const media = async (providerId: string, id: string, fields: string[] = [
             }
 
             return parsedManga as unknown as Manga;
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }
@@ -138,7 +138,7 @@ export const media = async (providerId: string, id: string, fields: string[] = [
         }
 
         return parsedAnime as unknown as Anime;
-    } catch (e) {
+    } catch {
         return undefined;
     }
 };

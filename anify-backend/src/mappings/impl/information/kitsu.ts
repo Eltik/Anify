@@ -82,8 +82,17 @@ export default class Kitsu extends InformationProvider<Anime | Manga, AnimeInfo 
                 totalVolumes: null,
                 type: media.type,
             } as AnimeInfo | MangaInfo;
-        } catch (e) {
+        } catch {
             return undefined;
+        }
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const request = await this.request(this.url);
+        if (request.ok) {
+            return true;
+        } else {
+            return false;
         }
     }
 }

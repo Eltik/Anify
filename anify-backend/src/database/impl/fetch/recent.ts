@@ -71,7 +71,7 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
                         }
                     });
                 }
-            } catch (e) {
+            } catch {
                 //
             }
 
@@ -136,7 +136,7 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
                         characters: JSON.parse(anime.characters),
                     }) as unknown as Anime,
                 );
-            } catch (e) {
+            } catch {
                 continue;
             }
         }
@@ -155,7 +155,7 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
                         }
                     });
                 }
-            } catch (e) {
+            } catch {
                 //
             }
 
@@ -202,7 +202,7 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
                         characters: JSON.parse(manga.characters),
                     }) as unknown as Manga,
                 );
-            } catch (e) {
+            } catch {
                 continue;
             }
         }
@@ -221,7 +221,7 @@ export const recent = async <T extends "ANIME" | "MANGA">(type: T, formats: Form
                         }
                     });
                 }
-            } catch (e) {
+            } catch {
                 //
             }
 

@@ -11,6 +11,7 @@
     "import": "bun run src/scripts/import.ts",
     "clear": "bun run src/scripts/clear.ts",
     "check:proxies": "bun run src/scripts/checkProxies.ts",
+    "check:proxies:current": "bun run src/scripts/checkCurrentProxies.ts",
     "scrape:proxies": "bun run src/scripts/scrapeProxies.ts",
     "build": "bun build ./src/index.ts --outdir ./dist --target node",
     "build:db": "bun run src/scripts/buildDb.ts",
@@ -19,14 +20,16 @@
     "lint": "bun run prettier && bun run eslint"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.10.0",
     "@types/crypto-js": "^4.1.2",
     "@types/pdfkit": "^0.12.10",
     "@types/pg": "^8.10.7",
-    "@typescript-eslint/eslint-plugin": "^6.19.1",
     "bun-types": "latest",
-    "eslint": "^8.56.0",
+    "eslint": "^9.10.0",
     "prettier": "^3.0.3",
-    "tsc": "^2.0.4"
+    "tsc": "^2.0.4",
+    "typescript-eslint": "^8.6.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

@@ -36,9 +36,11 @@ before().then(async () => {
     if (!chapters || chapters.length === 0) {
         return console.log("No chapters found :( Bruh");
     }
+    console.log(chapters);
 
     console.log(`Fetched ${chapters.length} chapters for ${id}. Creating PDF...`);
 
+    //await createNovelPDF(media as Manga, providerId, chapters);
     await createNovelPDF(media as Manga, providerId, chapters);
     console.log("Created novel PDF");
 });

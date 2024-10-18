@@ -23,7 +23,7 @@ export const create = async (data: Anime | Manga, stringify: boolean = true) => 
                     artwork: data.artwork ? JSON.parse((data as any).artwork) : null,
                     characters: data.characters ? JSON.parse((data as any).characters) : null,
                 });
-            } catch (e) {
+            } catch {
                 //
             }
         }
@@ -36,7 +36,7 @@ export const create = async (data: Anime | Manga, stringify: boolean = true) => 
                     Object.assign(data, {
                         episodes: JSON.parse((data as any).episodes),
                     });
-                } catch (e) {
+                } catch {
                     //
                 }
             }
@@ -146,7 +146,7 @@ export const create = async (data: Anime | Manga, stringify: boolean = true) => 
                     Object.assign(data, {
                         chapters: JSON.parse((data as any).chapters),
                     });
-                } catch (e) {
+                } catch {
                     //
                 }
             }

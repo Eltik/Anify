@@ -60,7 +60,7 @@ export default class MangaFire extends MangaProvider {
             await Promise.all(requestPromises);
 
             return results;
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }
@@ -208,6 +208,15 @@ export default class MangaFire extends MangaProvider {
                 reject(error);
             }
         });
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei");
+        if (!searchData || searchData!.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }
 

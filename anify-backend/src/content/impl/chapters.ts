@@ -54,7 +54,7 @@ export const fetchChapters = async (id: string): Promise<ChapterData[]> => {
                 });
             }
             return true;
-        } catch (e) {
+        } catch {
             return false;
         }
     });

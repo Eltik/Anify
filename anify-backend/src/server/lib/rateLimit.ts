@@ -21,18 +21,10 @@ export const rateLimitMiddleware = async (req: Request, pathName: string): Promi
             if (requests.timestamp < new Date(Date.now()).getTime() - 60000) {
                 await redis.del(`rate-limit:${ip}:${pathName}`);
             }
-        } catch (e) {
-            //console.error(e);
+        } catch {
+            return;
         }
     }, 60000);
-
-    // To clear all keys
-    /*
-    await redis.keys("rate-limit:*").then(async (keys) => {
-        console.log(keys);
-        await redis.del(keys);
-    });
-    */
 
     return { ip, timestamp: now, requests: requests.requests++ };
 };

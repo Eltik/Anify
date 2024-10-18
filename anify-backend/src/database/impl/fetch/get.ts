@@ -32,7 +32,7 @@ export const get = async (id: string, fields: string[] = []): Promise<Anime | Ma
                 }
 
                 return data as unknown as Anime | Manga;
-            } catch (e) {
+            } catch {
                 return undefined;
             }
         } else {
@@ -47,7 +47,7 @@ export const get = async (id: string, fields: string[] = []): Promise<Anime | Ma
                 }
 
                 return data as unknown as Anime | Manga;
-            } catch (e) {
+            } catch {
                 return undefined;
             }
         }
@@ -83,7 +83,7 @@ export const get = async (id: string, fields: string[] = []): Promise<Anime | Ma
             }
 
             return parsedManga as unknown as Manga;
-        } catch (e) {
+        } catch {
             return undefined;
         }
     } else {
@@ -113,7 +113,7 @@ export const get = async (id: string, fields: string[] = []): Promise<Anime | Ma
             }
 
             return parsedAnime as unknown as Anime;
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }

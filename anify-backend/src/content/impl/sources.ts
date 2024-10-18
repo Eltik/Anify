@@ -25,7 +25,7 @@ export const fetchSources = async (providerId: string, watchId: string, subType:
 
         if (!data) return null;
         return data;
-    } catch (e) {
+    } catch {
         return null;
     }
 };

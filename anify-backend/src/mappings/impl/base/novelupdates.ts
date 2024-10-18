@@ -57,6 +57,7 @@ export default class NovelUpdatesBase extends BaseProvider {
             method: "GET",
             headers: {
                 Referer: this.url,
+                "User-Agent": "Mozilla/5.0",
             },
         });
 
@@ -98,6 +99,7 @@ export default class NovelUpdatesBase extends BaseProvider {
                 method: "GET",
                 headers: {
                     Referer: this.url,
+                    "User-Agent": "Mozilla/5.0",
                 },
             },
         );
@@ -133,7 +135,14 @@ export default class NovelUpdatesBase extends BaseProvider {
             return undefined;
         }
 
-        let data = await (await this.request(`${this.url}/series/${id}`, { headers: { Referer: this.url } })).text();
+        let data = await (
+            await this.request(`${this.url}/series/${id}`, {
+                headers: {
+                    Referer: this.url,
+                    "User-Agent": "Mozilla/5.0",
+                },
+            })
+        ).text();
         let $$ = load(data);
 
         const title = $$("title").html();
@@ -237,6 +246,7 @@ export default class NovelUpdatesBase extends BaseProvider {
             method: "GET",
             headers: {
                 Referer: this.url,
+                "User-Agent": "Mozilla/5.0",
             },
         });
 
@@ -270,5 +280,14 @@ export default class NovelUpdatesBase extends BaseProvider {
 
         await Promise.all(requestPromises);
         return results;
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei", Type.MANGA, [Format.NOVEL], 0);
+        if (!searchData || searchData.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

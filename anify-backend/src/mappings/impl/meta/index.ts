@@ -29,4 +29,8 @@ export default abstract class MetaProvider {
 
         return Http.request(this.id, this.useGoogleTranslate, url, config, proxyRequest, 0, this.customProxy);
     }
+
+    async proxyCheck(): Promise<boolean | undefined> {
+        return undefined;
+    }
 }

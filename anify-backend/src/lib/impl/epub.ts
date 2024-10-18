@@ -92,7 +92,7 @@ export const loadEpub = async (data: { id: string; providerId: string; chapters:
                             unlinkSync(parentParentFolder);
                         }
                     }
-                } catch (e) {
+                } catch {
                     //
                 }
 
@@ -112,7 +112,7 @@ export const loadEpub = async (data: { id: string; providerId: string; chapters:
                                 unlinkSync(parentParentFolder);
                             }
                         }
-                    } catch (e) {
+                    } catch {
                         //
                     }
 
@@ -196,7 +196,7 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
     });
 
     for (const i in chapters) {
-        const html = await mangaProviders[providerId].fetchPages(chapters[i].id);
+        const html = await mangaProviders[providerId].fetchPages(chapters[i].id, true, chapters[i]);
         if (!html || typeof html != "string") continue;
 
         const $ = load(html);
@@ -269,7 +269,7 @@ export const createNovelPDF = async (manga: Manga, providerId: string, chapters:
         if (existsSync(imgPath)) {
             try {
                 unlinkSync(imgPath);
-            } catch (e) {
+            } catch {
                 console.log(colors.red("Unable to delete file ") + colors.blue(file + ".jpg") + colors.red("."));
             }
         }

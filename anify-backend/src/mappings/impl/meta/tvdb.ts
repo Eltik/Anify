@@ -73,6 +73,15 @@ export default class TheTVDB extends MetaProvider {
 
         return undefined;
     }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei");
+        if (!searchData || searchData.length === 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 /* Search Types */

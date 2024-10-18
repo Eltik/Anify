@@ -104,4 +104,13 @@ export default class FirstKissNovel extends MangaProvider {
         const $ = load(data);
         return $("div.text-left").toString();
     }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei");
+        if (!searchData || searchData.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

@@ -135,6 +135,15 @@ export default class MangaSee extends MangaProvider {
         const data: [SearchResult] = (await req.json()) as [SearchResult];
         return data;
     }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei");
+        if (!searchData || searchData!.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }
 
 interface SearchResult {

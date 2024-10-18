@@ -260,6 +260,15 @@ export default class TVDB extends InformationProvider<Anime | Manga, AnimeInfo |
 
         return undefined;
     }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const request = await this.request(this.url);
+        if (request.ok) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 interface Artwork {

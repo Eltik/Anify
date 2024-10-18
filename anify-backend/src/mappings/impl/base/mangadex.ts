@@ -316,7 +316,7 @@ export default class ManagDexBase extends BaseProvider {
                 author: data.relationships.filter((element: any) => element.type === "author").map((element: any) => element.attributes?.name) ?? null,
                 publisher: data.relationships.filter((element: any) => element.type === "publisher").map((element: any) => element.attributes?.name) ?? null,
             };
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }
@@ -481,5 +481,14 @@ export default class ManagDexBase extends BaseProvider {
             author: manga.relationships.filter((element: any) => element.type === "author").map((element: any) => element.attributes?.name) ?? null,
             publisher: manga.relationships.filter((element: any) => element.type === "publisher").map((element: any) => element.attributes?.name) ?? null,
         };
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei", Type.MANGA, [Format.MANGA], 0, 10);
+        if (!searchData || searchData.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

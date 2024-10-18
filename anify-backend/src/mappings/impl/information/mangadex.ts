@@ -88,8 +88,17 @@ export default class MangaDexInfo extends InformationProvider<Anime | Manga, Ani
                 author: data.relationships.find((element: any) => element.type === "author")?.attributes.name ?? null,
                 publisher: data.relationships.find((element: any) => element.type === "publisher")?.attributes.name ?? null,
             } as MangaInfo;
-        } catch (e) {
+        } catch {
             return undefined;
+        }
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const request = await this.request(this.url);
+        if (request.ok) {
+            return true;
+        } else {
+            return false;
         }
     }
 }

@@ -12,12 +12,12 @@ export default class JNovels extends MangaProvider {
     override formats: Format[] = [Format.NOVEL];
 
     override async search(query: string): Promise<Result[] | undefined> {
-        const lightNovels = await (await this.request(`${this.url}/11light-1novel27-pdf/`)).text();
+        const lightNovels = await (await this.request(`${this.url}/light-novel-pdf-jp/`)).text();
         const novelResults = await this.handleSearchResults(query, lightNovels);
 
         if (novelResults?.length > 0) return novelResults;
 
-        const webNovels = await (await this.request(`${this.url}/hwebnovels-lista14/`)).text();
+        const webNovels = await (await this.request(`${this.url}/webnovel-list-jp/`)).text();
         const webResults = await this.handleSearchResults(query, webNovels);
 
         return webResults;
@@ -92,5 +92,14 @@ export default class JNovels extends MangaProvider {
 
     override async fetchPages(id: string): Promise<string | Page[] | undefined> {
         return `No content able to read! You may download the novel <a href="${id}" target="_blank">here</a>.`;
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei");
+        if (!searchData || searchData.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

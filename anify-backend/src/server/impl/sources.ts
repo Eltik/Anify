@@ -1,11 +1,8 @@
 import { cacheTime, redis } from "..";
 import content from "../../content";
-import { env } from "../../env";
 import { isBanned } from "../../helper/banned";
 import { StreamingServers, SubType } from "../../types/enums";
-import { Source } from "../../types/types";
 import queues from "../../worker";
-import { AES } from "../lib/Aes";
 import { createResponse } from "../lib/response";
 
 export const handler = async (req: Request): Promise<Response> => {
@@ -52,21 +49,6 @@ export const handler = async (req: Request): Promise<Response> => {
 
         const cached = await redis.get(`sources:${id}:${episodeNumber}:${providerId}:${watchId}:${subType}:${server}`);
         if (cached) {
-            const cachedData = JSON.parse(cached) as Source;
-            if (env.USE_SUBTITLE_SPOOFING) {
-                cachedData?.subtitles?.forEach((sub) => {
-                    if (sub.lang != "Thumbnails" && sub.url.endsWith(".vtt") && !sub.url.startsWith(env.API_URL)) sub.url = env.API_URL + "/subtitles/" + AES.Encrypt(sub.url, env.SECRET_KEY) + ".vtt";
-                });
-            }
-            if (cachedData?.subtitles?.length == 0) {
-                if (!env.DISABLE_INTRO_VIDEO_SPOOFING) {
-                    const headers = encodeURIComponent(JSON.stringify(cachedData?.headers ?? {}));
-                    cachedData?.sources?.forEach((source) => {
-                        if (source.url.endsWith(".m3u8") && !source.url.startsWith(env.VIDEO_PROXY_URL)) source.url = env.VIDEO_PROXY_URL + "/video/" + encrypt(source.url) + "/" + headers + "/.m3u8";
-                    });
-                }
-            }
-
             return createResponse(cached);
         }
 
@@ -74,21 +56,6 @@ export const handler = async (req: Request): Promise<Response> => {
         if (banned) return createResponse(JSON.stringify({ error: "This item is banned." }), 403);
 
         const data = await content.fetchSources(providerId, watchId, subType as SubType, server as StreamingServers);
-        if (env.USE_SUBTITLE_SPOOFING) {
-            data?.subtitles?.forEach((sub) => {
-                if (sub.lang != "Thumbnails" && sub.url.endsWith(".vtt")) sub.url = env.API_URL + "/subtitles/" + AES.Encrypt(sub.url, env.SECRET_KEY) + ".vtt";
-            });
-        }
-        if (data?.subtitles?.length == 0) {
-            if (!env.DISABLE_INTRO_VIDEO_SPOOFING) {
-                const headers = encodeURIComponent(JSON.stringify(data?.headers ?? {}));
-
-                data?.sources?.forEach((source) => {
-                    if (source.url.endsWith(".m3u8")) source.url = env.VIDEO_PROXY_URL + "/video/" + encrypt(source.url) + "/" + headers + "/.m3u8";
-                });
-            }
-        }
-
         if (!data) return createResponse(JSON.stringify({ error: "Sources not found." }), 404);
 
         if (data) queues.skipTimes.add({ id, episode: episodeNumber, toInsert: data });
@@ -118,6 +85,3 @@ type Body = {
 };
 
 export default route;
-function encrypt(data: string): string {
-    return encodeURIComponent(AES.Encrypt(data, env.SECRET_KEY));
-}

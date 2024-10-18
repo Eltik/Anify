@@ -31,7 +31,7 @@ export default abstract class MangaProvider {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async fetchPages(id: string): Promise<Page[] | string | undefined> {
+    async fetchPages(id: string, proxy: boolean = false, chapter: Chapter | null = null): Promise<Page[] | string | undefined> {
         return undefined;
     }
 
@@ -42,6 +42,10 @@ export default abstract class MangaProvider {
         if (proxyRequest !== undefined && proxyRequest === true && !this.needsProxy) proxyRequest = true;
 
         return Http.request(this.id, this.useGoogleTranslate, url, config, proxyRequest, 0, this.customProxy);
+    }
+
+    async proxyCheck(): Promise<boolean | undefined> {
+        return undefined;
     }
 
     padNum(number: string, places: number): string {

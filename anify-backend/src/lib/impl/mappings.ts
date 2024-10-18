@@ -139,7 +139,7 @@ export const map = async (type: Type, formats: Format[], baseData: AnimeInfo | M
                 }
 
                 return results;
-            } catch (error) {
+            } catch {
                 console.log(colors.red(`Error fetching from provider ${colors.blue(provider.id)}. Skipping...`));
                 return [];
             }

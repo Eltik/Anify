@@ -45,7 +45,7 @@ export const importData = async () => {
         if (isString(media.averagePopularity)) {
             try {
                 media.averagePopularity = JSON.parse(media.averagePopularity);
-            } catch (e) {
+            } catch {
                 failedCount.anime++;
             }
         }
@@ -75,7 +75,7 @@ export const importData = async () => {
         if (isString(media.averagePopularity)) {
             try {
                 media.averagePopularity = JSON.parse(media.averagePopularity);
-            } catch (e) {
+            } catch {
                 failedCount.manga++;
             }
         }

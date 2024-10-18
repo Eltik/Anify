@@ -53,7 +53,7 @@ export default class KitsuMeta extends MetaProvider {
                     });
                 });
             }
-        } catch (e) {
+        } catch {
             //
         }
 
@@ -95,11 +95,20 @@ export default class KitsuMeta extends MetaProvider {
                     });
                 });
             }
-        } catch (e) {
+        } catch {
             //
         }
 
         return results;
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei");
+        if (!searchData || searchData.length === 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 

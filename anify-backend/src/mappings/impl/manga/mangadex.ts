@@ -152,7 +152,11 @@ export default class MangaDex extends MangaProvider {
                 }
             });
 
-            chapters.length > 0 ? chapterList.push(...chapters) : (run = false);
+            if (chapters.length > 0) {
+                chapterList.push(...chapters);
+            } else {
+                run = false;
+            }
         }
 
         return chapterList;
@@ -184,5 +188,14 @@ export default class MangaDex extends MangaProvider {
             });
         }
         return pages;
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei");
+        if (!searchData || searchData.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

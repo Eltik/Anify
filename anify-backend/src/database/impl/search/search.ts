@@ -138,7 +138,7 @@ export const search = async <T extends Type.ANIME | Type.MANGA>(
 
                 return data;
             }
-        } catch (e) {
+        } catch {
             return undefined;
         }
     });

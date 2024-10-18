@@ -37,7 +37,7 @@ export const fetchMetaData = async (id: string): Promise<ContentMetadata[]> => {
                 });
             }
             return true;
-        } catch (e) {
+        } catch {
             return false;
         }
     });

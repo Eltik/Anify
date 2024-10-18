@@ -11,9 +11,10 @@ import { Episode, Result, Source } from "../../../types/types";
 export default class AnimePahe extends AnimeProvider {
     override rateLimit = 250;
     override id = "animepahe";
-    override url = "https://animepahe.com";
+    override url = "https://animepahe.ru";
 
-    public needsProxy: boolean = true;
+    // why does this break things lol
+    //public needsProxy: boolean = true;
     public useGoogleTranslate: boolean = false;
 
     override formats: Format[] = [Format.MOVIE, Format.ONA, Format.OVA, Format.SPECIAL, Format.TV, Format.TV_SHORT];
@@ -241,6 +242,15 @@ export default class AnimePahe extends AnimeProvider {
         } catch (e) {
             console.error(e);
             return undefined;
+        }
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei");
+        if (!searchData || searchData.length === 0) {
+            return false;
+        } else {
+            return true;
         }
     }
 }

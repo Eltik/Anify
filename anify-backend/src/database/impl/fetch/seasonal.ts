@@ -59,7 +59,7 @@ export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: Ani
                             characters: JSON.parse(media.characters),
                         });
                         return parsedAnime as unknown as Anime;
-                    } catch (e) {
+                    } catch {
                         return undefined;
                     }
                 } else {
@@ -79,7 +79,7 @@ export const seasonal = async (trending: AnimeInfo[] | MangaInfo[], popular: Ani
                         });
 
                         return parsedManga as unknown as Manga;
-                    } catch (e) {
+                    } catch {
                         return undefined;
                     }
                 }

@@ -77,4 +77,13 @@ export default class NovelHall extends MangaProvider {
         const $ = load(data);
         return $("div#htmlContent.entry-content").toString();
     }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei");
+        if (!searchData || searchData!.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

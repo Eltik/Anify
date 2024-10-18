@@ -18,7 +18,7 @@ export const fetchPages = async (providerId: string, readId: string): Promise<st
         });
         if (!data) return null;
         return data;
-    } catch (e) {
+    } catch {
         return null;
     }
 };

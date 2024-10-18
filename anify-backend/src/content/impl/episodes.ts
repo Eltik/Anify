@@ -40,7 +40,7 @@ export const fetchEpisodes = async (id: string): Promise<EpisodeData[]> => {
                 });
             }
             return true;
-        } catch (e) {
+        } catch {
             return false;
         }
     });

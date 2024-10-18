@@ -87,6 +87,15 @@ export default class ComicKInfo extends InformationProvider<Anime | Manga, Anime
             publisher: null,
         } as MangaInfo;
     }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const request = await this.request(this.url);
+        if (request.ok) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 interface Comic {

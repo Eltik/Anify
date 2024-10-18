@@ -40,4 +40,8 @@ export default abstract class InformationProvider<T extends Anime | Manga, U ext
 
         return Http.request(this.id, this.useGoogleTranslate, url, config, proxyRequest, 0, this.customProxy);
     }
+
+    async proxyCheck(): Promise<boolean | undefined> {
+        return undefined;
+    }
 }

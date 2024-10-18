@@ -4,7 +4,8 @@ import { Source } from "../types/types";
 import { StreamingServers } from "../types/enums";
 import Http from "./request";
 import { animeProviders } from "../mappings";
-import { env } from "../env";
+import colors from "colors";
+import { b64decode, b64encode, rc4Cypher } from ".";
 
 /**
  * @description Extracts source links from the streaming servers. This class is very messy but it works.
@@ -32,6 +33,10 @@ export default class Extractor {
                     return await this.extractStreamSB(this.url, this.result);
                 case StreamingServers.VidCloud:
                     return await this.extractVidCloud(this.url, this.result);
+                case StreamingServers.Vidstream:
+                    return await this.extractVidstream(this.url, this.result);
+                case StreamingServers.MegaF:
+                    return await this.extractMegaF(this.url, this.result);
                 case StreamingServers.VidStreaming:
                     return await this.extractGogoCDN(this.url, this.result);
                 case StreamingServers.StreamTape:
@@ -118,7 +123,7 @@ export default class Extractor {
                     url: subtitle.url,
                 });
             });
-        } catch (e) {
+        } catch {
             //
         }
 
@@ -126,8 +131,10 @@ export default class Extractor {
     }
 
     public async extractMyCloud(url: string, result: Source): Promise<Source> {
-        const proxy = env.NINEANIME_RESOLVER || "https://9anime.resolver.net";
-        const proxyKey: string = env.NINEANIME_KEY || `9anime`;
+        //const proxy = env.NINEANIME_RESOLVER || "https://9anime.resolver.net";
+        //const proxyKey: string = env.NINEANIME_KEY || `9anime`;
+        const proxy = "https://9anime.resolver.net";
+        const proxyKey: string = `9anime`;
 
         const lolToken = await (await fetch("https://mcloud.to/futoken")).text();
 
@@ -188,8 +195,11 @@ export default class Extractor {
     }
 
     public async extractFileMoon(url: string, result: Source): Promise<Source> {
-        const proxy = env.NINEANIME_RESOLVER || "https://9anime.resolver.com";
-        const proxyKey: string = env.NINEANIME_KEY || `9anime`;
+        //const proxy = env.NINEANIME_RESOLVER || "https://9anime.resolver.net";
+        //const proxyKey: string = env.NINEANIME_KEY || `9anime`;
+        const proxy = "https://9anime.resolver.net";
+        const proxyKey: string = `9anime`;
+
         const data = await (await fetch(`https://filemoon.sx/d/${url}`)).text();
 
         const resolver = await fetch(`${proxy}/filemoon?apikey=${proxyKey}`, {
@@ -223,14 +233,185 @@ export default class Extractor {
         return result;
     }
 
+    public async extractVidstream(url: string, result: Source): Promise<Source> {
+        const data = (await (await fetch(url)).json()) as {
+            status: number;
+            result: {
+                url: string;
+                skip_data: string;
+            };
+        };
+
+        if (data.status !== 200) return result;
+
+        try {
+            const decodedURL = decodeURIComponent(rc4Cypher("ctpAbOz5u7S6OMkx", b64decode("".concat(data.result.url).replace(/_/g, "/").replace(/-/g, "+"))));
+
+            try {
+                const githubReq = await (await fetch("https://github.com/Ciarands/vidsrc-keys/blob/main/keys.json")).text();
+                const keys = JSON.parse(githubReq.match(/"rawLines":\["(.+?)"],"styling/)![1].replaceAll("\\", "")) as {
+                    encrypt: string[];
+                    decrypt: string[];
+                };
+
+                const videoId = decodedURL.split("/e/")[1].split("?")[0];
+                const urlEnd = "?" + decodedURL.split("?").pop();
+
+                const encodeElement = (input: string, key: string) => {
+                    input = encodeURIComponent(input);
+                    const e = rc4Cypher(key, input);
+                    const out = b64encode(e).replace(/\//g, "_").replace(/\+/g, "-");
+                    return out;
+                };
+
+                const encodedVideoId = encodeElement(videoId, keys.encrypt[1]);
+                const h = encodeElement(videoId, keys.encrypt[2]);
+                const videoURL = `https://vid2v11.site/mediainfo/${encodedVideoId}${urlEnd}&ads=0&h=${encodeURIComponent(h)}`;
+
+                const encryptedSources = (await (
+                    await fetch(videoURL, {
+                        method: "GET",
+                        headers: {
+                            Referer: videoURL,
+                        },
+                    })
+                ).json()) as {
+                    status: number;
+                    result: string;
+                };
+
+                try {
+                    const decryptedSources = JSON.parse(decodeURIComponent(rc4Cypher(keys.decrypt[1], b64decode("".concat(encryptedSources.result).replace(/_/g, "/").replace(/-/g, "+"))))) as {
+                        sources: {
+                            file: string;
+                        }[];
+                        tracks: {
+                            file: string;
+                            kind: "captions" | "thumbnails";
+                            label?: string;
+                        }[];
+                    };
+
+                    for (const source of decryptedSources.sources) {
+                        result.sources.push({
+                            quality: "auto",
+                            url: source.file,
+                        });
+                    }
+
+                    for (const track of decryptedSources.tracks) {
+                        result.subtitles.push({
+                            url: track.file,
+                            label: track.kind,
+                            lang: track.label ?? track.kind,
+                        });
+                    }
+                } catch (e) {
+                    console.error(e);
+                    console.error(colors.red("Failed to decrypt video sources!"));
+                }
+            } catch {
+                console.log(colors.red("Failed to decode video data! Trying using private key extractor."));
+                const keys = (await (
+                    await fetch("https://anithunder.vercel.app/api/keys", {
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        method: "POST",
+                    })
+                ).json()) as string[];
+
+                const videoId = decodedURL.split("/e/")[1].split("?")[0];
+                const urlEnd = "?" + decodedURL.split("?").pop();
+
+                const encodeElement = (input: string, key: string) => {
+                    input = encodeURIComponent(input);
+                    const e = rc4Cypher(key, input);
+                    const out = b64encode(e).replace(/\//g, "_").replace(/\+/g, "-");
+                    return out;
+                };
+
+                const encodedVideoId = encodeElement(videoId, keys[1]);
+                const h = encodeElement(videoId, keys[2]);
+                const videoURL = `https://vid2v11.site/mediainfo/${encodedVideoId}${urlEnd}&ads=0&h=${encodeURIComponent(h)}`;
+
+                const encryptedSources = (await fetch(videoURL, {
+                    method: "GET",
+                    headers: {
+                        Referer: videoURL,
+                    },
+                }).then((req) => req.json())) as {
+                    status: number;
+                    result: string;
+                };
+
+                try {
+                    const decryptedSources = JSON.parse(decodeURIComponent(rc4Cypher(keys[2], b64decode("".concat(encryptedSources.result).replace(/_/g, "/").replace(/-/g, "+"))))) as {
+                        sources: {
+                            file: string;
+                        }[];
+                        tracks: {
+                            file: string;
+                            kind: "captions" | "thumbnails";
+                            label?: string;
+                        }[];
+                    };
+
+                    for (const source of decryptedSources.sources) {
+                        result.sources.push({
+                            quality: "auto",
+                            url: source.file,
+                        });
+                    }
+
+                    for (const track of decryptedSources.tracks) {
+                        result.subtitles.push({
+                            url: track.file,
+                            label: track.kind,
+                            lang: track.label ?? track.kind,
+                        });
+                    }
+                } catch (e) {
+                    console.error(e);
+                    console.error(colors.red("Failed to decrypt video sources!"));
+                }
+            }
+        } catch (e) {
+            console.error(e);
+            console.error(colors.red("Failed to decode video data!"));
+        }
+
+        try {
+            const decodedSkipData = JSON.parse(decodeURIComponent(rc4Cypher("ctpAbOz5u7S6OMkx", b64decode("".concat(data.result.skip_data).replace(/_/g, "/").replace(/-/g, "+"))))) as {
+                intro: string[];
+                outro: string[];
+            };
+            result.intro.start = parseInt(decodedSkipData.intro[0]);
+            result.intro.end = parseInt(decodedSkipData.intro[1]);
+
+            result.outro.start = parseInt(decodedSkipData.outro[0]);
+            result.outro.end = parseInt(decodedSkipData.outro[1]);
+        } catch {
+            console.error(colors.red("Failed to decode skip data!"));
+        }
+
+        return result;
+    }
+
+    public async extractMegaF(url: string, result: Source): Promise<Source> {
+        throw new Error(`Method not implemented yet for ${url} and ${result}.`);
+    }
+
     /**
      * @description Requires a VizStream ID. Uses NineAnime resolver.
      * @param vidStreamId VizStream ID
      * @returns Promise<SubbedSource>
      */
     public async extractVizCloud(url: string, result: Source): Promise<Source> {
-        const proxy = env.NINEANIME_RESOLVER || "https://9anime.resolver.net";
-        const proxyKey: string = env.NINEANIME_KEY || `9anime`;
+        //const proxy = env.NINEANIME_RESOLVER || "https://9anime.resolver.net";
+        //const proxyKey: string = env.NINEANIME_KEY || `9anime`;
+        const proxy = "https://9anime.resolver.net";
+        const proxyKey: string = `9anime`;
 
         const futoken = await (await Http.request("9anime", false, "https://vidplay.site/futoken")).text();
 
@@ -431,29 +612,31 @@ export default class Extractor {
 
         let { sources } = reqData as { sources: string };
 
-        //const decryptKey = ((await (await fetch(env.ZORO_EXTRACTOR ? `${env.ZORO_EXTRACTOR}/key/6` : "https://zoro.anify.tv/key/6")).json()) as { key: string }).key as string;
-        const key = await extractKey();
+        if (!sources.includes("m3u8")) {
+            //const decryptKey = ((await (await fetch(env.ZORO_EXTRACTOR ? `${env.ZORO_EXTRACTOR}/key/6` : "https://zoro.anify.tv/key/6")).json()) as { key: string }).key as string;
+            const key = await extractKey();
 
-        if (key != null) {
-            let extractedKey = "";
-            let strippedSources = sources;
-            let totalledOffset = 0;
-            key.forEach(([a, b]) => {
-                const start = a + totalledOffset;
-                const end = start + b;
-                extractedKey += sources.slice(start, end);
-                strippedSources = strippedSources.replace(sources.substring(start, end), "");
-                totalledOffset += b;
-            });
+            if (key != null) {
+                let extractedKey = "";
+                let strippedSources = sources;
+                let totalledOffset = 0;
+                key.forEach(([a, b]) => {
+                    const start = a + totalledOffset;
+                    const end = start + b;
+                    extractedKey += sources.slice(start, end);
+                    strippedSources = strippedSources.replace(sources.substring(start, end), "");
+                    totalledOffset += b;
+                });
 
-            sources = CryptoJS.AES.decrypt(strippedSources, extractedKey).toString(CryptoJS.enc.Utf8);
-        }
+                sources = CryptoJS.AES.decrypt(strippedSources, extractedKey).toString(CryptoJS.enc.Utf8);
+            }
 
-        try {
-            sources = JSON.parse(sources);
-        } catch (e) {
-            console.error(e);
-            sources = "";
+            try {
+                sources = JSON.parse(sources);
+            } catch (e) {
+                console.error(e);
+                sources = "";
+            }
         }
 
         if (!sources || sources.length === 0) {

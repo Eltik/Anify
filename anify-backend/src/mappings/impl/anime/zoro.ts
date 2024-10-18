@@ -53,8 +53,13 @@ export default class Zoro extends AnimeProvider {
                     ?.filter(Boolean);
                 const year = $$($$("div.anisc-info-wrap div.anisc-info div.item").toArray()[4]).find("span.name").text().split(" ")[1];
 
-                jpTitle ? altTitles.push(jpTitle) : null;
-                synonyms ? altTitles.push(...synonyms) : null;
+                if (jpTitle) {
+                    altTitles.push(jpTitle);
+                }
+
+                if (synonyms) {
+                    altTitles.push(...synonyms);
+                }
 
                 results.push({
                     id: id,
@@ -156,7 +161,7 @@ export default class Zoro extends AnimeProvider {
             case StreamingServers.VidCloud:
                 serverId = this.retrieveServerId($, 4, subType);
 
-                if (!serverId) throw new Error("RapidCloud not found");
+                if (!serverId) throw new Error("VidCloud not found");
                 break;
             case StreamingServers.VidStreaming:
                 serverId = this.retrieveServerId($, 4, subType);
@@ -191,5 +196,14 @@ export default class Zoro extends AnimeProvider {
                 .get()[0]
                 ?.attr("data-id") ?? ""
         );
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei");
+        if (!searchData || searchData.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

@@ -172,3 +172,4 @@ dist
 db.sqlite
 keys.json
 bannedIds.json
+test.ts

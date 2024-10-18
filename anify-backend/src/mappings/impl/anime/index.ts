@@ -49,6 +49,10 @@ export default abstract class AnimeProvider {
         return Http.request(this.id, this.useGoogleTranslate, url, config, proxyRequest, 0, this.customProxy);
     }
 
+    async proxyCheck(): Promise<boolean | undefined> {
+        return undefined;
+    }
+
     abstract get subTypes(): SubType[];
     abstract get headers(): Record<string, string> | undefined;
 }

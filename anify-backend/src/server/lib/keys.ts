@@ -49,8 +49,8 @@ export const rateLimitApiKeyMiddleware = async (req: Request): Promise<boolean> 
                 //await redis.del(`apikey:${key}`);
                 return false;
             }
-        } catch (e) {
-            //
+        } catch {
+            return false;
         }
     }
 

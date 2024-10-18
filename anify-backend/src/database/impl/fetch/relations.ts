@@ -64,7 +64,7 @@ export const relations = async (id: string, fields: string[] = []): Promise<Anim
                                 }
                             });
                         }
-                    } catch (e) {
+                    } catch {
                         return undefined;
                     }
 
@@ -146,7 +146,7 @@ export const relations = async (id: string, fields: string[] = []): Promise<Anim
 
                         return data;
                     }
-                } catch (e) {
+                } catch {
                     return undefined;
                 }
             })

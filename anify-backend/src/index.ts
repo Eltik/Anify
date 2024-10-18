@@ -38,7 +38,7 @@ async function before() {
     });
 
     emitter.on(Events.COMPLETED_SEASONAL_LOAD, async (data) => {
-        for (let i = 0; i < (data.trending ?? []).length; i++) {
+        for (let i = 0; i < (data?.trending ?? []).length; i++) {
             if (data.trending[i].status === MediaStatus.NOT_YET_RELEASED) {
                 continue;
             }
@@ -52,7 +52,7 @@ async function before() {
             }
         }
 
-        for (let i = 0; i < (data.popular ?? []).length; i++) {
+        for (let i = 0; i < (data?.popular ?? []).length; i++) {
             if (data.popular[i].status === MediaStatus.NOT_YET_RELEASED) {
                 continue;
             }
@@ -65,7 +65,7 @@ async function before() {
                 });
         }
 
-        for (let i = 0; i < (data.top ?? []).length; i++) {
+        for (let i = 0; i < (data?.top ?? []).length; i++) {
             if (data.top[i].status === MediaStatus.NOT_YET_RELEASED) {
                 continue;
             }
@@ -78,7 +78,7 @@ async function before() {
                 });
         }
 
-        for (let i = 0; i < (data.seasonal ?? []).length; i++) {
+        for (let i = 0; i < (data?.seasonal ?? []).length; i++) {
             if (data.seasonal[i].status === MediaStatus.NOT_YET_RELEASED) {
                 continue;
             }

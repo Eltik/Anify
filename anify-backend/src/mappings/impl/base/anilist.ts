@@ -478,7 +478,17 @@ export default class AniListBase extends BaseProvider {
     }
 
     override getCurrentSeason(): Season {
-        return Season.FALL;
+        const month = new Date().getMonth();
+
+        if ((month >= 0 && month <= 1) || month === 11) {
+            return Season.WINTER;
+        } else if (month >= 2 && month <= 4) {
+            return Season.SPRING;
+        } else if (month >= 5 && month <= 7) {
+            return Season.SUMMER;
+        } else {
+            return Season.FALL;
+        }
     }
 
     override async getMedia(id: string): Promise<AnimeInfo | MangaInfo | undefined> {
@@ -670,7 +680,7 @@ export default class AniListBase extends BaseProvider {
             variables: {
                 type: type,
                 season: this.getCurrentSeason(),
-                seasonYear: 2023,
+                seasonYear: new Date(Date.now()).getFullYear(),
                 format: formats,
                 page: 0,
                 perPage: 20,
@@ -1166,6 +1176,15 @@ export default class AniListBase extends BaseProvider {
             console.error(err);
             return null;
         });
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei", Type.ANIME, [Format.TV], 0, 10);
+        if (!searchData || searchData.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public query = `

@@ -148,8 +148,17 @@ export default class AniDB extends InformationProvider<Anime | Manga, AnimeInfo 
                 title: episode.title,
                 updatedAt: isNaN(new Date($("div.info tr.date td.value span").text()?.trim() || "").getTime()) ? undefined : new Date($("div.info tr.date td.value span").text()?.trim() || "").getTime(),
             };
-        } catch (error) {
+        } catch {
             return undefined;
+        }
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const request = await this.request(this.url);
+        if (request.ok) {
+            return true;
+        } else {
+            return false;
         }
     }
 }

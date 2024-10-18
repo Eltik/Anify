@@ -26,7 +26,7 @@ export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga,
 
         if (!novelUpdatesId) return undefined;
 
-        const data = await (await this.request(`${this.url}/series/${novelUpdatesId}`, { headers: { Cookie: "_ga=;" } })).text();
+        const data = await (await this.request(`${this.url}/series/${novelUpdatesId}`, { headers: { Cookie: "_ga=;", "User-Agent": "Mozilla/5.0" } })).text();
         const $$ = load(data);
 
         const title = $$("title").html();
@@ -74,5 +74,14 @@ export default class NovelUpdatesInfo extends InformationProvider<Anime | Manga,
             publisher: $$("div#showopublisher a").text(),
             author: $$("div#showauthors a").text(),
         };
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const request = await this.request(this.url);
+        if (request.ok) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

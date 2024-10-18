@@ -36,8 +36,9 @@ import KitsuMeta from "./impl/meta/kitsu";
 import MALMeta from "./impl/meta/mal";
 import TheMovieDB from "./impl/meta/tmdb";
 import TheTVDB from "./impl/meta/tvdb";
+import Sudatchi from "./impl/anime/sudatchi";
 
-const ANIME_PROVIDERS: AnimeProvider[] = [new NineAnime(), new AnimePahe(), new GogoAnime(), new Zoro()];
+const ANIME_PROVIDERS: AnimeProvider[] = [new NineAnime(), new AnimePahe(), new GogoAnime(), new Zoro(), new Sudatchi()];
 const animeProviders: Record<string, AnimeProvider> = ANIME_PROVIDERS.reduce(
     (acc, provider) => {
         acc[provider.id] = provider;

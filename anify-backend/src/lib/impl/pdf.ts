@@ -34,7 +34,7 @@ export const loadPDF = async (data: { id: string; providerId: string; chapter: C
 
     const pdfPath = typeof data.pages === "string" ? "" : await createMangaPDF(data.providerId, data.chapter, data.pages);
     const file = Bun.file(pdfPath);
-    if (!file.exists()) return await emitter.emitAsync(Events.COMPLETED_MANGA_UPLOAD, "");
+    if (!(await file.exists())) return await emitter.emitAsync(Events.COMPLETED_MANGA_UPLOAD, "");
 
     const form = new FormData();
     form.append("email", mixdropEmail);
@@ -85,7 +85,7 @@ export const loadPDF = async (data: { id: string; providerId: string; chapter: C
                             unlinkSync(parentParentFolder);
                         }
                     }
-                } catch (e) {
+                } catch {
                     //
                 }
 
@@ -105,7 +105,7 @@ export const loadPDF = async (data: { id: string; providerId: string; chapter: C
                                 unlinkSync(parentParentFolder);
                             }
                         }
-                    } catch (e) {
+                    } catch {
                         //
                     }
 
@@ -211,7 +211,7 @@ export const createMangaPDF = async (providerId: string, chapter: Chapter, pages
                 width: width,
                 height: height,
             });
-        } catch (e) {
+        } catch {
             console.log(colors.red("Unable to add page ") + colors.blue(file + "") + colors.red(" to PDF."));
         }
     }
@@ -224,7 +224,7 @@ export const createMangaPDF = async (providerId: string, chapter: Chapter, pages
         if (existsSync(path)) {
             try {
                 unlinkSync(path);
-            } catch (e) {
+            } catch {
                 console.log(colors.red("Unable to delete file ") + colors.blue(file + ".png") + colors.red("."));
             }
         }
@@ -262,7 +262,7 @@ async function downloadFile(url: string, outputPath: string, headers?: Record<st
         await finishPromise;
 
         return;
-    } catch (error) {
+    } catch {
         throw new Error(`Failed to download file from ${url}.`);
     }
 }
@@ -283,7 +283,7 @@ async function getImageSize(path: string): Promise<{ width: number; height: numb
         } else {
             return null; // Failed to get image dimensions
         }
-    } catch (e) {
+    } catch {
         return null;
     }
 }

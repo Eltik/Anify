@@ -7,7 +7,7 @@ export default class ComicK extends MangaProvider {
     override id = "comick";
     override url = "https://comick.cc";
 
-    public needsProxy: boolean = true;
+    public needsProxy: boolean = false;
 
     override formats: Format[] = [Format.MANGA, Format.ONE_SHOT];
 
@@ -116,6 +116,15 @@ export default class ComicK extends MangaProvider {
         const json = (await (await this.request(`${this.api}${id}`))?.json()) as { comic: Comic };
         const data: Comic = json.comic;
         return data ? data.hid : null;
+    }
+
+    override async proxyCheck(): Promise<boolean | undefined> {
+        const searchData = await this.search("Mushoku Tensei");
+        if (!searchData || searchData.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }
 
