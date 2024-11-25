@@ -303,7 +303,7 @@ const Watch: NextPage<Props> = ({ episodeNumber, episodeSelector, episodes, medi
         function getBase64Chapters(chapters: string) {
             const encoder = new TextEncoder();
             const chaptersData = encoder.encode(chapters);
-            const base64Chapters = base64ArrayBuffer(chaptersData.buffer);
+            const base64Chapters = base64ArrayBuffer(chaptersData.buffer as ArrayBuffer);
             return `data:text/vtt;base64,${base64Chapters}`;
         }
 
