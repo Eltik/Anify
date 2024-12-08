@@ -86,6 +86,8 @@ USE_SUBTITLE_SPOOFING="true"
 ```
 Make sure to fill in the appropriate values for your setup.
 
+> **⚠️ WARNING:** The 9anime site has been deleted by its owner. As a result, the 9anime provider will not work until the site is recreated or an alternative is established. This means any configurations related to 9anime will be non-functional at this time.
+
 ## Usage
 Once you have installed and configured the project, you can use the following npm scripts to interact with the backend:
 
