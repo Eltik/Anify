@@ -4,9 +4,13 @@ import fs from "node:fs";
 import path from "node:path";
 
 const booleanFromEnv = z.string().transform((val) => {
-    if (val === "true") return true;
-    if (val === "false") return false;
-    throw new Error(`Invalid boolean value: ${val}`);
+    const normalized = val.toLowerCase().trim();
+    
+    if (["true", "1", "yes", "on"].includes(normalized)) return true;
+    
+    if (["false", "0", "no", "off"].includes(normalized)) return false;
+    
+    throw new Error(`Invalid boolean value: "${val}". Expected true/1/yes/on or false/0/no/off`);
 });
 
 /**
