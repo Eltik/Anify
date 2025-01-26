@@ -1,6 +1,6 @@
-export const averageMetric = (object: any) => {
-    let average = 0,
-        validCount = 0;
+export const averageMetric = (object: Record<string, unknown>) => {
+    let average = 0;
+    let validCount = 0;
     if (!object) return 0;
 
     for (const [, v] of Object.entries(object)) {

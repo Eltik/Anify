@@ -2,7 +2,7 @@ import { db } from "../../../../../database";
 import { MangaRepository } from "../../../../../database/impl/wrapper/impl/manga";
 import type { IManga } from "../../../../../types/impl/database/impl/schema/manga";
 import type { IEpubCredentials } from "../../../../../types/impl/lib/impl/epub";
-import { unlink, readdir, rm } from "fs/promises";
+import { unlink, readdir, rm } from "node:fs/promises";
 import colors from "colors";
 import { emitter } from "../../../../../events";
 import { Events } from "../../../../../types/impl/events";

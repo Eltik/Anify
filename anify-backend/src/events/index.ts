@@ -6,7 +6,7 @@ import type { IMedia, ISeasonal } from "../types/impl/mappings";
 import { MediaRepository } from "../database/impl/wrapper/impl/media";
 import { db } from "../database";
 import queues from "../worker";
-import { MediaFormat, MediaType } from "../types";
+import type { MediaFormat, MediaType } from "../types";
 import type { IEpisodeData } from "../types/impl/database/impl/mappings";
 import { AnimeRepository } from "../database/impl/wrapper/impl/anime";
 
@@ -81,35 +81,34 @@ emitter.on(
         return limit(async () => {
             const itemsToFetch: Array<{ type: MediaType; id: string; formats: [MediaFormat] }> = [];
 
-            data?.trending?.forEach((x) => {
+            for (const x of data?.trending ?? []) {
                 itemsToFetch.push({
                     type: x.type,
                     id: x.id,
                     formats: [x.format],
                 });
-            });
-            data?.seasonal?.forEach((x) => {
+            }
+            for (const x of data?.seasonal ?? []) {
                 itemsToFetch.push({
                     type: x.type,
                     id: x.id,
                     formats: [x.format],
                 });
-            });
-            data?.popular?.forEach((x) => {
+            }
+            for (const x of data?.popular ?? []) {
                 itemsToFetch.push({
                     type: x.type,
                     id: x.id,
                     formats: [x.format],
                 });
-            });
-            data?.top?.forEach((x) => {
+            }
+            for (const x of data?.top ?? []) {
                 itemsToFetch.push({
                     type: x.type,
                     id: x.id,
                     formats: [x.format],
                 });
-            });
-
+            }
             // Remove duplicates
             const uniqueItems = itemsToFetch.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id));
 

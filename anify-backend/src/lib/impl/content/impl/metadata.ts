@@ -17,12 +17,11 @@ const loadMetadata = async (media: IMedia): Promise<IContentMetadata[]> => {
                 if (!data?.length) return null; // Skip if no data returned
 
                 // Fill in missing updatedAt fields
-                data.forEach((chapter) => {
+                for (const chapter of data) {
                     if (!chapter.updatedAt) {
                         chapter.updatedAt = 0;
                     }
-                });
-
+                }
                 // Return a structured ContentMetadata object
                 return {
                     providerId: mapping.providerId,

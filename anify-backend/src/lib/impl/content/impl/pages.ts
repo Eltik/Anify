@@ -6,7 +6,7 @@
  */
 
 import { MANGA_PROVIDERS } from "../../../../mappings";
-import { IPage } from "../../../../types/impl/mappings/impl/manga";
+import type { IPage } from "../../../../types/impl/mappings/impl/manga";
 
 const loadPages = async (providerId: string, readId: string): Promise<IPage[] | string | null> => {
     const mangaProviders = await Promise.all(MANGA_PROVIDERS.map((factory) => factory()));

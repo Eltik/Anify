@@ -1,4 +1,4 @@
-import { EPub, Chapter as EPubChapter } from "epub-gen-memory";
+import  { EPub, type Chapter as EPubChapter } from "epub-gen-memory";
 import type { IChapter } from "../../../../../types";
 import type { IManga } from "../../../../../types/impl/database/impl/schema/manga";
 import type { ImageFile } from "../../../../../types/impl/lib/impl/epub";

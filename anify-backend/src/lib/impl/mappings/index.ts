@@ -1,5 +1,5 @@
 import { emitter } from "../../../events";
-import { MediaFormat, MediaStatus, MediaType } from "../../../types";
+import { type MediaFormat, MediaStatus, type MediaType } from "../../../types";
 import type { IMedia } from "../../../types/impl/mappings";
 import colors from "colors";
 import { MediaRepository } from "../../../database/impl/wrapper/impl/media";
@@ -36,9 +36,8 @@ const loadMapping = async (data: { id: string; type: MediaType; formats: MediaFo
         // Use only providers that match the desired format
         if (provider.formats?.includes(data.formats[0])) {
             return await provider.getMedia(data.id);
-        } else {
-            return null;
         }
+            return null;
     });
 
     const resolvedResults = await Promise.all(promiseArray);
