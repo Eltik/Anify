@@ -3,6 +3,7 @@
     "description": "Advanced anime, manga, and lightnovel scraping web API.",
     "module": "index.ts",
     "type": "module",
+    "version": "2.0.0",
     "scripts": {
         "start": "bun run dist/index.js",
         "dev": "bun src/index.ts",
