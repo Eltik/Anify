@@ -6,7 +6,7 @@ import type { IAnime } from "../../../../types/impl/database/impl/schema/anime";
 import type { IManga } from "../../../../types/impl/database/impl/schema/manga";
 import { Events } from "../../../../types/impl/events";
 import type { IMedia } from "../../../../types/impl/mappings";
-import DatabaseHandler from "../../handler";
+import type DatabaseHandler from "../../handler";
 import { AnimeRepository } from "./anime";
 import { MangaRepository } from "./manga";
 import { SkipTimesRepository } from "./skipTimes";
