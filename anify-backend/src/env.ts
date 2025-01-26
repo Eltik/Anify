@@ -1,7 +1,7 @@
 import * as dotenv from "dotenv";
 import { z } from "zod";
 import fs from "node:fs";
-import path from "path";
+import path from "node:path";
 
 const booleanFromEnv = z.string().transform((val) => {
     if (val === "true") return true;
