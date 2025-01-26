@@ -2,7 +2,7 @@
  * @author shimizu.dev_ from the Anify Discord
  */
 
-import { IMediaBase } from "../../../../../types/impl/mappings";
+import type { IMediaBase } from "../../../../../types/impl/mappings";
 
 /**
  * Cleans and normalizes a given title string for comparison.

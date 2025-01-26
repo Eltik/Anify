@@ -1,12 +1,12 @@
 import { ANIME_PROVIDERS, INFORMATION_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS } from "../../../../mappings";
-import InformationProvider from "../../../../mappings/impl/information";
+import type InformationProvider from "../../../../mappings/impl/information";
 import { MediaFormat, MediaSeason, MediaType, ProviderType } from "../../../../types";
 import type { IAnime } from "../../../../types/impl/database/impl/schema/anime";
 import type { IManga } from "../../../../types/impl/database/impl/schema/manga";
 import type { IMappedResult } from "../../../../types/impl/lib/impl/mappings";
 import type { IMedia } from "../../../../types/impl/mappings";
 import colors from "colors";
-import { AnimeInfo, MangaInfo } from "../../../../types/impl/mappings/impl/mediaInfo";
+import type { AnimeInfo, MangaInfo } from "../../../../types/impl/mappings/impl/mediaInfo";
 import { averageMetric } from "./helper/averageMetric";
 
 /**
@@ -156,7 +156,7 @@ export async function createMedia(mappings: IMappedResult[], type: MediaType): P
         const media = results[i];
 
         for (let j = 0; j < INFORMATION_PROVIDERS.length; j++) {
-            const provider = (await INFORMATION_PROVIDERS[j]()) as InformationProvider<IMedia, any>;
+            const provider = (await INFORMATION_PROVIDERS[j]()) as InformationProvider<IMedia, AnimeInfo | MangaInfo>;
             // Fetch info baesd on the media
             const info = await provider.info(media).catch((err) => {
                 console.log(colors.red(`Error while fetching info for ${media.id} from ${provider.id}`));
@@ -192,7 +192,7 @@ export function fillMediaInfo<T extends IAnime | IManga, U extends AnimeInfo | M
         const specialLoadFields: (keyof AnimeInfo | MangaInfo)[] = ["title"];
 
         for (const ak of Object.keys(info)) {
-            if (crossLoadFields.includes(ak as any) || provider.sharedArea.includes(ak as any) || specialLoadFields.includes(ak as any)) continue;
+            if (crossLoadFields.includes(ak as keyof (AnimeInfo | MangaInfo)) || provider.sharedArea.includes(ak as keyof (AnimeInfo | MangaInfo)) || specialLoadFields.includes(ak as keyof (AnimeInfo | MangaInfo))) continue;
 
             const v = media[ak as keyof (IAnime | IManga)];
 
@@ -200,12 +200,12 @@ export function fillMediaInfo<T extends IAnime | IManga, U extends AnimeInfo | M
             if ((!v || v === "UNKNOWN") && !!info[ak as keyof (AnimeInfo | MangaInfo)] && info[ak as keyof (AnimeInfo | MangaInfo)] !== "UNKNOWN") {
                 write = true;
             } else {
-                if (provider.priorityArea.includes(ak as any) && !!info[ak as keyof (AnimeInfo | MangaInfo)]) write = true;
+                if (provider.priorityArea.includes(ak as keyof (AnimeInfo | MangaInfo)) && !!info[ak as keyof (AnimeInfo | MangaInfo)]) write = true;
             }
 
             if (write) {
                 // Use type assertion to indicate that ak is of type keyof (Anime | Manga)
-                (media[ak as keyof (IAnime | IManga)] as any) = info[ak as keyof (AnimeInfo | MangaInfo)] as any;
+                (media[ak as keyof (IAnime | IManga)] as unknown) = info[ak as keyof (AnimeInfo | MangaInfo)];
             }
         }
 
@@ -215,9 +215,9 @@ export function fillMediaInfo<T extends IAnime | IManga, U extends AnimeInfo | M
                 // ak is the english/romaji/native title
                 // av is the actual title
                 for (const [ak, av] of Object.entries(v)) {
-                    if (av && (av as any)?.length) {
-                        if (!(media[special as keyof (IAnime | IManga)] as any)[ak]) {
-                            (media[special as keyof (IAnime | IManga)] as any)[ak] = {};
+                    if (av && (av as keyof (AnimeInfo | MangaInfo))?.length) {
+                        if (!((media[special as keyof (IAnime | IManga)] as Record<string, unknown>)[ak])) {
+                            (media[special as keyof (IAnime | IManga)] as Record<string, unknown>)[ak] = {};
 
                             Object.assign(media[special as keyof (IAnime | IManga)] ?? {}, {
                                 [ak]: av,
@@ -230,16 +230,17 @@ export function fillMediaInfo<T extends IAnime | IManga, U extends AnimeInfo | M
 
         for (const shared of provider.sharedArea) {
             if (!media[shared as keyof (IAnime | IManga)]) {
-                (media[shared as keyof (IAnime | IManga)] as any) = [];
+                (media[shared as keyof (IAnime | IManga)] as unknown) = [];
             }
 
-            (media[shared as keyof (IAnime | IManga)] as any) = [...new Set((media[shared as keyof (IAnime | IManga)] as any).concat(info[shared as keyof (AnimeInfo | MangaInfo)] ?? []))];
+            // @ts-expect-error: Type assertion is not working
+            (media[shared as keyof (IAnime | IManga)] as unknown) = [...new Set((media[shared as keyof (IAnime | IManga)]).concat(info[shared as keyof (AnimeInfo | MangaInfo)] ?? []))];
         }
 
         for (const crossLoad of crossLoadFields) {
             if (info[crossLoad as keyof (AnimeInfo | MangaInfo)]) {
                 if (media[crossLoad as keyof (IAnime | IManga)] === null || media[crossLoad as keyof (IAnime | IManga)] === undefined) {
-                    (media[crossLoad as keyof (IAnime | IManga)] as any) = {};
+                    (media[crossLoad as keyof (IAnime | IManga)] as unknown) = {};
 
                     Object.assign(media[crossLoad as keyof (IAnime | IManga)] ?? {}, {
                         [provider.id]: info[crossLoad as keyof (AnimeInfo | MangaInfo)],
@@ -247,7 +248,7 @@ export function fillMediaInfo<T extends IAnime | IManga, U extends AnimeInfo | M
                 }
                 if (media[crossLoad as keyof (IAnime | IManga)] !== null && media[crossLoad as keyof (IAnime | IManga)] !== undefined) {
                     if (media[crossLoad as keyof (IAnime | IManga)]) {
-                        (media[crossLoad as keyof (IAnime | IManga)] as any)[provider.id] = info[crossLoad as keyof (AnimeInfo | MangaInfo)] as any;
+                        ((media[crossLoad as keyof (IAnime | IManga)] as Record<string, unknown>))[provider.id] = info[crossLoad as keyof (AnimeInfo | MangaInfo)];
                     }
                 }
             }

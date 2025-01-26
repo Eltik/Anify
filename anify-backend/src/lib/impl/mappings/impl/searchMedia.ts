@@ -1,6 +1,6 @@
-import AnimeProvider from "../../../../mappings/impl/anime";
-import MangaProvider from "../../../../mappings/impl/manga";
-import MetaProvider from "../../../../mappings/impl/meta";
+import type AnimeProvider from "../../../../mappings/impl/anime";
+import type MangaProvider from "../../../../mappings/impl/manga";
+import type MetaProvider from "../../../../mappings/impl/meta";
 import type { IProviderResult } from "../../../../types";
 import type { AnimeInfo, MangaInfo } from "../../../../types/impl/mappings/impl/mediaInfo";
 import colors from "colors";

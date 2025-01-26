@@ -10,7 +10,7 @@ const handler = async (req: Request): Promise<Response> => {
         const paths = url.pathname.split("/");
         paths.shift();
 
-        const cached = await redis.get(`stats`);
+        const cached = await redis.get("stats");
         if (cached) {
             return middleware.createResponse(cached);
         }
@@ -20,7 +20,7 @@ const handler = async (req: Request): Promise<Response> => {
             return middleware.createResponse(JSON.stringify({ error: "No data found." }), 404);
         }
 
-        await redis.set(`stats`, JSON.stringify(data), "EX", env.REDIS_CACHE_TIME);
+        await redis.set("stats", JSON.stringify(data), "EX", env.REDIS_CACHE_TIME);
 
         return middleware.createResponse(JSON.stringify(data));
     } catch (e) {

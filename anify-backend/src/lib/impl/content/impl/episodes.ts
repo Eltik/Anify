@@ -27,11 +27,11 @@ const loadEpisodes = async (media: IAnime): Promise<IEpisodeData[]> => {
                 }
 
                 // Ensure each episode has an updatedAt field.
-                data.forEach((ep) => {
+                for (const ep of data) {
                     if (!ep.updatedAt) {
                         ep.updatedAt = 0;
                     }
-                });
+                }
 
                 // Add to our episodes array.
                 episodes.push({
@@ -47,11 +47,11 @@ const loadEpisodes = async (media: IAnime): Promise<IEpisodeData[]> => {
     // 2. Find the latest episode across all providers.
     let { latestEpisode = 0, latestTitle = "", updatedAt = 0 } = media.episodes?.latest ?? {};
 
-    episodes.forEach(({ episodes: providerEpisodes }) => {
+    for (const { episodes: providerEpisodes } of episodes) {
         const latest = providerEpisodes.reduce((prev, current) => (prev.number > current.number ? prev : current));
 
         const candidateEpisodeNumber = Number(latest.number);
-        const candidateUpdatedAt = !isNaN(Number(latest.updatedAt)) ? Number(latest.updatedAt) : 0;
+        const candidateUpdatedAt = !Number.isNaN(Number(latest.updatedAt)) ? Number(latest.updatedAt) : 0;
 
         // Check if the new episode is later or has a more recent updatedAt
         const hasNewerEpisode = candidateEpisodeNumber > latestEpisode || (candidateEpisodeNumber === latestEpisode && latest.title !== latestTitle);
@@ -62,10 +62,10 @@ const loadEpisodes = async (media: IAnime): Promise<IEpisodeData[]> => {
             latestTitle = String(latest.title);
             updatedAt = candidateUpdatedAt;
         }
-    });
+    }
 
     // If the totalEpisodes is not set or is behind the latest episode, update it.
-    const totalEpisodes = !media.totalEpisodes || media.totalEpisodes! < latestEpisode ? latestEpisode : media.totalEpisodes;
+    const totalEpisodes = !media.totalEpisodes || media.totalEpisodes as number < latestEpisode ? latestEpisode : media.totalEpisodes;
 
     // 3. Update media info from all information providers in parallel (instead of sequential).
     const infoProviders = await Promise.all(INFORMATION_PROVIDERS.map((factory) => factory()));

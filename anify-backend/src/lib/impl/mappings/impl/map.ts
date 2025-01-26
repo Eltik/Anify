@@ -1,8 +1,8 @@
 import { ANIME_PROVIDERS, MANGA_PROVIDERS, META_PROVIDERS } from "../../../../mappings";
-import AnimeProvider from "../../../../mappings/impl/anime";
-import MangaProvider from "../../../../mappings/impl/manga";
-import MetaProvider from "../../../../mappings/impl/meta";
-import { type IProviderResult, MediaFormat, MediaType } from "../../../../types";
+import type AnimeProvider from "../../../../mappings/impl/anime";
+import type MangaProvider from "../../../../mappings/impl/manga";
+import type MetaProvider from "../../../../mappings/impl/meta";
+import { type IProviderResult, type MediaFormat, MediaType } from "../../../../types";
 import type { IMappedResult } from "../../../../types/impl/lib/impl/mappings";
 import type { IMedia } from "../../../../types/impl/mappings";
 import type { AnimeInfo, MangaInfo } from "../../../../types/impl/mappings/impl/mediaInfo";
@@ -32,7 +32,7 @@ export const map = async (type: MediaType, formats: MediaFormat[], baseData: Ani
         }, []);
 
     console.log(colors.gray("Fetching from providers for ") + colors.blue(baseData?.id ?? "") + colors.gray("..."));
-    const resultsArray = await searchMedia(baseData!, suitableProviders);
+    const resultsArray = await searchMedia(baseData as AnimeInfo | MangaInfo, suitableProviders);
     console.log(colors.gray("Finished fetching from providers for ") + colors.blue(baseData?.id ?? "") + colors.gray("."));
 
     const mappings: IMappedResult[] = [];
@@ -63,7 +63,7 @@ export const map = async (type: MediaType, formats: MediaFormat[], baseData: Ani
                         colors.blue(suitableProviders[i].id) +
                         colors.gray(".") +
                         colors.gray(" Best match rating: ") +
-                        colors.blue(match.similarity + "") +
+                        colors.blue(`${match.similarity}`) +
                         colors.gray(". ID: ") +
                         colors.blue(match.match.id) +
                         colors.gray(". Title: ") +

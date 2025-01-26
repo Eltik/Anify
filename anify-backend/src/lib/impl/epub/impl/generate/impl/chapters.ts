@@ -3,7 +3,7 @@ import type { IManga } from "../../../../../../types/impl/database/impl/schema/m
 import type { ImageFile } from "../../../../../../types/impl/lib/impl/epub";
 import type { Chapter as EPubChapter } from "epub-gen-memory";
 import { MANGA_PROVIDERS } from "../../../../../../mappings";
-import { CheerioAPI, load } from "cheerio";
+import { type CheerioAPI, load } from "cheerio";
 import colors from "colors";
 import { env } from "../../../../../../env";
 import { getMediaTitle } from "./utils";

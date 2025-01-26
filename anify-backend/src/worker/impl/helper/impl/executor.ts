@@ -4,13 +4,13 @@ export default class QueueExecutor<T> {
     id: string;
     private intervalId: NodeJS.Timer | undefined;
     private intervalN: number | undefined;
-    private executorFunc: ((args: T, meta: any) => Promise<void>) | undefined;
+    private executorFunc: ((args: T, meta: unknown) => Promise<void>) | undefined;
     private callbackFunc: ((args: T) => Promise<void> | void) | undefined;
     private errorFunc: ((error: Error, args: T) => Promise<void> | void) | undefined;
     private runConditionFunc: (() => boolean) | undefined;
 
     private queue: Set<T> = new Set<T>();
-    private metaMap: Map<T, any> = new Map<T, any>();
+    private metaMap: Map<T, unknown> = new Map<T, unknown>();
     private paused = false;
     private activeBySwitch = false;
     private active = true;
@@ -34,25 +34,25 @@ export default class QueueExecutor<T> {
         return this;
     }
 
-    executor(func: (args: T, meta: any) => Promise<any>): QueueExecutor<T> {
-        this.executorFunc = func;
+    executor(func: (args: T, meta: unknown) => Promise<unknown>): QueueExecutor<T> {
+        this.executorFunc = func as (args: T, meta: unknown) => Promise<void>;
 
         return this;
     }
 
-    callback(func: (args: T) => Promise<any> | void): QueueExecutor<T> {
+    callback(func: (args: T) => Promise<void> | void): QueueExecutor<T> {
         this.callbackFunc = func;
 
         return this;
     }
 
-    error(func: (error: Error, args: T) => Promise<any> | void): QueueExecutor<T> {
+    error(func: (error: Error, args: T) => Promise<void> | void): QueueExecutor<T> {
         this.errorFunc = func;
 
         return this;
     }
 
-    add(arg: T, meta: any = undefined) {
+    add(arg: T, meta: unknown = undefined) {
         this.queue.add(arg);
         if (meta) {
             this.metaMap.set(arg, meta);
@@ -101,13 +101,13 @@ export default class QueueExecutor<T> {
                 if (this.active) {
                     this.running = true;
                     if (this.executorFunc)
-                        this.executorFunc(true as any, undefined)
+                        this.executorFunc(true as unknown as T, undefined)
                             .then(() => {
-                                if (this.callbackFunc) this.callbackFunc(true as any);
+                                if (this.callbackFunc) this.callbackFunc(true as unknown as T);
                                 this.running = false;
                             })
                             .catch((err) => {
-                                if (this.errorFunc) this.errorFunc(err, true as any);
+                                if (this.errorFunc) this.errorFunc(err, true as unknown as T);
                                 this.running = false;
                             });
                 }

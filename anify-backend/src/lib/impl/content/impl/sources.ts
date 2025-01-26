@@ -8,7 +8,7 @@
  */
 
 import { ANIME_PROVIDERS } from "../../../../mappings";
-import { ISource, StreamingServers, SubType } from "../../../../types/impl/mappings/impl/anime";
+import type { ISource, StreamingServers, SubType } from "../../../../types/impl/mappings/impl/anime";
 
 const loadSources = async (providerId: string, watchId: string, subType: SubType, server: StreamingServers): Promise<ISource | null> => {
     const animeProviders = await Promise.all(ANIME_PROVIDERS.map((factory) => factory()));

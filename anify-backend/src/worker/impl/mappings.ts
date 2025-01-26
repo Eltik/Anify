@@ -1,6 +1,6 @@
 import colors from "colors";
 import QueueExecutor from "./helper/impl/executor";
-import { MediaFormat, MediaType } from "../../types";
+import type { MediaFormat, MediaType } from "../../types";
 import loadMapping from "../../lib/impl/mappings";
 
 const executor = new QueueExecutor<{ id: string; type: MediaType; formats: MediaFormat[] }>("mapping-executor")
