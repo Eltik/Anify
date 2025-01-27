@@ -24,14 +24,16 @@ const handler = async (req: Request): Promise<Response> => {
         const type = body?.type ?? paths[1] ?? url.searchParams.get("type") ?? null;
         if (!type) {
             return middleware.createResponse(JSON.stringify({ error: "No type provided." }), 400);
-        } else if (!validTypes.includes(type.toLowerCase())) {
+        }
+        
+        if (!validTypes.includes(type.toLowerCase())) {
             return middleware.createResponse(JSON.stringify({ error: "Invalid type provided." }), 400);
         }
 
         let fields: string[] = body?.fields ?? [];
         const fieldsParam = url.searchParams.get("fields");
 
-        if (fieldsParam && fieldsParam.startsWith("[") && fieldsParam.endsWith("]")) {
+        if (fieldsParam?.startsWith("[") && fieldsParam?.endsWith("]")) {
             const fieldsArray = fieldsParam
                 .slice(1, -1)
                 .split(",")
@@ -51,44 +53,23 @@ const handler = async (req: Request): Promise<Response> => {
             formats,
         });
 
-        const itemsToFetch: Array<{ type: MediaType; id: string; formats: [MediaFormat] }> = [];
-        data?.trending?.forEach((x) => {
-            itemsToFetch.push({
-                type: x.type,
-                id: x.id,
-                formats: [x.format],
-            });
-        });
-        data?.seasonal?.forEach((x) => {
-            itemsToFetch.push({
-                type: x.type,
-                id: x.id,
-                formats: [x.format],
-            });
-        });
-        data?.popular?.forEach((x) => {
-            itemsToFetch.push({
-                type: x.type,
-                id: x.id,
-                formats: [x.format],
-            });
-        });
-        data?.top?.forEach((x) => {
-            itemsToFetch.push({
-                type: x.type,
-                id: x.id,
-                formats: [x.format],
-            });
-        });
-
-        // Remove duplicates
-        const uniqueItems = itemsToFetch.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id));
-
-        const batchData = await MediaRepository.batchFetchWithFilter(db, uniqueItems);
-
         if (!data) {
             return middleware.createResponse(JSON.stringify({ error: "No data found." }), 404);
         }
+
+        // Combine all arrays and create a Set to remove duplicates in one pass which is faster than filtering each array individually
+        const uniqueItems = [...new Set([
+            ...(data.trending || []),
+            ...(data.seasonal || []),
+            ...(data.popular || []),
+            ...(data.top || [])
+        ])].map(x => ({
+            type: x.type,
+            id: x.id,
+            formats: [x.format]
+        }));
+
+        const batchData = await MediaRepository.batchFetchWithFilter(db, uniqueItems);
 
         if (batchData.length !== 0) {
             await redis.set(`seasonal:${type}:${fields.join(",")}`, JSON.stringify(batchData), "EX", env.REDIS_CACHE_TIME);
