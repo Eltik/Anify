@@ -12,11 +12,11 @@ export default class TVDBInfo extends InformationProvider<IAnime | IManga, Anime
     private api = "https://api4.thetvdb.com/v4";
     private apiKeys = ["f5744a13-9203-4d02-b951-fbd7352c1657", "8f406bec-6ddb-45e7-8f4b-e1861e10f1bb", "5476e702-85aa-45fd-a8da-e74df3840baf", "51020266-18f7-4382-81fc-75a4014fa59f"];
 
-    public needsProxy: boolean = true;
-    public useGoogleTranslate: boolean = false;
+    public needsProxy = true;
+    public useGoogleTranslate = false;
 
     override rateLimit = 0;
-    override maxConcurrentRequests: number = -1;
+    override maxConcurrentRequests = -1;
 
     override formats: MediaFormat[] = [MediaFormat.TV, MediaFormat.MOVIE, MediaFormat.ONA, MediaFormat.SPECIAL, MediaFormat.TV_SHORT, MediaFormat.OVA];
 
