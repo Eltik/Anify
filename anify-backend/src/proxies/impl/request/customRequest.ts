@@ -2,184 +2,55 @@ import type { IRequestConfig } from "../../../types/impl/proxies";
 import { ProxyAgent } from "undici";
 import { removeProviderProxy } from "../manager/impl/file/saveProviderProxies";
 import { getRandomProxy } from "../manager/impl/getRandomProxy";
-import { ProviderType } from "../../../types";
 
 export async function customRequest(url: string, options: IRequestConfig = {}): Promise<Response> {
-    const { useGoogleTranslate, timeout = 5000, providerType, providerId, maxRetries = 3 } = options;
+    const { isChecking, proxy, useGoogleTranslate, timeout, providerType, providerId, maxRetries } = options;
 
-    let currentProxy = options.proxy;
-    let retryCount = 0;
-    // Keep track of used proxies to avoid reusing them
-    const usedProxies = new Set<string>();
-    if (currentProxy) usedProxies.add(currentProxy);
+    let attempts = 0;
+    while (attempts < (isChecking ? 1 : maxRetries || 3)) {
+        attempts++;
 
-    while (retryCount < maxRetries) {
-        const finalURL = useGoogleTranslate ? "http://translate.google.com/translate?sl=ja&tl=en&u=" + encodeURIComponent(url) : url;
-        const isHttps = finalURL.startsWith("https://");
-
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), timeout);
-
+        const proxyURL = isChecking ? proxy
+            : useGoogleTranslate ?
+                "http://translate.google.com/translate?sl=ja&tl=en&u=" + encodeURIComponent(url)
+            : proxy && attempts === 1 ?
+                proxy
+            : providerType && providerId ?
+                await getRandomProxy(providerType, providerId)
+            : null;
+            
         try {
-            // Create a fresh options object for each attempt, without the previous dispatcher
-            const currentOptions = { ...options };
-            delete currentOptions.dispatcher; // Remove any existing dispatcher
+            const dispatcher = new ProxyAgent(proxyURL || "");
 
-            // Set the current proxy
-            currentOptions.proxy = currentProxy;
+            const fetchOptions: RequestInit = {
+                ...options,
+                dispatcher: dispatcher as any, // TODO: Fix this
+            };
 
-            if (currentProxy && currentProxy.length > 0) {
-                // Create a new ProxyAgent for each attempt with appropriate configuration for HTTP/HTTPS
-                // @ts-expect-error - ProxyAgent is compatible with Dispatcher but types are mismatched
-                currentOptions.dispatcher = new ProxyAgent({
-                    uri: currentProxy,
-                    // Always add TLS options since we need to handle HTTPS certificates
-                    requestTls: {
-                        rejectUnauthorized: false,
-                    },
-                    // For HTTP URLs, ensure connection is not upgraded to HTTPS
-                    ...(isHttps
-                        ? {}
-                        : {
-                              protocol: "http:",
-                          }),
-                });
-            }
-
-            const fetchPromise = fetch(finalURL, {
-                ...currentOptions,
-                signal: controller.signal,
-                redirect: useGoogleTranslate ? "follow" : "manual",
+            const timeoutPromise = new Promise<Response>((_, reject) => {
+                setTimeout(() => reject(new Error("Request timed out")), timeout || 5000);
             });
 
-            const timeoutPromise = new Promise<never>((_, reject) =>
-                setTimeout(() => {
-                    controller.abort();
-                    reject(new Error(`Request to ${url}${currentProxy && currentProxy.length > 0 ? ` with proxy ${currentProxy}` : ""}${useGoogleTranslate ? " with Google Translate" : ""} timed out after ${timeout} ms`));
-                }, timeout),
-            );
-
+            const fetchPromise = fetch(url, fetchOptions);
             const response = await Promise.race([fetchPromise, timeoutPromise]);
-            clearTimeout(id);
-
-            // Handle redirects manually
-            if (response.status === 301 || response.status === 302 || response.status === 303 || response.status === 307 || response.status === 308) {
-                const location = response.headers.get("location");
-                if (location) {
-                    // Create new options for the redirect
-                    const redirectOptions = { ...options };
-                    // Copy over headers from the original response that should be preserved
-                    if (response.headers.get("set-cookie")) {
-                        redirectOptions.headers = {
-                            ...redirectOptions.headers,
-                            Cookie: response.headers.get("set-cookie") || "",
-                        };
-                    }
-                    // Make a new request to the redirect location
-                    return customRequest(location, redirectOptions);
-                }
-            }
 
             return response;
         } catch (error) {
-            clearTimeout(id);
+            const checkError = error instanceof Error && (
+                error.message.includes("Request timed out") ||
+                error.message.includes("socket connection was closed") ||
+                error.message.includes("unable to verify the first certificate") ||
+                error.message.includes("certificate has expired")
+            );
 
-            // During proxy checks, we want to try all available proxies
-            if (options.isChecking) {
-                // If we have provider info, try to get a new proxy
-                if (providerType && providerId) {
-                    // Keep trying to get a new proxy until we get one we haven't used
-                    let newProxy: string | null = null;
-                    let attempts = 0;
-                    const maxAttempts = 50; // Increase max attempts during proxy checks
-
-                    while (attempts < maxAttempts) {
-                        newProxy = getRandomProxy(providerType as ProviderType, providerId);
-                        if (!newProxy || !usedProxies.has(newProxy)) {
-                            break;
-                        }
-                        attempts++;
-                    }
-
-                    // If no more proxies available or all have been used, throw the error
-                    if (!newProxy || attempts >= maxAttempts) {
-                        throw new Error(`No more unused proxies available for ${providerType} ${providerId}`);
-                    }
-
-                    // Update the proxy and track it as used
-                    currentProxy = newProxy;
-                    usedProxies.add(newProxy);
-                    retryCount++;
-                    continue;
+            if (!isChecking && (providerType && providerId && proxyURL) && checkError) {
+                if (!useGoogleTranslate) {
+                    await removeProviderProxy(providerType, providerId, proxyURL);
                 }
-                throw error;
+            } else {
+                console.log((error as Error).message);
             }
-
-            // Check if this is a retriable error (connection refused, timeout, abort, etc.)
-            const shouldRetryError =
-                error instanceof Error &&
-                (error.message.includes("ConnectionRefused") ||
-                    error.message.includes("timed out") ||
-                    error.message.includes("Unable to connect") ||
-                    error.message.includes("aborted") ||
-                    error.name === "AbortError" ||
-                    (error as any).code === "ABORT_ERR" ||
-                    error.message.includes("timeout") ||
-                    error.message.includes("Timeout") ||
-                    error.message.includes("Request to") ||
-                    // Add connection closed errors
-                    error.message.includes("ConnectionClosed") ||
-                    error.message.includes("connection closed") ||
-                    error.message.includes("socket connection was closed") ||
-                    error.name === "ConnectionClosedError");
-
-            // Always retry if we have a proxy and it's a retriable error
-            if (currentProxy && shouldRetryError) {
-                // Only try to remove the proxy if we have provider info
-                if (providerType && providerId) {
-                    try {
-                        await removeProviderProxy(providerType as ProviderType, providerId, currentProxy);
-                    } catch (removeError) {
-                        console.error("Failed to remove proxy:", removeError);
-                    }
-
-                    // Keep trying to get a new proxy until we get one we haven't used
-                    let newProxy: string | null = null;
-                    let attempts = 0;
-                    const maxAttempts = 10; // Prevent infinite loops
-
-                    while (attempts < maxAttempts) {
-                        newProxy = getRandomProxy(providerType as ProviderType, providerId);
-                        if (!newProxy || !usedProxies.has(newProxy)) {
-                            break;
-                        }
-                        attempts++;
-                    }
-
-                    // If no more proxies available or all have been used, throw the error
-                    if (!newProxy || attempts >= maxAttempts) {
-                        throw new Error(`No more unused proxies available for ${providerType} ${providerId} after proxy failure: ${error instanceof Error ? error.message : String(error)}`);
-                    }
-
-                    // Update the proxy and track it as used
-                    currentProxy = newProxy;
-                    usedProxies.add(newProxy);
-                }
-
-                retryCount++;
-
-                // If we've exhausted all retries, throw the last error
-                if (retryCount >= maxRetries) {
-                    throw new Error(`Max retries (${maxRetries}) reached for ${url}. Last error: ${error instanceof Error ? error.message : String(error)}`);
-                }
-
-                // Continue to next iteration to retry with new proxy
-                continue;
-            }
-
-            throw error;
         }
     }
-
-    throw new Error(`Max retries (${maxRetries}) reached for ${url}`);
+    throw new Error("Max retry attempts reached");
 }

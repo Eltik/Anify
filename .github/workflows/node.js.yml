@@ -5,9 +5,9 @@ name: Build Anify
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "v2" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "v2" ]
 env:
   API_KEY: temp
 
@@ -23,3 +23,4 @@ jobs:
     - run: bun run install
     - run: bun run lint
     - run: bun run build
+    - run: bun run test

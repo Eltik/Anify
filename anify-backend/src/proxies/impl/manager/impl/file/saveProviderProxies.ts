@@ -1,7 +1,9 @@
 import { proxyCache } from "../..";
 import { ProviderType } from "../../../../../types";
 import { saveJSON } from "../../../helper/saveJSON";
-import { IProxy } from "../../../../../types/impl/proxies";
+import type { IProxy } from "../../../../../types/impl/proxies";
+import { env } from "../../../../../env";
+import colors from "colors";
 
 export async function saveProviderProxies(providerType: ProviderType): Promise<void> {
     const fileName = `${providerType}Proxies.json`;
@@ -34,4 +36,8 @@ export async function removeProviderProxy(providerType: ProviderType, providerId
 
     // Save the updated proxy list
     await saveProviderProxies(providerType);
+
+    if (env.DEBUG) {
+        console.log(colors.red(`Removed proxy ${proxyUrl} from ${providerType} ${providerId}`));
+    }
 }
