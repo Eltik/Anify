@@ -33,7 +33,7 @@ const handler = async (req: Request): Promise<Response> => {
         let fields: string[] = body?.fields ?? [];
         const fieldsParam = url.searchParams.get("fields");
 
-        if (fieldsParam?.startsWith("[") && fieldsParam.endsWith("]")) {
+        if (fieldsParam?.startsWith("[") && fieldsParam?.endsWith("]")) {
             const fieldsArray = fieldsParam
                 .slice(1, -1)
                 .split(",")
