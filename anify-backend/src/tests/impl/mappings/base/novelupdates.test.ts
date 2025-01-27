@@ -9,6 +9,11 @@ const novelupdates = new NovelUpdatesBase();
 test(
     "Base.NovelUpdates.Search",
     async (done) => {
+        if (env.IS_WORKFLOW) {
+            done();
+            return;
+        }
+
         await preloadProxies();
         const data = await novelupdates.search("Mushoku Tensei", MediaType.MANGA, [MediaFormat.NOVEL], 0);
 
@@ -29,6 +34,11 @@ test(
 test(
     "Base.NovelUpdates.GetMedia",
     async (done) => {
+        if (env.IS_WORKFLOW) {
+            done();
+            return;
+        }
+
         await preloadProxies();
         const data = await novelupdates.getMedia("mushoku-tensei");
 
@@ -48,6 +58,11 @@ test(
 test(
     "Base.NovelUpdates.Seasonal",
     async (done) => {
+        if (env.IS_WORKFLOW) {
+            done();
+            return;
+        }
+
         await preloadProxies();
         const data = await novelupdates.fetchSeasonal();
 

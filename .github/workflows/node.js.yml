@@ -9,7 +9,10 @@ on:
   pull_request:
     branches: [ "main", "v2" ]
 env:
-  API_KEY: temp
+  IS_WORKFLOW: true
+  NODE_ENV: test
+  DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/anify?schema=public"
+  REDIS_URL: "redis://localhost:6379"
 
 jobs:
   build:

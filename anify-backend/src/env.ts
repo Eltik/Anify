@@ -25,6 +25,10 @@ const envSchema = z.object({
      */
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     /**
+     * Whether the server is running in a GitHub Actions workflow.
+     */
+    IS_WORKFLOW: booleanFromEnv.optional().default("false"),
+    /**
      * The port to run the server on.
      */
     PORT: z.string().regex(/^\d+$/).transform(Number).default("3000"),
@@ -66,7 +70,7 @@ const envSchema = z.object({
     PROXY_CRON_ENABLED: booleanFromEnv.optional().default("false"),
 
     /**
-     * @description Enviorment variables for mapping providers.
+     * @description Environment variables for mapping providers.
      */
     NOVELUPDATES_LOGIN: z.string().optional(),
 });
