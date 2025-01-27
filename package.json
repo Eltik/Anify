@@ -8,6 +8,6 @@
     "install": "cd anify-startup && bun install && cd ../anify-frontend && bun install && cd ../anify-backend && bun install",
     "lint": "cd anify-startup && tsc && cd ../anify-frontend && bun run lint && cd ../anify-backend && bun run lint",
     "build": "cd anify-startup && bun run build && cd ../anify-backend && bun run build && cd ../anify-frontend && bun run build",
-    "test": "cd anify-backend && bun run test"
+    "test": "cd anify-backend && bun test"
   }
 }
