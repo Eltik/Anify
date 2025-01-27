@@ -37,7 +37,7 @@ const loadMapping = async (data: { id: string; type: MediaType; formats: MediaFo
         if (provider.formats?.includes(data.formats[0])) {
             return await provider.getMedia(data.id);
         }
-            return null;
+        return null;
     });
 
     const resolvedResults = await Promise.all(promiseArray);

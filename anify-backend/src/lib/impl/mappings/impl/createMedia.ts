@@ -216,7 +216,7 @@ export function fillMediaInfo<T extends IAnime | IManga, U extends AnimeInfo | M
                 // av is the actual title
                 for (const [ak, av] of Object.entries(v)) {
                     if (av && (av as keyof (AnimeInfo | MangaInfo))?.length) {
-                        if (!((media[special as keyof (IAnime | IManga)] as Record<string, unknown>)[ak])) {
+                        if (!(media[special as keyof (IAnime | IManga)] as Record<string, unknown>)[ak]) {
                             (media[special as keyof (IAnime | IManga)] as Record<string, unknown>)[ak] = {};
 
                             Object.assign(media[special as keyof (IAnime | IManga)] ?? {}, {
@@ -234,7 +234,7 @@ export function fillMediaInfo<T extends IAnime | IManga, U extends AnimeInfo | M
             }
 
             // @ts-expect-error: Type assertion is not working
-            (media[shared as keyof (IAnime | IManga)] as unknown) = [...new Set((media[shared as keyof (IAnime | IManga)]).concat(info[shared as keyof (AnimeInfo | MangaInfo)] ?? []))];
+            (media[shared as keyof (IAnime | IManga)] as unknown) = [...new Set(media[shared as keyof (IAnime | IManga)].concat(info[shared as keyof (AnimeInfo | MangaInfo)] ?? []))];
         }
 
         for (const crossLoad of crossLoadFields) {
@@ -248,7 +248,7 @@ export function fillMediaInfo<T extends IAnime | IManga, U extends AnimeInfo | M
                 }
                 if (media[crossLoad as keyof (IAnime | IManga)] !== null && media[crossLoad as keyof (IAnime | IManga)] !== undefined) {
                     if (media[crossLoad as keyof (IAnime | IManga)]) {
-                        ((media[crossLoad as keyof (IAnime | IManga)] as Record<string, unknown>))[provider.id] = info[crossLoad as keyof (AnimeInfo | MangaInfo)];
+                        (media[crossLoad as keyof (IAnime | IManga)] as Record<string, unknown>)[provider.id] = info[crossLoad as keyof (AnimeInfo | MangaInfo)];
                     }
                 }
             }

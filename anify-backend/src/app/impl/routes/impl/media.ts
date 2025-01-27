@@ -57,26 +57,21 @@ const handler = async (req: Request): Promise<Response> => {
                 )
             )
             SELECT 
-                ${fields.length ? fields.map(f => `"${f}"`).join(", ") : '*'},
+                ${fields.length ? fields.map((f) => `"${f}"`).join(", ") : "*"},
                 mediaType as type
             FROM media_union
             LIMIT 1;
         `;
 
         const result = await db.query(mediaQuery, [providerId, id]);
-        
+
         if (!result.rows.length) {
             return middleware.createResponse(JSON.stringify({ error: "No data found." }), 404);
         }
 
         const data = result.rows[0];
 
-        await redis.set(
-            `media:${providerId}:${id}:${JSON.stringify(fields)}`,
-            JSON.stringify(data),
-            "EX",
-            env.REDIS_CACHE_TIME
-        );
+        await redis.set(`media:${providerId}:${id}:${JSON.stringify(fields)}`, JSON.stringify(data), "EX", env.REDIS_CACHE_TIME);
 
         return middleware.createResponse(JSON.stringify(data));
     } catch (e) {
@@ -97,4 +92,4 @@ type Body = {
     fields?: string[];
 };
 
-export default route; 
+export default route;

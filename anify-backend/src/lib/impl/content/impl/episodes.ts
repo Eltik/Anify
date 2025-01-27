@@ -65,7 +65,7 @@ const loadEpisodes = async (media: IAnime): Promise<IEpisodeData[]> => {
     }
 
     // If the totalEpisodes is not set or is behind the latest episode, update it.
-    const totalEpisodes = !media.totalEpisodes || media.totalEpisodes as number < latestEpisode ? latestEpisode : media.totalEpisodes;
+    const totalEpisodes = !media.totalEpisodes || (media.totalEpisodes as number) < latestEpisode ? latestEpisode : media.totalEpisodes;
 
     // 3. Update media info from all information providers in parallel (instead of sequential).
     const infoProviders = await Promise.all(INFORMATION_PROVIDERS.map((factory) => factory()));

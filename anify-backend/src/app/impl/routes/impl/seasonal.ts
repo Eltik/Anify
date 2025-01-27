@@ -25,7 +25,7 @@ const handler = async (req: Request): Promise<Response> => {
         if (!type) {
             return middleware.createResponse(JSON.stringify({ error: "No type provided." }), 400);
         }
-        
+
         if (!validTypes.includes(type.toLowerCase())) {
             return middleware.createResponse(JSON.stringify({ error: "Invalid type provided." }), 400);
         }
@@ -58,15 +58,10 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         // Combine all arrays and create a Set to remove duplicates in one pass which is faster than filtering each array individually
-        const uniqueItems = [...new Set([
-            ...(data.trending || []),
-            ...(data.seasonal || []),
-            ...(data.popular || []),
-            ...(data.top || [])
-        ])].map(x => ({
+        const uniqueItems = [...new Set([...(data.trending || []), ...(data.seasonal || []), ...(data.popular || []), ...(data.top || [])])].map((x) => ({
             type: x.type,
             id: x.id,
-            formats: [x.format]
+            formats: [x.format],
         }));
 
         const batchData = await MediaRepository.batchFetchWithFilter(db, uniqueItems);

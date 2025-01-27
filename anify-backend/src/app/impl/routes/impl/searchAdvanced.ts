@@ -41,7 +41,7 @@ const handler = async (req: Request): Promise<Response> => {
         const sortOrder = (body?.sortDirection ?? url.searchParams.get("sortDirection") ?? "ASC").toUpperCase();
 
         const cacheKey = `search-advanced:${type}:${query}:${JSON.stringify(formats)}:${genres}:${genresExcluded}:${tags}:${tagsExcluded}:${season}:${year}:${page}:${perPage}:${sortField}:${sortOrder}`;
-        
+
         const cached = await redis.get(cacheKey);
         if (cached) {
             return middleware.createResponse(cached);
@@ -67,13 +67,13 @@ const handler = async (req: Request): Promise<Response> => {
                         WHERE synonym ILIKE $1
                     )
                 )
-                ${formats.length ? "AND format = ANY($2::text[])" : ''}
-                ${genres.length ? "AND genres && $3::text[]" : ''}
-                ${genresExcluded.length ? "AND NOT (genres && $4::text[])" : ''}
-                ${tags.length ? "AND tags && $5::text[]" : ''}
-                ${tagsExcluded.length ? "AND NOT (tags && $6::text[])" : ''}
-                ${season ? "AND season = $7" : ''}
-                ${year ? "AND year = $8" : ''}
+                ${formats.length ? "AND format = ANY($2::text[])" : ""}
+                ${genres.length ? "AND genres && $3::text[]" : ""}
+                ${genresExcluded.length ? "AND NOT (genres && $4::text[])" : ""}
+                ${tags.length ? "AND tags && $5::text[]" : ""}
+                ${tagsExcluded.length ? "AND NOT (tags && $6::text[])" : ""}
+                ${season ? "AND season = $7" : ""}
+                ${year ? "AND year = $8" : ""}
             ),
             count_total AS (
                 SELECT COUNT(*) as total
@@ -95,23 +95,11 @@ const handler = async (req: Request): Promise<Response> => {
                     WHEN $9 = 'averageRating' THEN COALESCE(averageRating, 0)
                     WHEN $9 = 'year' THEN COALESCE(year, 0)
                     ELSE COALESCE(title->>'english', title->>'romaji', title->>'native')
-                END ${sortOrder === 'DESC' ? 'DESC' : 'ASC'}
+                END ${sortOrder === "DESC" ? "DESC" : "ASC"}
             LIMIT $10 OFFSET $11;
         `;
 
-        const params = [
-            `%${query}%`,
-            formats,
-            genres,
-            genresExcluded,
-            tags,
-            tagsExcluded,
-            season,
-            year,
-            sortField,
-            perPage,
-            (page - 1) * perPage
-        ].filter(p => p !== null && (Array.isArray(p) ? p.length > 0 : true));
+        const params = [`%${query}%`, formats, genres, genresExcluded, tags, tagsExcluded, season, year, sortField, perPage, (page - 1) * perPage].filter((p) => p !== null && (Array.isArray(p) ? p.length > 0 : true));
 
         const result = await db.query(searchQuery, params);
 
@@ -127,7 +115,7 @@ const handler = async (req: Request): Promise<Response> => {
             currentPage: page,
             totalPages,
             hasNextPage: page < totalPages,
-            totalResults: totalCount
+            totalResults: totalCount,
         };
 
         await redis.set(cacheKey, JSON.stringify(data), "EX", env.REDIS_CACHE_TIME);
@@ -161,4 +149,4 @@ type Body = {
     sortDirection?: string;
 };
 
-export default route; 
+export default route;

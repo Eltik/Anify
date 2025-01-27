@@ -35,7 +35,7 @@ const handler = async (req: Request): Promise<Response> => {
             SELECT * FROM anify.manga WHERE id = $1
             LIMIT 1;
         `;
-        
+
         const sourceMedia = await db.query(sourceQuery, [id]);
         if (!sourceMedia.rows.length) {
             return middleware.createResponse(JSON.stringify({ error: "No data found." }), 404);
@@ -62,32 +62,26 @@ const handler = async (req: Request): Promise<Response> => {
         const maxPop = Math.max(...popularities, source.averagePopularity || 0);
 
         // Convert arrays to feature vectors using one-hot encoding
-        function getFeatureVector(media: {
-            genres: string[];
-            tags: string[];
-            format: string;
-            year: number;
-            averagePopularity: number;
-        }) {
+        function getFeatureVector(media: { genres: string[]; tags: string[]; format: string; year: number; averagePopularity: number }) {
             // Combine all unique genres and tags to create feature space
             const allGenres = new Set([...source.genres, ...media.genres]);
             const allTags = new Set([...source.tags, ...media.tags]);
-            
+
             // Normalize year and popularity to [0,1] range
             const normalizedYear = (media.year - minYear) / (maxYear - minYear || 1);
             const normalizedPopularity = ((media.averagePopularity || 0) - minPop) / (maxPop - minPop || 1);
-            
+
             // Create feature vector
             const vector = [
                 // Genre features
-                ...Array.from(allGenres).map(g => media.genres.includes(g) ? 1 : 0),
-                // Tag features  
-                ...Array.from(allTags).map(t => media.tags.includes(t) ? 1 : 0),
+                ...Array.from(allGenres).map((g) => (media.genres.includes(g) ? 1 : 0)),
+                // Tag features
+                ...Array.from(allTags).map((t) => (media.tags.includes(t) ? 1 : 0)),
                 // Format match
                 media.format === source.format ? 1 : 0,
                 // Normalized year and popularity
                 normalizedYear,
-                normalizedPopularity
+                normalizedPopularity,
             ];
 
             return vector;
@@ -105,18 +99,12 @@ const handler = async (req: Request): Promise<Response> => {
         const sourceVector = getFeatureVector(source);
 
         // Calculate similarities
-        const similarities = allMedia.rows.map((media: {
-            genres: string[];
-            tags: string[];
-            format: string;
-            year: number;
-            averagePopularity: number;
-        }) => {
+        const similarities = allMedia.rows.map((media: { genres: string[]; tags: string[]; format: string; year: number; averagePopularity: number }) => {
             const vector = getFeatureVector(media);
             const similarity = cosineSimilarity(sourceVector, vector);
             return {
                 ...media,
-                similarity_score: similarity
+                similarity_score: similarity,
             };
         });
 

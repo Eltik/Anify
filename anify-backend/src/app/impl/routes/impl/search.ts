@@ -89,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
             currentPage: page,
             totalPages: totalPages,
             hasNextPage: page < totalPages,
-            totalResults: totalCount
+            totalResults: totalCount,
         };
 
         await redis.set(`search:${query}:${page}`, JSON.stringify(data), "EX", env.REDIS_CACHE_TIME);

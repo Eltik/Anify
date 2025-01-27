@@ -10,15 +10,8 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
     while (attempts < (isChecking ? 1 : maxRetries || 3)) {
         attempts++;
 
-        const proxyURL = isChecking ? proxy
-            : useGoogleTranslate ?
-                "http://translate.google.com/translate?sl=ja&tl=en&u=" + encodeURIComponent(url)
-            : proxy && attempts === 1 ?
-                proxy
-            : providerType && providerId ?
-                await getRandomProxy(providerType, providerId)
-            : null;
-            
+        const proxyURL = isChecking ? proxy : useGoogleTranslate ? "http://translate.google.com/translate?sl=ja&tl=en&u=" + encodeURIComponent(url) : proxy && attempts === 1 ? proxy : providerType && providerId ? await getRandomProxy(providerType, providerId) : null;
+
         try {
             const dispatcher = new ProxyAgent(proxyURL || "");
 
@@ -36,14 +29,9 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
 
             return response;
         } catch (error) {
-            const checkError = error instanceof Error && (
-                error.message.includes("Request timed out") ||
-                error.message.includes("socket connection was closed") ||
-                error.message.includes("unable to verify the first certificate") ||
-                error.message.includes("certificate has expired")
-            );
+            const checkError = error instanceof Error && (error.message.includes("Request timed out") || error.message.includes("socket connection was closed") || error.message.includes("unable to verify the first certificate") || error.message.includes("certificate has expired"));
 
-            if (!isChecking && (providerType && providerId && proxyURL) && checkError) {
+            if (!isChecking && providerType && providerId && proxyURL && checkError) {
                 if (!useGoogleTranslate) {
                     await removeProviderProxy(providerType, providerId, proxyURL);
                 }

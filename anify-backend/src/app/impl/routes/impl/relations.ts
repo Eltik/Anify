@@ -43,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
             SELECT * FROM anify.manga WHERE id = $1
             LIMIT 1;
         `;
-        
+
         const media = await db.query(mediaQuery, [id]);
         if (!media.rows.length) {
             return middleware.createResponse(JSON.stringify({ error: "No data found." }), 404);
@@ -105,26 +105,21 @@ const handler = async (req: Request): Promise<Response> => {
             FROM relation_tree rt
             LEFT JOIN anify.anime a ON rt.id = a.id
             LEFT JOIN anify.manga m ON rt.id = m.id
-            ${fields.length ? `WHERE ${fields.map(f => `relationType = '${f}'`).join(" OR ")}` : ""}
+            ${fields.length ? `WHERE ${fields.map((f) => `relationType = '${f}'`).join(" OR ")}` : ""}
             ORDER BY id, depth;
         `;
 
         const relations = await db.query(relationsQuery, [id]);
-        
-        const result = (relations.rows as { id: string; mediatype: string; format: string; relationtype: string; title: string }[]).map(row => ({
+
+        const result = (relations.rows as { id: string; mediatype: string; format: string; relationtype: string; title: string }[]).map((row) => ({
             id: row.id,
             type: row.mediatype,
             format: row.format,
             relationType: row.relationtype,
-            title: row.title
+            title: row.title,
         }));
 
-        await redis.set(
-            `relations:${id}:${JSON.stringify(fields)}`, 
-            JSON.stringify(result), 
-            "EX", 
-            env.REDIS_CACHE_TIME
-        );
+        await redis.set(`relations:${id}:${JSON.stringify(fields)}`, JSON.stringify(result), "EX", env.REDIS_CACHE_TIME);
 
         return middleware.createResponse(JSON.stringify(result));
     } catch (e) {
@@ -144,4 +139,4 @@ type Body = {
     fields?: string[];
 };
 
-export default route; 
+export default route;
