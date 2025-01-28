@@ -1,4 +1,5 @@
 import InformationProvider from "..";
+import { BASE_PROVIDERS } from "../../..";
 import { type IChapter, type IEpisode, MediaFormat, MediaSeason, MediaType, ProviderType } from "../../../../types";
 import type { IAnime } from "../../../../types/impl/database/impl/schema/anime";
 import type { IManga } from "../../../../types/impl/database/impl/schema/manga";
@@ -104,7 +105,12 @@ export default class TMDBInfo extends InformationProvider<IAnime | IManga, Anime
 
         if (!tmdbId) return undefined;
 
-        const anilistResponse = await this.request(`https://graphql.anilist.co`, {
+        const baseProviders = await Promise.all(BASE_PROVIDERS.map((factory) => factory()));
+        const anilistProvider = baseProviders.find((provider) => provider.id === "anilist");
+        if (!anilistProvider) return undefined;
+
+        // Uses Anilist provider & proxies to fetch data
+        const anilistResponse = await anilistProvider.request(`https://graphql.anilist.co`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

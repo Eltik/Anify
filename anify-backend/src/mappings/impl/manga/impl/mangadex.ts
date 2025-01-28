@@ -7,7 +7,7 @@ export default class MangaDex extends MangaProvider {
     override url = "https://mangadex.org";
 
     public needsProxy: boolean = true;
-    public useGoogleTranslate: boolean = false;
+    public useGoogleTranslate: boolean = true;
 
     override rateLimit = 0;
     override maxConcurrentRequests: number = -1;
