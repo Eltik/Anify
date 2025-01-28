@@ -47,7 +47,7 @@ export abstract class MediaProvider {
             // Ensure isChecking is properly set
             const finalConfig: IRequestConfig = {
                 ...config,
-                proxy: useProxy ? (config.proxy && config.proxy.length > 0 ? config.proxy : (proxy ?? undefined)) : undefined,
+                proxy: useProxy ? (this.useGoogleTranslate ? undefined : config.proxy && config.proxy.length > 0 ? config.proxy : (proxy ?? undefined)) : undefined,
                 useGoogleTranslate: this.useGoogleTranslate,
                 providerId: this.id,
                 providerType: this.providerType,

@@ -52,7 +52,7 @@ export const runProxyChecks = async (providers: MediaProvider[], verbose: boolea
     const limit = pLimit(concurrencyLimit);
 
     for (const provider of providers) {
-        if (!provider.needsProxy) continue;
+        if (!provider.needsProxy || provider.useGoogleTranslate) continue;
 
         // Get the provider's last check info
         const lastCheckInfo = config.proxyChecks[provider.providerType]?.[provider.id];

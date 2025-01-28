@@ -10,16 +10,22 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
     while (attempts < (isChecking ? 1 : maxRetries || 3)) {
         attempts++;
 
-        const proxyURL = isChecking ? proxy : useGoogleTranslate ? `http://translate.google.com/translate?sl=ja&tl=en&u=${encodeURIComponent(url)}` : proxy && attempts === 1 ? proxy : providerType && providerId ? await getRandomProxy(providerType, providerId) : null;
+        const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempts === 1 ? proxy : providerType && providerId ? await getRandomProxy(providerType, providerId) : null;
+
+        if (useGoogleTranslate) {
+            url = "http://translate.google.com/translate?sl=ja&tl=en&u=" + encodeURIComponent(url);
+        }
 
         try {
-            const dispatcher = new ProxyAgent(proxyURL || "");
-
             const fetchOptions: RequestInit = {
                 ...options,
-                // @ts-expect-error: dispatcher is not a valid type for RequestInit
-                dispatcher: dispatcher as RequestInit["dispatcher"],
             };
+
+            if (proxyURL) {
+                Object.assign(fetchOptions, {
+                    dispatcher: new ProxyAgent(proxyURL),
+                });
+            }
 
             const timeoutPromise = new Promise<Response>((_, reject) => {
                 setTimeout(() => reject(new Error("Request timed out")), timeout || 5000);
@@ -36,10 +42,11 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
                 if (!useGoogleTranslate) {
                     await removeProviderProxy(providerType, providerId, proxyURL);
                 }
-            } else {
+            } else if (!isChecking) {
                 console.log((error as Error).message);
             }
         }
     }
+
     throw new Error("Max retry attempts reached");
 }

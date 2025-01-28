@@ -767,8 +767,7 @@ export default class MALInformation extends InformationProvider<IAnime | IManga,
 
             const data = await response.text();
 
-            // Check if we got a valid response by looking for common MAL elements
-            const isValid = data.includes("myanimelist.net") && !data.includes("Access Denied") && !data.includes("banned");
+            const isValid = data.includes("https://cdn.myanimelist.net");
 
             return isValid;
         } catch {
