@@ -10,6 +10,11 @@ const loadEpisodes = async (media: IAnime): Promise<IEpisodeData[]> => {
     const episodes: IEpisodeData[] = [];
     const mappings = media.mappings ?? [];
 
+    // If the anime is finished and we already have episode data, return it
+    if (media.status === "FINISHED" && media.episodes?.data?.length > 0) {
+        return media.episodes.data;
+    }
+
     // 1. Fetch episodes from providers in parallel.
     await Promise.all(
         mappings.map(async (mapping) => {

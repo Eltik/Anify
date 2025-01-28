@@ -29,7 +29,7 @@ const start = async () => {
         }
     }
 
-    console.log(colors.gray(`Loaded ${colors.yellow(Object.keys(routes).length + "")} routes`));
+    console.log(colors.gray(`Loaded ${colors.yellow(`${Object.keys(routes).length}`)} routes`));
 
     Bun.serve({
         port: env.PORT,
