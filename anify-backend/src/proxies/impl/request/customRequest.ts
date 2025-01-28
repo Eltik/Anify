@@ -10,14 +10,15 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
     while (attempts < (isChecking ? 1 : maxRetries || 3)) {
         attempts++;
 
-        const proxyURL = isChecking ? proxy : useGoogleTranslate ? "http://translate.google.com/translate?sl=ja&tl=en&u=" + encodeURIComponent(url) : proxy && attempts === 1 ? proxy : providerType && providerId ? await getRandomProxy(providerType, providerId) : null;
+        const proxyURL = isChecking ? proxy : useGoogleTranslate ? `http://translate.google.com/translate?sl=ja&tl=en&u=${encodeURIComponent(url)}` : proxy && attempts === 1 ? proxy : providerType && providerId ? await getRandomProxy(providerType, providerId) : null;
 
         try {
             const dispatcher = new ProxyAgent(proxyURL || "");
 
             const fetchOptions: RequestInit = {
                 ...options,
-                dispatcher: dispatcher as any, // TODO: Fix this
+                // @ts-expect-error: dispatcher is not a valid type for RequestInit
+                dispatcher: dispatcher as RequestInit["dispatcher"],
             };
 
             const timeoutPromise = new Promise<Response>((_, reject) => {
