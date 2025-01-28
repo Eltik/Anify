@@ -56,20 +56,7 @@ export const map = async (type: MediaType, formats: MediaFormat[], baseData: Ani
         const match = findBestMatch(baseData, providerData);
         if (match) {
             if (match.similarity < 0.7) {
-                console.log(
-                    colors.gray("Unable to match ") +
-                        colors.blue(title) +
-                        colors.gray(" for ") +
-                        colors.blue(suitableProviders[i].id) +
-                        colors.gray(".") +
-                        colors.gray(" Best match rating: ") +
-                        colors.blue(`${match.similarity}`) +
-                        colors.gray(". ID: ") +
-                        colors.blue(match.match.id) +
-                        colors.gray(". Title: ") +
-                        colors.blue(match.match.title) +
-                        colors.gray("."),
-                );
+                console.log(colors.gray(`Unable to match ${colors.blue(title)} for ${colors.blue(suitableProviders[i].id)}. Best match rating: ${colors.blue(match.similarity.toFixed(2))}. ID: ${colors.blue(match.match.id)}. Title: ${colors.blue(match.match.title)}.`));
                 continue;
             }
 
