@@ -6,7 +6,7 @@ import type { IMedia, ISeasonal } from "../types/impl/mappings";
 import { MediaRepository } from "../database/impl/wrapper/impl/media";
 import { db } from "../database";
 import queues from "../worker";
-import type { MediaFormat, MediaType } from "../types";
+import type { MediaFormat, MediaType, ProviderType } from "../types";
 import type { IEpisodeData } from "../types/impl/database/impl/mappings";
 import { AnimeRepository } from "../database/impl/wrapper/impl/anime";
 
@@ -19,8 +19,8 @@ export const emitter = new EventEmitter2({
     maxListeners: 20,
 });
 
-emitter.on(Events.PROXIES_LOADED, () => {
-    return limit(() => console.log(colors.green("Proxies loaded")));
+emitter.on(Events.PROXIES_LOADED, (amount: number, providerType: ProviderType, providerId: string) => {
+    return limit(() => console.log(colors.green(`Loaded ${amount} proxies for ${providerType} ${providerId}`)));
 });
 
 emitter.on(Events.PROXIES_SAVED, () => {

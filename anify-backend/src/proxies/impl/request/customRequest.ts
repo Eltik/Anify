@@ -1,6 +1,6 @@
 import type { IRequestConfig } from "../../../types/impl/proxies";
 import { ProxyAgent } from "undici";
-import { removeProviderProxy } from "../manager/impl/file/saveProviderProxies";
+import { updateProxyHealth, proxyCache } from "../manager";
 import { getRandomProxy } from "../manager/impl/getRandomProxy";
 
 export async function customRequest(url: string, options: IRequestConfig = {}): Promise<Response> {
@@ -16,6 +16,7 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
             url = "http://translate.google.com/translate?sl=ja&tl=en&u=" + encodeURIComponent(url);
         }
 
+        const startTime = Date.now();
         try {
             const fetchOptions: RequestInit = {
                 ...options,
@@ -34,13 +35,31 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
             const fetchPromise = fetch(url, fetchOptions);
             const response = await Promise.race([fetchPromise, timeoutPromise]);
 
+            // Update proxy health metrics on success
+            if (!isChecking && providerType && providerId && proxyURL) {
+                const responseTime = Date.now() - startTime;
+                // Find the existing proxy in the cache
+                const [ip, port] = proxyURL.replace("http://", "").split(":");
+                const existingProxy = proxyCache.proxies.find((p) => p.ip === ip && p.port === Number(port));
+                if (existingProxy) {
+                    updateProxyHealth(existingProxy, true, providerType, providerId, responseTime);
+                }
+            }
+
             return response;
         } catch (error) {
             const checkError = error instanceof Error && (error.message.includes("Request timed out") || error.message.includes("socket connection was closed") || error.message.includes("unable to verify the first certificate") || error.message.includes("certificate has expired"));
 
             if (!isChecking && providerType && providerId && proxyURL && checkError) {
                 if (!useGoogleTranslate) {
-                    await removeProviderProxy(providerType, providerId, proxyURL);
+                    // Update proxy health metrics on failure
+                    const responseTime = Date.now() - startTime;
+                    // Find the existing proxy in the cache
+                    const [ip, port] = proxyURL.replace("http://", "").split(":");
+                    const existingProxy = proxyCache.proxies.find((p) => p.ip === ip && p.port === Number(port));
+                    if (existingProxy) {
+                        updateProxyHealth(existingProxy, false, providerType, providerId, responseTime);
+                    }
                 }
             } else if (!isChecking) {
                 console.log((error as Error).message);
