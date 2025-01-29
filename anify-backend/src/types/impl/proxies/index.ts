@@ -16,6 +16,8 @@ export interface IProxyProviderMetrics {
     averageResponseTime: number;
     successfulRequests: number;
     totalRequests: number;
+    successStreak: number;
+    latencyScore: number;
 }
 
 /**

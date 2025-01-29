@@ -1,7 +1,7 @@
 import Bottleneck from "bottleneck";
 import { ProviderType } from "../../..";
 import type { IRequestConfig } from "../../proxies";
-import { getRandomProxy } from "../../../../proxies/impl/manager/impl/getRandomProxy";
+import { selectProxy, proxyToUrl } from "../../../../proxies/impl/manager";
 import { customRequest } from "../../../../proxies/impl/request/customRequest";
 
 export abstract class MediaProvider {
@@ -40,14 +40,15 @@ export abstract class MediaProvider {
         const limiter = MediaProvider.limiterMap.get(this.id)!;
 
         return limiter.schedule(async () => {
-            // same proxy logic
-            const proxy = getRandomProxy(this.providerType, this.id);
+            // Get the best proxy based on health metrics
+            const selectedProxy = selectProxy(this.providerType, this.id);
+            const proxyUrl = proxyToUrl(selectedProxy);
             const useProxy = (config.proxy && config.proxy.length > 0) || proxyRequest || this.needsProxy;
 
             // Ensure isChecking is properly set
             const finalConfig: IRequestConfig = {
                 ...config,
-                proxy: useProxy ? (this.useGoogleTranslate ? undefined : config.proxy && config.proxy.length > 0 ? config.proxy : (proxy ?? undefined)) : undefined,
+                proxy: useProxy ? (this.useGoogleTranslate ? undefined : config.proxy && config.proxy.length > 0 ? config.proxy : (proxyUrl ?? undefined)) : undefined,
                 useGoogleTranslate: this.useGoogleTranslate,
                 providerId: this.id,
                 providerType: this.providerType,

@@ -1,7 +1,6 @@
 import type { IRequestConfig } from "../../../types/impl/proxies";
 import { ProxyAgent } from "undici";
-import { updateProxyHealth, proxyCache } from "../manager";
-import { getRandomProxy } from "../manager/impl/getRandomProxy";
+import { updateProxyHealth, proxyCache, selectProxy, proxyToUrl } from "../manager";
 
 export async function customRequest(url: string, options: IRequestConfig = {}): Promise<Response> {
     const { isChecking, proxy, useGoogleTranslate, timeout, providerType, providerId, maxRetries } = options;
@@ -10,7 +9,8 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
     while (attempts < (isChecking ? 1 : maxRetries || 3)) {
         attempts++;
 
-        const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempts === 1 ? proxy : providerType && providerId ? await getRandomProxy(providerType, providerId) : null;
+        // Use provided proxy for first attempt or checking, otherwise select best proxy
+        const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempts === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId)) : null;
 
         if (useGoogleTranslate) {
             url = "http://translate.google.com/translate?sl=ja&tl=en&u=" + encodeURIComponent(url);
@@ -52,7 +52,6 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
 
             if (!isChecking && providerType && providerId && proxyURL && checkError) {
                 if (!useGoogleTranslate) {
-                    // Update proxy health metrics on failure
                     const responseTime = Date.now() - startTime;
                     // Find the existing proxy in the cache
                     const [ip, port] = proxyURL.replace("http://", "").split(":");
