@@ -32,6 +32,13 @@ const scrape = async (): Promise<IProxy[]> => {
                     country: country ?? "Unknown",
                     type: "HTTP",
                     anonymity,
+                    providerMetrics: {
+                        ANIME: {},
+                        MANGA: {},
+                        META: {},
+                        INFORMATION: {},
+                        BASE: {},
+                    },
                 });
             });
     }

@@ -10,6 +10,13 @@ const scrape = async (): Promise<IProxy[]> => {
             country: "unknown",
             ip: host,
             type: "http",
+            providerMetrics: {
+                ANIME: {},
+                MANGA: {},
+                META: {},
+                INFORMATION: {},
+                BASE: {},
+            },
         };
     }) as IProxy[];
 

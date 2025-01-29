@@ -5,6 +5,20 @@
 import { ProviderType } from "../..";
 
 /**
+ * @description Provider-specific health metrics
+ */
+export interface IProxyProviderMetrics {
+    healthScore: number;
+    lastSuccessTime?: Date;
+    lastFailureTime?: Date;
+    consecutiveFailures: number;
+    successRate: number;
+    averageResponseTime: number;
+    successfulRequests: number;
+    totalRequests: number;
+}
+
+/**
  * @description Proxy interface
  */
 export interface IProxy {
@@ -13,6 +27,8 @@ export interface IProxy {
     country: string;
     type: string;
     anonymity: string;
+    // Store metrics per provider
+    providerMetrics: Record<ProviderType, Record<string, IProxyProviderMetrics>>;
 }
 
 /**

@@ -8,15 +8,7 @@ export async function preloadProxies(): Promise<void> {
         return;
     }
 
-    const proxies = await loadJSON<
-        {
-            ip: string;
-            port: number;
-            country: string;
-            type: string;
-            anonymity: string;
-        }[]
-    >("proxies.json");
+    const proxies = await loadJSON<IProxy[]>("proxies.json");
 
     proxyCache.proxies = proxies;
 
