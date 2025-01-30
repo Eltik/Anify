@@ -186,15 +186,6 @@ export const updateProxyHealth = (proxy: IProxy, success: boolean, providerType:
     // Ensure health score stays within bounds
     metrics.healthScore = Math.min(MAX_HEALTH_SCORE, Math.max(MIN_HEALTH_SCORE, metrics.healthScore));
 
-    if (env.DEBUG) {
-        console.log(`Proxy ${proxy.ip}:${proxy.port} health updated:
-            Score: ${metrics.healthScore.toFixed(2)},
-            Success Rate: ${(metrics.successRate * 100).toFixed(2)}%,
-            Latency Score: ${metrics.latencyScore?.toFixed(2) || "N/A"},
-            Reliability: ${reliabilityScore.toFixed(2)}%,
-            Avg Response: ${metrics.averageResponseTime?.toFixed(2)}ms`);
-    }
-
     // Save updated proxies to file
     saveProxiesToFile(providerType);
 };

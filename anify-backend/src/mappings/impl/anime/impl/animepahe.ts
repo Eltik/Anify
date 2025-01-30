@@ -34,6 +34,15 @@ export default class AnimePahe extends AnimeProvider {
             headers: {
                 Cookie: "__ddg1_=;__ddg2_=;",
             },
+            validateResponse: async (response) => {
+                if (!response.ok) return false;
+                try {
+                    const data = (await response.json()) as { data?: unknown };
+                    return data?.data !== undefined;
+                } catch {
+                    return false;
+                }
+            },
         });
 
         if (!request.ok) {
@@ -68,29 +77,36 @@ export default class AnimePahe extends AnimeProvider {
     override async fetchEpisodes(id: string): Promise<IEpisode[] | undefined> {
         const episodes: IEpisode[] = [];
 
-        const req = await (
-            await this.request(
-                `${this.url}${id.includes("-") ? `/anime/${id}` : `/a/${id}`}`,
-                {
-                    headers: {
-                        Cookie: "__ddg1_=;__ddg2_=;",
-                    },
-                },
-                false,
-            )
-        ).text();
-
-        const $ = load(req);
-
-        const tempId = $("head > meta[property='og:url']").attr("content")!.split("/").pop()!;
-
-        const { last_page, data } = (await (
-            await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=1`, {
+        const req = await this.request(
+            `${this.url}${id.includes("-") ? `/anime/${id}` : `/a/${id}`}`,
+            {
                 headers: {
                     Cookie: "__ddg1_=;__ddg2_=;",
                 },
-            })
-        ).json()) as { last_page: number; data: { id: number; episode: number; number: number; title: string; snapshot: string; filler: number; created_at?: string }[] };
+            },
+            false,
+        );
+
+        const $ = load(await req.text());
+
+        const tempId = $("head > meta[property='og:url']").attr("content")!.split("/").pop()!;
+
+        const releaseRequest = await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=1`, {
+            headers: {
+                Cookie: "__ddg1_=;__ddg2_=;",
+            },
+            validateResponse: async (response) => {
+                if (!response.ok) return false;
+                try {
+                    const data = (await response.json()) as { data?: unknown; last_page?: unknown };
+                    return data?.data !== undefined && data?.last_page !== undefined;
+                } catch {
+                    return false;
+                }
+            },
+        });
+
+        const { last_page, data } = (await releaseRequest.json()) as { last_page: number; data: { id: number; episode: number; number: number; title: string; snapshot: string; filler: number; created_at?: string }[] };
 
         data.map((item: { id: number; episode: number; title: string; snapshot: string; filler: number; created_at?: string }) => {
             const updatedAt = new Date(item.created_at ?? Date.now()).getTime();
@@ -114,6 +130,15 @@ export default class AnimePahe extends AnimeProvider {
             this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=${pageNumber}`, {
                 headers: {
                     Cookie: "__ddg1_=;__ddg2_=;",
+                },
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = (await response.json()) as { data?: unknown };
+                        return data?.data !== undefined;
+                    } catch {
+                        return false;
+                    }
                 },
             }).then((res) => res.json()),
         );
@@ -248,6 +273,15 @@ export default class AnimePahe extends AnimeProvider {
                     Cookie: "__ddg1_=;__ddg2_=;",
                 },
                 proxy: proxyURL,
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = (await response.json()) as { data?: unknown };
+                        return data?.data !== undefined;
+                    } catch {
+                        return false;
+                    }
+                },
             });
 
             if (!request.ok) {

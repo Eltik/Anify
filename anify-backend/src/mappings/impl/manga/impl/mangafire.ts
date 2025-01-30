@@ -19,7 +19,14 @@ export default class MangaFire extends MangaProvider {
         const results: IProviderResult[] = [];
 
         try {
-            const data = await (await this.request(`${this.url}/filter?keyword=${encodeURIComponent(query)}${format ? `&type%5B%5D=${format.toLowerCase()}` : ""}${year && year != 0 ? `&year=%5B%5D=${year}` : ""}&sort=recently_updated`)).text();
+            const data = await (
+                await this.request(`${this.url}/filter?keyword=${encodeURIComponent(query)}${format ? `&type%5B%5D=${format.toLowerCase()}` : ""}${year && year != 0 ? `&year=%5B%5D=${year}` : ""}&sort=recently_updated`, {
+                    validateResponse: async (response) => {
+                        if (!response.ok) return false;
+                        return (await response.text()).length > 0;
+                    },
+                })
+            ).text();
 
             const $ = load(data);
 
@@ -76,6 +83,15 @@ export default class MangaFire extends MangaProvider {
                     "X-Requested-With": "XMLHttpRequest",
                     Referer: `${this.url}${id}`,
                 },
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = (await response.json()) as { status: number; result: string; message: string; messages: string[] };
+                        return data.status === 200;
+                    } catch {
+                        return false;
+                    }
+                },
             })
         ).json()) as { status: number; result: string; message: string; messages: string[] };
 
@@ -85,7 +101,7 @@ export default class MangaFire extends MangaProvider {
 
         const $ = load(data.result);
 
-        $("ul li.item").map((i, el) => {
+        $("ul li.item").map((_, el) => {
             chapters.push({
                 id: $(el).find("a").attr("href") ?? "",
                 number: Number($(el).attr("data-number")),
@@ -108,6 +124,15 @@ export default class MangaFire extends MangaProvider {
                     "X-Requested-With": "XMLHttpRequest",
                     Referer: `${this.url}${id}`,
                 },
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = (await response.json()) as { status: number; result: { html: string }; message: string; messages: string[] };
+                        return data.status === 200;
+                    } catch {
+                        return false;
+                    }
+                },
             })
         ).json()) as { status: number; result: { html: string }; message: string; messages: string[] };
 
@@ -119,7 +144,7 @@ export default class MangaFire extends MangaProvider {
         const $ = load(data.result?.html);
 
         let chapterId = "";
-        $("ul li").map((i, el) => {
+        $("ul li").map((_, el) => {
             const chapId = $(el).find("a").attr("data-id");
             const url = $(el).find("a").attr("href");
             if (url === id) {
@@ -136,6 +161,15 @@ export default class MangaFire extends MangaProvider {
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
                     Referer: `${this.url}${id}`,
+                },
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = (await response.json()) as IImageResponse;
+                        return data.status === 200;
+                    } catch {
+                        return false;
+                    }
                 },
             })
         ).json()) as IImageResponse;
@@ -220,6 +254,10 @@ export default class MangaFire extends MangaProvider {
                 const data = await (
                     await this.request(`${this.url}/filter?keyword=${encodeURIComponent("Mushoku Tensei")}&sort=recently_updated`, {
                         proxy: proxyURL,
+                        validateResponse: async (response) => {
+                            if (!response.ok) return false;
+                            return (await response.text()).length > 0;
+                        },
                     })
                 ).text();
 

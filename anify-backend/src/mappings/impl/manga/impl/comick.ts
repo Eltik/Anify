@@ -17,7 +17,19 @@ export default class ComicK extends MangaProvider {
     private api = "https://api.comick.fun";
 
     override async search(query: string, format?: MediaFormat, year?: number): Promise<IProviderResult[] | undefined> {
-        const data = (await (await this.request(`${this.api}/v1.0/search?q=${encodeURIComponent(query)}&limit=25&page=1${year ? `&from=${year}&to=${year}` : ""}`)).json()) as ISearchResult[];
+        const data = (await (
+            await this.request(`${this.api}/v1.0/search?q=${encodeURIComponent(query)}&limit=25&page=1${year ? `&from=${year}&to=${year}` : ""}`, {
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        await response.json();
+                        return true;
+                    } catch {
+                        return false;
+                    }
+                },
+            })
+        ).json()) as ISearchResult[];
 
         const results: IProviderResult[] = [];
 
@@ -51,7 +63,19 @@ export default class ComicK extends MangaProvider {
             return chapterList;
         }
 
-        const data = (await (await this.request(`${this.api}/comic/${comicId}/chapters?lang=en&page=0&limit=1000000`))?.json()) as { chapters: IComickChapter[] };
+        const data = (await (
+            await this.request(`${this.api}/comic/${comicId}/chapters?lang=en&page=0&limit=1000000`, {
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = (await response.json()) as { chapters?: IComickChapter[] };
+                        return data?.chapters !== undefined;
+                    } catch {
+                        return false;
+                    }
+                },
+            })
+        )?.json()) as { chapters: IComickChapter[] };
 
         const chapters: IChapter[] = [];
 
@@ -99,7 +123,19 @@ export default class ComicK extends MangaProvider {
     }
 
     override async fetchPages(id: string): Promise<IPage[] | string | undefined> {
-        const data = (await (await this.request(`${this.api}/chapter/${id}`))?.json()) as { chapter: { md_images: { w: number; h: number; b2key: string }[] } };
+        const data = (await (
+            await this.request(`${this.api}/chapter/${id}`, {
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = (await response.json()) as { chapter?: { md_images: { w: number; h: number; b2key: string }[] } };
+                        return data?.chapter !== undefined;
+                    } catch {
+                        return false;
+                    }
+                },
+            })
+        )?.json()) as { chapter: { md_images: { w: number; h: number; b2key: string }[] } };
 
         const pages: IPage[] = [];
 
@@ -115,7 +151,19 @@ export default class ComicK extends MangaProvider {
     }
 
     private async getComicId(id: string): Promise<string | null> {
-        const json = (await (await this.request(`${this.api}${id}`))?.json()) as { comic: IComic };
+        const json = (await (
+            await this.request(`${this.api}${id}`, {
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = (await response.json()) as { comic?: IComic };
+                        return data?.comic !== undefined;
+                    } catch {
+                        return false;
+                    }
+                },
+            })
+        ).json()) as { comic: IComic };
         const data: IComic = json.comic;
         return data ? data.hid : null;
     }

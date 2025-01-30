@@ -11,7 +11,8 @@
         "prettier": "bunx prettier --write .",
         "lint": "bun run prettier && bunx tsc --noEmit && bunx eslint --fix .",
         "scripts": "bun src/scripts/index.ts",
-        "test": "bun src/tests/index.ts"
+        "test": "bun src/tests/index.ts",
+        "train": " bun run src/scripts/proxyTrainer.ts --types=BASE,ANIME,MANGA,META,INFORMATION"
     },
     "dependencies": {
         "@extractus/article-extractor": "^8.0.16",

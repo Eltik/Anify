@@ -3,7 +3,7 @@ import { ProxyAgent } from "undici";
 import { updateProxyHealth, proxyCache, selectProxy, proxyToUrl } from "../manager";
 
 export async function customRequest(url: string, options: IRequestConfig = {}): Promise<Response> {
-    const { isChecking, proxy, useGoogleTranslate, timeout, providerType, providerId, maxRetries } = options;
+    const { isChecking, proxy, useGoogleTranslate, timeout, providerType, providerId, maxRetries, validateResponse } = options;
 
     let attempts = 0;
     while (attempts < (isChecking ? 1 : maxRetries || 3)) {
@@ -44,14 +44,25 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
             const fetchPromise = fetch(url, fetchOptions);
             const response = await Promise.race([fetchPromise, timeoutPromise]);
 
-            // Update proxy health metrics on success
+            // Update proxy health metrics based on response validation
             if (!isChecking && providerType && providerId && proxyURL) {
                 const responseTime = Date.now() - startTime;
                 // Find the existing proxy in the cache
                 const [ip, port] = proxyURL.replace("http://", "").split(":");
                 const existingProxy = proxyCache.proxies.find((p) => p.ip === ip && p.port === Number(port));
+
                 if (existingProxy) {
-                    updateProxyHealth(existingProxy, true, providerType, providerId, responseTime);
+                    let isValid = true;
+                    if (validateResponse) {
+                        // Clone the response since validation might need to read the body
+                        const clonedResponse = response.clone();
+                        try {
+                            isValid = await validateResponse(clonedResponse);
+                        } catch {
+                            isValid = false;
+                        }
+                    }
+                    updateProxyHealth(existingProxy, isValid, providerType, providerId, responseTime);
                 }
             }
 

@@ -25,7 +25,19 @@ export default class Sudatchi extends AnimeProvider {
     override async search(query: string): Promise<IProviderResult[] | undefined> {
         const results: IProviderResult[] = [];
 
-        const data = (await (await this.request(`${this.url}/api/directory?&title=${encodeURIComponent(query)}`)).json()) as {
+        const data = (await (
+            await this.request(`${this.url}/api/directory?&title=${encodeURIComponent(query)}`, {
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = (await response.json()) as { animes?: unknown };
+                        return data?.animes !== undefined;
+                    } catch {
+                        return false;
+                    }
+                },
+            })
+        ).json()) as {
             animes: {
                 id: number;
                 anilistId: number;
@@ -96,7 +108,14 @@ export default class Sudatchi extends AnimeProvider {
     override async fetchEpisodes(id: string): Promise<IEpisode[] | undefined> {
         const episodes: IEpisode[] = [];
 
-        const data = await (await this.request(`${this.url}/anime/${id}`)).text();
+        const data = await (
+            await this.request(`${this.url}/anime/${id}`, {
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    return (await response.text()).length > 0;
+                },
+            })
+        ).text();
         const $ = load(data);
         const props = JSON.parse(
             $("script#__NEXT_DATA__")
@@ -155,14 +174,33 @@ export default class Sudatchi extends AnimeProvider {
         const episodeId = id.split("-")[1];
         const episodeNumber = id.split("-")[2];
 
-        const req = await (await this.request(`${this.url}/watch/${animeId}/${episodeNumber}`)).text();
+        const req = await (
+            await this.request(`${this.url}/watch/${animeId}/${episodeNumber}`, {
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    return (await response.text()).length > 0;
+                },
+            })
+        ).text();
         const $ = load(req);
         const props = JSON.parse(
             $("script#__NEXT_DATA__")
                 .html()!
                 .replace(/(\r\n|\n|\r|\t)/gm, ""),
         );
-        const streamData = (await (await this.request(`${this.url}/api/streams?episodeId=${episodeId}`)).json()) as { url: string };
+        const streamData = (await (
+            await this.request(`${this.url}/api/streams?episodeId=${episodeId}`, {
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = (await response.json()) as { url?: unknown };
+                        return data?.url !== undefined;
+                    } catch {
+                        return false;
+                    }
+                },
+            })
+        ).json()) as { url: string };
 
         const parsedSubtitles: {
             id: number;
@@ -223,6 +261,15 @@ export default class Sudatchi extends AnimeProvider {
             const data = (await (
                 await this.request(`${this.url}/api/directory?&title=${encodeURIComponent("Mushoku Tensei")}`, {
                     proxy: proxyURL,
+                    validateResponse: async (response) => {
+                        if (!response.ok) return false;
+                        try {
+                            const data = (await response.json()) as { animes?: unknown };
+                            return data?.animes !== undefined;
+                        } catch {
+                            return false;
+                        }
+                    },
                 })
             ).json()) as {
                 animes: {

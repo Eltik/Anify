@@ -64,6 +64,10 @@ export default class NovelUpdates extends MangaProvider {
                 Referer: this.url,
                 "User-Agent": "Mozilla/5.0",
             },
+            validateResponse: async (response) => {
+                if (!response.ok) return false;
+                return (await response.text()).length > 0;
+            },
         });
 
         const data = await searchData.text();

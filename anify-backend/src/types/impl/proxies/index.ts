@@ -44,6 +44,7 @@ export interface IRequestConfig extends RequestInit {
     providerType?: ProviderType;
     providerId?: string;
     maxRetries?: number;
+    validateResponse?: (response: Response) => Promise<boolean>;
 }
 
 export interface IProxyCheckInfo {
