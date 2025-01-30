@@ -9,6 +9,14 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
     while (attempts < (isChecking ? 1 : maxRetries || 3)) {
         attempts++;
 
+        /*
+        // Add exponential backoff delay between retries
+        if (attempts > 1) {
+            const delay = Math.min(1000 * Math.pow(2, attempts - 1), 10000); // Max 10 second delay
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+        */
+
         // Use provided proxy for first attempt or checking, otherwise select best proxy
         const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempts === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId)) : null;
 
@@ -29,7 +37,8 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
             }
 
             const timeoutPromise = new Promise<Response>((_, reject) => {
-                setTimeout(() => reject(new Error("Request timed out")), timeout || 5000);
+                // Increase timeout for proxy checks to 15 seconds
+                setTimeout(() => reject(new Error("Request timed out")), isChecking ? 15000 : timeout || 5000);
             });
 
             const fetchPromise = fetch(url, fetchOptions);

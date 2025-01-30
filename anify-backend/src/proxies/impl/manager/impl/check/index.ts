@@ -3,7 +3,6 @@ import proxies from "../scrape";
 import colors from "colors";
 import { runProxyChecks } from "./impl/runProxyChecks";
 import { saveProxies } from "../file/saveProxies";
-import { clearProxies } from "../file/clearProxies";
 import { loadJSON } from "../../../helper/loadJSON";
 import { ProviderType } from "../../../../../types";
 import type { IProxy } from "../../../../../types/impl/proxies";
@@ -11,51 +10,84 @@ import { env } from "../../../../../env";
 import { preloadProxies } from "../file/preloadProxies";
 
 export const checkProxies = async (providers: MediaProvider[], verbose: boolean = false) => {
-    // First clear all proxies
-    await clearProxies();
+    // Load existing proxies from proxies.json
+    let existingProxies: IProxy[] = [];
+    try {
+        existingProxies = await loadJSON<IProxy[]>("proxies.json");
+        if (env.DEBUG && verbose) {
+            console.log(colors.green(`Loaded ${existingProxies.length} existing proxies from proxies.json`));
+        }
+    } catch {
+        // If file doesn't exist or is invalid, continue with empty array
+        if (env.DEBUG && verbose) {
+            console.log(colors.yellow("No existing proxies found in proxies.json"));
+        }
+    }
 
-    // Load and consolidate existing provider-specific proxies into proxies.json
+    // Load and consolidate existing provider-specific proxies
     const providerTypes = Object.values(ProviderType);
     const allProviderProxies: IProxy[] = [];
 
     for (const providerType of providerTypes) {
         try {
             const fileName = `${providerType}Proxies.json`;
-            const typeProxies = await loadJSON<Record<string, IProxy[]>>(fileName);
-
-            // Collect all proxies from each provider
-            Object.values(typeProxies).forEach((proxies) => {
-                allProviderProxies.push(...proxies);
-            });
+            const typeProxies = await loadJSON<IProxy[]>(fileName);
+            allProviderProxies.push(...typeProxies);
         } catch {
             // Skip if file doesn't exist or is invalid
             continue;
         }
     }
 
-    // Save consolidated proxies to proxies.json if any exist
-    if (allProviderProxies.length > 0) {
-        await saveProxies(allProviderProxies);
+    // Merge existing proxies with provider-specific proxies, preserving metrics
+    for (const providerProxy of allProviderProxies) {
+        const existingProxy = existingProxies.find((p) => p.ip === providerProxy.ip && p.port === providerProxy.port);
+        if (existingProxy) {
+            // Merge provider metrics
+            Object.entries(providerProxy.providerMetrics).forEach(([providerType, metrics]) => {
+                if (Object.values(ProviderType).includes(providerType as ProviderType)) {
+                    existingProxy.providerMetrics[providerType as ProviderType] = {
+                        ...existingProxy.providerMetrics[providerType as ProviderType],
+                        ...metrics,
+                    };
+                }
+            });
+        } else {
+            existingProxies.push(providerProxy);
+        }
+    }
+
+    // Save consolidated proxies
+    if (existingProxies.length > 0) {
+        await saveProxies(existingProxies);
         if (env.DEBUG && verbose) {
-            console.log(colors.green(`Consolidated ${allProviderProxies.length} existing proxies from provider files.`));
+            console.log(colors.green(`Saved ${existingProxies.length} consolidated proxies to proxies.json`));
         }
     }
 
     // Now scrape for new proxies
     for (const scrape of Object.values(proxies)) {
-        const data = await scrape();
+        const newProxies = await scrape();
 
-        if (data.length === 0) {
+        if (newProxies.length === 0) {
             if (env.DEBUG && verbose) {
-                console.log(colors.red("No proxies found, skipping proxy check"));
+                console.log(colors.red("No new proxies found from scraper"));
             }
-            return;
+            continue;
         }
 
-        await saveProxies(data);
+        // Merge new proxies with existing ones, preserving metrics
+        for (const newProxy of newProxies) {
+            const existingProxy = existingProxies.find((p) => p.ip === newProxy.ip && p.port === newProxy.port);
+            if (!existingProxy) {
+                existingProxies.push(newProxy);
+            }
+        }
+
+        await saveProxies(existingProxies);
 
         if (env.DEBUG && verbose) {
-            console.log(colors.green(`Found ${data.length} proxies. Saved to file.`));
+            console.log(colors.green(`Found ${newProxies.length} new proxies. Total proxies after merge: ${existingProxies.length}`));
         }
     }
 
@@ -63,7 +95,7 @@ export const checkProxies = async (providers: MediaProvider[], verbose: boolean 
     await preloadProxies();
 
     if (env.DEBUG && verbose) {
-        console.log(colors.green(`Checking ${providers.map((p) => p.needsProxy).length} providers for proxy support.`));
+        console.log(colors.green(`Checking ${providers.filter((p) => p.needsProxy).length} providers for proxy support.`));
     }
 
     await runProxyChecks(providers, verbose);
