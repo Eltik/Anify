@@ -1,8 +1,8 @@
+import { env } from "../../../env";
 import { ProviderType } from "../../../types";
 import type { IProxy, IProxyProviderMetrics } from "../../../types/impl/proxies";
 import fs from "fs";
 import path from "path";
-import { env } from "../../../env";
 
 const MIN_HEALTH_SCORE = 0;
 const MAX_HEALTH_SCORE = 100;

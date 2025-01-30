@@ -69,8 +69,6 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
                         updateProxyHealth(existingProxy, false, providerType, providerId, responseTime);
                     }
                 }
-            } else if (!isChecking) {
-                console.log((error as Error).message);
             }
         }
     }
