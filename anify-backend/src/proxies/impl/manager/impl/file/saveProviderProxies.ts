@@ -1,7 +1,7 @@
 import { proxyCache } from "../..";
 import { ProviderType } from "../../../../../types";
 import { saveJSON } from "../../../helper/saveJSON";
-import type { IProxy, IProxyProviderMetrics } from "../../../../../types/impl/proxies";
+import type { IProxy } from "../../../../../types/impl/proxies";
 import { env } from "../../../../../env";
 import colors from "colors";
 
@@ -19,46 +19,61 @@ export async function saveProviderProxies(providerType: ProviderType): Promise<v
             const key = `${proxy.ip}:${proxy.port}`;
 
             if (!finalProxies[key]) {
-                // Initialize empty provider metrics for all provider types
-                const initialProviderMetrics = Object.values(ProviderType).reduce(
-                    (acc, type) => {
-                        acc[type] = {};
-                        return acc;
-                    },
-                    {} as Record<ProviderType, Record<string, IProxyProviderMetrics>>,
-                );
-
                 // If this is a new proxy, add it to our final list
                 finalProxies[key] = {
                     ...proxy,
-                    providerMetrics: initialProviderMetrics,
+                    providerMetrics: {
+                        [providerId]: {
+                            healthScore: 50,
+                            consecutiveFailures: 0,
+                            successRate: 0,
+                            averageResponseTime: 0,
+                            successfulRequests: 0,
+                            totalRequests: 0,
+                            successStreak: 0,
+                            latencyScore: 50,
+                        },
+                    },
                 };
 
                 // Add the current provider's metrics
-                finalProxies[key].providerMetrics[providerType][providerId] = proxy.providerMetrics?.[providerType]?.[providerId] || {
+                finalProxies[key].providerMetrics[providerId] = proxy.providerMetrics?.[providerId] || {
                     healthScore: 50,
                     consecutiveFailures: 0,
                     successRate: 0,
                     averageResponseTime: 0,
                     successfulRequests: 0,
                     totalRequests: 0,
+                    successStreak: 0,
+                    latencyScore: 50,
                 };
             } else {
                 // If this proxy already exists, just update the provider metrics
-                finalProxies[key].providerMetrics[providerType][providerId] = proxy.providerMetrics?.[providerType]?.[providerId] || {
+                finalProxies[key].providerMetrics[providerId] = proxy.providerMetrics?.[providerId] || {
                     healthScore: 50,
                     consecutiveFailures: 0,
                     successRate: 0,
                     averageResponseTime: 0,
                     successfulRequests: 0,
                     totalRequests: 0,
+                    successStreak: 0,
+                    latencyScore: 50,
                 };
             }
         }
     }
 
     // Convert the map to an array and save
-    const proxiesToSave = Object.values(finalProxies).filter((proxy) => Object.values(proxy.providerMetrics[providerType] || {}).some((metrics) => (metrics.healthScore || 0) > 0 && (metrics.consecutiveFailures || 0) < 3));
+    const proxiesToSave = Object.values(finalProxies).filter((proxy) => {
+        // Check if any provider for this proxy has valid metrics
+        for (const providerId in proxyCache.validProxies[providerType]) {
+            const metrics = proxy.providerMetrics[providerId];
+            if (metrics && metrics.healthScore > 0 && metrics.consecutiveFailures < 3) {
+                return true;
+            }
+        }
+        return false;
+    });
 
     if (env.DEBUG) {
         console.log(colors.green(`Saving ${proxiesToSave.length} proxies for ${providerType}`));

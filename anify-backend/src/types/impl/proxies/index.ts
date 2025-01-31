@@ -29,8 +29,7 @@ export interface IProxy {
     country: string;
     type: string;
     anonymity: string;
-    // Store metrics per provider
-    providerMetrics: Record<ProviderType, Record<string, IProxyProviderMetrics>>;
+    providerMetrics: Record<string, IProxyProviderMetrics>; // providerId -> metrics
 }
 
 /**

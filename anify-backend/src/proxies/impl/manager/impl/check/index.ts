@@ -44,13 +44,11 @@ export const checkProxies = async (providers: MediaProvider[], verbose: boolean 
         const existingProxy = existingProxies.find((p) => p.ip === providerProxy.ip && p.port === providerProxy.port);
         if (existingProxy) {
             // Merge provider metrics
-            Object.entries(providerProxy.providerMetrics).forEach(([providerType, metrics]) => {
-                if (Object.values(ProviderType).includes(providerType as ProviderType)) {
-                    existingProxy.providerMetrics[providerType as ProviderType] = {
-                        ...existingProxy.providerMetrics[providerType as ProviderType],
-                        ...metrics,
-                    };
-                }
+            Object.entries(providerProxy.providerMetrics).forEach(([providerId, metrics]) => {
+                existingProxy.providerMetrics[providerId] = {
+                    ...existingProxy.providerMetrics[providerId],
+                    ...metrics,
+                };
             });
         } else {
             existingProxies.push(providerProxy);

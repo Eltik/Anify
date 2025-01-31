@@ -1,4 +1,3 @@
-import { env } from "../../../env";
 import { ProviderType } from "../../../types";
 import type { IProxy, IProxyProviderMetrics } from "../../../types/impl/proxies";
 import fs from "fs";
@@ -48,13 +47,10 @@ export const proxyToUrl = (proxy: IProxy | null): string | null => {
 // Helper function to get provider metrics, creating if doesn't exist
 const getProviderMetrics = (proxy: IProxy, providerType: ProviderType, providerId: string): IProxyProviderMetrics => {
     if (!proxy.providerMetrics) {
-        proxy.providerMetrics = {} as Record<ProviderType, Record<string, IProxyProviderMetrics>>;
+        proxy.providerMetrics = {} as Record<string, IProxyProviderMetrics>;
     }
-    if (!proxy.providerMetrics[providerType]) {
-        proxy.providerMetrics[providerType] = {};
-    }
-    if (!proxy.providerMetrics[providerType][providerId]) {
-        proxy.providerMetrics[providerType][providerId] = {
+    if (!proxy.providerMetrics[providerId]) {
+        proxy.providerMetrics[providerId] = {
             healthScore: 50,
             consecutiveFailures: 0,
             successRate: 0,
@@ -65,7 +61,7 @@ const getProviderMetrics = (proxy: IProxy, providerType: ProviderType, providerI
             latencyScore: 50,
         };
     }
-    return proxy.providerMetrics[providerType][providerId];
+    return proxy.providerMetrics[providerId];
 };
 
 // Save proxies to provider-specific files
@@ -79,12 +75,13 @@ const saveProxiesToFile = (providerType: ProviderType) => {
     // Update validProxies cache for each provider
     Object.keys(proxyCache.validProxies[providerType]).forEach((providerId) => {
         // Keep all proxies that have metrics for this provider
-        proxyCache.validProxies[providerType][providerId] = providerProxies.filter((proxy) => proxy.providerMetrics[providerType][providerId]);
+        proxyCache.validProxies[providerType][providerId] = providerProxies.filter((proxy) => proxy.providerMetrics[providerId]);
     });
 
     // Save all proxies with their metrics
     fs.writeFileSync(filePath, JSON.stringify(providerProxies, null, 2));
 
+    /*
     if (env.DEBUG) {
         const totalProxies = providerProxies.length;
         const healthyCount = providerProxies.filter((proxy) => Object.values(proxy.providerMetrics[providerType]).some((metrics) => metrics.healthScore > MIN_VIABLE_HEALTH)).length;
@@ -93,6 +90,7 @@ const saveProxiesToFile = (providerType: ProviderType) => {
             .join(", ");
         console.log(`Saved ${totalProxies} proxies for ${providerType} (${healthyCount} healthy) - Per provider: ${providerCounts}`);
     }
+    */
 };
 
 export const updateProxyHealth = (proxy: IProxy, success: boolean, providerType: ProviderType, providerId: string, responseTime?: number) => {
@@ -233,5 +231,5 @@ export const selectProxy = (providerType: ProviderType, providerId: string): IPr
         random -= health;
     }
 
-    return topProxies[0]; // Fallback to best proxy if weighted selection fails
+    return topProxies[Math.floor(Math.random() * topProxies.length)]; // Fallback to random proxy if weighted selection fails
 };

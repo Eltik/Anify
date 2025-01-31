@@ -42,13 +42,13 @@ export abstract class MediaProvider {
         return limiter.schedule(async () => {
             // Get the best proxy based on health metrics
             const selectedProxy = selectProxy(this.providerType, this.id);
-            const proxyUrl = proxyToUrl(selectedProxy);
+            const proxyURL = proxyToUrl(selectedProxy);
             const useProxy = (config.proxy && config.proxy.length > 0) || proxyRequest || this.needsProxy;
 
             // Ensure isChecking is properly set
             const finalConfig: IRequestConfig = {
                 ...config,
-                proxy: useProxy ? (this.useGoogleTranslate ? undefined : config.proxy && config.proxy.length > 0 ? config.proxy : (proxyUrl ?? undefined)) : undefined,
+                proxy: useProxy ? (this.useGoogleTranslate ? undefined : config.proxy && config.proxy.length > 0 ? config.proxy : (proxyURL ?? undefined)) : undefined,
                 useGoogleTranslate: this.useGoogleTranslate,
                 providerId: this.id,
                 providerType: this.providerType,

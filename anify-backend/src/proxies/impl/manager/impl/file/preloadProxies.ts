@@ -51,10 +51,7 @@ export async function preloadProxies(): Promise<void> {
                         // Merge metrics if proxy exists
                         existingProxy.providerMetrics = {
                             ...existingProxy.providerMetrics,
-                            [provider.providerType]: {
-                                ...existingProxy.providerMetrics[provider.providerType],
-                                ...typeProxy.providerMetrics[provider.providerType],
-                            },
+                            ...typeProxy.providerMetrics,
                         };
                     } else {
                         // Add new proxy to main list
@@ -63,11 +60,11 @@ export async function preloadProxies(): Promise<void> {
                 });
 
                 // Update validProxies cache with all proxies that have metrics for this provider
-                proxyCache.validProxies[provider.providerType][provider.id] = proxyCache.proxies.filter((proxy) => proxy.providerMetrics?.[provider.providerType]?.[provider.id]);
+                proxyCache.validProxies[provider.providerType][provider.id] = proxyCache.proxies.filter((proxy) => proxy.providerMetrics?.[provider.id]);
 
                 if (env.DEBUG) {
                     const totalCount = proxyCache.validProxies[provider.providerType][provider.id].length;
-                    const healthyCount = proxyCache.validProxies[provider.providerType][provider.id].filter((proxy) => proxy.providerMetrics[provider.providerType][provider.id].healthScore > 0).length;
+                    const healthyCount = proxyCache.validProxies[provider.providerType][provider.id].filter((proxy) => proxy.providerMetrics[provider.id].healthScore > 0).length;
                     console.log(`Loaded ${totalCount} proxies (${healthyCount} healthy) for ${provider.providerType} ${provider.id}`);
                 }
 

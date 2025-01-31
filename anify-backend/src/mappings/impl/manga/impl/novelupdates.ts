@@ -122,7 +122,7 @@ export default class NovelUpdates extends MangaProvider {
         }
 
         // Find the last page number from pagination
-        const lastPageLink = firstPage$("div.digg_pagination a").last();
+        const lastPageLink = firstPage$("div.digg_pagination a").eq(-2);
         const totalPages = lastPageLink.length ? parseInt(lastPageLink.attr("href")?.split("pg=")[1] ?? "1") : 1;
 
         // Create array of page numbers to fetch
