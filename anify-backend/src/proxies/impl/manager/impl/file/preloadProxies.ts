@@ -8,15 +8,33 @@ import colors from "colors";
 
 // Helper function to convert date strings to Date objects in proxy metrics
 const convertDates = (proxy: IProxy): IProxy => {
-    Object.values(proxy.providerMetrics).forEach((providerMetrics) => {
-        Object.values(providerMetrics).forEach((metrics) => {
-            if (metrics.lastSuccessTime) {
-                metrics.lastSuccessTime = new Date(metrics.lastSuccessTime);
-            }
-            if (metrics.lastFailureTime) {
-                metrics.lastFailureTime = new Date(metrics.lastFailureTime);
-            }
-        });
+    if (!proxy.providerMetrics) {
+        proxy.providerMetrics = {};
+        return proxy;
+    }
+
+    Object.entries(proxy.providerMetrics).forEach(([providerId, providerMetrics]) => {
+        if (!providerMetrics) {
+            proxy.providerMetrics[providerId] = {
+                healthScore: 50,
+                consecutiveFailures: 0,
+                successRate: 0,
+                averageResponseTime: 0,
+                successfulRequests: 0,
+                totalRequests: 0,
+                successStreak: 0,
+                latencyScore: 50,
+            };
+            return;
+        }
+
+        // Convert timestamps to numbers if they're strings
+        if (providerMetrics.lastSuccessTime) {
+            providerMetrics.lastSuccessTime = typeof providerMetrics.lastSuccessTime === "string" ? new Date(providerMetrics.lastSuccessTime).getTime() : providerMetrics.lastSuccessTime;
+        }
+        if (providerMetrics.lastFailureTime) {
+            providerMetrics.lastFailureTime = typeof providerMetrics.lastFailureTime === "string" ? new Date(providerMetrics.lastFailureTime).getTime() : providerMetrics.lastFailureTime;
+        }
     });
     return proxy;
 };
@@ -53,31 +71,27 @@ export async function preloadProxies(): Promise<void> {
                 }
 
                 // Only include proxies that have metrics for this specific provider
-                const convertedProxies = typeProxies
-                    .map(convertDates)
-                    .filter(proxy => proxy.providerMetrics && proxy.providerMetrics[provider.id]);
-                
+                const convertedProxies = typeProxies.map(convertDates).filter((proxy) => proxy.providerMetrics && proxy.providerMetrics[provider.id]);
+
                 // Update the provider's proxy list
                 proxyCache.validProxies[provider.providerType][provider.id] = convertedProxies;
 
                 // Update the main proxy list with any new proxies that have metrics for this provider
                 convertedProxies.forEach((typeProxy) => {
-                    const existingProxy = proxyCache.proxies.find(
-                        (p) => p.ip === typeProxy.ip && p.port === typeProxy.port
-                    );
+                    const existingProxy = proxyCache.proxies.find((p) => p.ip === typeProxy.ip && p.port === typeProxy.port);
                     if (existingProxy) {
                         // Merge provider metrics, but only for this specific provider
                         existingProxy.providerMetrics = {
                             ...existingProxy.providerMetrics,
-                            [provider.id]: typeProxy.providerMetrics[provider.id]
+                            [provider.id]: typeProxy.providerMetrics[provider.id],
                         };
                     } else {
                         // Only include the metrics for this specific provider
                         const newProxy = {
                             ...typeProxy,
                             providerMetrics: {
-                                [provider.id]: typeProxy.providerMetrics[provider.id]
-                            }
+                                [provider.id]: typeProxy.providerMetrics[provider.id],
+                            },
                         };
                         proxyCache.proxies.push(newProxy);
                     }

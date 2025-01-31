@@ -74,7 +74,7 @@ const saveProxiesToFile = (providerType: ProviderType) => {
     let existingProxies: IProxy[] = [];
     try {
         if (fs.existsSync(filePath)) {
-            const fileContent = fs.readFileSync(filePath, 'utf-8');
+            const fileContent = fs.readFileSync(filePath, "utf-8");
             existingProxies = JSON.parse(fileContent);
         }
     } catch (error) {
@@ -82,16 +82,14 @@ const saveProxiesToFile = (providerType: ProviderType) => {
     }
 
     // Create a map of existing proxies for easy lookup
-    const existingProxyMap = new Map(existingProxies.map(proxy => [`${proxy.ip}:${proxy.port}`, proxy]));
+    const existingProxyMap = new Map(existingProxies.map((proxy) => [`${proxy.ip}:${proxy.port}`, proxy]));
 
     // Update or add proxies from cache
-    proxyCache.proxies.forEach(proxy => {
+    proxyCache.proxies.forEach((proxy) => {
         const proxyKey = `${proxy.ip}:${proxy.port}`;
         // Check if proxy has metrics for any provider ID in this provider type
-        const hasMetricsForType = Object.keys(proxyCache.validProxies[providerType]).some(
-            providerId => proxy.providerMetrics?.[providerId]
-        );
-        
+        const hasMetricsForType = Object.keys(proxyCache.validProxies[providerType]).some((providerId) => proxy.providerMetrics?.[providerId]);
+
         if (hasMetricsForType) {
             // If proxy exists in file, merge the metrics
             const existingProxy = existingProxyMap.get(proxyKey);
@@ -100,8 +98,8 @@ const saveProxiesToFile = (providerType: ProviderType) => {
                     ...existingProxy,
                     providerMetrics: {
                         ...existingProxy.providerMetrics,
-                        ...proxy.providerMetrics // Merge all provider metrics
-                    }
+                        ...proxy.providerMetrics, // Merge all provider metrics
+                    },
                 });
             } else {
                 // Add new proxy
@@ -115,67 +113,80 @@ const saveProxiesToFile = (providerType: ProviderType) => {
 
     // Update validProxies cache for each provider
     Object.keys(proxyCache.validProxies[providerType]).forEach((providerId) => {
-        proxyCache.validProxies[providerType][providerId] = updatedProxies.filter(
-            (proxy) => proxy.providerMetrics?.[providerId] && 
-            proxy.providerMetrics[providerId].healthScore > MIN_VIABLE_HEALTH
-        );
+        proxyCache.validProxies[providerType][providerId] = updatedProxies.filter((proxy) => proxy.providerMetrics?.[providerId] && proxy.providerMetrics[providerId].healthScore > MIN_VIABLE_HEALTH);
     });
 
     // Save all proxies with their metrics
     fs.writeFileSync(filePath, JSON.stringify(updatedProxies, null, 2));
-
-    /*
-    if (env.DEBUG) {
-        const totalProxies = providerProxies.length;
-        const healthyCount = providerProxies.filter((proxy) => Object.values(proxy.providerMetrics[providerType]).some((metrics) => metrics.healthScore > MIN_VIABLE_HEALTH)).length;
-        const providerCounts = Object.entries(proxyCache.validProxies[providerType])
-            .map(([id, proxies]) => `${id}: ${proxies.length}`)
-            .join(", ");
-        console.log(`Saved ${totalProxies} proxies for ${providerType} (${healthyCount} healthy) - Per provider: ${providerCounts}`);
-    }
-    */
 };
 
 export const updateProxyHealth = (proxy: IProxy, success: boolean, providerType: ProviderType, providerId: string, responseTime?: number) => {
-    const now = new Date();
+    const now = Date.now();
     const metrics = getProviderMetrics(proxy, providerType, providerId);
 
     // Apply time-based health decay (only if not successful)
     if (!success && metrics.lastSuccessTime) {
-        const lastSuccessDate = new Date(metrics.lastSuccessTime);
-        const timeSinceLastUpdate = (now.getTime() - lastSuccessDate.getTime()) / (24 * 60 * 60 * 1000); // Days since last success
+        const timeSinceLastUpdate = (now - metrics.lastSuccessTime) / (24 * 60 * 60 * 1000); // Days since last success
         metrics.healthScore *= Math.pow(HEALTH_DECAY_RATE, timeSinceLastUpdate);
     }
 
     // Update basic metrics
     metrics.totalRequests = (metrics.totalRequests || 0) + 1;
+    metrics.successfulRequests = (metrics.successfulRequests || 0) + (success ? 1 : 0);
+
+    // Update success rate with exponential moving average for stability
+    const currentSuccessRate = (metrics.successfulRequests / metrics.totalRequests) * 100;
+    metrics.successRate =
+        metrics.successRate !== undefined
+            ? metrics.successRate * 0.7 + currentSuccessRate * 0.3 // 70% old rate, 30% new rate
+            : currentSuccessRate;
 
     if (success) {
-        metrics.successfulRequests = (metrics.successfulRequests || 0) + 1;
         metrics.lastSuccessTime = now;
         metrics.successStreak = (metrics.successStreak || 0) + 1;
 
-        // Calculate bonus based on success streak
+        // Calculate streak bonus with diminishing returns
         const streakBonus = Math.min(SUCCESS_STREAK_BONUS * Math.log10(metrics.successStreak + 1), SUCCESS_BONUS * 2);
 
-        // Apply success bonus with streak consideration
-        metrics.healthScore = Math.min(MAX_HEALTH_SCORE, metrics.healthScore + SUCCESS_BONUS + streakBonus);
+        // Calculate success bonus based on response time
+        let speedBonus = 0;
+        if (responseTime) {
+            if (responseTime < LATENCY_THRESHOLD_EXCELLENT) {
+                speedBonus = SUCCESS_BONUS * 0.5; // 50% bonus for excellent speed
+            } else if (responseTime < LATENCY_THRESHOLD_GOOD) {
+                speedBonus = SUCCESS_BONUS * 0.3; // 30% bonus for good speed
+            }
+        }
+
+        // Apply success bonus with streak and speed consideration
+        const totalBonus = SUCCESS_BONUS + streakBonus + speedBonus;
+        metrics.healthScore = Math.min(MAX_HEALTH_SCORE, metrics.healthScore + totalBonus);
         metrics.consecutiveFailures = 0;
     } else {
         metrics.lastFailureTime = now;
         metrics.consecutiveFailures = (metrics.consecutiveFailures || 0) + 1;
         metrics.successStreak = 0;
 
-        // Progressive penalty based on consecutive failures
-        const failurePenalty = FAILURE_PENALTY * Math.min(2, Math.pow(1.2, metrics.consecutiveFailures));
+        // Progressive penalty based on consecutive failures and response time
+        let failurePenalty = FAILURE_PENALTY * Math.min(2, Math.pow(1.2, metrics.consecutiveFailures));
+
+        // Additional penalty for slow response times that led to failure
+        if (responseTime && responseTime > LATENCY_THRESHOLD_FAIR) {
+            failurePenalty *= 1.5; // 50% more penalty for slow failures
+        }
+
         metrics.healthScore = Math.max(MIN_HEALTH_SCORE, metrics.healthScore - failurePenalty);
     }
 
     // Update response time metrics with exponential moving average
     if (responseTime) {
-        metrics.averageResponseTime = metrics.averageResponseTime ? metrics.averageResponseTime * 0.7 + responseTime * 0.3 : responseTime;
+        // Use different weights based on success/failure
+        const oldWeight = success ? 0.7 : 0.3; // Weight history more on success
+        const newWeight = 1 - oldWeight;
 
-        // Calculate latency score (0-100)
+        metrics.averageResponseTime = metrics.averageResponseTime ? metrics.averageResponseTime * oldWeight + responseTime * newWeight : responseTime;
+
+        // Calculate latency score (0-100) with more granular scaling
         let latencyScore = 100;
         if (responseTime > LATENCY_THRESHOLD_FAIR) {
             latencyScore = 50;
@@ -185,13 +196,16 @@ export const updateProxyHealth = (proxy: IProxy, success: boolean, providerType:
             latencyScore = 90;
         }
 
-        metrics.latencyScore = metrics.latencyScore ? metrics.latencyScore * 0.8 + latencyScore * 0.2 : latencyScore;
+        // Update latency score with more weight on recent performance
+        metrics.latencyScore = metrics.latencyScore
+            ? metrics.latencyScore * 0.6 + latencyScore * 0.4 // More weight on recent performance
+            : latencyScore;
     }
 
-    // Calculate reliability score based on total requests
-    const reliabilityScore = metrics.totalRequests >= MIN_REQUESTS_FOR_RELIABILITY ? (metrics.successfulRequests / metrics.totalRequests) * 100 : 50; // Default score for new proxies
+    // Calculate reliability score based on total requests with minimum threshold
+    const reliabilityScore = metrics.totalRequests >= MIN_REQUESTS_FOR_RELIABILITY ? (metrics.successfulRequests / metrics.totalRequests) * 100 : Math.min(50 + metrics.totalRequests * 5, 100); // Gradually increase base reliability
 
-    // Adaptive weights based on request volume
+    // Adaptive weights based on request volume and performance
     let adaptiveSuccessWeight = SUCCESS_RATE_WEIGHT;
     let adaptiveResponseWeight = RESPONSE_TIME_WEIGHT;
     let adaptiveReliabilityWeight = RELIABILITY_WEIGHT;
@@ -215,27 +229,26 @@ export const updateProxyHealth = (proxy: IProxy, success: boolean, providerType:
     }
 
     // Calculate final health score components
-    const successRateScore = metrics.successRate * 100;
+    const successRateScore = metrics.successRate;
     const responseTimeScore = metrics.latencyScore || 50;
 
     // Weighted health score calculation with reliability
     const targetScore = successRateScore * adaptiveSuccessWeight + responseTimeScore * adaptiveResponseWeight + reliabilityScore * adaptiveReliabilityWeight;
 
-    // Smooth transition to target score
-    metrics.healthScore += (targetScore - metrics.healthScore) * 0.1;
+    // Smooth transition to target score with adaptive rate
+    const adaptationRate = metrics.totalRequests < MIN_REQUESTS_FOR_RELIABILITY ? 0.2 : 0.1;
+    metrics.healthScore += (targetScore - metrics.healthScore) * adaptationRate;
 
     // Ensure health score stays within bounds
     metrics.healthScore = Math.min(MAX_HEALTH_SCORE, Math.max(MIN_HEALTH_SCORE, metrics.healthScore));
 
-    console.log(
-        `${proxy.ip}:${proxy.port} - ${providerType} - ${providerId} - ${metrics.healthScore} - ${metrics.totalRequests} - ${metrics.successfulRequests} - ${metrics.consecutiveFailures} - ${metrics.successStreak} - ${metrics.averageResponseTime} - ${metrics.latencyScore} - ${metrics.successRate} - ${metrics.lastSuccessTime} - ${metrics.lastFailureTime}`
-    )
+    console.log(`${proxy.ip}:${proxy.port} - ${providerType} - ${providerId} - ${metrics.healthScore}`);
 
     // Save updated proxies to file
     saveProxiesToFile(providerType);
 };
 
-export const selectProxy = (providerType: ProviderType, providerId: string): IProxy | null => {
+export const selectProxy = (providerType: ProviderType, providerId: string, isRetry: boolean = false, attempts: number = 1): IProxy | null => {
     const providerProxies = proxyCache.validProxies[providerType]?.[providerId] || [];
     if (providerProxies.length === 0) return null;
 
@@ -247,7 +260,7 @@ export const selectProxy = (providerType: ProviderType, providerId: string): IPr
         // Check if proxy is in cooldown
         if (metrics.lastFailureTime) {
             const cooldownTime = Math.min(MAX_COOLDOWN_MS, MIN_COOLDOWN_MS * Math.pow(2, metrics.consecutiveFailures));
-            if (now - metrics.lastFailureTime.getTime() < cooldownTime) {
+            if (now - metrics.lastFailureTime < cooldownTime) {
                 return false;
             }
         }
@@ -257,26 +270,118 @@ export const selectProxy = (providerType: ProviderType, providerId: string): IPr
 
     if (viableProxies.length === 0) return null;
 
-    // Sort by health score and select randomly from top proxies
-    const sortedProxies = viableProxies.sort((a, b) => {
+    // If this is not a retry, prioritize untested proxies
+    if (!isRetry) {
+        const untestedProxies = viableProxies.filter((proxy) => {
+            const metrics = getProviderMetrics(proxy, providerType, providerId);
+            // Specifically look for proxies with default health score (50) and no requests
+            return metrics.healthScore === 50 && (!metrics.totalRequests || metrics.totalRequests === 0);
+        });
+
+        if (untestedProxies.length > 0) {
+            // Randomly select from untested proxies to distribute load
+            return untestedProxies[Math.floor(Math.random() * untestedProxies.length)];
+        }
+    }
+
+    // For retries, prioritize proxies that have been tested and have good health scores
+    const testedProxies = viableProxies.filter((proxy) => {
+        const metrics = getProviderMetrics(proxy, providerType, providerId);
+        return metrics.totalRequests && metrics.totalRequests > 0;
+    });
+
+    if (testedProxies.length === 0) {
+        // If no tested proxies available, fall back to random selection from viable proxies
+        return viableProxies[Math.floor(Math.random() * viableProxies.length)];
+    }
+
+    // Sort by health score and success rate for retries
+    const sortedProxies = testedProxies.sort((a, b) => {
         const metricsA = getProviderMetrics(a, providerType, providerId);
         const metricsB = getProviderMetrics(b, providerType, providerId);
+
+        // For retries, heavily weight successful proxies
+        if (isRetry) {
+            // Calculate success rate (0-100)
+            const successRateA = (metricsA.successfulRequests / metricsA.totalRequests) * 100;
+            const successRateB = (metricsB.successfulRequests / metricsB.totalRequests) * 100;
+
+            // Calculate streak bonus (0-20)
+            const streakBonusA = Math.min(20, metricsA.successStreak * 2);
+            const streakBonusB = Math.min(20, metricsB.successStreak * 2);
+
+            // Calculate response time score (inverse - faster is better)
+            const responseScoreA = metricsA.averageResponseTime ? Math.max(0, 100 - metricsA.averageResponseTime / 50) : 0;
+            const responseScoreB = metricsB.averageResponseTime ? Math.max(0, 100 - metricsB.averageResponseTime / 50) : 0;
+
+            // Calculate reliability based on number of successful requests
+            const reliabilityA = Math.min(100, (metricsA.successfulRequests / 10) * 100);
+            const reliabilityB = Math.min(100, (metricsB.successfulRequests / 10) * 100);
+
+            // Composite score with weighted components
+            const scoreA =
+                metricsA.healthScore * 0.3 + // Health score (30%)
+                successRateA * 0.25 + // Success rate (25%)
+                streakBonusA * 0.15 + // Current streak bonus (15%)
+                responseScoreA * 0.15 + // Response time (15%)
+                reliabilityA * 0.15; // Reliability/experience (15%)
+
+            const scoreB = metricsB.healthScore * 0.3 + successRateB * 0.25 + streakBonusB * 0.15 + responseScoreB * 0.15 + reliabilityB * 0.15;
+
+            return scoreB - scoreA;
+        }
+
+        // For non-retries, just use health score
         return metricsB.healthScore - metricsA.healthScore;
     });
 
-    // Select from top 30% of proxies, weighted by health score
-    const topCount = Math.max(1, Math.ceil(sortedProxies.length * 0.3));
+    // For retries, select from top 20% of proxies to ensure we get the best ones
+    // For non-retries, select from top 30% to maintain more variety
+    const topCount = Math.max(1, Math.ceil(sortedProxies.length * (isRetry ? 0.2 : 0.3)));
     const topProxies = sortedProxies.slice(0, topCount);
 
-    // Weighted random selection based on health scores
-    const totalHealth = topProxies.reduce((sum, p) => sum + getProviderMetrics(p, providerType, providerId).healthScore, 0);
-
-    let random = Math.random() * totalHealth;
-    for (const proxy of topProxies) {
-        const health = getProviderMetrics(proxy, providerType, providerId).healthScore;
-        if (random <= health) return proxy;
-        random -= health;
+    // For retries, prefer the absolute best proxies more often based on attempt number
+    if (isRetry) {
+        // Higher chance to pick the best proxy on subsequent retries
+        const bestProxyChance = Math.min(0.9, 0.6 + attempts * 0.15); // Increases with each retry
+        if (Math.random() < bestProxyChance) {
+            return topProxies[0];
+        }
     }
 
-    return topProxies[Math.floor(Math.random() * topProxies.length)]; // Fallback to random proxy if weighted selection fails
+    // Otherwise use weighted random selection based on composite scores
+    const totalScore = topProxies.reduce((sum, p) => {
+        const metrics = getProviderMetrics(p, providerType, providerId);
+        if (isRetry) {
+            // Use the same composite scoring for weights
+            const successRate = (metrics.successfulRequests / metrics.totalRequests) * 100;
+            const streakBonus = Math.min(20, metrics.successStreak * 2);
+            const responseScore = metrics.averageResponseTime ? Math.max(0, 100 - metrics.averageResponseTime / 50) : 0;
+            const reliability = Math.min(100, (metrics.successfulRequests / 10) * 100);
+
+            return sum + metrics.healthScore * 0.3 + successRate * 0.25 + streakBonus * 0.15 + responseScore * 0.15 + reliability * 0.15;
+        }
+        return sum + metrics.healthScore;
+    }, 0);
+
+    let random = Math.random() * totalScore;
+    for (const proxy of topProxies) {
+        const metrics = getProviderMetrics(proxy, providerType, providerId);
+        let score;
+        if (isRetry) {
+            const successRate = (metrics.successfulRequests / metrics.totalRequests) * 100;
+            const streakBonus = Math.min(20, metrics.successStreak * 2);
+            const responseScore = metrics.averageResponseTime ? Math.max(0, 100 - metrics.averageResponseTime / 50) : 0;
+            const reliability = Math.min(100, (metrics.successfulRequests / 10) * 100);
+
+            score = metrics.healthScore * 0.3 + successRate * 0.25 + streakBonus * 0.15 + responseScore * 0.15 + reliability * 0.15;
+        } else {
+            score = metrics.healthScore;
+        }
+
+        if (random <= score) return proxy;
+        random -= score;
+    }
+
+    return topProxies[Math.floor(Math.random() * topProxies.length)];
 };

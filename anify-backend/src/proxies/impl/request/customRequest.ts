@@ -10,7 +10,7 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
         attempts++;
 
         // Use provided proxy for first attempt or checking, otherwise select best proxy
-        const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempts === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId)) : null;
+        const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempts === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId, attempts > 1, attempts)) : null;
 
         if (useGoogleTranslate) {
             url = "http://translate.google.com/translate?sl=ja&tl=en&u=" + encodeURIComponent(url);

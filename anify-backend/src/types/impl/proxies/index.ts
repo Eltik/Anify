@@ -9,8 +9,8 @@ import { ProviderType } from "../..";
  */
 export interface IProxyProviderMetrics {
     healthScore: number;
-    lastSuccessTime?: Date;
-    lastFailureTime?: Date;
+    lastSuccessTime?: number;
+    lastFailureTime?: number;
     consecutiveFailures: number;
     successRate: number;
     averageResponseTime: number;
