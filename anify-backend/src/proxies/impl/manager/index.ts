@@ -5,24 +5,24 @@ import path from "path";
 
 const MIN_HEALTH_SCORE = 0;
 const MAX_HEALTH_SCORE = 100;
-const FAILURE_PENALTY = 2;
-const SUCCESS_BONUS = 3;
-const RESPONSE_TIME_WEIGHT = 0.3;
-const SUCCESS_RATE_WEIGHT = 0.7;
-const MAX_CONSECUTIVE_FAILURES = 10;
-const MIN_COOLDOWN_MS = 30000;
-const MAX_COOLDOWN_MS = 1800000;
-const HEALTH_DECAY_RATE = 0.98;
-const MIN_VIABLE_HEALTH = 10;
+const FAILURE_PENALTY = 3;
+const SUCCESS_BONUS = 2;
+const RESPONSE_TIME_WEIGHT = 0.25;
+const SUCCESS_RATE_WEIGHT = 0.75;
+const MAX_CONSECUTIVE_FAILURES = 5;
+const MIN_COOLDOWN_MS = 60000;
+const MAX_COOLDOWN_MS = 3600000;
+const HEALTH_DECAY_RATE = 0.95;
+const MIN_VIABLE_HEALTH = 20;
 
 // Add new constants for improved health scoring
-const LATENCY_THRESHOLD_EXCELLENT = 200; // ms
-const LATENCY_THRESHOLD_GOOD = 500; // ms
-const LATENCY_THRESHOLD_FAIR = 1000; // ms
-const SUCCESS_STREAK_BONUS = 1.5;
-const MIN_REQUESTS_FOR_RELIABILITY = 10;
-const RELIABILITY_WEIGHT = 0.2;
-const ADAPTIVE_WEIGHT_THRESHOLD = 100; // Number of requests before adapting weights
+const LATENCY_THRESHOLD_EXCELLENT = 300;
+const LATENCY_THRESHOLD_GOOD = 800;
+const LATENCY_THRESHOLD_FAIR = 1500;
+const SUCCESS_STREAK_BONUS = 1.2;
+const MIN_REQUESTS_FOR_RELIABILITY = 5;
+const RELIABILITY_WEIGHT = 0.3;
+const ADAPTIVE_WEIGHT_THRESHOLD = 50;
 
 export const proxyCache: {
     proxies: IProxy[];
@@ -138,7 +138,7 @@ export const updateProxyHealth = (proxy: IProxy, success: boolean, providerType:
     const currentSuccessRate = (metrics.successfulRequests / metrics.totalRequests) * 100;
     metrics.successRate =
         metrics.successRate !== undefined
-            ? metrics.successRate * 0.7 + currentSuccessRate * 0.3 // 70% old rate, 30% new rate
+            ? metrics.successRate * 0.75 + currentSuccessRate * 0.25 // 75% old rate, 25% new rate
             : currentSuccessRate;
 
     if (success) {
@@ -181,7 +181,7 @@ export const updateProxyHealth = (proxy: IProxy, success: boolean, providerType:
     // Update response time metrics with exponential moving average
     if (responseTime) {
         // Use different weights based on success/failure
-        const oldWeight = success ? 0.7 : 0.3; // Weight history more on success
+        const oldWeight = success ? 0.75 : 0.25; // Weight history more on success
         const newWeight = 1 - oldWeight;
 
         metrics.averageResponseTime = metrics.averageResponseTime ? metrics.averageResponseTime * oldWeight + responseTime * newWeight : responseTime;

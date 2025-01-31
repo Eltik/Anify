@@ -1,5 +1,6 @@
 import type { IRequestConfig } from "../../../types/impl/proxies";
 import { ProxyAgent } from "undici";
+import { SocksProxyAgent } from "socks-proxy-agent";
 import { updateProxyHealth, proxyCache, selectProxy, proxyToUrl } from "../manager";
 
 export async function customRequest(url: string, options: IRequestConfig = {}): Promise<Response> {
@@ -23,9 +24,16 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
             };
 
             if (proxyURL) {
-                Object.assign(fetchOptions, {
-                    dispatcher: new ProxyAgent(proxyURL),
-                });
+                // Determine if it's a SOCKS5 or HTTP proxy based on the URL scheme
+                if (proxyURL.startsWith("socks5://")) {
+                    Object.assign(fetchOptions, {
+                        dispatcher: new SocksProxyAgent(proxyURL),
+                    });
+                } else {
+                    Object.assign(fetchOptions, {
+                        dispatcher: new ProxyAgent(proxyURL),
+                    });
+                }
             }
 
             const timeoutPromise = new Promise<Response>((_, reject) => {
