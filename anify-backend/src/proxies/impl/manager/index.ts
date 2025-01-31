@@ -66,20 +66,63 @@ const getProviderMetrics = (proxy: IProxy, providerType: ProviderType, providerI
 
 // Save proxies to provider-specific files
 const saveProxiesToFile = (providerType: ProviderType) => {
-    const filename = `${providerType}Proxies.json`;
+    // Convert providerType to uppercase for ANIME, MANGA, etc.
+    const filename = `${providerType.toUpperCase()}Proxies.json`;
     const filePath = path.join(process.cwd(), filename);
 
-    // Get all proxies that have metrics for this provider type
-    const providerProxies = proxyCache.proxies.filter((proxy) => proxy.providerMetrics?.[providerType] && Object.keys(proxy.providerMetrics[providerType]).length > 0);
+    // Read existing proxies from file
+    let existingProxies: IProxy[] = [];
+    try {
+        if (fs.existsSync(filePath)) {
+            const fileContent = fs.readFileSync(filePath, 'utf-8');
+            existingProxies = JSON.parse(fileContent);
+        }
+    } catch (error) {
+        console.error(`Error reading existing proxies from ${filename}:`, error);
+    }
+
+    // Create a map of existing proxies for easy lookup
+    const existingProxyMap = new Map(existingProxies.map(proxy => [`${proxy.ip}:${proxy.port}`, proxy]));
+
+    // Update or add proxies from cache
+    proxyCache.proxies.forEach(proxy => {
+        const proxyKey = `${proxy.ip}:${proxy.port}`;
+        // Check if proxy has metrics for any provider ID in this provider type
+        const hasMetricsForType = Object.keys(proxyCache.validProxies[providerType]).some(
+            providerId => proxy.providerMetrics?.[providerId]
+        );
+        
+        if (hasMetricsForType) {
+            // If proxy exists in file, merge the metrics
+            const existingProxy = existingProxyMap.get(proxyKey);
+            if (existingProxy) {
+                existingProxyMap.set(proxyKey, {
+                    ...existingProxy,
+                    providerMetrics: {
+                        ...existingProxy.providerMetrics,
+                        ...proxy.providerMetrics // Merge all provider metrics
+                    }
+                });
+            } else {
+                // Add new proxy
+                existingProxyMap.set(proxyKey, proxy);
+            }
+        }
+    });
+
+    // Convert map back to array
+    const updatedProxies = Array.from(existingProxyMap.values());
 
     // Update validProxies cache for each provider
     Object.keys(proxyCache.validProxies[providerType]).forEach((providerId) => {
-        // Keep all proxies that have metrics for this provider
-        proxyCache.validProxies[providerType][providerId] = providerProxies.filter((proxy) => proxy.providerMetrics[providerId]);
+        proxyCache.validProxies[providerType][providerId] = updatedProxies.filter(
+            (proxy) => proxy.providerMetrics?.[providerId] && 
+            proxy.providerMetrics[providerId].healthScore > MIN_VIABLE_HEALTH
+        );
     });
 
     // Save all proxies with their metrics
-    fs.writeFileSync(filePath, JSON.stringify(providerProxies, null, 2));
+    fs.writeFileSync(filePath, JSON.stringify(updatedProxies, null, 2));
 
     /*
     if (env.DEBUG) {
@@ -183,6 +226,10 @@ export const updateProxyHealth = (proxy: IProxy, success: boolean, providerType:
 
     // Ensure health score stays within bounds
     metrics.healthScore = Math.min(MAX_HEALTH_SCORE, Math.max(MIN_HEALTH_SCORE, metrics.healthScore));
+
+    console.log(
+        `${proxy.ip}:${proxy.port} - ${providerType} - ${providerId} - ${metrics.healthScore} - ${metrics.totalRequests} - ${metrics.successfulRequests} - ${metrics.consecutiveFailures} - ${metrics.successStreak} - ${metrics.averageResponseTime} - ${metrics.latencyScore} - ${metrics.successRate} - ${metrics.lastSuccessTime} - ${metrics.lastFailureTime}`
+    )
 
     // Save updated proxies to file
     saveProxiesToFile(providerType);
