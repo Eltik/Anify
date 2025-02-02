@@ -1,5 +1,5 @@
 import { load } from "cheerio";
-import type { IProxy } from "../../../../../../types/impl/proxies";
+import { ProxyType, type IProxy } from "../../../../../../types/impl/proxies";
 
 const scrape = async (): Promise<IProxy[]> => {
     const pages = 10;
@@ -26,7 +26,7 @@ const scrape = async (): Promise<IProxy[]> => {
                 ip: proxy.split(":")[0],
                 port: Number(proxy.split(":")[1]),
                 country: country ?? "Unknown",
-                type,
+                type: type === "HTTPS" ? ProxyType.HTTP : ProxyType.SOCKS5,
                 anonymity,
                 providerMetrics: {},
             });

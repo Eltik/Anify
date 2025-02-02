@@ -1,4 +1,4 @@
-import type { IProxy } from "../../../../../../types/impl/proxies";
+import { ProxyType, type IProxy } from "../../../../../../types/impl/proxies";
 
 const scrape = async (): Promise<IProxy[]> => {
     const data = await (await fetch("https://raw.githubusercontent.com/monosans/proxy-list/refs/heads/main/proxies_anonymous/http.txt")).text();
@@ -9,7 +9,7 @@ const scrape = async (): Promise<IProxy[]> => {
             anonymity: "unknown",
             country: "unknown",
             ip: host,
-            type: "http",
+            type: ProxyType.HTTP,
             providerMetrics: {},
         };
     }) as IProxy[];

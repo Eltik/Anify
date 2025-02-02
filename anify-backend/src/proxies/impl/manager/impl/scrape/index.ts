@@ -4,7 +4,7 @@ import proxyList from "./impl/proxyList";
 import proxyListPlus from "./impl/proxyListPlus";
 import spys from "./impl/spys";
 export default {
-    //speedX,
+    speedX,
     //monosans,
     //proxyList,
     //proxyListPlus,

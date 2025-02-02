@@ -1,5 +1,6 @@
 import { load } from "cheerio";
 import type { IProxy } from "../../../../../../types/impl/proxies";
+import { ProxyType } from "../../../../../../types/impl/proxies";
 
 const scrape = async (): Promise<IProxy[]> => {
     const data = await (await fetch("https://spys.one/en/socks-proxy-list/")).text();
@@ -86,7 +87,7 @@ const scrape = async (): Promise<IProxy[]> => {
             return {
                 ip,
                 port,
-                type: type.includes("socks5") ? "socks5" : type.includes("socks4") ? "socks4" : "socks",
+                type: type.includes("socks5") ? ProxyType.SOCKS5 : ProxyType.HTTP,
                 anonymity,
                 country,
                 providerMetrics: {},

@@ -2,6 +2,7 @@ import { ProviderType } from "../../../types";
 import type { IProxy, IProxyProviderMetrics } from "../../../types/impl/proxies";
 import fs from "fs";
 import path from "path";
+import { ProxyType } from "../../../types/impl/proxies";
 
 const MIN_HEALTH_SCORE = 0;
 const MAX_HEALTH_SCORE = 100;
@@ -41,7 +42,7 @@ export const proxyCache: {
 // Helper function to convert proxy to URL string
 export const proxyToUrl = (proxy: IProxy | null): string | null => {
     if (!proxy) return null;
-    return `http://${proxy.ip}:${proxy.port}`;
+    return `${proxy.type === ProxyType.SOCKS5 ? "socks5" : "http"}://${proxy.ip}:${proxy.port}`;
 };
 
 // Helper function to get provider metrics, creating if doesn't exist

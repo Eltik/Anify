@@ -1,6 +1,7 @@
 import { proxyCache } from "../..";
 import { PROVIDERS } from "../../../../../mappings";
 import type { IProxy } from "../../../../../types/impl/proxies";
+import { ProxyType } from "../../../../../types/impl/proxies";
 import { loadJSON } from "../../../helper/loadJSON";
 import { emitter } from "../../../../../events";
 import { Events } from "../../../../../types/impl/events";
@@ -80,15 +81,17 @@ export async function preloadProxies(): Promise<void> {
                 convertedProxies.forEach((typeProxy) => {
                     const existingProxy = proxyCache.proxies.find((p) => p.ip === typeProxy.ip && p.port === typeProxy.port);
                     if (existingProxy) {
-                        // Merge provider metrics, but only for this specific provider
+                        // Merge provider metrics and preserve type
+                        existingProxy.type = typeProxy.type || existingProxy.type;
                         existingProxy.providerMetrics = {
                             ...existingProxy.providerMetrics,
                             [provider.id]: typeProxy.providerMetrics[provider.id],
                         };
                     } else {
-                        // Only include the metrics for this specific provider
+                        // Only include the metrics for this specific provider but preserve all other properties
                         const newProxy = {
                             ...typeProxy,
+                            type: typeProxy.type || ProxyType.HTTP, // Ensure type is preserved
                             providerMetrics: {
                                 [provider.id]: typeProxy.providerMetrics[provider.id],
                             },

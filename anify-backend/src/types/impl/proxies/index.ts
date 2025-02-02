@@ -5,6 +5,14 @@
 import { ProviderType } from "../..";
 
 /**
+ * @description Type of proxy
+ */
+export enum ProxyType {
+    HTTP = "http",
+    SOCKS5 = "socks5",
+}
+
+/**
  * @description Provider-specific health metrics
  */
 export interface IProxyProviderMetrics {
@@ -27,7 +35,7 @@ export interface IProxy {
     ip: string;
     port: number;
     country: string;
-    type: string;
+    type: ProxyType;
     anonymity: string;
     providerMetrics: Record<string, IProxyProviderMetrics>; // providerId -> metrics
 }
