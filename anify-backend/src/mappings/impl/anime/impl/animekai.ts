@@ -180,7 +180,3 @@ export default class AnimeKai extends AnimeProvider {
         } as ISource;
     }
 }
-
-
-const animekai = new AnimeKai();
-animekai.fetchSources("w16Z30-jWKxshw", SubType.SUB, StreamingServers.UpCloud).then(console.log);
