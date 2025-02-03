@@ -3,6 +3,7 @@
  */
 
 import { ProviderType } from "../..";
+import type { RequestInit, Response } from "node-fetch";
 
 /**
  * @description Type of proxy

@@ -3,6 +3,7 @@ import { ProviderType } from "../../..";
 import type { IRequestConfig } from "../../proxies";
 import { selectProxy, proxyToUrl } from "../../../../proxies/impl/manager";
 import { customRequest } from "../../../../proxies/impl/request/customRequest";
+import type { Response } from "node-fetch";
 
 export abstract class MediaProvider {
     private static limiterMap: Map<string, Bottleneck> = new Map();

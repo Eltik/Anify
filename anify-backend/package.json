@@ -11,8 +11,7 @@
         "prettier": "bunx prettier --write .",
         "lint": "bun run prettier && bunx tsc --noEmit && bunx eslint --fix .",
         "scripts": "bun src/scripts/index.ts",
-        "test": "bun src/tests/index.ts",
-        "train": " bun run src/scripts/proxyTrainer.ts --types=BASE,ANIME,MANGA,META,INFORMATION"
+        "test": "bun src/tests/index.ts"
     },
     "dependencies": {
         "@extractus/article-extractor": "^8.0.16",
@@ -24,13 +23,15 @@
         "epub-gen-memory": "^1.1.2",
         "eventemitter2": "latest",
         "fastest-levenshtein": "^1.0.16",
+        "https-proxy-agent": "^7.0.6",
         "ioredis": "^5.4.1",
         "jimp": "^0.22.12",
         "lru-cache": "^11.0.2",
+        "node-fetch": "^3.3.2",
         "p-limit": "^6.2.0",
         "pdfkit": "^0.13.0",
         "pg": "^8.13.1",
-        "undici": "^7.2.0",
+        "undici": "^7.3.0",
         "zod": "^3.23.8"
     },
     "devDependencies": {

@@ -2,6 +2,7 @@ import type { IRequestConfig } from "../../../types/impl/proxies";
 import { ProxyAgent } from "undici";
 import { SocksProxyAgent } from "socks-proxy-agent";
 import { updateProxyHealth, proxyCache, selectProxy, proxyToUrl } from "../manager";
+import fetch, { type RequestInit, type Response } from "node-fetch";
 
 export async function customRequest(url: string, options: IRequestConfig = {}): Promise<Response> {
     const { isChecking, proxy, useGoogleTranslate, timeout, providerType, providerId, maxRetries, validateResponse } = options;
@@ -27,7 +28,7 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
                 // Determine if it's a SOCKS5 or HTTP proxy based on the URL scheme
                 if (proxyURL.startsWith("socks5://")) {
                     Object.assign(fetchOptions, {
-                        dispatcher: new SocksProxyAgent(proxyURL),
+                        agent: new SocksProxyAgent(proxyURL),
                     });
                 } else {
                     Object.assign(fetchOptions, {
