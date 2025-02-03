@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 import { z } from "zod";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "bun";
 
 const booleanFromEnv = z.string().transform((val) => {
     const normalized = val.toLowerCase().trim();
@@ -75,10 +76,12 @@ const envSchema = z.object({
     NOVELUPDATES_LOGIN: z.string().optional(),
 });
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 /**
  * @description Set the file path for the `.env` file.
  */
-const ENV_FILE_PATH = path.resolve(process.cwd(), ".env");
+const ENV_FILE_PATH = path.resolve(__dirname, "..", ".env");
 
 /**
  * @description Load and parse the `.env` file

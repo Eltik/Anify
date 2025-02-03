@@ -33,18 +33,21 @@ export type IServer = {
 /**
  * @description Enum for the sub type of the anime.
  */
-export const enum SubType {
+export enum SubType {
     DUB = "dub",
     SUB = "sub",
 }
 
+
 /**
  * @description Enum for streaming servers that can be extracted.
  */
-export const enum StreamingServers {
+export enum StreamingServers {
     GogoCDN = "gogocdn",
     Kwik = "kwik",
     VidStreaming = "vidstreaming",
     StreamSB = "streamsb",
     VidCloud = "vidcloud",
+    UpCloud = "upcloud",
+    AnimeKaiMegacloud = "animekai-megacloud",
 }

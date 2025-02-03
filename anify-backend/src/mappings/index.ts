@@ -30,7 +30,12 @@ export const ANIME_PROVIDERS = [
         const { default: HiAnime } = await import("./impl/anime/impl/hianime");
         return new HiAnime();
     },
+    async () => {
+        const { default: AnimeKai } = await import("./impl/anime/impl/animekai");
+        return new AnimeKai();
+    },
 ];
+
 
 export const MANGA_PROVIDERS = [
     async () => {
