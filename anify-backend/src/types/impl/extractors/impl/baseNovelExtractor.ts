@@ -4,6 +4,7 @@ import { selectProxy, proxyToUrl } from "../../../../proxies/impl/manager";
 import { customRequest } from "../../../../proxies/impl/request/customRequest";
 import type { IPage, NovelProviders } from "../../mappings/impl/manga";
 import type { IRequestConfig } from "../../proxies";
+import type { Response } from "node-fetch";
 
 export default abstract class BaseNovelExtractor implements INovelExtractor {
     abstract url: string;
