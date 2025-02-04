@@ -2,7 +2,7 @@ import { load } from "cheerio";
 import AnimeProvider from "..";
 import { type ISource, StreamingServers, SubType } from "../../../../types/impl/mappings/impl/anime";
 import {type IEpisode, type IProviderResult, MediaFormat } from "../../../../types";
-import AnimekaiDecoder from "../../../../helper/impl/animekai-decoder";
+import AnimekaiDecoder from "../../../../video-extractors/impl/animekai-decoder";
 
 const decoder = AnimekaiDecoder
 
