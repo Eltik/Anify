@@ -1,17 +1,15 @@
 import { expect, test } from "bun:test";
-import proxies from "../../../proxies/impl/manager/impl/scrape";
+import { scrape } from "../../../proxies/impl/manager/impl/scrape";
 import { env } from "../../../env";
 
 test(
     "Proxies.Scrape",
     async (done) => {
-        for (const proxy of Object.values(proxies)) {
-            const data = await proxy();
-            if (env.DEBUG) {
-                console.log(data);
-            }
-            expect(data).not.toBeEmpty();
+        const data = await scrape();
+        if (env.DEBUG) {
+            console.log(data);
         }
+        expect(data).not.toBeEmpty();
 
         done();
     },

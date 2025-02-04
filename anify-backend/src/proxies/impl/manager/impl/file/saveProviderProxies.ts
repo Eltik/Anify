@@ -2,7 +2,6 @@ import { proxyCache } from "../..";
 import { ProviderType } from "../../../../../types";
 import { saveJSON } from "../../../helper/saveJSON";
 import type { IProxy } from "../../../../../types/impl/proxies";
-import { ProxyType } from "../../../../../types/impl/proxies";
 import { env } from "../../../../../env";
 import colors from "colors";
 
@@ -23,7 +22,6 @@ export async function saveProviderProxies(providerType: ProviderType): Promise<v
                 // If this is a new proxy, add it to our final list with proper type
                 finalProxies[key] = {
                     ...proxy,
-                    type: proxy.type || ProxyType.HTTP, // Default to HTTP if type is not set
                     providerMetrics: {
                         [providerId]: {
                             healthScore: 50,
@@ -50,8 +48,6 @@ export async function saveProviderProxies(providerType: ProviderType): Promise<v
                     latencyScore: 50,
                 };
             } else {
-                // If this proxy already exists, update the provider metrics and ensure type is preserved
-                finalProxies[key].type = proxy.type || finalProxies[key].type;
                 finalProxies[key].providerMetrics[providerId] = proxy.providerMetrics?.[providerId] || {
                     healthScore: 50,
                     consecutiveFailures: 0,

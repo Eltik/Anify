@@ -50,6 +50,19 @@ const envSchema = z.object({
     DEBUG: booleanFromEnv.optional().default("false"),
 
     /**
+     * @description Optional, but highly recommended as
+     * Censys is used for scraping proxies.
+     */
+    /**
+     * The API ID for the Censys API.
+     */
+    CENSYS_API_ID: z.string().optional(),
+    /**
+     * The API key for the Censys API.
+     */
+    CENSYS_API_SECRET: z.string().optional(),
+
+    /**
      * @description Optional, additional environment variables
      */
     /**

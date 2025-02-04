@@ -1,5 +1,4 @@
 import { MediaProvider } from "../../../../../types/impl/mappings/impl/mediaProvider";
-import proxies from "../scrape";
 import colors from "colors";
 import { runProxyChecks } from "./impl/runProxyChecks";
 import { saveProxies } from "../file/saveProxies";
@@ -60,32 +59,6 @@ export const checkProxies = async (providers: MediaProvider[], verbose: boolean 
         await saveProxies(existingProxies);
         if (env.DEBUG && verbose) {
             console.log(colors.green(`Saved ${existingProxies.length} consolidated proxies to proxies.json`));
-        }
-    }
-
-    // Now scrape for new proxies
-    for (const scrape of Object.values(proxies)) {
-        const newProxies = await scrape();
-
-        if (newProxies.length === 0) {
-            if (env.DEBUG && verbose) {
-                console.log(colors.red("No new proxies found from scraper"));
-            }
-            continue;
-        }
-
-        // Merge new proxies with existing ones, preserving metrics
-        for (const newProxy of newProxies) {
-            const existingProxy = existingProxies.find((p) => p.ip === newProxy.ip && p.port === newProxy.port);
-            if (!existingProxy) {
-                existingProxies.push(newProxy);
-            }
-        }
-
-        await saveProxies(existingProxies);
-
-        if (env.DEBUG && verbose) {
-            console.log(colors.green(`Found ${newProxies.length} new proxies. Total proxies after merge: ${existingProxies.length}`));
         }
     }
 

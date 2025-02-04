@@ -1,6 +1,4 @@
 import type { IRequestConfig } from "../../../types/impl/proxies";
-import { ProxyAgent } from "undici";
-import { SocksProxyAgent } from "socks-proxy-agent";
 import { updateProxyHealth, proxyCache, selectProxy, proxyToUrl } from "../manager";
 import fetch, { type RequestInit, type Response } from "node-fetch";
 
@@ -12,7 +10,7 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
         attempts++;
 
         // Use provided proxy for first attempt or checking, otherwise select best proxy
-        const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempts === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId, attempts > 1, attempts)) : null;
+        const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempts === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId)) : null;
 
         if (useGoogleTranslate) {
             url = "http://translate.google.com/translate?sl=ja&tl=en&u=" + encodeURIComponent(url);
@@ -25,16 +23,12 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
             };
 
             if (proxyURL) {
-                // Determine if it's a SOCKS5 or HTTP proxy based on the URL scheme
-                if (proxyURL.startsWith("socks5://")) {
-                    Object.assign(fetchOptions, {
-                        agent: new SocksProxyAgent(proxyURL),
-                    });
-                } else {
-                    Object.assign(fetchOptions, {
-                        dispatcher: new ProxyAgent(proxyURL),
-                    });
-                }
+                url = `${proxyURL}/${url}`;
+                console.log(`Using proxy: ${proxyURL} (Attempt ${attempts})`);
+                fetchOptions.headers = {
+                    ...options.headers,
+                    Origin: "https://anify.tv",
+                };
             }
 
             const timeoutPromise = new Promise<Response>((_, reject) => {

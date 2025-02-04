@@ -6,14 +6,6 @@ import { ProviderType } from "../..";
 import type { RequestInit, Response } from "node-fetch";
 
 /**
- * @description Type of proxy
- */
-export enum ProxyType {
-    HTTP = "http",
-    SOCKS5 = "socks5",
-}
-
-/**
  * @description Provider-specific health metrics
  */
 export interface IProxyProviderMetrics {
@@ -35,9 +27,6 @@ export interface IProxyProviderMetrics {
 export interface IProxy {
     ip: string;
     port: number;
-    country: string;
-    type: ProxyType;
-    anonymity: string;
     providerMetrics: Record<string, IProxyProviderMetrics>; // providerId -> metrics
 }
 

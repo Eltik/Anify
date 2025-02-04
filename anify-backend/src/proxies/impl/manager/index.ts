@@ -2,7 +2,6 @@ import { ProviderType } from "../../../types";
 import type { IProxy, IProxyProviderMetrics } from "../../../types/impl/proxies";
 import fs from "fs";
 import path from "path";
-import { ProxyType } from "../../../types/impl/proxies";
 
 const MIN_HEALTH_SCORE = 0;
 const MAX_HEALTH_SCORE = 100;
@@ -42,7 +41,7 @@ export const proxyCache: {
 // Helper function to convert proxy to URL string
 export const proxyToUrl = (proxy: IProxy | null): string | null => {
     if (!proxy) return null;
-    return `${proxy.type === ProxyType.SOCKS5 ? "socks5" : "http"}://${proxy.ip}:${proxy.port}`;
+    return `http://${proxy.ip}:${proxy.port}`;
 };
 
 // Helper function to get provider metrics, creating if doesn't exist
@@ -249,140 +248,74 @@ export const updateProxyHealth = (proxy: IProxy, success: boolean, providerType:
     saveProxiesToFile(providerType);
 };
 
-export const selectProxy = (providerType: ProviderType, providerId: string, isRetry: boolean = false, attempts: number = 1): IProxy | null => {
-    const providerProxies = proxyCache.validProxies[providerType]?.[providerId] || [];
-    if (providerProxies.length === 0) return null;
+// Add rotation tracking
+const proxyUsageMap = new Map<string, number>();
 
-    // Filter out proxies that are in cooldown or have too low health
-    const now = Date.now();
-    const viableProxies = providerProxies.filter((proxy) => {
-        const metrics = getProviderMetrics(proxy, providerType, providerId);
+export const selectProxy = (providerType: ProviderType, providerId: string): IProxy | null => {
+    const validProxies = proxyCache.validProxies[providerType][providerId] || [];
 
-        // Check if proxy is in cooldown
-        if (metrics.lastFailureTime) {
-            const cooldownTime = Math.min(MAX_COOLDOWN_MS, MIN_COOLDOWN_MS * Math.pow(2, metrics.consecutiveFailures));
-            if (now - metrics.lastFailureTime < cooldownTime) {
-                return false;
-            }
-        }
+    if (validProxies.length === 0) return null;
 
-        return metrics.healthScore > MIN_VIABLE_HEALTH && metrics.consecutiveFailures < MAX_CONSECUTIVE_FAILURES;
+    // Filter proxies by health and usage
+    const viableProxies = validProxies.filter((proxy) => {
+        const metrics = proxy.providerMetrics?.[providerId];
+        if (!metrics) return false;
+
+        // Check health score
+        if (metrics.healthScore < MIN_VIABLE_HEALTH) return false;
+
+        // Check consecutive failures
+        if (metrics.consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) return false;
+
+        // Check cooldown if proxy has been used recently
+        const proxyKey = `${proxy.ip}:${proxy.port}`;
+        const lastUsed = proxyUsageMap.get(proxyKey) || 0;
+        const timeSinceLastUse = Date.now() - lastUsed;
+
+        return timeSinceLastUse >= MIN_COOLDOWN_MS;
     });
 
     if (viableProxies.length === 0) return null;
 
-    // If this is not a retry, prioritize untested proxies
-    if (!isRetry) {
-        const untestedProxies = viableProxies.filter((proxy) => {
-            const metrics = getProviderMetrics(proxy, providerType, providerId);
-            // Specifically look for proxies with default health score (50) and no requests
-            return metrics.healthScore === 50 && (!metrics.totalRequests || metrics.totalRequests === 0);
-        });
-
-        if (untestedProxies.length > 0) {
-            // Randomly select from untested proxies to distribute load
-            return untestedProxies[Math.floor(Math.random() * untestedProxies.length)];
-        }
-    }
-
-    // For retries, prioritize proxies that have been tested and have good health scores
-    const testedProxies = viableProxies.filter((proxy) => {
-        const metrics = getProviderMetrics(proxy, providerType, providerId);
-        return metrics.totalRequests && metrics.totalRequests > 0;
+    // First try to find any unused proxies
+    const unusedProxies = viableProxies.filter((proxy) => {
+        const proxyKey = `${proxy.ip}:${proxy.port}`;
+        return !proxyUsageMap.has(proxyKey);
     });
 
-    if (testedProxies.length === 0) {
-        // If no tested proxies available, fall back to random selection from viable proxies
-        return viableProxies[Math.floor(Math.random() * viableProxies.length)];
+    // If we have unused proxies, randomly select one to distribute load
+    if (unusedProxies.length > 0) {
+        const selectedProxy = unusedProxies[Math.floor(Math.random() * unusedProxies.length)];
+        const proxyKey = `${selectedProxy.ip}:${selectedProxy.port}`;
+        proxyUsageMap.set(proxyKey, Date.now());
+        return selectedProxy;
     }
 
-    // Sort by health score and success rate for retries
-    const sortedProxies = testedProxies.sort((a, b) => {
-        const metricsA = getProviderMetrics(a, providerType, providerId);
-        const metricsB = getProviderMetrics(b, providerType, providerId);
+    // If no unused proxies, sort by health score and usage time
+    const sortedProxies = viableProxies.sort((a, b) => {
+        const aMetrics = a.providerMetrics[providerId];
+        const bMetrics = b.providerMetrics[providerId];
 
-        // For retries, heavily weight successful proxies
-        if (isRetry) {
-            // Calculate success rate (0-100)
-            const successRateA = (metricsA.successfulRequests / metricsA.totalRequests) * 100;
-            const successRateB = (metricsB.successfulRequests / metricsB.totalRequests) * 100;
+        // Calculate score including usage time
+        const aKey = `${a.ip}:${a.port}`;
+        const bKey = `${b.ip}:${b.port}`;
+        const aLastUsed = proxyUsageMap.get(aKey) || 0;
+        const bLastUsed = proxyUsageMap.get(bKey) || 0;
 
-            // Calculate streak bonus (0-20)
-            const streakBonusA = Math.min(20, metricsA.successStreak * 2);
-            const streakBonusB = Math.min(20, metricsB.successStreak * 2);
+        const aTimeFactor = Math.min(1, (Date.now() - aLastUsed) / MAX_COOLDOWN_MS);
+        const bTimeFactor = Math.min(1, (Date.now() - bLastUsed) / MAX_COOLDOWN_MS);
 
-            // Calculate response time score (inverse - faster is better)
-            const responseScoreA = metricsA.averageResponseTime ? Math.max(0, 100 - metricsA.averageResponseTime / 50) : 0;
-            const responseScoreB = metricsB.averageResponseTime ? Math.max(0, 100 - metricsB.averageResponseTime / 50) : 0;
+        // Heavily weight health score for subsequent requests
+        const aScore = aMetrics.healthScore * (0.8 + 0.2 * aTimeFactor);
+        const bScore = bMetrics.healthScore * (0.8 + 0.2 * bTimeFactor);
 
-            // Calculate reliability based on number of successful requests
-            const reliabilityA = Math.min(100, (metricsA.successfulRequests / 10) * 100);
-            const reliabilityB = Math.min(100, (metricsB.successfulRequests / 10) * 100);
-
-            // Composite score with weighted components
-            const scoreA =
-                metricsA.healthScore * 0.3 + // Health score (30%)
-                successRateA * 0.25 + // Success rate (25%)
-                streakBonusA * 0.15 + // Current streak bonus (15%)
-                responseScoreA * 0.15 + // Response time (15%)
-                reliabilityA * 0.15; // Reliability/experience (15%)
-
-            const scoreB = metricsB.healthScore * 0.3 + successRateB * 0.25 + streakBonusB * 0.15 + responseScoreB * 0.15 + reliabilityB * 0.15;
-
-            return scoreB - scoreA;
-        }
-
-        // For non-retries, just use health score
-        return metricsB.healthScore - metricsA.healthScore;
+        return bScore - aScore;
     });
 
-    // For retries, select from top 20% of proxies to ensure we get the best ones
-    // For non-retries, select from top 30% to maintain more variety
-    const topCount = Math.max(1, Math.ceil(sortedProxies.length * (isRetry ? 0.2 : 0.3)));
-    const topProxies = sortedProxies.slice(0, topCount);
+    // Select proxy and update usage time
+    const selectedProxy = sortedProxies[0];
+    const proxyKey = `${selectedProxy.ip}:${selectedProxy.port}`;
+    proxyUsageMap.set(proxyKey, Date.now());
 
-    // For retries, prefer the absolute best proxies more often based on attempt number
-    if (isRetry) {
-        // Higher chance to pick the best proxy on subsequent retries
-        const bestProxyChance = Math.min(0.9, 0.6 + attempts * 0.15); // Increases with each retry
-        if (Math.random() < bestProxyChance) {
-            return topProxies[0];
-        }
-    }
-
-    // Otherwise use weighted random selection based on composite scores
-    const totalScore = topProxies.reduce((sum, p) => {
-        const metrics = getProviderMetrics(p, providerType, providerId);
-        if (isRetry) {
-            // Use the same composite scoring for weights
-            const successRate = (metrics.successfulRequests / metrics.totalRequests) * 100;
-            const streakBonus = Math.min(20, metrics.successStreak * 2);
-            const responseScore = metrics.averageResponseTime ? Math.max(0, 100 - metrics.averageResponseTime / 50) : 0;
-            const reliability = Math.min(100, (metrics.successfulRequests / 10) * 100);
-
-            return sum + metrics.healthScore * 0.3 + successRate * 0.25 + streakBonus * 0.15 + responseScore * 0.15 + reliability * 0.15;
-        }
-        return sum + metrics.healthScore;
-    }, 0);
-
-    let random = Math.random() * totalScore;
-    for (const proxy of topProxies) {
-        const metrics = getProviderMetrics(proxy, providerType, providerId);
-        let score;
-        if (isRetry) {
-            const successRate = (metrics.successfulRequests / metrics.totalRequests) * 100;
-            const streakBonus = Math.min(20, metrics.successStreak * 2);
-            const responseScore = metrics.averageResponseTime ? Math.max(0, 100 - metrics.averageResponseTime / 50) : 0;
-            const reliability = Math.min(100, (metrics.successfulRequests / 10) * 100);
-
-            score = metrics.healthScore * 0.3 + successRate * 0.25 + streakBonus * 0.15 + responseScore * 0.15 + reliability * 0.15;
-        } else {
-            score = metrics.healthScore;
-        }
-
-        if (random <= score) return proxy;
-        random -= score;
-    }
-
-    return topProxies[Math.floor(Math.random() * topProxies.length)];
+    return selectedProxy;
 };

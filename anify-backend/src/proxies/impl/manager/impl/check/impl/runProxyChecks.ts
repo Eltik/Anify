@@ -87,57 +87,89 @@ export const runProxyChecks = async (providers: MediaProvider[], verbose: boolea
         // Check proxies in parallel with concurrency limiting:
         let checkResults: (IProxy | null)[] = [];
         try {
+            const startTime = Date.now();
             checkResults = await Promise.all(
                 proxiesToCheck.map((proxy) =>
                     limit(async () => {
-                        const url = `http://${proxy.ip}:${proxy.port}`;
-                        let isValid = false;
+                        // Add timeout for the entire proxy check process
+                        const proxyCheckPromise = (async () => {
+                            const url = `http://${proxy.ip}:${proxy.port}`;
+                            let isValid = false;
 
-                        try {
-                            isValid = (await provider.proxyCheck(url)) ?? false;
-                        } catch (error) {
-                            // Log the error but don't let it crash the script
-                            if (env.DEBUG && verbose) {
-                                console.error(`Error checking proxy ${url}: ${error instanceof Error ? error.message : String(error)}`);
+                            try {
+                                // Check if proxy is valid
+                                const timeoutPromise = new Promise<Response>((_, reject) => {
+                                    setTimeout(() => reject(new Error("Request timed out")), 15000);
+                                });
+
+                                const fetchPromise = fetch(`${url}/iscorsneeded`, {
+                                    headers: {
+                                        Origin: "https://anify.tv",
+                                    },
+                                });
+
+                                const response = await Promise.race([fetchPromise, timeoutPromise]);
+
+                                if (response.status === 200 && (await response.text()) === "no") {
+                                    const providerCheckPromise = provider.proxyCheck(url);
+                                    const providerTimeoutPromise = new Promise<boolean>((_, reject) => {
+                                        setTimeout(() => reject(new Error("Provider check timed out")), 15000);
+                                    });
+
+                                    try {
+                                        const check = await Promise.race([providerCheckPromise, providerTimeoutPromise]);
+                                        isValid = check ?? false;
+                                    } catch (error) {
+                                        if (env.DEBUG && verbose) {
+                                            console.error(`Provider check failed for ${url}: ${error instanceof Error ? error.message : String(error)}`);
+                                        }
+                                        isValid = false;
+                                    }
+                                } else {
+                                    isValid = false;
+                                }
+                            } catch {
+                                isValid = false;
                             }
-                            isValid = false;
-                        }
 
-                        // Update progress counters
+                            // Update progress counters
+                            checkedCount += 1;
+                            if (isValid) {
+                                validCount += 1;
+                            } else {
+                                invalidCount += 1;
+                            }
+
+                            if (env.DEBUG && verbose) {
+                                throttledProgressUpdate(
+                                    colors.yellow(`Provider: ${provider.providerType} ${provider.id} | ` + `${checkedCount}/${proxiesToCheck.length} checked, ` + `${validCount} valid, ` + `${invalidCount} invalid | ` + `Time elapsed: ${((Date.now() - startTime) / 1000).toFixed(1)}s`),
+                                );
+                            }
+
+                            return isValid ? proxy : null;
+                        })();
+
+                        // Global timeout for entire proxy check
+                        const globalTimeout = new Promise<null>((_, reject) => {
+                            setTimeout(() => reject(new Error("Global proxy check timeout")), 30000);
+                        });
+
+                        return Promise.race([proxyCheckPromise, globalTimeout]);
+                    }).catch(() => {
                         checkedCount += 1;
-                        if (isValid) {
-                            validCount += 1;
-                        } else {
-                            invalidCount += 1;
-                        }
-
-                        // Throttled progress update:
-                        if (env.DEBUG && verbose) {
-                            throttledProgressUpdate(colors.yellow(`Provider: ${provider.providerType} ${provider.id} | ` + `${checkedCount}/${proxiesToCheck.length} checked, ` + `${validCount} valid, ` + `${invalidCount} invalid`));
-                        }
-
-                        // Return the proxy if valid, otherwise null
-                        return isValid ? proxy : null;
-                    }).catch((error) => {
-                        // Catch any errors that might occur in the limit wrapper
-                        if (env.DEBUG && verbose) {
-                            console.error(`Error in proxy check: ${error instanceof Error ? error.message : String(error)}`);
-                        }
+                        invalidCount += 1;
                         return null;
                     }),
                 ),
-            ).catch((error) => {
-                // Catch any errors in Promise.all
-                if (env.DEBUG && verbose) {
-                    console.error(`Error in proxy batch check: ${error instanceof Error ? error.message : String(error)}`);
-                }
-                return [];
-            });
+            );
         } catch (error) {
             if (env.DEBUG && verbose) {
                 console.error(`Error in proxy batch check: ${error instanceof Error ? error.message : String(error)}`);
             }
             continue;
+        } finally {
+            // Ensure we clear any remaining tasks in the limit queue
+            limit.clearQueue();
         }
 
         // After finishing all checks, print a new line to avoid overwriting
