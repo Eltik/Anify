@@ -242,8 +242,6 @@ export const updateProxyHealth = (proxy: IProxy, success: boolean, providerType:
     // Ensure health score stays within bounds
     metrics.healthScore = Math.min(MAX_HEALTH_SCORE, Math.max(MIN_HEALTH_SCORE, metrics.healthScore));
 
-    console.log(`${proxy.ip}:${proxy.port} - ${providerType} - ${providerId} - ${metrics.healthScore}`);
-
     // Save updated proxies to file
     saveProxiesToFile(providerType);
 };

@@ -173,20 +173,18 @@ export default class AnimePahe extends AnimeProvider {
         const animeId = id.split("-").pop()!;
         const episodeId = id.split("-")[0];
 
-        const req = await this.request(
-            `${this.url}${animeId.includes("-") ? `/anime/${animeId}` : `/a/${animeId}`}`,
-            {
-                headers: {
-                    Cookie: "__ddg1_=;__ddg2_=;",
-                },
+        const req = await this.request(`${this.url}${animeId.includes("-") ? `/anime/${animeId}` : `/a/${animeId}`}`, {
+            headers: {
+                Cookie: "__ddg1_=;__ddg2_=;",
             },
-            false,
-        );
+            redirect: "follow",
+            useCloudflareWorker: false,
+        });
 
         try {
             const url = req.url;
             // Need session id to fetch the watch page
-            const sessionId = url.split("/anime/").pop()?.split("?")[0] ?? "";
+            const sessionId = url.includes("/anime/") ? (url.split("/anime/").pop()?.split("?")[0] ?? "") : (url.split("/a/").pop()?.split("?")[0] ?? "");
 
             const $ = load(await req.text());
             const tempId = $("head > meta[property='og:url']").attr("content")!.split("/").pop()!;
@@ -214,11 +212,15 @@ export default class AnimePahe extends AnimeProvider {
             if (episodeSession === "") {
                 for (let i = 1; i < last_page; i++) {
                     const data = (await (
-                        await this.request(`${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=${i + 1}`, {
-                            headers: {
-                                Cookie: "__ddg1_=;__ddg2_=;",
+                        await this.request(
+                            `${this.url}/api?m=release&id=${tempId}&sort=episode_asc&page=${i + 1}`,
+                            {
+                                headers: {
+                                    Cookie: "__ddg1_=;__ddg2_=;",
+                                },
                             },
-                        })
+                            false,
+                        )
                     ).json()) as { last_page: number; data: { id: number; session: string }[] }["data"];
 
                     for (let j = 0; j < data.length; j++) {

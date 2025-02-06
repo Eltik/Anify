@@ -63,6 +63,17 @@ const envSchema = z.object({
     CENSYS_API_SECRET: z.string().optional(),
 
     /**
+     * @description Optional, but highly recommended as
+     * CloudFlare worker is used for proxies.
+     * The worker can be setup via the anify-cloudflare-worker folder.
+     */
+    CLOUDFLARE_WORKER_URL: z.string().url().optional(),
+    /**
+     * @description The API key for the Cloudflare worker.
+     */
+    CLOUDFLARE_WORKER_API_KEY: z.string().optional(),
+
+    /**
      * @description Optional, additional environment variables
      */
     /**

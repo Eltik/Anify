@@ -3,7 +3,6 @@ import { ProviderType } from "../../..";
 import type { IRequestConfig } from "../../proxies";
 import { selectProxy, proxyToUrl } from "../../../../proxies/impl/manager";
 import { customRequest } from "../../../../proxies/impl/request/customRequest";
-import type { Response } from "node-fetch";
 
 export abstract class MediaProvider {
     private static limiterMap: Map<string, Bottleneck> = new Map();
@@ -49,11 +48,13 @@ export abstract class MediaProvider {
             // Ensure isChecking is properly set
             const finalConfig: IRequestConfig = {
                 ...config,
-                proxy: useProxy ? (this.useGoogleTranslate ? undefined : config.proxy && config.proxy.length > 0 ? config.proxy : (proxyURL ?? undefined)) : undefined,
-                useGoogleTranslate: this.useGoogleTranslate,
+                // Don't set proxy immediately to allow CloudFlare workers to be tried first
                 providerId: this.id,
                 providerType: this.providerType,
                 isChecking: this.isCheckingProxies || config.isChecking,
+                useGoogleTranslate: this.useGoogleTranslate,
+                // Store proxy info for fallback
+                _proxyURL: useProxy ? (this.useGoogleTranslate ? undefined : config.proxy && config.proxy.length > 0 ? config.proxy : (proxyURL ?? undefined)) : undefined,
             };
 
             return customRequest(url, finalConfig);

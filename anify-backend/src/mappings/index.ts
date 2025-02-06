@@ -23,10 +23,6 @@ export const ANIME_PROVIDERS = [
         return new GogoAnime();
     },
     async () => {
-        const { default: Sudatchi } = await import("./impl/anime/impl/sudatchi");
-        return new Sudatchi();
-    },
-    async () => {
         const { default: HiAnime } = await import("./impl/anime/impl/hianime");
         return new HiAnime();
     },
@@ -60,10 +56,6 @@ export const MANGA_PROVIDERS = [
     async () => {
         const { default: MangaPill } = await import("./impl/manga/impl/mangapill");
         return new MangaPill();
-    },
-    async () => {
-        const { default: MangaSee } = await import("./impl/manga/impl/mangasee");
-        return new MangaSee();
     },
     async () => {
         const { default: NovelUpdates } = await import("./impl/manga/impl/novelupdates");

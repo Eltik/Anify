@@ -1,6 +1,5 @@
 import MetaProvider from "..";
 import { IProviderResult, MediaFormat } from "../../../../types";
-import type { Response } from "node-fetch";
 
 export default class TVDBMeta extends MetaProvider {
     override id = "tvdb";

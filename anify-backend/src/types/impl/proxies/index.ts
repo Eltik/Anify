@@ -3,7 +3,6 @@
  */
 
 import { ProviderType } from "../..";
-import type { RequestInit, Response } from "node-fetch";
 
 /**
  * @description Provider-specific health metrics
@@ -37,11 +36,13 @@ export interface IRequestConfig extends RequestInit {
     isChecking?: boolean;
     proxy?: string;
     useGoogleTranslate?: boolean;
+    useCloudflareWorker?: boolean;
     timeout?: number;
     providerType?: ProviderType;
     providerId?: string;
     maxRetries?: number;
     validateResponse?: (response: Response) => Promise<boolean>;
+    _proxyURL?: string; // Used for storing proxy URL for fallback
 }
 
 export interface IProxyCheckInfo {

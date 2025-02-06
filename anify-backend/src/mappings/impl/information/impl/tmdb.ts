@@ -4,7 +4,6 @@ import { type IChapter, type IEpisode, MediaFormat, MediaSeason, MediaType, Prov
 import type { IAnime } from "../../../../types/impl/database/impl/schema/anime";
 import type { IManga } from "../../../../types/impl/database/impl/schema/manga";
 import type { AnimeInfo, MangaInfo, MediaInfoKeys } from "../../../../types/impl/mappings/impl/mediaInfo";
-import type { Response } from "node-fetch";
 
 export default class TMDBInfo extends InformationProvider<IAnime | IManga, AnimeInfo | MangaInfo> {
     override id = "tmdb";

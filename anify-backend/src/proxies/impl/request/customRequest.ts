@@ -1,6 +1,6 @@
+import { env } from "../../../env";
 import type { IRequestConfig } from "../../../types/impl/proxies";
 import { updateProxyHealth, proxyCache, selectProxy, proxyToUrl } from "../manager";
-import fetch, { type RequestInit, type Response } from "node-fetch";
 
 export async function customRequest(url: string, options: IRequestConfig = {}): Promise<Response> {
     const { isChecking, proxy, useGoogleTranslate, timeout, providerType, providerId, maxRetries, validateResponse } = options;
@@ -8,6 +8,53 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
     let attempts = 0;
     while (attempts < (isChecking ? 1 : maxRetries || 3)) {
         attempts++;
+
+        if (!useGoogleTranslate && !isChecking && env.CLOUDFLARE_WORKER_URL && options.useCloudflareWorker) {
+            // First try CloudFlare worker proxy
+            try {
+                const fetchOptions: RequestInit = {
+                    ...options,
+                    headers: {
+                        ...options.headers,
+                        "X-API-Key": env.CLOUDFLARE_WORKER_API_KEY || "",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                    },
+                };
+
+                const timeoutPromise = new Promise<Response>((_, reject) => {
+                    setTimeout(() => reject(new Error("Request timed out")), timeout || 10000);
+                });
+
+                // Construct the worker URL properly
+                const targetUrl = encodeURIComponent(url);
+                const workerUrl = `${env.CLOUDFLARE_WORKER_URL}/?target=${targetUrl}`;
+                const fetchPromise = fetch(workerUrl, fetchOptions);
+
+                try {
+                    const response = await Promise.race([fetchPromise, timeoutPromise]);
+
+                    // Check if response is ok before validation
+                    if (!response.ok) {
+                        console.log(url);
+                        throw new Error(`Worker responded with status ${response.status}`);
+                    }
+
+                    // Validate the response if a validator is provided
+                    if (!validateResponse || (await validateResponse(response.clone()))) {
+                        return response;
+                    }
+                } catch (error) {
+                    throw new Error(`Worker request failed: ${error instanceof Error ? error.message : String(error)}`);
+                }
+            } catch (error) {
+                console.error("CloudFlare worker proxy failed:", error instanceof Error ? error.message : String(error));
+                // If CloudFlare worker fails and we have a stored proxy URL, use it
+                if (options._proxyURL) {
+                    options.proxy = options._proxyURL;
+                }
+                // Continue to CORS proxy attempt
+            }
+        }
 
         // Use provided proxy for first attempt or checking, otherwise select best proxy
         const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempts === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId)) : null;
@@ -24,7 +71,6 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
 
             if (proxyURL) {
                 url = `${proxyURL}/${url}`;
-                console.log(`Using proxy: ${proxyURL} (Attempt ${attempts})`);
                 fetchOptions.headers = {
                     ...options.headers,
                     Origin: "https://anify.tv",
