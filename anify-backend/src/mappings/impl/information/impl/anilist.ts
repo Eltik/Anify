@@ -55,6 +55,15 @@ export default class AniList extends InformationProvider<IAnime | IManga, AnimeI
                 query,
                 variables,
             }),
+            validateResponse: async (response) => {
+                if (!response.ok) return false;
+                try {
+                    const data = (await response.json()) as { data: { Media: any } };
+                    return data.data.Media !== undefined;
+                } catch {
+                    return false;
+                }
+            },
         });
         //const data: Media = (await req.json()).data.Media;
         const text = await req.text();

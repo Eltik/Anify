@@ -52,6 +52,15 @@ export default class AniListBase extends BaseProvider {
                 origin: "graphql.anilist.co",
             },
             body: JSON.stringify(aniListArgs),
+            validateResponse: async (response) => {
+                if (!response.ok) return false;
+                try {
+                    const json = (await response.json()) as { data: { Page: { media: IMedia[] } } };
+                    return json.data?.Page.media !== undefined;
+                } catch {
+                    return false;
+                }
+            },
         });
         const json = (await req?.json()) as { data: { Page: { media: IMedia[] } } };
         const media = json?.data?.Page.media;
@@ -295,6 +304,15 @@ export default class AniListBase extends BaseProvider {
                 origin: "graphql.anilist.co",
             },
             body: JSON.stringify(aniListArgs),
+            validateResponse: async (response) => {
+                if (!response.ok) return false;
+                try {
+                    const json = (await response.json()) as { data: { Page: { media: IMedia[] } } };
+                    return json.data?.Page.media !== undefined;
+                } catch {
+                    return false;
+                }
+            },
         });
         const json = (await req?.json()) as { data: { Page: { media: IMedia[] } } };
         const media = json?.data.Page.media;
@@ -516,6 +534,15 @@ export default class AniListBase extends BaseProvider {
                 query,
                 variables,
             }),
+            validateResponse: async (response) => {
+                if (!response.ok) return false;
+                try {
+                    const json = (await response.json()) as { data: { Media: IMedia } };
+                    return json.data?.Media !== undefined;
+                } catch {
+                    return false;
+                }
+            },
         });
 
         const data: IMedia = ((await req.json()) as { data: { Media: IMedia } }).data?.Media;
@@ -703,6 +730,47 @@ export default class AniListBase extends BaseProvider {
                 headers: {
                     "Content-Type": "application/json",
                     Origin: "https://anilist.co",
+                },
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const json = (await response.json()) as {
+                            data: {
+                                trending: {
+                                    media: {
+                                        id: string;
+                                        type: MediaType;
+                                        format: MediaFormat;
+                                    }[];
+                                };
+                                season: {
+                                    media: {
+                                        id: string;
+                                        type: MediaType;
+                                        format: MediaFormat;
+                                    }[];
+                                };
+                                popular: {
+                                    media: {
+                                        id: string;
+                                        type: MediaType;
+                                        format: MediaFormat;
+                                    }[];
+                                };
+                                top: {
+                                    media: {
+                                        id: string;
+                                        type: MediaType;
+                                        format: MediaFormat;
+                                    }[];
+                                };
+                            };
+                        };
+                        if (json.data.trending.media.length > 0 || json.data.season.media.length > 0 || json.data.popular.media.length > 0 || json.data.top.media.length > 0) return true;
+                        return false;
+                    } catch {
+                        return false;
+                    }
                 },
             })
         ).json()) as {

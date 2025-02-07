@@ -39,6 +39,17 @@ export default class MALMeta extends MetaProvider {
             requestConfig.proxy = proxyURL;
         }
 
+        requestConfig.validateResponse = async (response) => {
+            if (!response.ok) return false;
+            try {
+                const data = await response.text();
+                const $ = load(data);
+                return $("div.js-categories-seasonal table tr").length > 0;
+            } catch {
+                return false;
+            }
+        };
+
         const url = `${this.url}/${type === MediaType.ANIME ? "anime" : "manga"}.php?q=${query}&c[]=a&c[]=b&c[]=c&c[]=f&c[]=d&c[]=e&c[]=g`;
         const data = await (await this.request(url, requestConfig)).text();
         const $ = load(data);

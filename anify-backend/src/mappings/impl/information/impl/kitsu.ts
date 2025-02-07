@@ -35,13 +35,37 @@ export default class KitsuInformation extends InformationProvider<IAnime | IMang
         if (!kitsuId) return undefined;
 
         try {
-            const kitsuResponse: KitsuResponse = (await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}`)).json()) as KitsuResponse;
+            const kitsuResponse: KitsuResponse = (await (
+                await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}`, {
+                    validateResponse: async (response) => {
+                        if (!response.ok) return false;
+                        try {
+                            const data = (await response.json()) as KitsuResponse;
+                            return data.data !== undefined;
+                        } catch {
+                            return false;
+                        }
+                    },
+                })
+            ).json()) as KitsuResponse;
 
             const attributes = kitsuResponse?.data?.attributes;
 
             if (!attributes) return undefined;
 
-            const kitsuGenre = (await (await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}/genres`)).json()) as { data: { attributes: { name: string } }[] };
+            const kitsuGenre = (await (
+                await this.request(`${this.kitsuApiUrl}/${media.type.toLowerCase()}/${kitsuId}/genres`, {
+                    validateResponse: async (response) => {
+                        if (!response.ok) return false;
+                        try {
+                            const data = (await response.json()) as { data: { attributes: { name: string } }[] };
+                            return data.data !== undefined;
+                        } catch {
+                            return false;
+                        }
+                    },
+                })
+            ).json()) as { data: { attributes: { name: string } }[] };
             const genres = kitsuGenre?.data;
 
             const artwork: IArtwork[] = [];

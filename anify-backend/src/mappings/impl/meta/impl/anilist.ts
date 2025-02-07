@@ -65,6 +65,15 @@ export default class AniListMeta extends MetaProvider {
                 origin: "graphql.anilist.co",
             },
             body: JSON.stringify(aniListArgs),
+            validateResponse: async (response) => {
+                if (!response.ok) return false;
+                try {
+                    const data = (await response.json()) as { data: { Page: { media: Media[] } } };
+                    return data.data !== undefined;
+                } catch {
+                    return false;
+                }
+            },
         });
         const json = (await req?.json()) as { data: { Page: { media: Media[] } } };
         const media = json?.data?.Page?.media;

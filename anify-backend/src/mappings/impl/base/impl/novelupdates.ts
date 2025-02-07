@@ -82,6 +82,16 @@ export default class NovelUpdatesBase extends BaseProvider {
                 Referer: this.url,
                 "User-Agent": "Mozilla/5.0",
             },
+            validateResponse: async (response) => {
+                if (!response.ok) return false;
+                try {
+                    const data = await response.text();
+                    const $ = load(data);
+                    return $("div.search_body_nu div.search_title a").length > 0;
+                } catch {
+                    return false;
+                }
+            },
         });
 
         const data = await searchData.text();
@@ -123,6 +133,16 @@ export default class NovelUpdatesBase extends BaseProvider {
                 headers: {
                     Referer: this.url,
                     "User-Agent": "Mozilla/5.0",
+                },
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = await response.text();
+                        const $ = load(data);
+                        return $("div.search_body_nu div.search_title a").length > 0;
+                    } catch {
+                        return false;
+                    }
                 },
             },
         );
@@ -171,6 +191,16 @@ export default class NovelUpdatesBase extends BaseProvider {
                         Referer: this.url,
                         "User-Agent": "Mozilla/5.0",
                         Cookie: env.NOVELUPDATES_LOGIN ?? "",
+                    },
+                    validateResponse: async (response) => {
+                        if (!response.ok) return false;
+                        try {
+                            const data = await response.text();
+                            const $ = load(data);
+                            return $("div.seriesimg").length > 0;
+                        } catch {
+                            return false;
+                        }
                     },
                 })
             ).text();
@@ -303,6 +333,16 @@ export default class NovelUpdatesBase extends BaseProvider {
                 headers: {
                     Referer: this.url,
                     "User-Agent": "Mozilla/5.0",
+                },
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = await response.text();
+                        const $ = load(data);
+                        return $("div.seriesimg").length > 0;
+                    } catch {
+                        return false;
+                    }
                 },
             });
 

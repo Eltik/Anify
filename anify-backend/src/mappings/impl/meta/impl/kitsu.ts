@@ -24,6 +24,15 @@ export default class KitsuMeta extends MetaProvider {
                         Accept: "application/vnd.api+json",
                         "Content-Type": "application/vnd.api+json",
                     },
+                    validateResponse: async (response) => {
+                        if (!response.ok) return false;
+                        try {
+                            const data = (await response.json()) as { data: IKitsuResult[] };
+                            return data.data !== undefined;
+                        } catch {
+                            return false;
+                        }
+                    },
                 })
             ).json()) as { data: IKitsuResult[] };
 
@@ -65,6 +74,15 @@ export default class KitsuMeta extends MetaProvider {
                     headers: {
                         Accept: "application/vnd.api+json",
                         "Content-Type": "application/vnd.api+json",
+                    },
+                    validateResponse: async (response) => {
+                        if (!response.ok) return false;
+                        try {
+                            const data = (await response.json()) as { data: IKitsuResult[] };
+                            return data.data !== undefined;
+                        } catch {
+                            return false;
+                        }
                     },
                 })
             ).json()) as { data: IKitsuResult[] };
@@ -116,6 +134,15 @@ export default class KitsuMeta extends MetaProvider {
                             Accept: "application/vnd.api+json",
                             "Content-Type": "application/vnd.api+json",
                         },
+                        validateResponse: async (response) => {
+                            if (!response.ok) return false;
+                            try {
+                                const data = (await response.json()) as { data: IKitsuResult[] };
+                                return data.data !== undefined;
+                            } catch {
+                                return false;
+                            }
+                        },
                     })
                 ).json()) as { data: IKitsuResult[] };
 
@@ -158,6 +185,15 @@ export default class KitsuMeta extends MetaProvider {
                         headers: {
                             Accept: "application/vnd.api+json",
                             "Content-Type": "application/vnd.api+json",
+                        },
+                        validateResponse: async (response) => {
+                            if (!response.ok) return false;
+                            try {
+                                const data = (await response.json()) as { data: IKitsuResult[] };
+                                return data.data !== undefined;
+                            } catch {
+                                return false;
+                            }
                         },
                     })
                 ).json()) as { data: IKitsuResult[] };

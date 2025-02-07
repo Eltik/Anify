@@ -16,8 +16,7 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
                     ...options,
                     headers: {
                         ...options.headers,
-                        "X-API-Key": env.CLOUDFLARE_WORKER_API_KEY || "",
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                        "X-API-Key": env.CLOUDFLARE_WORKER_API_KEY || ""
                     },
                 };
 
@@ -35,8 +34,7 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
 
                     // Check if response is ok before validation
                     if (!response.ok) {
-                        console.log(url);
-                        throw new Error(`Worker responded with status ${response.status}`);
+                        throw new Error(`Worker responded with status ${response.status} for ${url}.`);
                     }
 
                     // Validate the response if a validator is provided
@@ -125,5 +123,5 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
         }
     }
 
-    throw new Error("Max retry attempts reached");
+    throw new Error(`Max retry attempts reached for ${url}. Provider ID: ${providerId} | Provider Type: ${providerType}`);
 }

@@ -33,6 +33,15 @@ export default class TVDBMeta extends MetaProvider {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
+            validateResponse: async (response) => {
+                if (!response.ok) return false;
+                try {
+                    const data = (await response.json()) as { data: ISearchResponse[] };
+                    return data.data !== undefined;
+                } catch {
+                    return false;
+                }
+            },
         });
 
         if (data?.ok) {

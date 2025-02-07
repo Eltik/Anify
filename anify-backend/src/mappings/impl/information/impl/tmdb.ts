@@ -35,7 +35,17 @@ export default class TMDBInfo extends InformationProvider<IAnime | IManga, Anime
 
         if (!tmdbId) return undefined;
 
-        const data: Response | undefined = await this.request(`${this.api}${tmdbId}?api_key=${this.apiKey}`).catch(() => {
+        const data: Response | undefined = await this.request(`${this.api}${tmdbId}?api_key=${this.apiKey}`, {
+            validateResponse: async (response) => {
+                if (!response.ok) return false;
+                try {
+                    const data = (await response.json()) as ITMDBResponse;
+                    return data.id !== undefined;
+                } catch {
+                    return false;
+                }
+            },
+        }).catch(() => {
             return undefined;
         });
 
@@ -145,7 +155,19 @@ export default class TMDBInfo extends InformationProvider<IAnime | IManga, Anime
         const episodesCount = (media as IAnime).totalEpisodes ?? anilistMedia?.episodes ?? anilistMedia?.nextAiringEpisode?.episode - 1;
 
         try {
-            const data = (await (await this.request(`${this.api}${tmdbId}?api_key=${this.apiKey}`)).json()) as ITMDBResponse;
+            const data = (await (
+                await this.request(`${this.api}${tmdbId}?api_key=${this.apiKey}`, {
+                    validateResponse: async (response) => {
+                        if (!response.ok) return false;
+                        try {
+                            const data = (await response.json()) as ITMDBResponse;
+                            return data.id !== undefined;
+                        } catch {
+                            return false;
+                        }
+                    },
+                })
+            ).json()) as ITMDBResponse;
             const seasons = data.seasons;
 
             const isLongRunning = episodesCount > 50;
@@ -211,7 +233,19 @@ export default class TMDBInfo extends InformationProvider<IAnime | IManga, Anime
 
                 if (!bestSeason) return undefined;
 
-                const seasonData = (await (await this.request(`${this.api}${tmdbId}/season/${bestSeason.season_number}?api_key=${this.apiKey}`)).json()) as ITMDBSeasonData;
+                const seasonData = (await (
+                    await this.request(`${this.api}${tmdbId}/season/${bestSeason.season_number}?api_key=${this.apiKey}`, {
+                        validateResponse: async (response) => {
+                            if (!response.ok) return false;
+                            try {
+                                const data = (await response.json()) as ITMDBSeasonData;
+                                return data.episodes !== undefined;
+                            } catch {
+                                return false;
+                            }
+                        },
+                    })
+                ).json()) as ITMDBSeasonData;
 
                 for (const episode of seasonData.episodes) {
                     const episodeDate = episode.air_date ? new Date(episode.air_date) : null;

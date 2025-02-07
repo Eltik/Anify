@@ -33,7 +33,30 @@ export default class ComicKInfo extends InformationProvider<IAnime | IManga, Ani
 
         if (!comicKId) return undefined;
 
-        const [comicReq, coverReq] = await Promise.all([this.request(`${this.api}/comic/${comicKId}`), this.request(`${this.api}/comic/${comicKId}/covers`)]);
+        const [comicReq, coverReq] = await Promise.all([
+            this.request(`${this.api}/comic/${comicKId}`, {
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = (await response.json()) as { comic: IComic };
+                        return data.comic !== undefined;
+                    } catch {
+                        return false;
+                    }
+                },
+            }),
+            this.request(`${this.api}/comic/${comicKId}/covers`, {
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = (await response.json()) as ICovers;
+                        return data.md_covers !== undefined;
+                    } catch {
+                        return false;
+                    }
+                },
+            }),
+        ]);
 
         if (!comicReq.ok) return undefined;
 

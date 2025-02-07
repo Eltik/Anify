@@ -41,6 +41,15 @@ export default class TVDBInfo extends InformationProvider<IAnime | IManga, Anime
             headers: {
                 Authorization: `Bearer ${token}`,
             },
+            validateResponse: async (response) => {
+                if (!response.ok) return false;
+                try {
+                    const data = (await response.json()) as { data: ITVDBResponse };
+                    return data.data !== undefined;
+                } catch {
+                    return false;
+                }
+            },
         }).catch(() => {
             return undefined;
         });
@@ -174,8 +183,16 @@ export default class TVDBInfo extends InformationProvider<IAnime | IManga, Anime
         // Get initial info with seasons
         const infoRequest = await this.request(`${this.api}${tvdbId}/extended`, {
             headers: { Authorization: `Bearer ${token}` },
+            validateResponse: async (response) => {
+                if (!response.ok) return false;
+                try {
+                    const data = (await response.json()) as { data: ITVDBResponse };
+                    return data.data !== undefined;
+                } catch {
+                    return false;
+                }
+            },
         }).catch(() => undefined);
-
         if (!infoRequest?.ok) return undefined;
 
         const { seasons } = ((await infoRequest.json()) as { data: { seasons: ITVDBSeason[] } }).data;
@@ -189,8 +206,16 @@ export default class TVDBInfo extends InformationProvider<IAnime | IManga, Anime
             seasons.map(async (season) => {
                 const seasonResponse = await this.request(`${this.api}/seasons/${season.id}/extended`, {
                     headers: { Authorization: `Bearer ${token}` },
+                    validateResponse: async (response) => {
+                        if (!response.ok) return false;
+                        try {
+                            const data = (await response.json()) as { data: ISeasonInfo };
+                            return data.data !== undefined;
+                        } catch {
+                            return false;
+                        }
+                    },
                 }).catch(() => undefined);
-
                 if (!seasonResponse?.ok) return;
 
                 const seasonInfo = ((await seasonResponse.json()) as { data: ISeasonInfo }).data;
@@ -203,6 +228,21 @@ export default class TVDBInfo extends InformationProvider<IAnime | IManga, Anime
                             // Always fetch English translations
                             const translationResponse = await this.request(`${this.api}/episodes/${episode.id}/translations/eng`, {
                                 headers: { Authorization: `Bearer ${token}` },
+                                validateResponse: async (response) => {
+                                    if (!response.ok) return false;
+                                    try {
+                                        const data = (await response.json()) as {
+                                            data: {
+                                                name: string;
+                                                overview: string;
+                                                language: string;
+                                            };
+                                        };
+                                        return data.data !== undefined;
+                                    } catch {
+                                        return false;
+                                    }
+                                },
                             }).catch(() => undefined);
 
                             let title = episode.name;

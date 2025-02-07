@@ -34,7 +34,24 @@ export default class NovelUpdatesInfo extends InformationProvider<IAnime | IMang
 
         if (!novelUpdatesId) return undefined;
 
-        const data = await (await this.request(`${this.url}/series/${novelUpdatesId}`, { headers: { Cookie: "_ga=;", "User-Agent": "Mozilla/5.0" } })).text();
+        const data = await (
+            await this.request(`${this.url}/series/${novelUpdatesId}`, {
+                headers: {
+                    Cookie: "_ga=;",
+                    "User-Agent": "Mozilla/5.0",
+                },
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = (await response.text()) as string;
+                        const $ = load(data);
+                        return $("div.seriesimg").length > 0;
+                    } catch {
+                        return false;
+                    }
+                },
+            })
+        ).text();
         const $$ = load(data);
 
         if (data.trim().includes("Not authenticated or invalid authentication credentials. Make sure to update your proxy address, proxy username and port.") || data.trim().includes("HTTP authorization error: ip auth failed, no credentials provided")) {

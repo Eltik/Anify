@@ -22,8 +22,8 @@ export default class ComicK extends MangaProvider {
                 validateResponse: async (response) => {
                     if (!response.ok) return false;
                     try {
-                        await response.json();
-                        return true;
+                        const data = (await response.json()) as { data: ISearchResult[] };
+                        return data.data !== undefined;
                     } catch {
                         return false;
                     }
