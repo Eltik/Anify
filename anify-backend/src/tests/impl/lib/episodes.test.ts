@@ -3,11 +3,13 @@ import { init as initDB } from "../../../database";
 import lib from "../../../lib";
 import { MediaFormat, MediaSeason, MediaType, ProviderType } from "../../../types";
 import { env } from "../../../env";
+import { preloadProxies } from "../../../proxies/impl/manager/impl/file/preloadProxies";
 
 test(
     "Content.EpisodesHandler",
     async (done) => {
         await initDB();
+        await preloadProxies();
 
         const episodes = await lib.content.loadEpisodes({
             artwork: [],

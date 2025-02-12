@@ -13,6 +13,14 @@ export enum Events {
     PROXIES_SAVED = "proxies.saved",
 
     /**
+     * @description WireGuard events
+     */
+    WIREGUARD_INITIALIZED = "wireguard.initialized",
+    WIREGUARD_CONNECTED = "wireguard.connected",
+    WIREGUARD_DISCONNECTED = "wireguard.disconnected",
+    WIREGUARD_ROTATED = "wireguard.rotated",
+
+    /**
      * @description Database events
      */
     DATABASE_CONNECTED = "database.connected",

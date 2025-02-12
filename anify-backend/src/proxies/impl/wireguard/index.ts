@@ -1,3 +1,5 @@
+import { emitter } from "../../../events";
+import { Events } from "../../../types/impl/events";
 import { ProxyManager } from "./impl/proxy-manager";
 
 /**
@@ -8,6 +10,8 @@ export const wireguardProxyManager = new ProxyManager();
 export const init = async () => {
     await wireguardProxyManager.init();
     await wireguardProxyManager.connect();
+
+    emitter.emit(Events.WIREGUARD_INITIALIZED);
 };
 
 process.on("SIGINT", async () => {

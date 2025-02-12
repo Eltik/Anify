@@ -4,11 +4,28 @@ import { checkAll } from "./impl/checkAll";
 import { checkProvider } from "./impl/checkProvider";
 import helper from "./impl/helper";
 import { ProviderType } from "../types";
+import { init, wireguardProxyManager } from "../proxies/impl/wireguard";
 
 // ---------------------------------------------------
 // CLI definition using Commander
 // ---------------------------------------------------
 program.name("anify-cli").description("CLI for running various tasks related to proxies and media providers.").version("1.0.0");
+
+program
+    .command("disconnect")
+    .description("Disconnects from all WireGuard configurations.")
+    .action(async () => {
+        try {
+            await init();
+            await wireguardProxyManager.disconnect();
+
+            console.log(colors.green("Successfully disconnected from all WireGuard connections."));
+            process.exit(0);
+        } catch (error) {
+            console.error(colors.red(`Error while disconnecting from WireGuard connections: ${error}`));
+            process.exit(1);
+        }
+    });
 
 program
     .command("check-all")

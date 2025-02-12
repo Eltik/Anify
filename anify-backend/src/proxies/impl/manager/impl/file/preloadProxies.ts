@@ -1,3 +1,4 @@
+import { init as initWireguard } from "../../../wireguard";
 import { proxyCache } from "../..";
 import { PROVIDERS } from "../../../../../mappings";
 import type { IProxy } from "../../../../../types/impl/proxies";
@@ -104,6 +105,8 @@ export async function preloadProxies(): Promise<void> {
                 proxyCache.validProxies[provider.providerType][provider.id] = [];
             }
         }
+
+        await initWireguard();
 
         emitter.emit(Events.PROXIES_LOADED, proxyCache.proxies);
     } catch (error) {

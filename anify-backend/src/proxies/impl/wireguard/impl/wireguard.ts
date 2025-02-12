@@ -3,6 +3,9 @@ import { promisify } from "util";
 import * as fs from "fs/promises";
 import * as path from "path";
 import type { IWireguardConfig } from "../../../../types/impl/proxies/impl/wireguard";
+import { emitter } from "../../../../events";
+import { Events } from "../../../../types/impl/events";
+import colors from "colors";
 
 const execAsync = promisify(exec);
 
@@ -21,7 +24,7 @@ export class WireGuardManager {
         try {
             await fs.mkdir(this.configDir, { recursive: true });
         } catch (error) {
-            console.error("Error creating config directory:", error);
+            console.error(colors.red("Error creating config directory:") + colors.gray(error instanceof Error ? error.message : String(error)));
             throw error;
         }
     }
@@ -34,7 +37,7 @@ export class WireGuardManager {
         try {
             await fs.writeFile(configPath, config);
         } catch (error) {
-            console.error("Error adding configuration:", error);
+            console.error(colors.red("Error adding configuration:") + colors.gray(error instanceof Error ? error.message : String(error)));
             throw error;
         }
     }
@@ -47,7 +50,7 @@ export class WireGuardManager {
             const files = await fs.readdir(this.configDir);
             return files.filter((file) => file.endsWith(".conf"));
         } catch (error) {
-            console.error("Error listing configurations:", error);
+            console.error(colors.red("Error listing configurations:") + colors.gray(error instanceof Error ? error.message : String(error)));
             throw error;
         }
     }
@@ -65,7 +68,7 @@ export class WireGuardManager {
             // If we find the config name in the output, it means it's connected
             return config.endpoint === endpoint;
         } catch (error) {
-            console.error("Error checking if connected:", error);
+            console.error(colors.red("Error checking if connected:") + colors.gray(error instanceof Error ? error.message : String(error)));
             // If the command fails, assume we're not connected
             return false;
         }
@@ -147,9 +150,10 @@ export class WireGuardManager {
 
             await execAsync(`sudo wg-quick up ${configPath}`);
             this.currentConfig = configName;
-            console.log(`Connected to ${configName}`);
+
+            await emitter.emitAsync(Events.WIREGUARD_CONNECTED, config);
         } catch (error) {
-            console.error("Error connecting to WireGuard:", error);
+            console.error(colors.red("Error connecting to WireGuard:") + colors.gray(error instanceof Error ? error.message : String(error)));
             throw error;
         }
     }
@@ -170,14 +174,15 @@ export class WireGuardManager {
                 try {
                     await execAsync(`sudo kill -9 ${pid}`);
                 } catch (error) {
-                    console.error(`Error killing process ${pid}:`, error);
+                    console.error(colors.red(`Error killing process ${pid}:`) + colors.gray(error instanceof Error ? error.message : String(error)));
                 }
             }
 
-            console.log(`Disconnected from ${this.currentConfig}`);
+            await emitter.emitAsync(Events.WIREGUARD_DISCONNECTED, this.currentConfig);
+
             this.currentConfig = null;
         } catch (error) {
-            console.error("Error disconnecting from WireGuard:", error);
+            console.error(colors.red("Error disconnecting from WireGuard:") + colors.gray(error instanceof Error ? error.message : String(error)));
             throw error;
         }
     }
@@ -212,8 +217,10 @@ export class WireGuardManager {
 
             // Connect to randomly selected configuration
             await this.connect(nextConfig);
+
+            await emitter.emitAsync(Events.WIREGUARD_ROTATED, nextConfig);
         } catch (error) {
-            console.error("Error rotating IP:", error);
+            console.error(colors.red("Error rotating IP:") + colors.gray(error instanceof Error ? error.message : String(error)));
             throw error;
         }
     }
@@ -226,7 +233,7 @@ export class WireGuardManager {
             const { stdout } = await execAsync("sudo wg show");
             return stdout;
         } catch (error) {
-            console.error("Error getting WireGuard status:", error);
+            console.error(colors.red("Error getting WireGuard status:") + colors.gray(error instanceof Error ? error.message : String(error)));
             throw error;
         }
     }

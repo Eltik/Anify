@@ -4,11 +4,13 @@ import lib from "../../../lib";
 import { env } from "../../../env";
 import { MangaRepository } from "../../../database/impl/wrapper/impl/manga";
 import { MANGA_PROVIDERS } from "../../../mappings";
+import { preloadProxies } from "../../../proxies/impl/manager/impl/file/preloadProxies";
 
 test(
     "EpubHandler",
     async (done) => {
         await initDB();
+        await preloadProxies();
 
         const media = await MangaRepository.getById(db, "manuscript-screening-boy-and-manuscript-submitting-girl");
         if (!media) {

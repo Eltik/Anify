@@ -4,11 +4,13 @@ import lib from "../../../lib";
 import { MediaFormat, MediaType } from "../../../types";
 import { env } from "../../../env";
 import { MediaRepository } from "../../../database/impl/wrapper/impl/media";
+import { preloadProxies } from "../../../proxies/impl/manager/impl/file/preloadProxies";
 
 test(
     "MappingsHandler",
     async (done) => {
         await initDB();
+        await preloadProxies();
 
         const animeId = "113415"; // Mushoku Tensei
         const animeFormats = [MediaFormat.TV];
@@ -41,6 +43,6 @@ test(
         done();
     },
     {
-        timeout: 30000,
+        timeout: 100000,
     },
 );

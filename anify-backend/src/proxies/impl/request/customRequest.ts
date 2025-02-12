@@ -1,6 +1,59 @@
 import { env } from "../../../env";
 import type { IRequestConfig } from "../../../types/impl/proxies";
 import { updateProxyHealth, proxyCache, selectProxy, proxyToUrl } from "../manager";
+import { wireguardProxyManager } from "../wireguard";
+
+// Track consecutive errors per provider and per status code
+const errorTracker = new Map<
+    string,
+    {
+        count: number;
+        lastRotation: number;
+        statusCodes: Map<number, number>; // Track frequency of each status code
+    }
+>();
+
+const ROTATION_THRESHOLD = 5; // Base threshold for weighted errors
+const ROTATION_COOLDOWN = 60000; // 1 minute cooldown between rotations
+const STATUS_CODE_WEIGHTS: Record<number, number> = {
+    503: 2.5, // Service unavailable - likely rate limit
+    429: 5, // Explicit rate limit - rotate quickly
+    404: 0.2, // Not found - much less important
+    999: 1.5, // Timeout errors
+};
+
+// Minimum occurrences needed for specific status codes before considering rotation
+const MIN_OCCURRENCES: Record<number, number> = {
+    503: 2, // Need at least 2 service unavailable errors
+    429: 1, // Single rate limit is significant
+    404: 10, // Need many 404s to trigger rotation
+    999: 3, // Need several timeouts
+};
+
+function shouldRotateIP(errorState: { count: number; lastRotation: number; statusCodes: Map<number, number> }): boolean {
+    // Don't rotate if we're still in cooldown
+    if (Date.now() - errorState.lastRotation < ROTATION_COOLDOWN) {
+        return false;
+    }
+
+    let weightedCount = 0;
+    let hasSignificantErrors = false;
+
+    // Check if we have enough occurrences of any specific status code
+    errorState.statusCodes.forEach((count, statusCode) => {
+        const minRequired = MIN_OCCURRENCES[statusCode] ?? 5;
+        const weight = STATUS_CODE_WEIGHTS[statusCode] ?? 1;
+
+        if (count >= minRequired) {
+            hasSignificantErrors = true;
+        }
+
+        weightedCount += count * weight;
+    });
+
+    // Only rotate if we have both enough weighted errors AND a significant pattern
+    return weightedCount >= ROTATION_THRESHOLD && hasSignificantErrors;
+}
 
 export async function customRequest(url: string, options: IRequestConfig = {}): Promise<Response> {
     const { isChecking, proxy, useGoogleTranslate, timeout, providerType, providerId, maxRetries, validateResponse } = options;
@@ -10,7 +63,32 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
         attempts++;
 
         if (!useGoogleTranslate && !isChecking && env.USE_WIREGUARD) {
-            // First try CloudFlare worker proxy
+            const providerKey = `${providerType}-${providerId}`;
+            const errorState = errorTracker.get(providerKey) || {
+                count: 0,
+                lastRotation: 0,
+                statusCodes: new Map(),
+            };
+
+            // Check if we need to rotate IP based on error patterns
+            if (shouldRotateIP(errorState)) {
+                try {
+                    await wireguardProxyManager.rotate();
+                    // Reset error tracking after rotation
+                    errorTracker.set(providerKey, {
+                        count: 0,
+                        lastRotation: Date.now(),
+                        statusCodes: new Map(),
+                    });
+                    console.log(`Rotated IP for provider ${providerKey} due to error threshold`);
+
+                    // Add a small delay after rotation to ensure the new connection is ready
+                    await new Promise((resolve) => setTimeout(resolve, 1000));
+                } catch (error) {
+                    console.error("Failed to rotate WireGuard IP:", error);
+                }
+            }
+
             try {
                 const fetchOptions: RequestInit = {
                     ...options,
@@ -23,31 +101,49 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
                     setTimeout(() => reject(new Error("Request timed out")), timeout || 10000);
                 });
 
-                // Construct the worker URL properly
                 const fetchPromise = fetch(url, fetchOptions);
 
                 try {
                     const response = await Promise.race([fetchPromise, timeoutPromise]);
 
-                    // Check if response is ok before validation
                     if (!response.ok) {
+                        // Track the specific status code
+                        const currentCount = errorState.statusCodes.get(response.status) || 0;
+                        errorState.statusCodes.set(response.status, currentCount + 1);
+                        errorState.count++;
+                        errorTracker.set(providerKey, errorState);
+
                         throw new Error(`WireGuard request responded with status ${response.status} for ${url}.`);
                     }
 
-                    // Validate the response if a validator is provided
                     if (!validateResponse || (await validateResponse(response.clone()))) {
+                        // Reset error tracking on successful request
+                        errorTracker.set(providerKey, {
+                            count: 0,
+                            lastRotation: errorState.lastRotation,
+                            statusCodes: new Map(),
+                        });
                         return response;
                     }
                 } catch (error) {
                     throw new Error(`WireGuard request failed: ${error instanceof Error ? error.message : String(error)}`);
                 }
             } catch (error) {
-                console.error("WireGuard proxy failed:", error instanceof Error ? error.message : String(error));
-                // If WireGuard proxy fails and we have a stored proxy URL, use it
+                // Update error tracking
+                if (providerType && providerId) {
+                    // If it's a timeout error, track it as a special status code (like 999)
+                    if (error instanceof Error && error.message.includes("timeout")) {
+                        const currentCount = errorState.statusCodes.get(999) || 0;
+                        errorState.statusCodes.set(999, currentCount + 1);
+                    }
+
+                    errorState.count++;
+                    errorTracker.set(providerKey, errorState);
+                }
+
                 if (options._proxyURL) {
                     options.proxy = options._proxyURL;
                 }
-                // Continue to CORS proxy attempt
             }
         }
 

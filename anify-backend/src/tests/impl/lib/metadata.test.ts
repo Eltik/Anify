@@ -2,10 +2,13 @@ import { expect, test } from "bun:test";
 import lib from "../../../lib";
 import { MediaFormat, MediaSeason, MediaType, ProviderType } from "../../../types";
 import { env } from "../../../env";
+import { preloadProxies } from "../../../proxies/impl/manager/impl/file/preloadProxies";
 
 test(
     "Content.MetadataHandler",
     async (done) => {
+        await preloadProxies();
+
         const metadata = await lib.content.loadMetadata({
             artwork: [],
             averagePopularity: null,
