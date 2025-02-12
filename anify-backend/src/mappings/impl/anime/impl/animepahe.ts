@@ -178,7 +178,6 @@ export default class AnimePahe extends AnimeProvider {
                 Cookie: "__ddg1_=;__ddg2_=;",
             },
             redirect: "follow",
-            useCloudflareWorker: false,
         });
 
         try {

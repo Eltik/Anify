@@ -9,14 +9,13 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
     while (attempts < (isChecking ? 1 : maxRetries || 3)) {
         attempts++;
 
-        if (!useGoogleTranslate && !isChecking && env.CLOUDFLARE_WORKER_URL && options.useCloudflareWorker) {
+        if (!useGoogleTranslate && !isChecking && env.USE_WIREGUARD) {
             // First try CloudFlare worker proxy
             try {
                 const fetchOptions: RequestInit = {
                     ...options,
                     headers: {
                         ...options.headers,
-                        "X-API-Key": env.CLOUDFLARE_WORKER_API_KEY || ""
                     },
                 };
 
@@ -25,16 +24,14 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
                 });
 
                 // Construct the worker URL properly
-                const targetUrl = encodeURIComponent(url);
-                const workerUrl = `${env.CLOUDFLARE_WORKER_URL}/?target=${targetUrl}`;
-                const fetchPromise = fetch(workerUrl, fetchOptions);
+                const fetchPromise = fetch(url, fetchOptions);
 
                 try {
                     const response = await Promise.race([fetchPromise, timeoutPromise]);
 
                     // Check if response is ok before validation
                     if (!response.ok) {
-                        throw new Error(`Worker responded with status ${response.status} for ${url}.`);
+                        throw new Error(`WireGuard request responded with status ${response.status} for ${url}.`);
                     }
 
                     // Validate the response if a validator is provided
@@ -42,11 +39,11 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
                         return response;
                     }
                 } catch (error) {
-                    throw new Error(`Worker request failed: ${error instanceof Error ? error.message : String(error)}`);
+                    throw new Error(`WireGuard request failed: ${error instanceof Error ? error.message : String(error)}`);
                 }
             } catch (error) {
-                console.error("CloudFlare worker proxy failed:", error instanceof Error ? error.message : String(error));
-                // If CloudFlare worker fails and we have a stored proxy URL, use it
+                console.error("WireGuard proxy failed:", error instanceof Error ? error.message : String(error));
+                // If WireGuard proxy fails and we have a stored proxy URL, use it
                 if (options._proxyURL) {
                     options.proxy = options._proxyURL;
                 }

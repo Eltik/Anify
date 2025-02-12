@@ -53,7 +53,6 @@ export abstract class MediaProvider {
                 providerType: this.providerType,
                 isChecking: this.isCheckingProxies || config.isChecking,
                 useGoogleTranslate: this.useGoogleTranslate,
-                useCloudflareWorker: config.useCloudflareWorker === false ? false : true,
                 // Store proxy info for fallback
                 _proxyURL: useProxy ? (this.useGoogleTranslate ? undefined : config.proxy && config.proxy.length > 0 ? config.proxy : (proxyURL ?? undefined)) : undefined,
             };

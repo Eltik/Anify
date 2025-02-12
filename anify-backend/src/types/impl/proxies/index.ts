@@ -36,7 +36,6 @@ export interface IRequestConfig extends RequestInit {
     isChecking?: boolean;
     proxy?: string;
     useGoogleTranslate?: boolean;
-    useCloudflareWorker?: boolean;
     timeout?: number;
     providerType?: ProviderType;
     providerId?: string;

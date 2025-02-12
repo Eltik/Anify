@@ -63,15 +63,16 @@ const envSchema = z.object({
     CENSYS_API_SECRET: z.string().optional(),
 
     /**
-     * @description Optional, but highly recommended as
-     * CloudFlare worker is used for proxies.
-     * The worker can be setup via the anify-cloudflare-worker folder.
+     * @description WireGuard environment variables
      */
-    CLOUDFLARE_WORKER_URL: z.string().url().optional(),
     /**
-     * @description The API key for the Cloudflare worker.
+     * Whether to use WireGuard.
      */
-    CLOUDFLARE_WORKER_API_KEY: z.string().optional(),
+    USE_WIREGUARD: booleanFromEnv.optional().default("false"),
+    /**
+     * The path to the WireGuard interface.
+     */
+    WIREGUARD_CONFIGS_DIR: z.string().optional(),
 
     /**
      * @description Optional, additional environment variables
