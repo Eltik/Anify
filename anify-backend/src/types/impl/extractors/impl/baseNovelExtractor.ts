@@ -14,21 +14,29 @@ export default abstract class BaseNovelExtractor implements INovelExtractor {
 
     abstract extract(url: string, chapter: IChapter | null, ...args: any): Promise<IPage[] | string | undefined>;
 
+    /**
+     * Makes a request to the provider's API.
+     * Returns Response if successful, throws an error if the request fails.
+     */
     async request(url: string, config: IRequestConfig = {}, proxyRequest: boolean = false): Promise<Response> {
-        return (async () => {
-            // Get the best proxy based on health metrics
-            const selectedProxy = selectProxy(ProviderType.MANGA, "novelupdates");
-            const proxyUrl = proxyToUrl(selectedProxy);
-            const useProxy = (config.proxy && config.proxy.length > 0) || proxyRequest || true;
+        // Get the best proxy based on health metrics
+        const selectedProxy = selectProxy(ProviderType.MANGA, "novelupdates");
+        const proxyUrl = proxyToUrl(selectedProxy);
+        const useProxy = (config.proxy && config.proxy.length > 0) || proxyRequest || true;
 
-            return customRequest(url, {
-                proxy: useProxy ? (config.proxy && config.proxy.length > 0 ? config.proxy : (proxyUrl ?? undefined)) : undefined,
-                useGoogleTranslate: false,
-                providerId: "novelupdates",
-                providerType: ProviderType.MANGA,
-                isChecking: false,
-                ...config,
-            });
-        })();
+        const response = await customRequest(url, {
+            proxy: useProxy ? (config.proxy && config.proxy.length > 0 ? config.proxy : (proxyUrl ?? undefined)) : undefined,
+            useGoogleTranslate: false,
+            providerId: "novelupdates",
+            providerType: ProviderType.MANGA,
+            isChecking: false,
+            ...config,
+        });
+
+        if (!response) {
+            throw new Error(`Failed to fetch ${url}`);
+        }
+
+        return response;
     }
 }

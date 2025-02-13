@@ -1,5 +1,3 @@
-import { emitter } from "../../../events";
-import { Events } from "../../../types/impl/events";
 import { ProxyManager } from "./impl/proxy-manager";
 
 /**
@@ -7,29 +5,45 @@ import { ProxyManager } from "./impl/proxy-manager";
  */
 export const wireguardProxyManager = new ProxyManager();
 
+// Track current connection state
+let isDisconnecting = false;
+let currentConnection: string | null = null;
+
 export const init = async () => {
     await wireguardProxyManager.init();
     await wireguardProxyManager.connect();
-
-    emitter.emit(Events.WIREGUARD_INITIALIZED);
 };
 
+// Ensure clean disconnection
+const disconnect = async () => {
+    if (isDisconnecting || !currentConnection) return;
+
+    try {
+        isDisconnecting = true;
+        await wireguardProxyManager.disconnect();
+        currentConnection = null;
+    } finally {
+        isDisconnecting = false;
+    }
+};
+
+// Handle process termination
 process.on("SIGINT", async () => {
-    await wireguardProxyManager.disconnect();
+    await disconnect();
     process.exit(0);
 });
 
 process.on("SIGTERM", async () => {
-    await wireguardProxyManager.disconnect();
+    await disconnect();
     process.exit(0);
 });
 
 process.on("uncaughtException", async (error) => {
     console.error(error);
-    await wireguardProxyManager.disconnect();
+    await disconnect();
     process.exit(1);
 });
 
 process.on("exit", async () => {
-    await wireguardProxyManager.disconnect();
+    await disconnect();
 });

@@ -20,10 +20,11 @@ export abstract class MediaProvider {
 
     /**
      * Queued request function that respects this.rateLimit (seconds/10).
+     * Returns Response if successful, null if request failed but was handled gracefully.
+     * Throws an error only for unexpected failures that should halt execution.
      */
     async request(url: string, config: IRequestConfig = {}, proxyRequest: boolean = false): Promise<Response> {
         if (!MediaProvider.limiterMap.has(this.id)) {
-            // e.g. minTime = this.rateLimit, so 1 request per 'rateLimit' ms
             const bottleneck = new Bottleneck({
                 minTime: this.rateLimit,
             });
@@ -39,25 +40,35 @@ export abstract class MediaProvider {
 
         const limiter = MediaProvider.limiterMap.get(this.id)!;
 
-        return limiter.schedule(async () => {
-            // Get the best proxy based on health metrics
-            const selectedProxy = selectProxy(this.providerType, this.id);
-            const proxyURL = proxyToUrl(selectedProxy);
-            const useProxy = (config.proxy && config.proxy.length > 0) || proxyRequest || this.needsProxy;
+        try {
+            const response = await limiter.schedule(async () => {
+                // Get the best proxy based on health metrics
+                const selectedProxy = selectProxy(this.providerType, this.id);
+                const proxyURL = proxyToUrl(selectedProxy);
+                const useProxy = (config.proxy && config.proxy.length > 0) || proxyRequest || this.needsProxy;
 
-            // Ensure isChecking is properly set
-            const finalConfig: IRequestConfig = {
-                ...config,
-                // Don't set proxy immediately to allow CloudFlare workers to be tried first
-                providerId: this.id,
-                providerType: this.providerType,
-                isChecking: this.isCheckingProxies || config.isChecking,
-                useGoogleTranslate: this.useGoogleTranslate,
-                // Store proxy info for fallback
-                _proxyURL: useProxy ? (this.useGoogleTranslate ? undefined : config.proxy && config.proxy.length > 0 ? config.proxy : (proxyURL ?? undefined)) : undefined,
-            };
+                const finalConfig: IRequestConfig = {
+                    ...config,
+                    providerId: this.id,
+                    providerType: this.providerType,
+                    isChecking: this.isCheckingProxies || config.isChecking,
+                    useGoogleTranslate: this.useGoogleTranslate,
+                    // Store proxy info for fallback
+                    _proxyURL: useProxy ? (this.useGoogleTranslate ? undefined : config.proxy && config.proxy.length > 0 ? config.proxy : (proxyURL ?? undefined)) : undefined,
+                };
 
-            return customRequest(url, finalConfig);
-        });
+                const result = await customRequest(url, finalConfig);
+                if (!result) {
+                    throw new Error(`Request failed for ${url}`);
+                }
+                return result;
+            });
+
+            return response;
+        } catch (error) {
+            // Log the error but throw a standardized error to maintain type safety
+            console.error(`Error in request for ${url} (${this.id}/${this.providerType}):`, error);
+            throw new Error(`Failed to fetch ${url}`);
+        }
     }
 }
