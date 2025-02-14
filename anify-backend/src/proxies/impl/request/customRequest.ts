@@ -13,6 +13,14 @@ const errorTracker = new Map<
     }
 >();
 
+// Track rotation state
+const rotationState = {
+    isRotating: false,
+    lastRotationStart: 0,
+    rotationAttempts: new Map<string, number>(),
+    maxAttempts: 3,
+};
+
 const ROTATION_THRESHOLD = 5;
 const ROTATION_COOLDOWN = 60000;
 const STATUS_CODE_WEIGHTS: Record<number, number> = {
@@ -29,8 +37,33 @@ const MIN_OCCURRENCES: Record<number, number> = {
     999: 2, // Need couple timeouts
 };
 
+// Dynamic backoff calculation based on recent errors and rotation history
+function calculateBackoff(providerKey: string): number {
+    const attempts = rotationState.rotationAttempts.get(providerKey) || 0;
+    const baseDelay = 1000; // 1 second base
+    const jitter = Math.random() * 500; // Add some randomness
+    return Math.min(baseDelay * Math.pow(1.5, attempts) + jitter, 10000); // Cap at 10 seconds
+}
+
+async function waitForRotation(providerKey: string): Promise<void> {
+    if (!rotationState.isRotating) return;
+
+    const backoff = calculateBackoff(providerKey);
+    await new Promise((resolve) => setTimeout(resolve, backoff));
+
+    // Increment attempt counter
+    const attempts = (rotationState.rotationAttempts.get(providerKey) || 0) + 1;
+    rotationState.rotationAttempts.set(providerKey, attempts);
+
+    // If we've waited too long, reset rotation state
+    if (Date.now() - rotationState.lastRotationStart > 30000) {
+        rotationState.isRotating = false;
+        rotationState.rotationAttempts.clear();
+    }
+}
+
 function shouldRotateIP(errorState: { count: number; lastRotation: number; statusCodes: Map<number, number> }): boolean {
-    if (Date.now() - errorState.lastRotation < ROTATION_COOLDOWN) {
+    if (Date.now() - errorState.lastRotation < ROTATION_COOLDOWN || rotationState.isRotating) {
         return false;
     }
 
@@ -69,12 +102,17 @@ async function makeRequest(url: string, options: RequestInit, timeout: number = 
 export async function customRequest(url: string, options: IRequestConfig = {}): Promise<Response | null> {
     const { isChecking, proxy, useGoogleTranslate, timeout, providerType, providerId, maxRetries, validateResponse } = options;
     const retryAttempts = isChecking ? 1 : maxRetries || 3;
+    const providerKey = `${providerType}-${providerId}`;
 
     // Try different request strategies in sequence
     for (let attempt = 1; attempt <= retryAttempts; attempt++) {
+        // Wait if IP rotation is in progress
+        if (rotationState.isRotating) {
+            await waitForRotation(providerKey);
+        }
+
         // 1. Try WireGuard proxy first if enabled
         if (!useGoogleTranslate && !isChecking && env.USE_WIREGUARD) {
-            const providerKey = `${providerType}-${providerId}`;
             const errorState = errorTracker.get(providerKey) || {
                 count: 0,
                 lastRotation: 0,
@@ -83,16 +121,25 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
 
             if (shouldRotateIP(errorState)) {
                 try {
+                    rotationState.isRotating = true;
+                    rotationState.lastRotationStart = Date.now();
+
                     await wireguardProxyManager.rotate();
+
                     errorTracker.set(providerKey, {
                         count: 0,
                         lastRotation: Date.now(),
                         statusCodes: new Map(),
                     });
+
                     console.log(`Rotated IP for provider ${providerKey} due to error threshold`);
-                    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+                    // Clear rotation state after successful rotation
+                    rotationState.isRotating = false;
+                    rotationState.rotationAttempts.delete(providerKey);
                 } catch (error) {
                     console.warn("Failed to rotate WireGuard IP:", error);
+                    rotationState.isRotating = false;
                 }
             }
 
@@ -165,7 +212,22 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
         }
     }
 
-    // If all strategies failed, log warning and return null
-    console.warn(`All request strategies failed for ${url}. Provider: ${providerId}/${providerType}`);
+    // If all strategies failed, update error tracking and return null
+    if (providerType && providerId) {
+        const errorState = errorTracker.get(providerKey) || {
+            count: 0,
+            lastRotation: 0,
+            statusCodes: new Map(),
+        };
+
+        // Add to error count and track as a 503 error (service unavailable)
+        const currentCount = errorState.statusCodes.get(503) || 0;
+        errorState.statusCodes.set(503, currentCount + 1);
+        errorState.count++;
+        errorTracker.set(providerKey, errorState);
+
+        console.warn(`All request strategies failed for ${url}. Provider: ${providerId}/${providerType}`);
+    }
+
     return null;
 }

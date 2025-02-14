@@ -31,27 +31,24 @@ export default class MALMeta extends MetaProvider {
         return results;
     }
 
-    private async fetchResults(query: string, type: MediaType, proxyURL?: string): Promise<IProviderResult[] | undefined> {
+    private async fetchResults(query: string, type: MediaType): Promise<IProviderResult[] | undefined> {
         const results: IProviderResult[] = [];
 
-        const requestConfig: IRequestConfig = {};
-        if (proxyURL) {
-            requestConfig.proxy = proxyURL;
-        }
-
-        requestConfig.validateResponse = async (response) => {
-            if (!response.ok) return false;
-            try {
-                const data = await response.text();
-                const $ = load(data);
-                return $("div.js-categories-seasonal table tr").length > 0;
-            } catch {
-                return false;
-            }
-        };
-
         const url = `${this.url}/${type === MediaType.ANIME ? "anime" : "manga"}.php?q=${query}&c[]=a&c[]=b&c[]=c&c[]=f&c[]=d&c[]=e&c[]=g`;
-        const data = await (await this.request(url, requestConfig)).text();
+        const data = await (
+            await this.request(url, {
+                validateResponse: async (response) => {
+                    if (!response.ok) return false;
+                    try {
+                        const data = await response.text();
+                        const $ = load(data);
+                        return $("div.js-categories-seasonal table tr").length > 0;
+                    } catch {
+                        return false;
+                    }
+                },
+            })
+        ).text();
         const $ = load(data);
 
         const searchResults = $("div.js-categories-seasonal table tr").first();
@@ -72,7 +69,20 @@ export default class MALMeta extends MetaProvider {
 
             promises.push(
                 new Promise(async (resolve) => {
-                    const data = await (await this.request(`${this.url}/${type === MediaType.ANIME ? "anime" : "manga"}/${id}`, requestConfig)).text();
+                    const data = await (
+                        await this.request(`${this.url}/${type === MediaType.ANIME ? "anime" : "manga"}/${id}`, {
+                            validateResponse: async (response) => {
+                                if (!response.ok) return false;
+                                try {
+                                    const data = await response.text();
+                                    const $ = load(data);
+                                    return $("title").text().includes("MyAnimeList");
+                                } catch {
+                                    return false;
+                                }
+                            },
+                        })
+                    ).text();
                     const $$ = load(data);
 
                     const published =

@@ -4,6 +4,19 @@ import type { IRequestConfig } from "../../proxies";
 import { selectProxy, proxyToUrl } from "../../../../proxies/impl/manager";
 import { customRequest } from "../../../../proxies/impl/request/customRequest";
 
+export class RequestError extends Error {
+    constructor(
+        message: string,
+        public readonly url: string,
+        public readonly providerId: string,
+        public readonly providerType: string,
+        public readonly statusCode?: number,
+    ) {
+        super(message);
+        this.name = "RequestError";
+    }
+}
+
 export abstract class MediaProvider {
     private static limiterMap: Map<string, Bottleneck> = new Map();
 
@@ -20,8 +33,8 @@ export abstract class MediaProvider {
 
     /**
      * Queued request function that respects this.rateLimit (seconds/10).
-     * Returns Response if successful, null if request failed but was handled gracefully.
-     * Throws an error only for unexpected failures that should halt execution.
+     * Returns Response if successful, throws RequestError for handled failures.
+     * Throws other errors only for unexpected failures that should halt execution.
      */
     async request(url: string, config: IRequestConfig = {}, proxyRequest: boolean = false): Promise<Response> {
         if (!MediaProvider.limiterMap.has(this.id)) {
@@ -59,16 +72,33 @@ export abstract class MediaProvider {
 
                 const result = await customRequest(url, finalConfig);
                 if (!result) {
-                    throw new Error(`Request failed for ${url}`);
+                    throw new RequestError(`Request failed after all retry attempts`, url, this.id, this.providerType);
                 }
                 return result;
             });
 
             return response;
         } catch (error) {
-            // Log the error but throw a standardized error to maintain type safety
-            console.error(`Error in request for ${url} (${this.id}/${this.providerType}):`, error);
-            throw new Error(`Failed to fetch ${url}`);
+            if (error instanceof RequestError) {
+                // Log the handled error but don't halt execution
+                console.warn(`Request failed for ${url} (${this.id}/${this.providerType}):`, error.message);
+
+                // Return an empty 204 response instead of null
+                return new Response(null, {
+                    status: 204,
+                    statusText: "No Content - Request Failed",
+                    headers: {
+                        "X-Error-Type": "RequestError",
+                        "X-Error-Message": error.message,
+                        "X-Provider-Id": this.id,
+                        "X-Provider-Type": this.providerType,
+                    },
+                });
+            }
+
+            // For unexpected errors, throw a standardized error
+            console.error(`Unexpected error in request for ${url} (${this.id}/${this.providerType}):`, error);
+            throw new RequestError(`Failed to fetch ${url}`, url, this.id, this.providerType);
         }
     }
 }

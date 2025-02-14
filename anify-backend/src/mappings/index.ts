@@ -19,10 +19,6 @@ export const ANIME_PROVIDERS = [
         return new AnimePahe();
     },
     async () => {
-        const { default: GogoAnime } = await import("./impl/anime/impl/gogoanime");
-        return new GogoAnime();
-    },
-    async () => {
         const { default: HiAnime } = await import("./impl/anime/impl/hianime");
         return new HiAnime();
     },
