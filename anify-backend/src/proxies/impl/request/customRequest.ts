@@ -19,6 +19,10 @@ const rotationState = {
     lastRotationStart: 0,
     rotationAttempts: new Map<string, number>(),
     maxAttempts: 3,
+    requestQueue: new Map<string, Promise<void>>(), // Queue for pending requests per provider
+    activeRequests: new Map<string, number>(), // Track active requests per provider
+    maxConcurrentRequests: 5, // Max concurrent requests per provider
+    rotationPromise: null as Promise<void> | null, // Track current rotation
 };
 
 const ROTATION_THRESHOLD = 5;
@@ -46,20 +50,69 @@ function calculateBackoff(providerKey: string): number {
 }
 
 async function waitForRotation(providerKey: string): Promise<void> {
-    if (!rotationState.isRotating) return;
-
-    const backoff = calculateBackoff(providerKey);
-    await new Promise((resolve) => setTimeout(resolve, backoff));
-
-    // Increment attempt counter
-    const attempts = (rotationState.rotationAttempts.get(providerKey) || 0) + 1;
-    rotationState.rotationAttempts.set(providerKey, attempts);
-
-    // If we've waited too long, reset rotation state
-    if (Date.now() - rotationState.lastRotationStart > 30000) {
-        rotationState.isRotating = false;
-        rotationState.rotationAttempts.clear();
+    // If there's an active rotation, wait for it to complete
+    if (rotationState.rotationPromise) {
+        await rotationState.rotationPromise;
+        return;
     }
+
+    // Get or create queue for this provider
+    let queue = rotationState.requestQueue.get(providerKey);
+    if (!queue) {
+        queue = Promise.resolve();
+        rotationState.requestQueue.set(providerKey, queue);
+    }
+
+    // Add request to queue
+    const queuePromise = queue.then(async () => {
+        const backoff = calculateBackoff(providerKey);
+        await new Promise((resolve) => setTimeout(resolve, backoff));
+    });
+    rotationState.requestQueue.set(providerKey, queuePromise);
+
+    // Wait for our turn
+    await queuePromise;
+}
+
+async function rotateIPWithQueue(providerKey: string): Promise<void> {
+    if (rotationState.isRotating) {
+        await waitForRotation(providerKey);
+        return;
+    }
+
+    // Create a new rotation promise
+    rotationState.rotationPromise = (async () => {
+        try {
+            rotationState.isRotating = true;
+            rotationState.lastRotationStart = Date.now();
+
+            // Wait for all active requests to finish
+            const activeRequests = rotationState.activeRequests.get(providerKey) || 0;
+            if (activeRequests > 0) {
+                console.log(`Waiting for ${activeRequests} active requests to complete before rotating IP...`);
+                await new Promise((resolve) => setTimeout(resolve, 5000));
+            }
+
+            await wireguardProxyManager.rotate();
+
+            errorTracker.set(providerKey, {
+                count: 0,
+                lastRotation: Date.now(),
+                statusCodes: new Map(),
+            });
+
+            console.log(`Rotated IP for provider ${providerKey} due to error threshold`);
+        } catch (error) {
+            console.warn("Failed to rotate WireGuard IP:", error);
+        } finally {
+            rotationState.isRotating = false;
+            rotationState.rotationAttempts.delete(providerKey);
+            rotationState.requestQueue.delete(providerKey);
+            rotationState.rotationPromise = null;
+        }
+    })();
+
+    await rotationState.rotationPromise;
 }
 
 function shouldRotateIP(errorState: { count: number; lastRotation: number; statusCodes: Map<number, number> }): boolean {
@@ -99,6 +152,22 @@ async function makeRequest(url: string, options: RequestInit, timeout: number = 
     }
 }
 
+async function acquireRequestSlot(providerKey: string): Promise<boolean> {
+    const currentRequests = rotationState.activeRequests.get(providerKey) || 0;
+    if (currentRequests >= rotationState.maxConcurrentRequests) {
+        return false;
+    }
+    rotationState.activeRequests.set(providerKey, currentRequests + 1);
+    return true;
+}
+
+function releaseRequestSlot(providerKey: string): void {
+    const currentRequests = rotationState.activeRequests.get(providerKey) || 0;
+    if (currentRequests > 0) {
+        rotationState.activeRequests.set(providerKey, currentRequests - 1);
+    }
+}
+
 export async function customRequest(url: string, options: IRequestConfig = {}): Promise<Response | null> {
     const { isChecking, proxy, useGoogleTranslate, timeout, providerType, providerId, maxRetries, validateResponse } = options;
     const retryAttempts = isChecking ? 1 : maxRetries || 3;
@@ -107,108 +176,96 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
     // Try different request strategies in sequence
     for (let attempt = 1; attempt <= retryAttempts; attempt++) {
         // Wait if IP rotation is in progress
-        if (rotationState.isRotating) {
+        if (rotationState.isRotating || rotationState.rotationPromise) {
             await waitForRotation(providerKey);
+            // Add a small delay after rotation to ensure the new IP is ready
+            await new Promise((resolve) => setTimeout(resolve, 1000));
         }
 
-        // 1. Try WireGuard proxy first if enabled
-        if (!useGoogleTranslate && !isChecking && env.USE_WIREGUARD) {
-            const errorState = errorTracker.get(providerKey) || {
-                count: 0,
-                lastRotation: 0,
-                statusCodes: new Map(),
-            };
+        // Wait for a request slot
+        while (!(await acquireRequestSlot(providerKey))) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
 
-            if (shouldRotateIP(errorState)) {
-                try {
-                    rotationState.isRotating = true;
-                    rotationState.lastRotationStart = Date.now();
+        try {
+            // 1. Try WireGuard proxy first if enabled
+            if (!useGoogleTranslate && !isChecking && env.USE_WIREGUARD) {
+                const errorState = errorTracker.get(providerKey) || {
+                    count: 0,
+                    lastRotation: 0,
+                    statusCodes: new Map(),
+                };
 
-                    await wireguardProxyManager.rotate();
+                if (shouldRotateIP(errorState)) {
+                    await rotateIPWithQueue(providerKey);
+                    // Skip this attempt and try again with the new IP
+                    continue;
+                }
 
-                    errorTracker.set(providerKey, {
-                        count: 0,
-                        lastRotation: Date.now(),
-                        statusCodes: new Map(),
-                    });
+                const response = await makeRequest(
+                    url,
+                    {
+                        ...options,
+                        headers: { ...options.headers },
+                    },
+                    timeout || 10000,
+                );
 
-                    console.log(`Rotated IP for provider ${providerKey} due to error threshold`);
+                if (response) {
+                    if (!validateResponse || (await validateResponse(response.clone()))) {
+                        // Reset error tracking on success
+                        errorTracker.set(providerKey, {
+                            count: 0,
+                            lastRotation: errorState.lastRotation,
+                            statusCodes: new Map(),
+                        });
 
-                    // Clear rotation state after successful rotation
-                    rotationState.isRotating = false;
-                    rotationState.rotationAttempts.delete(providerKey);
-                } catch (error) {
-                    console.warn("Failed to rotate WireGuard IP:", error);
-                    rotationState.isRotating = false;
+                        return response;
+                    }
+                } else {
+                    // Update error tracking
+                    if (providerType && providerId) {
+                        const currentCount = errorState.statusCodes.get(999) || 0;
+                        errorState.statusCodes.set(999, currentCount + 1);
+                        errorState.count++;
+                        errorTracker.set(providerKey, errorState);
+                    }
                 }
             }
 
-            const response = await makeRequest(
-                url,
-                {
-                    ...options,
-                    headers: { ...options.headers },
-                },
-                timeout || 10000,
-            );
+            // 2. Try CORS proxy if WireGuard failed
+            const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempt === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId)) : null;
 
-            if (response) {
-                if (!validateResponse || (await validateResponse(response.clone()))) {
-                    // Reset error tracking on success
-                    errorTracker.set(providerKey, {
-                        count: 0,
-                        lastRotation: errorState.lastRotation,
-                        statusCodes: new Map(),
-                    });
+            if (proxyURL) {
+                const proxiedUrl = `${proxyURL}/${url}`;
+                const response = await makeRequest(
+                    proxiedUrl,
+                    {
+                        ...options,
+                        headers: {
+                            ...options.headers,
+                            Origin: "https://anify.tv",
+                        },
+                    },
+                    timeout || 5000,
+                );
 
+                if (response && (!validateResponse || (await validateResponse(response.clone())))) {
                     return response;
                 }
-            } else {
-                // Update error tracking
-                if (providerType && providerId) {
-                    const currentCount = errorState.statusCodes.get(999) || 0;
-                    errorState.statusCodes.set(999, currentCount + 1);
-                    errorState.count++;
-                    errorTracker.set(providerKey, errorState);
+            }
+
+            // 3. Try Google Translate as last resort if enabled
+            if (useGoogleTranslate) {
+                const translatedUrl = `http://translate.google.com/translate?sl=ja&tl=en&u=${encodeURIComponent(url)}`;
+                const response = await makeRequest(translatedUrl, options, timeout || 5000);
+
+                if (response && (!validateResponse || (await validateResponse(response.clone())))) {
+                    return response;
                 }
             }
-        }
-
-        // 2. Try CORS proxy if WireGuard failed
-        const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempt === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId)) : null;
-
-        if (proxyURL) {
-            const proxiedUrl = `${proxyURL}/${url}`;
-            const response = await makeRequest(
-                proxiedUrl,
-                {
-                    ...options,
-                    headers: {
-                        ...options.headers,
-                        Origin: "https://anify.tv",
-                    },
-                },
-                timeout || 5000,
-            );
-
-            if (response && (!validateResponse || (await validateResponse(response.clone())))) {
-                return response;
-            }
-        }
-
-        // 3. Try Google Translate as last resort if enabled
-        if (useGoogleTranslate) {
-            const translatedUrl = `http://translate.google.com/translate?sl=ja&tl=en&u=${encodeURIComponent(url)}`;
-            const response = await makeRequest(translatedUrl, options, timeout || 5000);
-
-            if (response && (!validateResponse || (await validateResponse(response.clone())))) {
-                return response;
-            }
-        }
-
-        // Add delay between attempts
-        if (attempt < retryAttempts) {
-            await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+        } finally {
+            releaseRequestSlot(providerKey);
         }
     }
 
