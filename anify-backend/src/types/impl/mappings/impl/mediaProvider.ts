@@ -19,6 +19,7 @@ export class RequestError extends Error {
 
 export abstract class MediaProvider {
     private static limiterMap: Map<string, Bottleneck> = new Map();
+    private controller: AbortController | null = null;
 
     abstract providerType: ProviderType;
     abstract id: string;
@@ -31,15 +32,29 @@ export abstract class MediaProvider {
 
     abstract proxyCheck(proxyUrl: string): Promise<boolean | undefined>;
 
+    // Add method to abort all pending requests for this provider
+    public abortRequests(): void {
+        if (this.controller) {
+            this.controller.abort();
+            this.controller = null;
+        }
+    }
+
     /**
      * Queued request function that respects this.rateLimit (seconds/10).
      * Returns Response if successful, throws RequestError for handled failures.
      * Throws other errors only for unexpected failures that should halt execution.
      */
     async request(url: string, config: IRequestConfig = {}, proxyRequest: boolean = false): Promise<Response> {
+        // Create a new controller for this request chain
+        this.controller = new AbortController();
+
         if (!MediaProvider.limiterMap.has(this.id)) {
             const bottleneck = new Bottleneck({
                 minTime: this.rateLimit,
+                reservoir: 10, // Add a reservoir to prevent too many requests
+                reservoirRefreshAmount: 10,
+                reservoirRefreshInterval: this.rateLimit * 1000, // Refresh interval in ms
             });
 
             if (this.maxConcurrentRequests > 0) {
@@ -55,7 +70,11 @@ export abstract class MediaProvider {
 
         try {
             const response = await limiter.schedule(async () => {
-                // Get the best proxy based on health metrics
+                // Check if request has been aborted
+                if (this.controller?.signal.aborted) {
+                    throw new RequestError("Request aborted", url, this.id, this.providerType);
+                }
+
                 const selectedProxy = selectProxy(this.providerType, this.id);
                 const proxyURL = proxyToUrl(selectedProxy);
                 const useProxy = (config.proxy && config.proxy.length > 0) || proxyRequest || this.needsProxy;
@@ -66,13 +85,15 @@ export abstract class MediaProvider {
                     providerType: this.providerType,
                     isChecking: this.isCheckingProxies || config.isChecking,
                     useGoogleTranslate: this.useGoogleTranslate,
-                    // Store proxy info for fallback
+                    signal: this.controller?.signal,
+                    timeout: config.timeout || 15000, // Ensure timeout is set
                     _proxyURL: useProxy ? (this.useGoogleTranslate ? undefined : config.proxy && config.proxy.length > 0 ? config.proxy : (proxyURL ?? undefined)) : undefined,
                 };
 
                 const result = await customRequest(url, finalConfig);
                 if (!result) {
-                    throw new RequestError(`Request failed after all retry attempts`, url, this.id, this.providerType);
+                    this.abortRequests(); // Abort on failure
+                    throw new RequestError("Request failed after all retry attempts", url, this.id, this.providerType);
                 }
                 return result;
             });
@@ -80,10 +101,12 @@ export abstract class MediaProvider {
             return response;
         } catch (error) {
             if (error instanceof RequestError) {
-                // Log the handled error but don't halt execution
                 console.warn(`Request failed for ${url} (${this.id}/${this.providerType}):`, error.message);
 
-                // Return an empty 204 response instead of null
+                // Abort any remaining requests
+                this.abortRequests();
+
+                // Return an empty 204 response
                 return new Response(null, {
                     status: 204,
                     statusText: "No Content - Request Failed",
@@ -96,9 +119,11 @@ export abstract class MediaProvider {
                 });
             }
 
-            // For unexpected errors, throw a standardized error
             console.error(`Unexpected error in request for ${url} (${this.id}/${this.providerType}):`, error);
+            this.abortRequests();
             throw new RequestError(`Failed to fetch ${url}`, url, this.id, this.providerType);
+        } finally {
+            this.controller = null;
         }
     }
 }

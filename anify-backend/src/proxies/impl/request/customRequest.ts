@@ -25,21 +25,26 @@ const rotationState = {
     rotationPromise: null as Promise<void> | null, // Track current rotation
 };
 
-const ROTATION_THRESHOLD = 5;
-const ROTATION_COOLDOWN = 60000;
+const ROTATION_THRESHOLD = 3;
+const ROTATION_COOLDOWN = 30000;
 const STATUS_CODE_WEIGHTS: Record<number, number> = {
-    503: 2.5, // Service unavailable - likely rate limit
-    429: 5, // Explicit rate limit - rotate quickly
-    404: 0.2, // Not found - much less important
-    999: 2, // Timeout errors
+    503: 5, // Increase weight for service unavailable
+    429: 10, // Increase weight for rate limits
+    404: 0.2,
+    400: 5, // Add weight for bad requests
+    999: 5, // Increase weight for timeouts/general errors
 };
 
 const MIN_OCCURRENCES: Record<number, number> = {
-    503: 2, // Need at least 2 service unavailable errors
-    429: 1, // Single rate limit is significant
-    404: 10, // Need many 404s to trigger rotation
-    999: 2, // Need couple timeouts
+    503: 1, // Lower threshold for service unavailable
+    429: 1,
+    404: 10,
+    400: 1, // Single bad request is significant
+    999: 1, // Single timeout is significant
 };
+
+// Add to state tracking
+const activeControllers = new Map<string, AbortController>();
 
 // Dynamic backoff calculation based on recent errors and rotation history
 function calculateBackoff(providerKey: string): number {
@@ -136,20 +141,117 @@ function shouldRotateIP(errorState: { count: number; lastRotation: number; statu
     return weightedCount >= ROTATION_THRESHOLD && hasSignificantErrors;
 }
 
-async function makeRequest(url: string, options: RequestInit, timeout: number = 10000): Promise<Response | null> {
+interface ExtendedRequestInit extends RequestInit {
+    providerKey?: string;
+    signal?: AbortSignal;
+}
+
+async function makeRequest(url: string, options: ExtendedRequestInit, timeout: number = 10000): Promise<Response | null> {
+    const controller = new AbortController();
+    const { signal: existingSignal, providerKey, ...restOptions } = options;
+
+    // Create a combined signal if there's an existing one
+    const signal = existingSignal ? AbortSignal.any([existingSignal, controller.signal]) : controller.signal;
+
+    // Store controller for potential cleanup
+    if (providerKey) {
+        activeControllers.set(providerKey, controller);
+    }
+
+    const timeoutId = setTimeout(() => {
+        controller.abort("timeout");
+        // Clean up on timeout
+        if (providerKey) {
+            // Increment error count for timeouts
+            const errorState = errorTracker.get(providerKey) || {
+                count: 0,
+                lastRotation: 0,
+                statusCodes: new Map(),
+            };
+            const currentCount = errorState.statusCodes.get(999) || 0;
+            errorState.statusCodes.set(999, currentCount + 2); // Increment by 2 for timeouts
+            errorState.count += 2;
+            errorTracker.set(providerKey, errorState);
+
+            if (shouldRotateIP(errorState)) {
+                rotateIPWithQueue(providerKey).catch(console.error);
+            }
+            abortProviderRequests(providerKey);
+        }
+    }, timeout);
+
     try {
-        const timeoutPromise = new Promise<Response>((_, reject) => {
-            setTimeout(() => reject(new Error("Request timed out")), timeout);
+        const response = await fetch(url, {
+            ...restOptions,
+            signal,
         });
 
-        const response = await Promise.race([fetch(url, options), timeoutPromise]);
         if (!response.ok) {
+            if (providerKey) {
+                // Increment error count for non-200 responses
+                const errorState = errorTracker.get(providerKey) || {
+                    count: 0,
+                    lastRotation: 0,
+                    statusCodes: new Map(),
+                };
+                const currentCount = errorState.statusCodes.get(response.status) || 0;
+                errorState.statusCodes.set(response.status, currentCount + 2); // Increment by 2 for bad responses
+                errorState.count += 2;
+                errorTracker.set(providerKey, errorState);
+
+                if (shouldRotateIP(errorState)) {
+                    rotateIPWithQueue(providerKey).catch(console.error);
+                }
+                abortProviderRequests(providerKey);
+            }
             throw new Error(`Request failed with status ${response.status}`);
         }
         return response;
-    } catch {
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.warn(`Request to ${url} failed:`, error.message);
+
+            // If this is a provider-specific request, abort all its requests and track error
+            if (providerKey) {
+                // Increment error count for failed requests
+                const errorState = errorTracker.get(providerKey) || {
+                    count: 0,
+                    lastRotation: 0,
+                    statusCodes: new Map(),
+                };
+                const currentCount = errorState.statusCodes.get(999) || 0;
+                errorState.statusCodes.set(999, currentCount + 2); // Increment by 2 for general errors
+                errorState.count += 2;
+                errorTracker.set(providerKey, errorState);
+
+                if (shouldRotateIP(errorState)) {
+                    rotateIPWithQueue(providerKey).catch(console.error);
+                }
+                abortProviderRequests(providerKey);
+            }
+        }
         return null;
+    } finally {
+        clearTimeout(timeoutId);
+        if (providerKey) {
+            activeControllers.delete(providerKey);
+            // Clear request tracking
+            rotationState.requestQueue.delete(providerKey);
+            rotationState.activeRequests.set(providerKey, 0);
+        }
     }
+}
+
+// Function to abort all requests for a provider
+function abortProviderRequests(providerKey: string) {
+    const controller = activeControllers.get(providerKey);
+    if (controller) {
+        controller.abort();
+        activeControllers.delete(providerKey);
+    }
+    // Clear request tracking
+    rotationState.requestQueue.delete(providerKey);
+    rotationState.activeRequests.set(providerKey, 0);
 }
 
 async function acquireRequestSlot(providerKey: string): Promise<boolean> {
@@ -172,119 +274,145 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
     const { isChecking, proxy, useGoogleTranslate, timeout, providerType, providerId, maxRetries, validateResponse } = options;
     const retryAttempts = isChecking ? 1 : maxRetries || 3;
     const providerKey = `${providerType}-${providerId}`;
+    const requestTimeout = timeout || 15000; // Default to 15 seconds
 
-    // Try different request strategies in sequence
-    for (let attempt = 1; attempt <= retryAttempts; attempt++) {
-        // Wait if IP rotation is in progress
-        if (rotationState.isRotating || rotationState.rotationPromise) {
-            await waitForRotation(providerKey);
-            // Add a small delay after rotation to ensure the new IP is ready
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
+    // Create an abort controller for this request chain
+    const controller = new AbortController();
+    activeControllers.set(providerKey, controller);
 
-        // Wait for a request slot
-        while (!(await acquireRequestSlot(providerKey))) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
-        }
+    let hasAcquiredSlot = false;
 
-        try {
-            // 1. Try WireGuard proxy first if enabled
-            if (!useGoogleTranslate && !isChecking && env.USE_WIREGUARD) {
-                const errorState = errorTracker.get(providerKey) || {
-                    count: 0,
-                    lastRotation: 0,
-                    statusCodes: new Map(),
+    try {
+        // Try different request strategies in sequence
+        for (let attempt = 1; attempt <= retryAttempts; attempt++) {
+            // Check if request has been aborted
+            if (controller.signal.aborted) {
+                console.log(`Request chain aborted for provider ${providerKey}`);
+                return null;
+            }
+
+            // Wait if IP rotation is in progress
+            if (rotationState.isRotating || rotationState.rotationPromise) {
+                await waitForRotation(providerKey);
+                // Add a small delay after rotation to ensure the new IP is ready
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+                continue; // Retry with new IP
+            }
+
+            // Wait for a request slot with timeout
+            if (!hasAcquiredSlot) {
+                const slotStartTime = Date.now();
+                while (!controller.signal.aborted && !(await acquireRequestSlot(providerKey))) {
+                    if (Date.now() - slotStartTime > 10000) {
+                        // 10 second timeout for slot acquisition
+                        console.warn(`Timeout waiting for request slot for provider ${providerKey}`);
+                        abortProviderRequests(providerKey);
+                        return null;
+                    }
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+                }
+                hasAcquiredSlot = true;
+            }
+
+            try {
+                // Add providerKey and signal to options
+                const requestOptions: ExtendedRequestInit = {
+                    ...options,
+                    providerKey,
+                    signal: controller.signal,
                 };
 
-                if (shouldRotateIP(errorState)) {
-                    await rotateIPWithQueue(providerKey);
-                    // Skip this attempt and try again with the new IP
-                    continue;
+                // 1. Try WireGuard proxy first if enabled
+                if (!useGoogleTranslate && !isChecking && env.USE_WIREGUARD) {
+                    const errorState = errorTracker.get(providerKey) || {
+                        count: 0,
+                        lastRotation: 0,
+                        statusCodes: new Map(),
+                    };
+
+                    if (shouldRotateIP(errorState)) {
+                        await rotateIPWithQueue(providerKey);
+                        continue;
+                    }
+
+                    const response = await makeRequest(url, requestOptions, requestTimeout + attempt * 5000);
+
+                    if (response) {
+                        if (!validateResponse || (await validateResponse(response.clone()))) {
+                            errorTracker.set(providerKey, {
+                                count: 0,
+                                lastRotation: errorState.lastRotation,
+                                statusCodes: new Map(),
+                            });
+                            return response;
+                        }
+                    } else {
+                        if (providerType && providerId) {
+                            const currentCount = errorState.statusCodes.get(999) || 0;
+                            errorState.statusCodes.set(999, currentCount + 1);
+                            errorState.count++;
+                            errorTracker.set(providerKey, errorState);
+                            // Abort remaining requests on error
+                            abortProviderRequests(providerKey);
+                            return null;
+                        }
+                    }
                 }
 
-                const response = await makeRequest(
-                    url,
-                    {
-                        ...options,
-                        headers: { ...options.headers },
-                    },
-                    timeout || 10000,
-                );
+                // 2. Try CORS proxy if WireGuard failed
+                const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempt === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId)) : null;
 
-                if (response) {
-                    if (!validateResponse || (await validateResponse(response.clone()))) {
-                        // Reset error tracking on success
-                        errorTracker.set(providerKey, {
-                            count: 0,
-                            lastRotation: errorState.lastRotation,
-                            statusCodes: new Map(),
-                        });
+                if (proxyURL) {
+                    const proxiedUrl = `${proxyURL}/${url}`;
+                    const response = await makeRequest(
+                        proxiedUrl,
+                        {
+                            ...requestOptions,
+                            headers: {
+                                ...requestOptions.headers,
+                                Origin: "https://anify.tv",
+                            },
+                        },
+                        requestTimeout + attempt * 5000,
+                    );
 
+                    if (response && (!validateResponse || (await validateResponse(response.clone())))) {
                         return response;
                     }
-                } else {
-                    // Update error tracking
-                    if (providerType && providerId) {
-                        const currentCount = errorState.statusCodes.get(999) || 0;
-                        errorState.statusCodes.set(999, currentCount + 1);
-                        errorState.count++;
-                        errorTracker.set(providerKey, errorState);
+                }
+
+                // 3. Try Google Translate as last resort if enabled
+                if (useGoogleTranslate) {
+                    const translatedUrl = `http://translate.google.com/translate?sl=ja&tl=en&u=${encodeURIComponent(url)}`;
+                    const response = await makeRequest(translatedUrl, requestOptions, requestTimeout + attempt * 5000);
+
+                    if (response && (!validateResponse || (await validateResponse(response.clone())))) {
+                        return response;
                     }
                 }
+            } catch (error) {
+                console.warn(`Request attempt ${attempt} failed for ${url}:`, error);
+                // Abort remaining requests on error
+                abortProviderRequests(providerKey);
+                return null;
             }
+        }
 
-            // 2. Try CORS proxy if WireGuard failed
-            const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempt === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId)) : null;
-
-            if (proxyURL) {
-                const proxiedUrl = `${proxyURL}/${url}`;
-                const response = await makeRequest(
-                    proxiedUrl,
-                    {
-                        ...options,
-                        headers: {
-                            ...options.headers,
-                            Origin: "https://anify.tv",
-                        },
-                    },
-                    timeout || 5000,
-                );
-
-                if (response && (!validateResponse || (await validateResponse(response.clone())))) {
-                    return response;
-                }
-            }
-
-            // 3. Try Google Translate as last resort if enabled
-            if (useGoogleTranslate) {
-                const translatedUrl = `http://translate.google.com/translate?sl=ja&tl=en&u=${encodeURIComponent(url)}`;
-                const response = await makeRequest(translatedUrl, options, timeout || 5000);
-
-                if (response && (!validateResponse || (await validateResponse(response.clone())))) {
-                    return response;
-                }
-            }
-        } finally {
+        return null;
+    } finally {
+        if (hasAcquiredSlot) {
             releaseRequestSlot(providerKey);
         }
+        activeControllers.delete(providerKey);
     }
+}
 
-    // If all strategies failed, update error tracking and return null
-    if (providerType && providerId) {
-        const errorState = errorTracker.get(providerKey) || {
-            count: 0,
-            lastRotation: 0,
-            statusCodes: new Map(),
-        };
-
-        // Add to error count and track as a 503 error (service unavailable)
-        const currentCount = errorState.statusCodes.get(503) || 0;
-        errorState.statusCodes.set(503, currentCount + 1);
-        errorState.count++;
-        errorTracker.set(providerKey, errorState);
-
-        console.warn(`All request strategies failed for ${url}. Provider: ${providerId}/${providerType}`);
+// Add cleanup function
+export function abortAllRequests(): void {
+    for (const [providerKey, controller] of activeControllers) {
+        controller.abort();
+        rotationState.requestQueue.delete(providerKey);
+        rotationState.activeRequests.set(providerKey, 0);
     }
-
-    return null;
+    activeControllers.clear();
 }
