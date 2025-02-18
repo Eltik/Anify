@@ -209,8 +209,6 @@ async function makeRequest(url: string, options: ExtendedRequestInit, timeout: n
         return response;
     } catch (error: unknown) {
         if (error instanceof Error) {
-            console.warn(`Request to ${url} failed:`, error.message);
-
             // If this is a provider-specific request, abort all its requests and track error
             if (providerKey) {
                 // Increment error count for failed requests
@@ -390,8 +388,7 @@ export async function customRequest(url: string, options: IRequestConfig = {}): 
                         return response;
                     }
                 }
-            } catch (error) {
-                console.warn(`Request attempt ${attempt} failed for ${url}:`, error);
+            } catch {
                 // Abort remaining requests on error
                 abortProviderRequests(providerKey);
                 return null;

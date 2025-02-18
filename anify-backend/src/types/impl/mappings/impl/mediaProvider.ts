@@ -101,8 +101,6 @@ export abstract class MediaProvider {
             return response;
         } catch (error) {
             if (error instanceof RequestError) {
-                console.warn(`Request failed for ${url} (${this.id}/${this.providerType}):`, error.message);
-
                 // Abort any remaining requests
                 this.abortRequests();
 
