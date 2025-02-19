@@ -2,7 +2,7 @@ import Bottleneck from "bottleneck";
 import { ProviderType } from "../../..";
 import type { IRequestConfig } from "../../proxies";
 import { selectProxy, proxyToUrl } from "../../../../proxies/impl/manager";
-import { customRequest } from "../../../../proxies/impl/request/customRequest";
+import { customRequest } from "../../../../proxies/impl/request";
 
 export class RequestError extends Error {
     constructor(

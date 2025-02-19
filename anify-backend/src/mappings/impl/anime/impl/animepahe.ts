@@ -38,7 +38,7 @@ export default class AnimePahe extends AnimeProvider {
                 if (!response.ok) return false;
                 try {
                     const data = (await response.json()) as { data?: unknown };
-                    return data?.data !== undefined;
+                    return Array.isArray(data?.data);
                 } catch {
                     return false;
                 }

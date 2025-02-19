@@ -1,7 +1,7 @@
 import type { INovelExtractor } from "..";
 import { type IChapter, ProviderType } from "../../..";
 import { selectProxy, proxyToUrl } from "../../../../proxies/impl/manager";
-import { customRequest } from "../../../../proxies/impl/request/customRequest";
+import { customRequest } from "../../../../proxies/impl/request/";
 import type { IPage, NovelProviders } from "../../mappings/impl/manga";
 import type { IRequestConfig } from "../../proxies";
 

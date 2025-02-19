@@ -69,7 +69,7 @@ export default class AniListMeta extends MetaProvider {
                 if (!response.ok) return false;
                 try {
                     const data = (await response.json()) as { data: { Page: { media: Media[] } } };
-                    return data.data !== undefined;
+                    return Array.isArray(data.data.Page.media);
                 } catch {
                     return false;
                 }
