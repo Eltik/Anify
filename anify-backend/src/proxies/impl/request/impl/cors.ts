@@ -28,7 +28,7 @@ const attemptRequest = async (url: string, options: IRequestConfig = {}, attempt
             if (options.validateResponse) {
                 try {
                     const clonedResponse = corsResponse.clone();
-                    await options.validateResponse(clonedResponse);
+                    await options.validateResponse(clonedResponse as Response);
                     return corsResponse;
                 } catch (error) {
                     if (!isJsonParseError(error)) {
@@ -72,7 +72,7 @@ const cors = async (url: string, options: IRequestConfig = {}, attempt?: number)
             },
         });
 
-        if (response && (!validateResponse || (await validateResponse(response.clone())))) {
+        if (response && (!validateResponse || (await validateResponse(response.clone() as Response)))) {
             return response;
         }
     }

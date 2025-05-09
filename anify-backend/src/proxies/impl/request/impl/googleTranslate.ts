@@ -11,7 +11,7 @@ const googleTranslate = async (url: string, options: IRequestConfig = {}): Promi
         const translatedUrl = `http://translate.google.com/translate?sl=ja&tl=en&u=${encodeURIComponent(url)}`;
         const response = await fetch(translatedUrl, options);
 
-        if (response && (!validateResponse || (await validateResponse(response.clone())))) {
+        if (response && (!validateResponse || (await validateResponse(response.clone() as Response)))) {
             return response;
         }
     }
