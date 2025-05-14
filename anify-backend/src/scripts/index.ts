@@ -4,28 +4,14 @@ import { checkAll } from "./impl/checkAll";
 import { checkProvider } from "./impl/checkProvider";
 import helper from "./impl/helper";
 import { ProviderType } from "../types";
-import { init, wireguardProxyManager } from "../proxies/impl/wireguard";
+import { scrapeProxies } from "./impl/scrapeProxies";
+import { testProxy } from "./impl/testProxy";
+import { getProxyById } from "./impl/getProxyById";
 
 // ---------------------------------------------------
 // CLI definition using Commander
 // ---------------------------------------------------
 program.name("anify-cli").description("CLI for running various tasks related to proxies and media providers.").version("1.0.0");
-
-program
-    .command("disconnect")
-    .description("Disconnects from all WireGuard configurations.")
-    .action(async () => {
-        try {
-            await init();
-            await wireguardProxyManager.disconnect();
-
-            console.log(colors.green("Successfully disconnected from all WireGuard connections."));
-            process.exit(0);
-        } catch (error) {
-            console.error(colors.red(`Error while disconnecting from WireGuard connections: ${error}`));
-            process.exit(1);
-        }
-    });
 
 program
     .command("check-all")
@@ -43,6 +29,22 @@ program
     });
 
 program
+    .command("scrape-proxies")
+    .description("Scrape proxies from Webshare.")
+    .action(async () => {
+        await scrapeProxies();
+    });
+
+program
+    .command("test-proxy <proxyId>")
+    .description("Test a proxy by ID.")
+    .action(async (proxyId: string) => {
+        const proxy = await getProxyById(proxyId);
+        const data = await testProxy(proxy);
+        console.log(data);
+    });
+
+program
     .command("check-provider <providerId> <providerType>")
     .description("Check proxies for a specific provider by ID and provider type.")
     .action(async (providerId: string, providerType: ProviderType) => {
@@ -54,19 +56,6 @@ program
             // Log the error but don't exit with error code
             console.error(colors.red(`Error in proxy check script: ${error instanceof Error ? error.message : String(error)}`));
             process.exit(0); // Exit with success code since we handled the error
-        }
-    });
-
-program
-    .command("scrape-proxies")
-    .description("Scrape new proxies from external sources and save them.")
-    .action(async () => {
-        try {
-            await helper.scrapeNewProxies();
-            process.exit(0);
-        } catch (error) {
-            console.error(colors.red(`Error while scraping proxies: ${error}`));
-            process.exit(1);
         }
     });
 

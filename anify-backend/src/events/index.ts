@@ -10,7 +10,6 @@ import type { MediaFormat, MediaType } from "../types";
 import type { IEpisodeData } from "../types/impl/database/impl/mappings";
 import { AnimeRepository } from "../database/impl/wrapper/impl/anime";
 import type { IProxy } from "../types/impl/proxies";
-import { IWireguardConfig } from "../types/impl/proxies/impl/wireguard";
 
 export const limit = pLimit(4);
 
@@ -27,22 +26,6 @@ emitter.on(Events.PROXIES_LOADED, (proxies: IProxy[]) => {
 
 emitter.on(Events.PROXIES_SAVED, () => {
     return limit(() => console.log(colors.green("Proxies saved")));
-});
-
-emitter.on(Events.WIREGUARD_INITIALIZED, () => {
-    return limit(() => console.log(colors.green("WireGuard initialized")));
-});
-
-emitter.on(Events.WIREGUARD_CONNECTED, (config: IWireguardConfig) => {
-    return limit(() => console.log(colors.green("WireGuard connected to ") + colors.cyan(config.endpoint) + colors.gray(" - ") + colors.cyan(config.name)));
-});
-
-emitter.on(Events.WIREGUARD_DISCONNECTED, (config: string) => {
-    return limit(() => console.log(colors.red("WireGuard disconnected from ") + colors.cyan(config) + colors.red(".")));
-});
-
-emitter.on(Events.WIREGUARD_ROTATED, (config: string) => {
-    return limit(() => console.log(colors.green("WireGuard rotated to ") + colors.cyan(config) + colors.green(".")));
 });
 
 emitter.on(Events.DATABASE_CONNECTED, () => {

@@ -24,8 +24,14 @@ export interface IProxyProviderMetrics {
  * @description Proxy interface
  */
 export interface IProxy {
+    id: string;
     ip: string;
     port: number;
+    protocol: "http" | "https" | "socks4" | "socks5";
+    country?: string;
+    source?: string;
+    username?: string;
+    password?: string;
     providerMetrics: Record<string, IProxyProviderMetrics>; // providerId -> metrics
 }
 

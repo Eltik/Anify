@@ -63,16 +63,16 @@ const envSchema = z.object({
     CENSYS_API_SECRET: z.string().optional(),
 
     /**
-     * @description WireGuard environment variables
+     * @description Webshare environment variables
      */
     /**
-     * Whether to use WireGuard.
+     * Whether to use Webshare.
      */
-    USE_WIREGUARD: booleanFromEnv.optional().default("false"),
+    USE_WEBSHARE: booleanFromEnv.optional().default("false"),
     /**
-     * The path to the WireGuard interface.
+     * The Webshare API key.
      */
-    WIREGUARD_CONFIGS_DIR: z.string().optional(),
+    WEBSHARE_API_KEY: z.string().optional(),
 
     /**
      * @description Optional, additional environment variables
