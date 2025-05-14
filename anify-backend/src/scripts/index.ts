@@ -7,6 +7,7 @@ import { ProviderType } from "../types";
 import { scrapeProxies } from "./impl/scrapeProxies";
 import { testProxy } from "./impl/testProxy";
 import { getProxyById } from "./impl/getProxyById";
+import deployProxy from "./impl/deployProxy";
 
 // ---------------------------------------------------
 // CLI definition using Commander
@@ -91,6 +92,21 @@ program
             process.exit(0);
         } catch (error) {
             console.error(colors.red(`Error while fetching stats: ${error}`));
+            process.exit(1);
+        }
+    });
+
+// Command to deploy the Cloudflare proxy
+program
+    .command("deploy-proxy")
+    .description("Deploys the Cloudflare worker proxy and updates the .env file.")
+    .action(async () => {
+        try {
+            await deployProxy();
+            console.log(colors.green("Successfully initiated Cloudflare proxy deployment."));
+            process.exit(0);
+        } catch (error) {
+            console.error(colors.red(`Error during proxy deployment command: ${error instanceof Error ? error.message : String(error)}`));
             process.exit(1);
         }
     });

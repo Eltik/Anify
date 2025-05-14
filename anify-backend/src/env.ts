@@ -98,6 +98,18 @@ const envSchema = z.object({
      * @description Environment variables for mapping providers.
      */
     NOVELUPDATES_LOGIN: z.string().optional(),
+
+    /**
+     * @description Environment variables for Cloudflare Proxy.
+     */
+    /**
+     * The URL of the Cloudflare Proxy.
+     */
+    CLOUDFLARE_PROXY_URL: z.string().url().optional(),
+    /**
+     * The full proxy access URL.
+     */
+    FULL_PROXY_ACCESS_URL: z.string().url().optional(),
 });
 
 /**
