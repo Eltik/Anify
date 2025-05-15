@@ -1,5 +1,7 @@
 import type { IProxy } from "../../types/impl/proxies";
 // No specific proxy agent import needed for Bun's native fetch proxy option
+import AniListBase from "../../mappings/impl/base/impl/anilist";
+import { preloadProxies } from "../../proxies/impl/manager/impl/file/preloadProxies";
 
 interface ProxyTestResult {
     success: boolean;
@@ -15,9 +17,12 @@ interface ProxyTestResult {
  * @param proxy The proxy to test.
  * @param testUrl The URL to use for testing. Defaults to "https://api.ipify.org?format=json".
  * @param timeout The timeout for the request in milliseconds. Defaults to 5000ms.
+ * @param useAniListProvider Whether to use AniListBase for proxying.
  * @returns A Promise resolving to a ProxyTestResult.
  */
-export async function testProxy(proxy: IProxy, testUrl = "https://api.ipify.org?format=json", timeout = 5000): Promise<ProxyTestResult> {
+export async function testProxy(proxy: IProxy, testUrl = "https://api.ipify.org?format=json", timeout = 5000, useAniListProvider = true): Promise<ProxyTestResult> {
+    await preloadProxies();
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -36,14 +41,29 @@ export async function testProxy(proxy: IProxy, testUrl = "https://api.ipify.org?
             };
         }
 
-        const response = await fetch(testUrl, {
-            // Assumes global fetch is Bun's fetch
-            proxy: proxyUrlString,
-            signal: controller.signal,
-            headers: {
-                "User-Agent": "Anify-Proxy-Tester/1.0",
-            },
-        });
+        let response: Response;
+        if (useAniListProvider) {
+            const aniListProvider = new AniListBase();
+            // Use a simple query to AniList API or the testUrl
+            // Using testUrl to keep comparison consistent.
+            // The `request` method in MediaProvider (parent of AniListBase) handles proxy configuration.
+            response = await aniListProvider.request(testUrl, {
+                proxy: proxyUrlString,
+                signal: controller.signal,
+                headers: {
+                    "User-Agent": "Anify-Proxy-Tester/1.0",
+                },
+            });
+        } else {
+            response = await fetch(testUrl, {
+                // Assumes global fetch is Bun's fetch
+                proxy: proxyUrlString,
+                signal: controller.signal,
+                headers: {
+                    "User-Agent": "Anify-Proxy-Tester/1.0",
+                },
+            });
+        }
 
         clearTimeout(timeoutId);
         const responseTime = Date.now() - startTime;

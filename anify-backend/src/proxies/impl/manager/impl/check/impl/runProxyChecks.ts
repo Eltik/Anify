@@ -93,42 +93,30 @@ export const runProxyChecks = async (providers: MediaProvider[], verbose: boolea
                     limit(async () => {
                         // Add timeout for the entire proxy check process
                         const proxyCheckPromise = (async () => {
-                            const url = `http://${proxy.ip}:${proxy.port}`;
+                            const url = `${proxy.protocol}://${proxy.username && proxy.password ? `${proxy.username}:${proxy.password}@` : ""}${proxy.ip}:${proxy.port}`;
                             let isValid = false;
 
                             try {
-                                // Check if proxy is valid
-                                const timeoutPromise = new Promise<Response>((_, reject) => {
-                                    setTimeout(() => reject(new Error("Request timed out")), 15000);
+                                // Directly use provider's proxyCheck
+                                const providerCheckPromise = provider.proxyCheck(url);
+                                const providerTimeoutPromise = new Promise<boolean>((_, reject) => {
+                                    setTimeout(() => reject(new Error("Provider check timed out")), 15000);
                                 });
 
-                                const fetchPromise = fetch(`${url}/iscorsneeded`, {
-                                    headers: {
-                                        Origin: "https://anify.tv",
-                                    },
-                                });
-
-                                const response = await Promise.race([fetchPromise, timeoutPromise]);
-
-                                if (response.status === 200 && (await response.text()) === "no") {
-                                    const providerCheckPromise = provider.proxyCheck(url);
-                                    const providerTimeoutPromise = new Promise<boolean>((_, reject) => {
-                                        setTimeout(() => reject(new Error("Provider check timed out")), 15000);
-                                    });
-
-                                    try {
-                                        const check = await Promise.race([providerCheckPromise, providerTimeoutPromise]);
-                                        isValid = check ?? false;
-                                    } catch (error) {
-                                        if (env.DEBUG && verbose) {
-                                            console.error(`Provider check failed for ${url}: ${error instanceof Error ? error.message : String(error)}`);
-                                        }
-                                        isValid = false;
+                                try {
+                                    const check = await Promise.race([providerCheckPromise, providerTimeoutPromise]);
+                                    isValid = check ?? false;
+                                } catch (error) {
+                                    if (env.DEBUG && verbose) {
+                                        console.error(`Provider check failed for ${url}: ${error instanceof Error ? error.message : String(error)}`);
                                     }
-                                } else {
                                     isValid = false;
                                 }
-                            } catch {
+                            } catch (error) {
+                                // Catch any unexpected errors during the setup or execution of provider.proxyCheck
+                                if (env.DEBUG && verbose) {
+                                    console.error(`Error during proxy check for ${url}: ${error instanceof Error ? error.message : String(error)}`);
+                                }
                                 isValid = false;
                             }
 

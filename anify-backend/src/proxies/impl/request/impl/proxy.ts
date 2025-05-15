@@ -7,7 +7,7 @@ const isJsonParseError = (error: unknown): boolean => {
     return error instanceof SyntaxError && error.message.includes("Unexpected end of JSON input");
 };
 
-const isCORS = (options: IRequestConfig = {}, attempt?: number): boolean => {
+const isProxy = (options: IRequestConfig = {}, attempt?: number): boolean => {
     const { isChecking, proxy, useGoogleTranslate, providerType, providerId } = options;
 
     const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempt === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId)) : null;
@@ -20,52 +20,53 @@ const isCORS = (options: IRequestConfig = {}, attempt?: number): boolean => {
 
 const attemptRequest = async (url: string, options: IRequestConfig = {}, attempt: number): Promise<Response | null> => {
     try {
-        const corsResponse = await cors(url, options, attempt);
+        const proxyResponse = await proxy(url, options, attempt);
         if (options.signal?.aborted) return null;
 
-        if (corsResponse) {
+        if (proxyResponse) {
             // Try to validate JSON if there's a validateResponse function
             if (options.validateResponse) {
                 try {
-                    const clonedResponse = corsResponse.clone();
+                    const clonedResponse = proxyResponse.clone();
                     await options.validateResponse(clonedResponse as Response);
-                    return corsResponse;
+                    return proxyResponse;
                 } catch (error) {
                     if (!isJsonParseError(error)) {
-                        return corsResponse;
+                        return proxyResponse;
                     }
                     // If JSON parsing fails, return null to trigger retry
                     return null;
                 }
             }
-            return corsResponse;
+            return proxyResponse;
         }
     } catch (error) {
         if (error instanceof Error && error.name === "AbortError") {
             return null;
         }
-        console.error(`CORS attempt ${attempt} failed:`, error);
+        console.error(`Proxy attempt ${attempt} failed:`, error);
     }
     return null;
 };
 
-const corsWithRetries = async (url: string, options: IRequestConfig = {}): Promise<Response | null> => {
+const proxyWithRetries = async (url: string, options: IRequestConfig = {}): Promise<Response | null> => {
     // Try parallel CORS requests
-    const corsPromises = Array.from({ length: MAX_PARALLEL_RETRIES }, (_, i) => attemptRequest(url, options, i + 1));
+    const proxyPromises = Array.from({ length: MAX_PARALLEL_RETRIES }, (_, i) => attemptRequest(url, options, i + 1));
 
-    const responses = await Promise.all(corsPromises);
+    const responses = await Promise.all(proxyPromises);
     return responses.find((response) => response !== null) ?? null;
 };
 
-const cors = async (url: string, options: IRequestConfig = {}, attempt?: number): Promise<Response | null> => {
+const proxy = async (url: string, options: IRequestConfig = {}, attempt?: number): Promise<Response | null> => {
     const { isChecking, proxy, useGoogleTranslate, providerType, providerId, validateResponse } = options;
 
     const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempt === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId)) : null;
 
     if (proxyURL) {
-        const proxiedURL = `${proxyURL}/${url}`;
-        const response = await fetch(proxiedURL, {
+        const response = await fetch(url, {
             ...options,
+            proxy: proxyURL,
+            signal: options.signal,
             headers: {
                 ...options.headers,
                 Origin: "https://anify.tv",
@@ -81,7 +82,7 @@ const cors = async (url: string, options: IRequestConfig = {}, attempt?: number)
 };
 
 export default {
-    cors,
-    corsWithRetries,
-    isCORS,
+    proxy,
+    proxyWithRetries,
+    isProxy,
 };
