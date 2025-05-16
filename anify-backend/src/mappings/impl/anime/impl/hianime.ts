@@ -8,9 +8,9 @@ export default class HiAnime extends AnimeProvider {
     override rateLimit = 0;
     override maxConcurrentRequests: number = -1;
     override id = "hianime";
-    override url = "https://hianime.to";
+    override url = "https://hianimez.to";
 
-    public needsProxy: boolean = false;
+    public needsProxy: boolean = true;
     public useGoogleTranslate: boolean = false;
 
     override formats: MediaFormat[] = [MediaFormat.MOVIE, MediaFormat.ONA, MediaFormat.OVA, MediaFormat.SPECIAL, MediaFormat.TV, MediaFormat.TV_SHORT];

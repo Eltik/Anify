@@ -1,5 +1,6 @@
 import type { IRequestConfig } from "../../../../types/impl/proxies";
 import { proxyToUrl, selectProxy } from "../../manager";
+import { ProxyAgent } from "undici";
 
 const MAX_PARALLEL_RETRIES = 3;
 
@@ -63,15 +64,17 @@ const proxy = async (url: string, options: IRequestConfig = {}, attempt?: number
     const proxyURL = isChecking ? proxy : useGoogleTranslate ? null : proxy && attempt === 1 ? proxy : providerType && providerId ? proxyToUrl(selectProxy(providerType, providerId)) : null;
 
     if (proxyURL) {
-        const response = await fetch(url, {
+        const requestOptions = {
             ...options,
-            proxy: proxyURL,
             signal: options.signal,
-            headers: {
-                ...options.headers,
-                Origin: "https://anify.tv",
-            },
+        } as RequestInit;
+
+        const proxyAgent = new ProxyAgent(proxyURL);
+        Object.assign(requestOptions, {
+            dispatcher: proxyAgent
         });
+
+        const response = await fetch(url, requestOptions);
 
         if (response && (!validateResponse || (await validateResponse(response.clone() as Response)))) {
             return response;

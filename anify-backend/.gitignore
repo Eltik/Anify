@@ -53,3 +53,4 @@ METAProxies.json
 proxy-config.json
 configs
 .wrangler
+test.ts

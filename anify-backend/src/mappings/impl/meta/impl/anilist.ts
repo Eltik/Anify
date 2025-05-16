@@ -76,6 +76,7 @@ export default class AniListMeta extends MetaProvider {
             },
         });
         const json = (await req?.json()) as { data: { Page: { media: Media[] } } };
+        if (json?.data?.Page?.media === undefined) console.log(json);
         const media = json?.data?.Page?.media;
 
         media.map((data: Media) => {

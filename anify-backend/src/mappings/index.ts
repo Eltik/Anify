@@ -103,10 +103,10 @@ export const META_PROVIDERS = [
         const { default: AniListMeta } = await import("./impl/meta/impl/anilist");
         return new AniListMeta();
     },
-    async () => {
-        const { default: AniDBMeta } = await import("./impl/meta/impl/anidb");
-        return new AniDBMeta();
-    },
+    // async () => {
+    //     const { default: AniDBMeta } = await import("./impl/meta/impl/anidb");
+    //     return new AniDBMeta();
+    // },
     async () => {
         const { default: KitsuMeta } = await import("./impl/meta/impl/kitsu");
         return new KitsuMeta();

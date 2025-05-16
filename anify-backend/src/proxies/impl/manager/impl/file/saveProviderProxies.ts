@@ -67,7 +67,7 @@ export async function saveProviderProxies(providerType: ProviderType): Promise<v
         // Check if any provider for this proxy has valid metrics
         for (const providerId in proxyCache.validProxies[providerType]) {
             const metrics = proxy.providerMetrics[providerId];
-            if (metrics && metrics.healthScore > 0 && metrics.consecutiveFailures < 3) {
+            if (metrics && metrics.healthScore >= 0 && metrics.consecutiveFailures < 3) {
                 return true;
             }
         }
