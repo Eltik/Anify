@@ -1352,3 +1352,5 @@ interface IMediaEntry {
     type: MediaType;
     format: MediaFormat;
 }
+
+// console.dir(await (new AniListBase).search("Alya sometimes hides her feelings in russian", MediaType.ANIME, [MediaFormat.TV], 1, 20))
