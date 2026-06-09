@@ -95,9 +95,7 @@ export abstract class MediaProvider {
 
                 const useProxy = (config.proxy && config.proxy.length > 0) || proxyRequest || this.needsProxy;
 
-                const resolvedProxy = useProxy && !this.useGoogleTranslate
-                    ? (config.proxy && config.proxy.length > 0 ? config.proxy : pickProxy(this.id))
-                    : undefined;
+                const resolvedProxy = useProxy && !this.useGoogleTranslate ? (config.proxy && config.proxy.length > 0 ? config.proxy : pickProxy(this.id)) : undefined;
 
                 const finalConfig: IRequestConfig = {
                     ...config,

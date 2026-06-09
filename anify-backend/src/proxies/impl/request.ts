@@ -9,18 +9,8 @@ function wrapWithProxy(targetUrl: string, proxyBase: string): string {
     return `${proxyBase.startsWith("http://") ? "" : "http://"}${base}${targetUrl}`;
 }
 
-export async function customRequest(
-    url: string,
-    config: IRequestConfig = {}
-): Promise<Response | null> {
-    const {
-        _proxyURL,
-        timeout = 15000,
-        signal,
-        headers: extraHeaders = {},
-        proxy,
-        ...restConfig
-    } = config;
+export async function customRequest(url: string, config: IRequestConfig = {}): Promise<Response | null> {
+    const { _proxyURL, timeout = 15000, signal, headers: extraHeaders = {}, proxy, ...restConfig } = config;
 
     const proxyUrl = _proxyURL ?? proxy;
     const finalUrl = proxyUrl ? wrapWithProxy(url, proxyUrl) : url;
@@ -28,12 +18,10 @@ export async function customRequest(
     const timeoutController = new AbortController();
     const timeoutId = setTimeout(() => timeoutController.abort(), timeout);
 
-    const mergedSignal = signal
-        ? mergeSignals(signal, timeoutController.signal)
-        : timeoutController.signal;
+    const mergedSignal = signal ? mergeSignals(signal, timeoutController.signal) : timeoutController.signal;
 
     const headers: Record<string, string> = {
-        "Origin": CORS_ORIGIN,
+        Origin: CORS_ORIGIN,
         "X-Requested-With": "XMLHttpRequest",
         ...(extraHeaders as Record<string, string>),
     };
