@@ -54,3 +54,4 @@ proxy-config.json
 configs
 .wrangler
 test.ts
+proxies.json

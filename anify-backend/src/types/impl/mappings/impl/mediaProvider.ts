@@ -1,8 +1,34 @@
+import fs from "fs";
+import path from "path";
 import Bottleneck from "bottleneck";
 import { ProviderType } from "../../..";
 import type { IRequestConfig } from "../../proxies";
-import { selectProxy, proxyToUrl } from "../../../../proxies/impl/manager";
 import { customRequest } from "../../../../proxies/impl/request";
+
+interface Proxy {
+    ip: string;
+    port: number;
+}
+
+// 🌸 Load proxies once at startup, round-robin per provider
+const ALL_PROXIES: Proxy[] = (() => {
+    try {
+        const raw = fs.readFileSync(path.resolve(process.cwd(), "proxies.json"), "utf-8");
+        return JSON.parse(raw) as Proxy[];
+    } catch {
+        return [];
+    }
+})();
+
+const roundRobinIndex: Map<string, number> = new Map();
+
+function pickProxy(providerId: string): string | undefined {
+    if (ALL_PROXIES.length === 0) return undefined;
+    const current = roundRobinIndex.get(providerId) ?? 0;
+    const proxy = ALL_PROXIES[current % ALL_PROXIES.length];
+    roundRobinIndex.set(providerId, current + 1);
+    return proxy ? `${proxy.ip}:${proxy.port}` : undefined;
+}
 
 export class RequestError extends Error {
     constructor(
@@ -32,7 +58,6 @@ export abstract class MediaProvider {
 
     abstract proxyCheck(proxyUrl: string): Promise<boolean | undefined>;
 
-    // Add method to abort all pending requests for this provider
     public abortRequests(): void {
         if (this.controller) {
             this.controller.abort();
@@ -40,21 +65,15 @@ export abstract class MediaProvider {
         }
     }
 
-    /**
-     * Queued request function that respects this.rateLimit (seconds/10).
-     * Returns Response if successful, throws RequestError for handled failures.
-     * Throws other errors only for unexpected failures that should halt execution.
-     */
     async request(url: string, config: IRequestConfig = {}, proxyRequest: boolean = false): Promise<Response> {
-        // Create a new controller for this request chain
         this.controller = new AbortController();
 
         if (!MediaProvider.limiterMap.has(this.id)) {
             const bottleneck = new Bottleneck({
                 minTime: this.rateLimit,
-                reservoir: 10, // Add a reservoir to prevent too many requests
+                reservoir: 10,
                 reservoirRefreshAmount: 10,
-                reservoirRefreshInterval: this.rateLimit * 1000, // Refresh interval in ms
+                reservoirRefreshInterval: this.rateLimit * 1000,
             });
 
             if (this.maxConcurrentRequests > 0) {
@@ -70,14 +89,15 @@ export abstract class MediaProvider {
 
         try {
             const response = await limiter.schedule(async () => {
-                // Check if request has been aborted
                 if (this.controller?.signal.aborted) {
                     throw new RequestError("Request aborted", url, this.id, this.providerType);
                 }
 
-                const selectedProxy = selectProxy(this.providerType, this.id);
-                const proxyURL = proxyToUrl(selectedProxy);
                 const useProxy = (config.proxy && config.proxy.length > 0) || proxyRequest || this.needsProxy;
+
+                const resolvedProxy = useProxy && !this.useGoogleTranslate
+                    ? (config.proxy && config.proxy.length > 0 ? config.proxy : pickProxy(this.id))
+                    : undefined;
 
                 const finalConfig: IRequestConfig = {
                     ...config,
@@ -86,13 +106,13 @@ export abstract class MediaProvider {
                     isChecking: this.isCheckingProxies || config.isChecking,
                     useGoogleTranslate: this.useGoogleTranslate,
                     signal: this.controller?.signal,
-                    timeout: config.timeout || 15000, // Ensure timeout is set
-                    _proxyURL: useProxy ? (this.useGoogleTranslate ? undefined : config.proxy && config.proxy.length > 0 ? config.proxy : (proxyURL ?? undefined)) : undefined,
+                    timeout: config.timeout ?? 15000,
+                    _proxyURL: resolvedProxy,
                 };
 
                 const result = await customRequest(url, finalConfig);
                 if (!result) {
-                    this.abortRequests(); // Abort on failure
+                    this.abortRequests();
                     throw new RequestError("Request failed after all retry attempts", url, this.id, this.providerType);
                 }
                 return result;
@@ -101,10 +121,8 @@ export abstract class MediaProvider {
             return response;
         } catch (error) {
             if (error instanceof RequestError) {
-                // Abort any remaining requests
                 this.abortRequests();
 
-                // Return an empty 204 response
                 return new Response(null, {
                     status: 204,
                     statusText: "No Content - Request Failed",
